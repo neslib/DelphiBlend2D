@@ -1,0 +1,101 @@
+inherited FormMain: TFormMain
+  Caption = 'Rectangles'
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    Size.Height = 48.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Height = 48.000000000000000000
+    end
+    inherited LayoutRenderer: TLayout
+      Size.Height = 48.000000000000000000
+      inherited ComboBoxRenderer: TComboBox
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 106.000000000000000000
+        Size.Height = 32.000000000000000000
+      end
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Size.Height = 48.000000000000000000
+    end
+    inherited LabelFPS: TLabel
+      Size.Height = 48.000000000000000000
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Height = 384.000000000000000000
+  end
+  object ToolBar: TToolBar
+    Position.Y = 48.000000000000000000
+    Size.Width = 360.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object LabelCompOp: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 54.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Comp Op:'
+      TabOrder = 0
+    end
+    object LayoutCompOp: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 62.000000000000000000
+      Size.Width = 105.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxCompOp: TComboBox
+        Align = VertCenter
+        DropDownCount = 15
+        Items.Strings = (
+          'SrcOver'
+          'SrcCopy'
+          'DstAtop'
+          'Xor'
+          'Plus'
+          'Screen'
+          'Lighten'
+          'Hard Light'
+          'Difference')
+        ItemIndex = 0
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 101.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnChange = ComboBoxCompOpChange
+      end
+    end
+    object TrackBarRectCount: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 5000.000000000000000000
+      Min = 1.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 171.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 185.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Value = 50.000000000000000000
+      OnChange = TrackBarRectCountChange
+    end
+  end
+end

@@ -1,0 +1,163 @@
+inherited FormMain: TFormMain
+  Caption = 'Elliptic Arcs'
+  ClientHeight = 620
+  ClientWidth = 400
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    Size.Height = 48.000000000000000000
+    Visible = False
+    inherited LabelRenderer: TLabel
+      Size.Height = 48.000000000000000000
+    end
+    inherited LayoutRenderer: TLayout
+      Size.Height = 48.000000000000000000
+      inherited ComboBoxRenderer: TComboBox
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 106.000000000000000000
+        Size.Height = 32.000000000000000000
+      end
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Size.Height = 48.000000000000000000
+    end
+    inherited LabelFPS: TLabel
+      Size.Height = 48.000000000000000000
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Width = 400.000000000000000000
+    Size.Height = 476.000000000000000000
+    OnMouseDown = PaintBoxMouseDown
+    OnMouseMove = PaintBoxMouseMove
+    OnMouseUp = PaintBoxMouseUp
+  end
+  inherited TimerRepaint: TTimer
+    Left = 24
+    Top = 16
+  end
+  object ToolBarXRadius: TToolBar
+    Size.Width = 400.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 4
+    object TrackBarXRadius: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 500.000000000000000000
+      Min = 1.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 57.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 243.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Value = 131.000000000000000000
+    end
+    object LabelXRadius: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 49.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'X Radius:'
+      TabOrder = 0
+    end
+    object CheckBoxLargeArc: TCheckBox
+      Align = Right
+      Position.X = 304.000000000000000000
+      Size.Width = 96.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'Large Arc'
+    end
+  end
+  object ToolBarYRadius: TToolBar
+    Position.Y = 48.000000000000000000
+    Size.Width = 400.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    object TrackBarYRadius: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 500.000000000000000000
+      Min = 1.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 56.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 244.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Value = 143.000000000000000000
+    end
+    object LabelYRadius: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Y Radius:'
+      TabOrder = 0
+    end
+    object CheckBoxSweepArc: TCheckBox
+      Align = Right
+      Position.X = 304.000000000000000000
+      Size.Width = 96.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'Sweep Arc'
+    end
+  end
+  object ToolBarAngle: TToolBar
+    Position.Y = 96.000000000000000000
+    Size.Width = 400.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object TrackBarAngle: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 360.000000000000000000
+      Min = -360.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 42.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 354.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+    end
+    object LabelAngle: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 34.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Angle:'
+      TabOrder = 0
+    end
+  end
+end

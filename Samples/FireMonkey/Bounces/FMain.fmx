@@ -1,0 +1,31 @@
+inherited FormMain: TFormMain
+  Caption = 'Bounces'
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    Size.Height = 48.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Height = 48.000000000000000000
+    end
+    inherited LayoutRenderer: TLayout
+      Size.Height = 48.000000000000000000
+      inherited ComboBoxRenderer: TComboBox
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 106.000000000000000000
+        Size.Height = 32.000000000000000000
+      end
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Size.Height = 48.000000000000000000
+    end
+    inherited LabelFPS: TLabel
+      Size.Height = 48.000000000000000000
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Height = 432.000000000000000000
+  end
+end

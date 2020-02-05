@@ -1,0 +1,92 @@
+inherited FormMain: TFormMain
+  Caption = 'Tiger'
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    Size.Height = 48.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Height = 48.000000000000000000
+    end
+    inherited LayoutRenderer: TLayout
+      Size.Height = 48.000000000000000000
+      inherited ComboBoxRenderer: TComboBox
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 106.000000000000000000
+        Size.Height = 32.000000000000000000
+      end
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Size.Height = 48.000000000000000000
+    end
+    inherited LabelFPS: TLabel
+      Size.Height = 48.000000000000000000
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Height = 384.000000000000000000
+  end
+  object ToolBar: TToolBar
+    Position.Y = 48.000000000000000000
+    Size.Width = 360.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object TrackBarScale: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 50.000000000000000000
+      Min = 0.050000000745058060
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 142.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 214.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Value = 1.000000000000000000
+      OnChange = TrackBarScaleChange
+    end
+    object LabelCaching: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 43.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Caching'
+      TabOrder = 0
+    end
+    object LayoutCaching: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 51.000000000000000000
+      Size.Width = 87.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxCaching: TComboBox
+        Align = VertCenter
+        Items.Strings = (
+          'None'
+          'Strokes')
+        ItemIndex = 0
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 83.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+    end
+  end
+end

@@ -1,0 +1,52 @@
+program blGettingStarted07;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils,
+  Blend4D in '..\..\..\Blend4D.pas';
+
+procedure Run;
+var
+  Image: IBLImage;
+  Context: IBLContext;
+  Face: IBLFontFace;
+  Font: IBLFont;
+  Codec: IBLImageCodec;
+begin
+  ReportMemoryLeaksOnShutdown := True;
+  Image := TBLImage.Create(480, 480);
+
+  Context := TBLContext.Create(Image);
+  Context.CompOp := TBLCompOp.SrcCopy;
+  Context.FillAll;
+
+  Face := TBLFontFace.Create;
+  Face.InitializeFromFile('Resources/NotoSans-Regular.ttf');
+
+  Font := TBLFont.Create;
+  Font.InitializeFromFace(Face, 50);
+
+  Context.FillColor := $FFFFFFFF;
+  Context.FillText(BLPoint(60, 80), Font, 'Hello Blend2D!');
+
+  Context.Rotate(0.785398);
+  Context.FillText(BLPoint(250, 80), Font, 'Rotated Text');
+
+  Context.Finish;
+
+  Codec := TBLImageCodec.Create;
+  if (Codec.FindByName('BMP')) then
+    Image.WriteToFile('blGettingStarted07.bmp', Codec);
+end;
+
+begin
+  try
+    Run;
+  except
+    on E: Exception do
+      Writeln(E.ClassName, ': ', E.Message);
+  end;
+end.

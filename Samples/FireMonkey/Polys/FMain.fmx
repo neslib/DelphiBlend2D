@@ -1,0 +1,83 @@
+inherited FormMain: TFormMain
+  Caption = 'Polygons'
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    inherited LayoutRenderer: TLayout
+      inherited ComboBoxRenderer: TComboBox
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Size.Width = 106.000000000000000000
+      end
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Height = 392.000000000000000000
+  end
+  object ToolBar: TToolBar
+    Position.Y = 44.000000000000000000
+    Size.Width = 360.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object LabelOperation: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 57.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Operation:'
+      TabOrder = 0
+    end
+    object LayoutOperation: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 65.000000000000000000
+      Size.Width = 133.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxOperation: TComboBox
+        Align = VertCenter
+        DropDownCount = 15
+        Items.Strings = (
+          'Fill Poly'
+          'Fill Cubics'
+          'Stroke (W=1)'
+          'Stroke (W=2)'
+          'Stroke (W=5)')
+        ItemIndex = 0
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 7.000000000000000000
+        Size.Width = 129.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+    end
+    object TrackBarPointCount: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 1000.000000000000000000
+      Min = 3.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 202.000000000000000000
+      Position.Y = 12.000000000000000000
+      Size.Width = 154.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Value = 50.000000000000000000
+      OnChange = TrackBarPointCountChange
+    end
+  end
+end

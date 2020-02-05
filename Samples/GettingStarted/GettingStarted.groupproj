@@ -1,0 +1,120 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{E1B88A85-2BC8-46B7-A3A6-C82996893F89}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="01\blGettingStarted01.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="02\blGettingStarted02.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="03\blGettingStarted03.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="04\blGettingStarted04.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="05\blGettingStarted05.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="06\blGettingStarted06.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="07\blGettingStarted07.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="08\blGettingStarted08.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="blGettingStarted01">
+        <MSBuild Projects="01\blGettingStarted01.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted01:Clean">
+        <MSBuild Projects="01\blGettingStarted01.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted01:Make">
+        <MSBuild Projects="01\blGettingStarted01.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blGettingStarted02">
+        <MSBuild Projects="02\blGettingStarted02.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted02:Clean">
+        <MSBuild Projects="02\blGettingStarted02.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted02:Make">
+        <MSBuild Projects="02\blGettingStarted02.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blGettingStarted03">
+        <MSBuild Projects="03\blGettingStarted03.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted03:Clean">
+        <MSBuild Projects="03\blGettingStarted03.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted03:Make">
+        <MSBuild Projects="03\blGettingStarted03.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blGettingStarted04">
+        <MSBuild Projects="04\blGettingStarted04.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted04:Clean">
+        <MSBuild Projects="04\blGettingStarted04.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted04:Make">
+        <MSBuild Projects="04\blGettingStarted04.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blGettingStarted05">
+        <MSBuild Projects="05\blGettingStarted05.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted05:Clean">
+        <MSBuild Projects="05\blGettingStarted05.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted05:Make">
+        <MSBuild Projects="05\blGettingStarted05.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blGettingStarted06">
+        <MSBuild Projects="06\blGettingStarted06.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted06:Clean">
+        <MSBuild Projects="06\blGettingStarted06.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted06:Make">
+        <MSBuild Projects="06\blGettingStarted06.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blGettingStarted07">
+        <MSBuild Projects="07\blGettingStarted07.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted07:Clean">
+        <MSBuild Projects="07\blGettingStarted07.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted07:Make">
+        <MSBuild Projects="07\blGettingStarted07.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blGettingStarted08">
+        <MSBuild Projects="08\blGettingStarted08.dproj"/>
+    </Target>
+    <Target Name="blGettingStarted08:Clean">
+        <MSBuild Projects="08\blGettingStarted08.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blGettingStarted08:Make">
+        <MSBuild Projects="08\blGettingStarted08.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="blGettingStarted01;blGettingStarted02;blGettingStarted03;blGettingStarted04;blGettingStarted05;blGettingStarted06;blGettingStarted07;blGettingStarted08"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="blGettingStarted01:Clean;blGettingStarted02:Clean;blGettingStarted03:Clean;blGettingStarted04:Clean;blGettingStarted05:Clean;blGettingStarted06:Clean;blGettingStarted07:Clean;blGettingStarted08:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="blGettingStarted01:Make;blGettingStarted02:Make;blGettingStarted03:Make;blGettingStarted04:Make;blGettingStarted05:Make;blGettingStarted06:Make;blGettingStarted07:Make;blGettingStarted08:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

@@ -1,0 +1,74 @@
+inherited FormMain: TFormMain
+  Caption = 'Text'
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    Size.Height = 48.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Height = 48.000000000000000000
+    end
+    inherited LayoutRenderer: TLayout
+      Size.Height = 48.000000000000000000
+      inherited ComboBoxRenderer: TComboBox
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 106.000000000000000000
+        Size.Height = 32.000000000000000000
+      end
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Size.Height = 48.000000000000000000
+    end
+    inherited LabelFPS: TLabel
+      Size.Height = 48.000000000000000000
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Height = 392.000000000000000000
+  end
+  object ToolBar: TToolBar
+    Position.Y = 48.000000000000000000
+    Size.Width = 360.000000000000000000
+    Size.Height = 40.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object TrackBarFontSize: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 200.000000000000000000
+      Min = 5.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 165.000000000000000000
+      Position.Y = 10.000000000000000000
+      Size.Width = 191.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Value = 20.000000000000000000
+      OnChange = TrackBarFontSizeChange
+    end
+    object LayoutText: TLayout
+      Align = Left
+      Size.Width = 161.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object EditText: TEdit
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        Align = VertCenter
+        TabOrder = 0
+        Text = 'Sample Text'
+        Position.X = 4.000000000000000000
+        Position.Y = 9.000000000000000000
+        Margins.Left = 4.000000000000000000
+        Size.Width = 157.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+      end
+    end
+  end
+end

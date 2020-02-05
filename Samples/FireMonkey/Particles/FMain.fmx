@@ -1,0 +1,49 @@
+inherited FormMain: TFormMain
+  Caption = 'Particles'
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    inherited LayoutRenderer: TLayout
+      inherited ComboBoxRenderer: TComboBox
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Size.Width = 106.000000000000000000
+      end
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Height = 392.000000000000000000
+  end
+  object ToolBar: TToolBar
+    Position.Y = 44.000000000000000000
+    Size.Width = 360.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object TrackBarCount: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 5000.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Position.Y = 12.000000000000000000
+      Size.Width = 280.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Value = 500.000000000000000000
+    end
+    object CheckBoxColors: TCheckBox
+      Align = Right
+      Position.X = 288.000000000000000000
+      Size.Width = 72.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'Colors'
+    end
+  end
+end

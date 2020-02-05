@@ -1,0 +1,82 @@
+object FormBase: TFormBase
+  Left = 0
+  Top = 0
+  Caption = 'Blend2D'
+  ClientHeight = 480
+  ClientWidth = 360
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  DesignerMasterStyle = 0
+  object ToolBarMain: TToolBar
+    Size.Width = 360.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object LabelRenderer: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 51.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Renderer:'
+      TabOrder = 0
+    end
+    object LayoutRenderer: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 59.000000000000000000
+      Size.Width = 110.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxRenderer: TComboBox
+        Align = VertCenter
+        Position.Y = 7.000000000000000000
+        Size.Width = 110.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+    end
+    object CheckBoxLimitFPS: TCheckBox
+      Align = Right
+      Position.X = 288.000000000000000000
+      Size.Width = 72.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'Limit'
+      OnChange = CheckBoxLimitFPSChange
+    end
+    object LabelFPS: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 208.000000000000000000
+      Size.Width = 76.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      Text = '0000 fps'
+      TabOrder = 3
+    end
+  end
+  object PaintBox: TPaintBox
+    Align = Client
+    Size.Width = 360.000000000000000000
+    Size.Height = 436.000000000000000000
+    Size.PlatformDefault = False
+    OnPaint = PaintBoxPaint
+  end
+  object TimerRepaint: TTimer
+    Interval = 1
+    OnTimer = TimerRepaintTimer
+    Left = 168
+    Top = 8
+  end
+end

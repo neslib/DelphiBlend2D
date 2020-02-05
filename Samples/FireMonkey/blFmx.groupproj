@@ -1,0 +1,144 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{22D3BCF6-FB1F-43E3-9981-70A85099046F}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Rects\blFmxRects.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Bounces\blFmxBounces.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Circles\blFmxCircles.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Particles\blFmxParticles.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Polys\blFmxPolys.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Text\blFmxText.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Tiger\blFmxTiger.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Gradients\blFmxGradients.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EllipticArc\blFmxEllipticArc.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Stroke\blFmxStroke.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="blFmxRects">
+        <MSBuild Projects="Rects\blFmxRects.dproj"/>
+    </Target>
+    <Target Name="blFmxRects:Clean">
+        <MSBuild Projects="Rects\blFmxRects.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxRects:Make">
+        <MSBuild Projects="Rects\blFmxRects.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxBounces">
+        <MSBuild Projects="Bounces\blFmxBounces.dproj"/>
+    </Target>
+    <Target Name="blFmxBounces:Clean">
+        <MSBuild Projects="Bounces\blFmxBounces.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxBounces:Make">
+        <MSBuild Projects="Bounces\blFmxBounces.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxCircles">
+        <MSBuild Projects="Circles\blFmxCircles.dproj"/>
+    </Target>
+    <Target Name="blFmxCircles:Clean">
+        <MSBuild Projects="Circles\blFmxCircles.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxCircles:Make">
+        <MSBuild Projects="Circles\blFmxCircles.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxParticles">
+        <MSBuild Projects="Particles\blFmxParticles.dproj"/>
+    </Target>
+    <Target Name="blFmxParticles:Clean">
+        <MSBuild Projects="Particles\blFmxParticles.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxParticles:Make">
+        <MSBuild Projects="Particles\blFmxParticles.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxPolys">
+        <MSBuild Projects="Polys\blFmxPolys.dproj"/>
+    </Target>
+    <Target Name="blFmxPolys:Clean">
+        <MSBuild Projects="Polys\blFmxPolys.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxPolys:Make">
+        <MSBuild Projects="Polys\blFmxPolys.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxText">
+        <MSBuild Projects="Text\blFmxText.dproj"/>
+    </Target>
+    <Target Name="blFmxText:Clean">
+        <MSBuild Projects="Text\blFmxText.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxText:Make">
+        <MSBuild Projects="Text\blFmxText.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxTiger">
+        <MSBuild Projects="Tiger\blFmxTiger.dproj"/>
+    </Target>
+    <Target Name="blFmxTiger:Clean">
+        <MSBuild Projects="Tiger\blFmxTiger.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxTiger:Make">
+        <MSBuild Projects="Tiger\blFmxTiger.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxGradients">
+        <MSBuild Projects="Gradients\blFmxGradients.dproj"/>
+    </Target>
+    <Target Name="blFmxGradients:Clean">
+        <MSBuild Projects="Gradients\blFmxGradients.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxGradients:Make">
+        <MSBuild Projects="Gradients\blFmxGradients.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxEllipticArc">
+        <MSBuild Projects="EllipticArc\blFmxEllipticArc.dproj"/>
+    </Target>
+    <Target Name="blFmxEllipticArc:Clean">
+        <MSBuild Projects="EllipticArc\blFmxEllipticArc.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxEllipticArc:Make">
+        <MSBuild Projects="EllipticArc\blFmxEllipticArc.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="blFmxStroke">
+        <MSBuild Projects="Stroke\blFmxStroke.dproj"/>
+    </Target>
+    <Target Name="blFmxStroke:Clean">
+        <MSBuild Projects="Stroke\blFmxStroke.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxStroke:Make">
+        <MSBuild Projects="Stroke\blFmxStroke.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="blFmxRects;blFmxBounces;blFmxCircles;blFmxParticles;blFmxPolys;blFmxText;blFmxTiger;blFmxGradients;blFmxEllipticArc;blFmxStroke"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="blFmxRects:Clean;blFmxBounces:Clean;blFmxCircles:Clean;blFmxParticles:Clean;blFmxPolys:Clean;blFmxText:Clean;blFmxTiger:Clean;blFmxGradients:Clean;blFmxEllipticArc:Clean;blFmxStroke:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="blFmxRects:Make;blFmxBounces:Make;blFmxCircles:Make;blFmxParticles:Make;blFmxPolys:Make;blFmxText:Make;blFmxTiger:Make;blFmxGradients:Make;blFmxEllipticArc:Make;blFmxStroke:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
