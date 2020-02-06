@@ -28,6 +28,7 @@ const
 type
   PUInt8     = PByte;
   PPUInt8    = ^PByte;
+  PUInt32    = ^UInt32;
   PPUTF8Char = ^PUTF8Char;
 
 const
