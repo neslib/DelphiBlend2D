@@ -73,11 +73,6 @@ type
   protected
     class function RandomSign: Single; static;
     class function RandomColor: TAlphaColor; static;
-
-//    property CanvasSize: TSize read FSrcSize;
-//    property CanvasWidth: Integer read FSrcSize.cx;
-//    property CanvasHeight: Integer read FSrcSize.cy;
-//    property PixelScale: Single read FPixelScale;
   private
     procedure RenderFireMonkeyInternal;
     procedure RenderBlend2DInternal;

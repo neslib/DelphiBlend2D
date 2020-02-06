@@ -14,7 +14,7 @@ Blend4D currently supports Windows (32 and 64-bit) and macOS (64-bit). Support f
 
 ## Easy to Use API
 
-The Blend4D OOP framework follows the [Blend2D C++ API](https://blend2d.com/doc/index.html) as closely as possible. It uses interfaces for automatic resource management. The snippet below is taken from the `blGettingStarted01` sample project. 
+The Blend4D OOP framework follows the [Blend2D C++ API](https://blend2d.com/doc/index.html) as closely as possible. It uses interfaces for automatic resource management. The snippet below is taken from the `blGettingStarted05` sample project. 
 
 ```Delphi
 procedure Run;
