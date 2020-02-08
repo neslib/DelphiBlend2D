@@ -1,0 +1,154 @@
+object FormMain: TFormMain
+  Left = 0
+  Top = 0
+  Caption = 'TBlend2DPaintBox for FMX'
+  ClientHeight = 440
+  ClientWidth = 393
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object LayoutSettings: TLayout
+    Align = Top
+    Size.Width = 393.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object CheckBoxLowRes: TCheckBox
+      Align = Bottom
+      Margins.Left = 40.000000000000000000
+      Position.X = 40.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 353.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = 'Low Resolution (on high-DPI displays)'
+      OnChange = CheckBoxLowResChange
+    end
+  end
+  object GridPanelLayout: TGridPanelLayout
+    Align = Client
+    Size.Width = 393.000000000000000000
+    Size.Height = 407.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    ColumnCollection = <
+      item
+        SizeStyle = Absolute
+        Value = 40.000000000000000000
+      end
+      item
+        Value = 100.000000000000000000
+      end
+      item
+        SizeStyle = Absolute
+        Value = 40.000000000000000000
+      end>
+    ControlCollection = <
+      item
+        Column = 1
+        Control = TrackBarX
+        Row = 0
+      end
+      item
+        Column = 0
+        Control = TrackBarY
+        Row = 1
+      end
+      item
+        Column = 1
+        Control = Blend2DPaintBox
+        Row = 1
+      end
+      item
+        Column = 2
+        Control = TrackBarZoom
+        Row = 1
+      end
+      item
+        Column = 1
+        Control = TrackBarRotate
+        Row = 2
+      end>
+    RowCollection = <
+      item
+        SizeStyle = Absolute
+        Value = 40.000000000000000000
+      end
+      item
+        Value = 100.000000000000000000
+      end
+      item
+        SizeStyle = Absolute
+        Value = 40.000000000000000000
+      end>
+    object TrackBarX: TTrackBar
+      Align = Bottom
+      CanParentFocus = True
+      Max = 240.000000000000000000
+      Orientation = Horizontal
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 40.000000000000000000
+      Position.Y = 17.000000000000000000
+      Size.Width = 313.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      OnChange = TrackBarChange
+    end
+    object TrackBarY: TTrackBar
+      Align = Right
+      CanParentFocus = True
+      Max = 240.000000000000000000
+      Orientation = Vertical
+      Margins.Right = 4.000000000000000000
+      Position.X = 17.000000000000000000
+      Position.Y = 40.000000000000000000
+      Size.Width = 19.000000000000000000
+      Size.Height = 327.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      OnChange = TrackBarChange
+    end
+    object Blend2DPaintBox: TBlend2DPaintBox
+      Align = Client
+      Size.Width = 313.000000000000000000
+      Size.Height = 327.000000000000000000
+      Size.PlatformDefault = False
+      OnPaint = Blend2DPaintBoxPaint
+    end
+    object TrackBarZoom: TTrackBar
+      Align = Left
+      CanParentFocus = True
+      Max = 5.000000000000000000
+      Min = 0.009999999776482582
+      Orientation = Vertical
+      Margins.Left = 4.000000000000000000
+      Position.X = 357.000000000000000000
+      Position.Y = 40.000000000000000000
+      Size.Width = 19.000000000000000000
+      Size.Height = 327.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      Value = 1.000000000000000000
+      OnChange = TrackBarChange
+    end
+    object TrackBarRotate: TTrackBar
+      Align = Top
+      CanParentFocus = True
+      Max = 360.000000000000000000
+      Min = -360.000000000000000000
+      Orientation = Horizontal
+      Margins.Top = 4.000000000000000000
+      Position.X = 40.000000000000000000
+      Position.Y = 371.000000000000000000
+      Size.Width = 313.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      OnChange = TrackBarChange
+    end
+  end
+end

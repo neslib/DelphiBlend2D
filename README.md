@@ -77,7 +77,7 @@ Blend4D comes with a variety of sample applications that match the original samp
 
 Features planned for future releases include:
 
-* Provide a `TPaintBox`-like control for VCL and FireMonkey that renders using Blend4D instead.
+* ~~Provide a `TPaintBox`-like control for VCL and FireMonkey that renders using Blend4D instead.~~
 * Provide the possibility to replace the system canvas in FireMonkey applications with a Blend4D canvas. This way, the entire FireMonkey UI will be rendered using Blend4D.
 
 ## License

@@ -44,7 +44,6 @@ type
   private
     { Private declarations }
     FBitmap: TBitmap;
-    FSrcSize: TSize;
     FDstSize: TSize;
     FSrcRect: TRectF;
     FDstRect: TRectF;
@@ -143,10 +142,6 @@ begin
 end;
 
 procedure TFormBase.FormCreate(Sender: TObject);
-{$IFNDEF MSWINDOWS}
-var
-  SrcFormat, DstFormat: TBLFormatInfo;
-{$ENDIF}
 
   procedure AddItem(const AText: String; const ATag: Integer);
   var
@@ -173,7 +168,6 @@ begin
   end;
 
   FPixelScale := Handle.Scale;
-  FSrcSize := TSize.Create(Trunc(PaintBox.Width * FPixelScale), Trunc(PaintBox.Height * FPixelScale));
 
   FBitmap := TBitmap.Create;
   FBlend2DImage := TBLImage.Create;
@@ -181,17 +175,7 @@ begin
 
   {$IFNDEF MSWINDOWS}
   { We need to convert ARGB to ABGR on non-Windows platforms. }
-
-  SrcFormat.Reset(32, [TBLFormatFlag.RGB, TBLFormatFlag.Alpha,
-    TBLFormatFlag.Premultiplied, TBLFormatFlag.ByteAligned], 8, 8, 8, 8,
-    16, 8, 0, 24);
-
-  DstFormat.Reset(32, [TBLFormatFlag.RGB, TBLFormatFlag.Alpha,
-    TBLFormatFlag.Premultiplied, TBLFormatFlag.ByteAligned], 8, 8, 8, 8,
-    0, 8, 16, 24);
-
-  FBlend2DConverter := TBLPixelConverter.Create;
-  FBlend2DConverter.Initialize(SrcFormat, DstFormat, [TBLPixelConverterCreateFlag.NoMultiStep]);
+  FBlend2DConverter := TBLPixelConverter.CreatePlatformConverter;
   {$ENDIF}
 
   {$IFDEF USE_SKIA}
@@ -219,7 +203,7 @@ end;
 
 procedure TFormBase.PaintBoxPaint(Sender: TObject; Canvas: TCanvas);
 var
-  DstSize: TSize;
+  SrcSize, DstSize: TSize;
 begin
   if (FBitmap = nil) or (ComboBoxRenderer.Selected = nil) then
     Exit;
@@ -230,11 +214,11 @@ begin
   begin
     FDstSize := DstSize;
     FPixelScale := Handle.Scale;
-    FSrcSize.Width := Trunc(FDstSize.Width * FPixelScale);
-    FSrcSize.Height := Trunc(FDstSize.Height * FPixelScale);
-    FBitmap.SetSize(FSrcSize);
+    SrcSize.Width := Trunc(FDstSize.Width * FPixelScale);
+    SrcSize.Height := Trunc(FDstSize.Height * FPixelScale);
+    FBitmap.SetSize(SrcSize);
 
-    FSrcRect := RectF(0, 0, FSrcSize.Width, FSrcSize.Height);
+    FSrcRect := RectF(0, 0, SrcSize.Width, SrcSize.Height);
     FDstRect := RectF(0, 0, FDstSize.Width, FDstSize.Height);
   end;
 

@@ -3345,7 +3345,7 @@ type
     property AlphaSize: Byte read FHandle.aSize write FHandle.aSize;
     property RedShift: Byte read FHandle.rShift write FHandle.rShift;
     property GreenShift: Byte read FHandle.gShift write FHandle.gShift;
-    property Bluehift: Byte read FHandle.bShift write FHandle.bShift;
+    property BlueShift: Byte read FHandle.bShift write FHandle.bShift;
     property AlphaShift: Byte read FHandle.aShift write FHandle.aShift;
     property Palette: PBLRgba32 read GetPalette;
   end;
@@ -6317,6 +6317,20 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
+    { Creates a pixel converter appropriate for the current platform. This is
+      useful for platforms where the display format does not match the internal
+      Blend2D format. For example, on macOS, iOS and Android, the red and blue
+      color channels need to be swapped. On Windows, Blend2D's internal format
+      matches the display format and no conversion is needed.
+
+      On Windows, it returns a converter that doesn't convert, but just copies
+      the data. However, it is more efficient to not use a pixel converter at
+      all on Windows.
+
+      On other platforms, it creates a converter that converts
+      from PRGB to PBGR. }
+    class function CreatePlatformConverter: IBLPixelConverter; static;
   end;
 
 {$ENDREGION 'Pixel Converter'}
@@ -14904,6 +14918,22 @@ constructor TBLPixelConverter.Create;
 begin
   inherited;
   blPixelConverterInit(@FHandle);
+end;
+
+class function TBLPixelConverter.CreatePlatformConverter: IBLPixelConverter;
+var
+  SrcFormat, DstFormat: TBLFormatInfo;
+begin
+  Result := TBLPixelConverter.Create;
+  SrcFormat := TBLFormat.PRGB32.Info;
+  DstFormat := SrcFormat;
+
+  {$IFNDEF MSWINDOWS}
+  DstFormat.RedShift := SrcFormat.BlueShift;
+  DstFormat.BlueShift := SrcFormat.RedShift;
+  {$ENDIF}
+
+  Result.Initialize(SrcFormat, DstFormat, [TBLPixelConverterCreateFlag.NoMultiStep]);
 end;
 
 destructor TBLPixelConverter.Destroy;
