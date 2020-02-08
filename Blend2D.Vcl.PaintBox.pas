@@ -1,4 +1,4 @@
-unit Blend4D.Vcl.PaintBox;
+unit Blend2D.Vcl.PaintBox;
 
 interface
 
@@ -7,7 +7,7 @@ uses
   System.Classes,
   Vcl.Controls,
   Vcl.Graphics,
-  Blend4D;
+  Blend2D;
 
 type
   { Event handler type for TBlend2DPaintBox.OnPaint }

@@ -5,7 +5,7 @@ uses
   FMX.Forms,
   FMain in 'FMain.pas' {FormMain},
   FBase in '..\Common\FBase.pas' {FormBase},
-  Blend4D in '..\..\..\Blend4D.pas',
+  Blend2D in '..\..\..\Blend2D.pas',
   Tiger in 'Tiger.pas';
 
 {$R *.res}

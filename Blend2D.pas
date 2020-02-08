@@ -1,4 +1,4 @@
-unit Blend4D;
+unit Blend2D;
 { OPP wrappers for Blend2D C API. 
 
   Follows the C++ API where possible. The following C++ classes are not 
@@ -16,7 +16,7 @@ interface
 uses
   System.Math,
   System.SysUtils,
-  Blend4D.Api;
+  Blend2D.Api;
 
 {$REGION 'Error Handling'}
 

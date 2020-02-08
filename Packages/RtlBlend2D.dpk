@@ -1,4 +1,4 @@
-package VclBlend4D;
+package RtlBlend2D;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -25,15 +25,15 @@ package VclBlend4D;
 {$IMAGEBASE $400000}
 {$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
-{$DESIGNONLY}
+{$DESCRIPTION 'Common Blend2D Functionality'}
+{$RUNONLY}
 {$IMPLICITBUILD ON}
 
 requires
-  rtl,
-  vcl,
-  RtlBlend4D;
+  rtl;
 
 contains
-  Blend4D.Vcl.PaintBox in '..\Blend4D.Vcl.PaintBox.pas';
+  Blend2D.Api in '..\Blend2D.Api.pas',
+  Blend2D in '..\Blend2D.pas';
 
 end.

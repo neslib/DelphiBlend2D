@@ -6,7 +6,7 @@ program blGettingStarted08;
 
 uses
   System.SysUtils,
-  Blend4D in '..\..\..\Blend4D.pas';
+  Blend2D in '..\..\..\Blend2D.pas';
 
 procedure Run;
 const

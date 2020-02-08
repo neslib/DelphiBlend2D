@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{0374A06F-A996-4FEC-B9C3-F1B57C763FC7}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="RtlBlend2D.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="FmxBlend2D.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="VclBlend2D.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="RtlBlend2D">
+        <MSBuild Projects="RtlBlend2D.dproj"/>
+    </Target>
+    <Target Name="RtlBlend2D:Clean">
+        <MSBuild Projects="RtlBlend2D.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RtlBlend2D:Make">
+        <MSBuild Projects="RtlBlend2D.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="FmxBlend2D">
+        <MSBuild Projects="FmxBlend2D.dproj"/>
+    </Target>
+    <Target Name="FmxBlend2D:Clean">
+        <MSBuild Projects="FmxBlend2D.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FmxBlend2D:Make">
+        <MSBuild Projects="FmxBlend2D.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="VclBlend2D">
+        <MSBuild Projects="VclBlend2D.dproj"/>
+    </Target>
+    <Target Name="VclBlend2D:Clean">
+        <MSBuild Projects="VclBlend2D.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VclBlend2D:Make">
+        <MSBuild Projects="VclBlend2D.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="RtlBlend2D;FmxBlend2D;VclBlend2D"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="RtlBlend2D:Clean;FmxBlend2D:Clean;VclBlend2D:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="RtlBlend2D:Make;FmxBlend2D:Make;VclBlend2D:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

@@ -20,7 +20,7 @@ uses
   FMX.Objects,
   FMX.ListBox,
   FMX.Layouts,
-  Blend4D,
+  Blend2D,
   FBase;
 
 type

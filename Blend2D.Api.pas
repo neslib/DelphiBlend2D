@@ -1,4 +1,4 @@
-unit Blend4D.Api;
+unit Blend2D.Api;
 { Blend2D for Delphi.
   Based on Blend2D beta 12 }
 

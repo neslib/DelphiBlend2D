@@ -407,7 +407,7 @@
         <DCCReference Include="..\Common\FBase.pas">
             <Form>FormBase</Form>
         </DCCReference>
-        <DCCReference Include="..\..\..\Blend4D.pas"/>
+        <DCCReference Include="..\..\..\Blend2D.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -99,7 +99,7 @@ object FormMain: TFormMain
     object TrackBarX: TTrackBar
       Left = 40
       Top = 15
-      Width = 353
+      Width = 355
       Height = 25
       Align = alBottom
       Max = 240
@@ -107,14 +107,12 @@ object FormMain: TFormMain
       TabOrder = 0
       TickStyle = tsNone
       OnChange = TrackBarChange
-      ExplicitLeft = 41
-      ExplicitTop = 16
     end
     object TrackBarY: TTrackBar
       Left = 15
       Top = 40
       Width = 25
-      Height = 330
+      Height = 332
       Align = alRight
       Max = 240
       Orientation = trVertical
@@ -122,14 +120,12 @@ object FormMain: TFormMain
       TabOrder = 1
       TickStyle = tsNone
       OnChange = TrackBarChange
-      ExplicitLeft = 16
-      ExplicitTop = 41
     end
     object TrackBarZoom: TTrackBar
-      Left = 393
+      Left = 395
       Top = 40
       Width = 25
-      Height = 330
+      Height = 332
       Align = alLeft
       Max = 500
       Min = 1
@@ -140,13 +136,11 @@ object FormMain: TFormMain
       TickMarks = tmTopLeft
       TickStyle = tsNone
       OnChange = TrackBarChange
-      ExplicitLeft = 394
-      ExplicitTop = 41
     end
     object TrackBarRotate: TTrackBar
       Left = 40
-      Top = 370
-      Width = 353
+      Top = 372
+      Width = 355
       Height = 25
       Align = alTop
       Max = 360
@@ -156,18 +150,18 @@ object FormMain: TFormMain
       TickMarks = tmTopLeft
       TickStyle = tsNone
       OnChange = TrackBarChange
-      ExplicitLeft = 41
-      ExplicitTop = 371
     end
     object Blend2DPaintBox: TBlend2DPaintBox
       Left = 40
       Top = 40
-      Width = 353
-      Height = 330
+      Width = 355
+      Height = 332
       Align = alClient
       OnPaint = Blend2DPaintBoxPaint
       ExplicitLeft = 35
       ExplicitTop = 47
+      ExplicitWidth = 353
+      ExplicitHeight = 330
     end
   end
 end

@@ -17,8 +17,8 @@ uses
   FMX.Controls.Presentation,
   FMX.StdCtrls,
   FMX.Layouts,
-  Blend4D,
-  Blend4D.Fmx.PaintBox;
+  Blend2D,
+  Blend2D.Fmx.PaintBox;
 
 type
   TFormMain = class(TForm)

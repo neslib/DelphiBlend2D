@@ -1,4 +1,4 @@
-package FmxBlend4D;
+package VclBlend2D;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -25,16 +25,16 @@ package FmxBlend4D;
 {$IMAGEBASE $400000}
 {$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'Blend2D Controls for FireMonkey'}
+{$DESCRIPTION 'Blend2D Controls for VCL'}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
 requires
   rtl,
-  fmx,
-  RtlBlend4D;
+  vcl,
+  RtlBlend2D;
 
 contains
-  Blend4D.Fmx.PaintBox in '..\Blend4D.Fmx.PaintBox.pas';
+  Blend2D.Vcl.PaintBox in '..\Blend2D.Vcl.PaintBox.pas';
 
 end.

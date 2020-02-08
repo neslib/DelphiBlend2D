@@ -17,8 +17,8 @@ uses
   Vcl.ComCtrls,
   Vcl.ExtCtrls,
   Vcl.StdCtrls,
-  Blend4D,
-  Blend4D.Vcl.PaintBox;
+  Blend2D,
+  Blend2D.Vcl.PaintBox;
 
 type
   TFormMain = class(TForm)

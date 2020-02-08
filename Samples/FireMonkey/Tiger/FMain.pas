@@ -24,7 +24,7 @@ uses
   {$IFDEF USE_SKIA}
   Neslib.Skia,
   {$ENDIF}
-  Blend4D,
+  Blend2D,
   FBase;
 
 type

@@ -1,4 +1,4 @@
-unit Blend4D.Fmx.PaintBox;
+unit Blend2D.Fmx.PaintBox;
 
 interface
 
@@ -8,7 +8,7 @@ uses
   System.UITypes,
   FMX.Controls,
   FMX.Graphics,
-  Blend4D;
+  Blend2D;
 
 type
   { Event handler type for TBlend2DPaintBox.OnPaint }
