@@ -26,14 +26,14 @@ inherited FormMain: TFormMain
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Height = 384.000000000000000000
+    Size.Height = 336.000000000000000000
   end
-  object ToolBar: TToolBar
+  object ToolBar1: TToolBar
     Position.Y = 48.000000000000000000
     Size.Width = 360.000000000000000000
     Size.Height = 48.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 1
+    TabOrder = 2
     object LabelCompOp: TLabel
       Align = Left
       AutoSize = True
@@ -44,16 +44,16 @@ inherited FormMain: TFormMain
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Comp Op:'
-      TabOrder = 0
+      TabOrder = 1
     end
     object LayoutCompOp: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
       Position.X = 62.000000000000000000
-      Size.Width = 105.000000000000000000
+      Size.Width = 90.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
+      TabOrder = 2
       object ComboBoxCompOp: TComboBox
         Align = VertCenter
         DropDownCount = 15
@@ -73,7 +73,7 @@ inherited FormMain: TFormMain
         Margins.Bottom = 4.000000000000000000
         Position.X = 4.000000000000000000
         Position.Y = 8.000000000000000000
-        Size.Width = 101.000000000000000000
+        Size.Width = 86.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
@@ -83,19 +83,108 @@ inherited FormMain: TFormMain
     object TrackBarRectCount: TTrackBar
       Align = VertCenter
       CanParentFocus = True
-      Max = 5000.000000000000000000
+      Max = 10000.000000000000000000
       Min = 1.000000000000000000
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 171.000000000000000000
+      Position.X = 195.000000000000000000
       Position.Y = 14.000000000000000000
-      Size.Width = 185.000000000000000000
+      Size.Width = 161.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
-      Value = 50.000000000000000000
+      TabOrder = 3
+      Value = 200.000000000000000000
       OnChange = TrackBarRectCountChange
+    end
+    object LabelCount: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 156.000000000000000000
+      Size.Width = 35.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Count:'
+      TabOrder = 0
+    end
+  end
+  object ToolBar2: TToolBar
+    Position.Y = 96.000000000000000000
+    Size.Width = 360.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object LabelShape: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 36.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Shape:'
+      TabOrder = 1
+    end
+    object Layout1: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 44.000000000000000000
+      Size.Width = 90.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object ComboBoxShape: TComboBox
+        Align = VertCenter
+        DropDownCount = 15
+        Items.Strings = (
+          'Rect'
+          'RectPath'
+          'RoundRect'
+          'Polygon')
+        ItemIndex = 0
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 86.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnChange = ComboBoxShapeChange
+      end
+    end
+    object TrackBarSize: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 128.000000000000000000
+      Min = 8.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 166.000000000000000000
+      Position.Y = 14.000000000000000000
+      Size.Width = 190.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      Value = 64.000000000000000000
+      OnChange = TrackBarSizeChange
+    end
+    object LabelSize: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 138.000000000000000000
+      Size.Width = 24.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Size:'
+      TabOrder = 0
     end
   end
 end

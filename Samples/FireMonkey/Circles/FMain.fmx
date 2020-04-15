@@ -42,13 +42,25 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 4.000000000000000000
+      Position.X = 43.000000000000000000
       Position.Y = 10.000000000000000000
-      Size.Width = 352.000000000000000000
+      Size.Width = 313.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       Value = 500.000000000000000000
+    end
+    object LabelCount: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 35.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Count:'
+      TabOrder = 0
     end
   end
 end

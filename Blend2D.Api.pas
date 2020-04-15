@@ -15,8 +15,9 @@ const
   LIB_BLEND2D = 'blend2d_win64.dll';
   _PU = '';
   {$ELSEIF Defined(MACOS64) and not Defined(IOS)}
-  LIB_BLEND2D = 'libblend2d_mac64.a';
-  _PU = '';
+    {$MESSAGE Error 'Blend2D for macOS not available yet'}
+//  LIB_BLEND2D = 'libblend2d_mac64.a';
+//  _PU = '';
   {$ELSEIF Defined(IOS64)}
     {$MESSAGE Error 'Blend2D for iOS not available yet'}
   {$ELSEIF Defined(ANDROID)}
@@ -70,6 +71,25 @@ const
   BL_BYTE_ORDER_BE      = 1;
   BL_BYTE_ORDER_NATIVE  = BL_BYTE_ORDER_LE;
   BL_BYTE_ORDER_SWAPPED = BL_BYTE_ORDER_BE;
+
+type
+  BLContextProperty = Integer;
+
+const
+  BL_CONTEXT_PROPERTY_THREAD_COUNT            = 0;
+  BL_CONTEXT_PROPERTY_ACCUMULATED_ERROR_FLAGS = 10;
+
+type
+  BLContextErrorFlags = Cardinal;
+
+const
+  BL_CONTEXT_ERROR_FLAG_INVALID_VALUE    = $00000001;
+  BL_CONTEXT_ERROR_FLAG_INVALID_STATE    = $00000002;
+  BL_CONTEXT_ERROR_FLAG_INVALID_GEOMETRY = $00000004;
+  BL_CONTEXT_ERROR_FLAG_INVALID_GLYPH    = $00000008;
+  BL_CONTEXT_ERROR_FLAG_INVALID_FONT     = $00000010;
+  BL_CONTEXT_ERROR_FLAG_OUT_OF_MEMORY    = $40000000;
+  BL_CONTEXT_ERROR_FLAG_UNKNOWN_ERROR    = $80000000;
 
 type
   BLClipMode = Integer;
@@ -883,12 +903,13 @@ const
   BL_ERROR_JPEG_INVALID_SOF             = 65602;
   BL_ERROR_JPEG_MULTIPLE_SOF            = 65603;
   BL_ERROR_JPEG_UNSUPPORTED_SOF         = 65604;
-  BL_ERROR_FONT_NO_CHARACTER_MAPPING    = 65605;
-  BL_ERROR_FONT_MISSING_IMPORTANT_TABLE = 65606;
-  BL_ERROR_FONT_FEATURE_NOT_AVAILABLE   = 65607;
-  BL_ERROR_FONT_CFF_INVALID_DATA        = 65608;
-  BL_ERROR_FONT_PROGRAM_TERMINATED      = 65609;
-  BL_ERROR_INVALID_GLYPH                = 65610;
+  BL_ERROR_FONT_NOT_INITIALIZED         = 65605;
+  BL_ERROR_FONT_NO_CHARACTER_MAPPING    = 65606;
+  BL_ERROR_FONT_MISSING_IMPORTANT_TABLE = 65607;
+  BL_ERROR_FONT_FEATURE_NOT_AVAILABLE   = 65608;
+  BL_ERROR_FONT_CFF_INVALID_DATA        = 65609;
+  BL_ERROR_FONT_PROGRAM_TERMINATED      = 65610;
+  BL_ERROR_INVALID_GLYPH                = 65611;
 
 type
   BLRuntimeLimits = Integer;
@@ -1031,7 +1052,7 @@ type
   _PBLApproximationOptions = ^BLApproximationOptions;
 
 type
-  BLRgba32 = record
+  BLRgba32 = packed record
   case Integer of
     0: (value: UInt32);
     1: (b: UInt8;
@@ -1042,7 +1063,7 @@ type
   _PBLRgba32 = ^BLRgba32;
 
 type
-  BLRgba64 = record
+  BLRgba64 = packed record
   case Integer of
     0: (value: UInt64);
     1: (b: UInt16;
@@ -1052,12 +1073,13 @@ type
   end;
 
 type
-  BLRgba128 = record
+  BLRgba = record
     r: Single;
     g: Single;
     b: Single;
     a: Single;
   end;
+  _PBLRgba = ^BLRgba;
 
 type
   BLArrayView = record
@@ -1117,6 +1139,7 @@ type
     w: Double;
     h: Double;
   end;
+  _PBLSize = ^BLSize;
 
 type
   BLSizeI = record
@@ -1240,6 +1263,27 @@ type
   PBLStrokeOptionsCore = ^BLStrokeOptionsCore;
 
 type
+  BLImageImpl = record
+    pixelData: Pointer;
+    refCount: NativeUInt;
+    implType: UInt8;
+    implTraits: UInt8;
+    memPoolData: UInt16;
+    format: UInt8;
+    flags: UInt8;
+    depth: UInt16;
+    size: BLSizeI;
+    stride: IntPtr;
+  end;
+  _PBLImageImpl = ^BLImageImpl;
+
+type
+  BLImageCore = record
+    impl: _PBLImageImpl;
+  end;
+  PBLImageCore = ^BLImageCore;
+
+type
   BLContextCookie = record
     data: array [0..1] of UInt64;
   end;
@@ -1248,9 +1292,10 @@ type
 type
   BLContextCreateInfo = record
     flags: UInt32;
-    threadCount: UInt32;
+    threadCount: Int32;
     cpuFeatures: UInt32;
-    reserved: array [0..4] of UInt32;
+    commandQueueLimit: Int32;
+    reserved: array [0..3] of UInt32;
   end;
   _PBLContextCreateInfo = ^BLContextCreateInfo;
 
@@ -1266,6 +1311,8 @@ type
 
 type
   BLContextState = record
+    targetImage: PBLImageCore;
+    targetSize: BLSize;
     hints: BLContextHints;
     compOp: UInt8;
     fillRule: UInt8;
@@ -1292,7 +1339,6 @@ type
     implTraits: UInt8;
     memPoolData: UInt16;
     contextType: UInt32;
-    targetSize: BLSize;
     state: _PBLContextState;
   end;
   PBLContextImpl = ^BLContextImpl;
@@ -1844,27 +1890,6 @@ type
   _PBLImageScaleOptions = ^BLImageScaleOptions;
 
 type
-  BLImageImpl = record
-    pixelData: Pointer;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    format: UInt8;
-    flags: UInt8;
-    depth: UInt16;
-    size: BLSizeI;
-    stride: IntPtr;
-  end;
-  _PBLImageImpl = ^BLImageImpl;
-
-type
-  BLImageCore = record
-    impl: _PBLImageImpl;
-  end;
-  PBLImageCore = ^BLImageCore;
-
-type
   BLPatternImpl = record
     image: BLImageCore;
     refCount: NativeUInt;
@@ -2053,8 +2078,28 @@ type
   end;
   PBLVariantCore = ^BLVariantCore;
 
+type
+  BLStyleCore = record
+  case Integer of
+    0: (rgba: BLRgba);
+    1: (variant: BLVariantCore);
+    2: (pattern: BLPatternCore);
+    3: (gradient: BLGradientCore);
+    4: (data: record
+          unknown: UInt64;
+          &type: UInt32;
+          tag: UInt32;
+        end);
+    5: (u64data: array [0..1] of UInt64);
+  end;
+  PBLStyleCore = ^BLStyleCore;
+
+
 function blArrayInit(self: PBLArrayCore; arrayTypeId: UInt32): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blArrayInit';
+
+function blArrayDestroy(self: PBLArrayCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blArrayDestroy';
 
 function blArrayReset(self: PBLArrayCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blArrayReset';
@@ -2192,6 +2237,9 @@ function blContextInit(self: PBLContextCore): BLResult; cdecl;
 function blContextInitAs(self: PBLContextCore; image: PBLImageCore; options: _PBLContextCreateInfo): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextInitAs';
 
+function blContextDestroy(self: PBLContextCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextDestroy';
+
 function blContextReset(self: PBLContextCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextReset';
 
@@ -2201,8 +2249,14 @@ function blContextAssignMove(self: PBLContextCore; other: PBLContextCore): BLRes
 function blContextAssignWeak(self: PBLContextCore; other: PBLContextCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextAssignWeak';
 
-function blContextGetType(self: PBLContextCore): BLResult; cdecl;
+function blContextGetType(self: PBLContextCore): UInt32; cdecl;
   external LIB_BLEND2D name _PU + 'blContextGetType';
+
+function blContextGetTargetSize(self: PBLContextCore; targetSizeOut: _PBLSize): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextGetTargetSize';
+
+function blContextGetTargetImage(self: PBLContextCore): PBLImageCore; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextGetTargetImage';
 
 function blContextBegin(self: PBLContextCore; image: PBLImageCore; options: _PBLContextCreateInfo): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextBegin';
@@ -2212,6 +2266,9 @@ function blContextEnd(self: PBLContextCore): BLResult; cdecl;
 
 function blContextFlush(self: PBLContextCore; flags: UInt32): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextFlush';
+
+function blContextQueryProperty(self: PBLContextCore; propertyId: UInt32; valueOut: Pointer): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextQueryProperty';
 
 function blContextSave(self: PBLContextCore; cookie: _PBLContextCookie): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSave';
@@ -2255,17 +2312,14 @@ function blContextSetGlobalAlpha(self: PBLContextCore; alpha: Double): BLResult;
 function blContextSetFillAlpha(self: PBLContextCore; alpha: Double): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetFillAlpha';
 
-function blContextGetFillStyle(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
+function blContextGetFillStyle(self: PBLContextCore; styleOut: PBLStyleCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextGetFillStyle';
 
-function blContextGetFillStyleRgba32(self: PBLContextCore; rgba32: PUInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetFillStyleRgba32';
-
-function blContextGetFillStyleRgba64(self: PBLContextCore; rgba64: PUInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetFillStyleRgba64';
-
-function blContextSetFillStyle(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
+function blContextSetFillStyle(self: PBLContextCore; style: PBLStyleCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetFillStyle';
+
+function blContextSetFillStyleRgba(self: PBLContextCore; rgba: _PBLRgba): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba';
 
 function blContextSetFillStyleRgba32(self: PBLContextCore; rgba32: UInt32): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba32';
@@ -2273,29 +2327,32 @@ function blContextSetFillStyleRgba32(self: PBLContextCore; rgba32: UInt32): BLRe
 function blContextSetFillStyleRgba64(self: PBLContextCore; rgba64: UInt64): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba64';
 
+function blContextSetFillStyleObject(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextSetFillStyleObject';
+
 function blContextSetFillRule(self: PBLContextCore; fillRule: UInt32): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetFillRule';
 
 function blContextSetStrokeAlpha(self: PBLContextCore; alpha: Double): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetStrokeAlpha';
 
-function blContextGetStrokeStyle(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
+function blContextGetStrokeStyle(self: PBLContextCore; styleout: PBLStyleCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextGetStrokeStyle';
 
-function blContextGetStrokeStyleRgba32(self: PBLContextCore; rgba32: PUInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetStrokeStyleRgba32';
-
-function blContextGetStrokeStyleRgba64(self: PBLContextCore; rgba64: PUInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetStrokeStyleRgba64';
-
-function blContextSetStrokeStyle(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
+function blContextSetStrokeStyle(self: PBLContextCore; style: PBLStyleCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetStrokeStyle';
+
+function blContextSetStrokeStyleRgba(self: PBLContextCore; rgba: _PBLRgba): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba';
 
 function blContextSetStrokeStyleRgba32(self: PBLContextCore; rgba32: UInt32): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba32';
 
 function blContextSetStrokeStyleRgba64(self: PBLContextCore; rgba64: UInt64): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba64';
+
+function blContextSetStrokeStyleObject(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleObject';
 
 function blContextSetStrokeWidth(self: PBLContextCore; width: Double): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blContextSetStrokeWidth';
@@ -2447,6 +2504,9 @@ function blFileSystemWriteFile(fileName: PUTF8Char; data: Pointer; size: NativeU
 function blFontInit(self: PBLFontCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontInit';
 
+function blFontDestroy(self: PBLFontCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontDestroy';
+
 function blFontReset(self: PBLFontCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontReset';
 
@@ -2508,6 +2568,9 @@ function blFontGetGlyphRunOutlines(self: PBLFontCore; glyphRun: _PBLGlyphRun; us
 function blFontDataInit(self: PBLFontDataCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontDataInit';
 
+function blFontDataDestroy(self: PBLFontDataCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontDataDestroy';
+
 function blFontDataReset(self: PBLFontDataCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontDataReset';
 
@@ -2538,6 +2601,9 @@ function blFontDataQueryTables(self: PBLFontDataCore; faceIndex: UInt32; dst: _P
 
 function blFontFaceInit(self: PBLFontFaceCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontFaceInit';
+
+function blFontFaceDestroy(self: PBLFontFaceCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontFaceDestroy';
 
 function blFontFaceReset(self: PBLFontFaceCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontFaceReset';
@@ -2570,6 +2636,9 @@ function blFontFaceGetUnicodeCoverage(self: PBLFontFaceCore; &out: _PBLFontUnico
 function blFontManagerInit(self: PBLFontManagerCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontManagerInit';
 
+function blFontManagerDestroy(self: PBLFontManagerCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerDestroy';
+
 function blFontManagerReset(self: PBLFontManagerCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontManagerReset';
 
@@ -2583,6 +2652,9 @@ function blFontManagerEquals(a: PBLFontManagerCore; b: PBLFontManagerCore): Bool
   external LIB_BLEND2D name _PU + 'blFontManagerEquals';
 
 
+function blFormatInfoQuery(self: _PBLFormatInfo; format: UInt32): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFormatInfoQuery';
+
 function blFormatInfoSanitize(self: _PBLFormatInfo): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFormatInfoSanitize';
 
@@ -2592,6 +2664,9 @@ function blGlyphBufferInit(self: PBLGlyphBufferCore): BLResult; cdecl;
 
 function blGlyphBufferInitMove(self: PBLGlyphBufferCore; other: PBLGlyphBufferCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blGlyphBufferInitMove';
+
+function blGlyphBufferDestroy(self: PBLGlyphBufferCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blGlyphBufferDestroy';
 
 function blGlyphBufferReset(self: PBLGlyphBufferCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blGlyphBufferReset';
@@ -2632,6 +2707,9 @@ function blGradientInit(self: PBLGradientCore): BLResult; cdecl;
 
 function blGradientInitAs(self: PBLGradientCore; &type: UInt32; values: Pointer; extendMode: UInt32; stops: _PBLGradientStop; n: NativeUInt; m: _PBLMatrix2D): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blGradientInitAs';
+
+function blGradientDestroy(self: PBLGradientCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blGradientDestroy';
 
 function blGradientReset(self: PBLGradientCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blGradientReset';
@@ -2730,6 +2808,9 @@ function blImageInitAs(self: PBLImageCore; w: Integer; h: Integer; format: UInt3
 function blImageInitAsFromData(self: PBLImageCore; w: Integer; h: Integer; format: UInt32; pixelData: Pointer; stride: IntPtr; destroyFunc: BLDestroyImplFunc; destroyData: Pointer): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageInitAsFromData';
 
+function blImageDestroy(self: PBLImageCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blImageDestroy';
+
 function blImageReset(self: PBLImageCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageReset';
 
@@ -2779,6 +2860,9 @@ function blImageWriteToData(self: PBLImageCore; dst: PBLArrayCore; codec: PBLIma
 function blImageCodecInit(self: PBLImageCodecCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageCodecInit';
 
+function blImageCodecDestroy(self: PBLImageCodecCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blImageCodecDestroy';
+
 function blImageCodecReset(self: PBLImageCodecCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageCodecReset';
 
@@ -2787,6 +2871,9 @@ function blImageCodecAssignWeak(self: PBLImageCodecCore; other: PBLImageCodecCor
 
 function blImageCodecFindByName(self: PBLImageCodecCore; name: PUTF8Char; size: NativeUInt; codecs: PBLArrayCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageCodecFindByName';
+
+function blImageCodecFindByExtension(self: PBLImageCodecCore; name: PUTF8Char; size: NativeUInt; codecs: PBLArrayCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blImageCodecFindByExtension';
 
 function blImageCodecFindByData(self: PBLImageCodecCore; data: Pointer; size: NativeUInt; codecs: PBLArrayCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageCodecFindByData';
@@ -2816,6 +2903,9 @@ function blImageCodecRemoveFromBuiltIn(codec: PBLImageCodecCore): BLResult; cdec
 function blImageDecoderInit(self: PBLImageDecoderCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageDecoderInit';
 
+function blImageDecoderDestroy(self: PBLImageDecoderCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blImageDecoderDestroy';
+
 function blImageDecoderReset(self: PBLImageDecoderCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageDecoderReset';
 
@@ -2837,6 +2927,9 @@ function blImageDecoderReadFrame(self: PBLImageDecoderCore; imageOut: PBLImageCo
 
 function blImageEncoderInit(self: PBLImageEncoderCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageEncoderInit';
+
+function blImageEncoderDestroy(self: PBLImageEncoderCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blImageEncoderDestroy';
 
 function blImageEncoderReset(self: PBLImageEncoderCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blImageEncoderReset';
@@ -2884,6 +2977,9 @@ function blMatrix2DMapPointDArray(self: _PBLMatrix2D; dst: _PBLPoint; src: _PBLP
 
 function blPathInit(self: PBLPathCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPathInit';
+
+function blPathDestroy(self: PBLPathCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blPathDestroy';
 
 function blPathReset(self: PBLPathCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPathReset';
@@ -2987,6 +3083,9 @@ function blPathAddReversedPath(self: PBLPathCore; other: PBLPathCore; range: _PB
 function blPathAddStrokedPath(self: PBLPathCore; other: PBLPathCore; range: _PBLRange; options: PBLStrokeOptionsCore; approx: _PBLApproximationOptions): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPathAddStrokedPath';
 
+function blPathRemoveRange(self: PBLPathCore; range: _PBLRange): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blPathRemoveRange';
+
 function blPathTranslate(self: PBLPathCore; range: _PBLRange; p: _PBLPoint): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPathTranslate';
 
@@ -3027,6 +3126,9 @@ function blPatternInit(self: PBLPatternCore): BLResult; cdecl;
 function blPatternInitAs(self: PBLPatternCore; image: PBLImageCore; area: _PBLRectI; extendMode: UInt32; m: _PBLMatrix2D): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPatternInitAs';
 
+function blPatternDestroy(self: PBLPatternCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blPatternDestroy';
+
 function blPatternReset(self: PBLPatternCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPatternReset';
 
@@ -3064,6 +3166,9 @@ function blPixelConverterInit(self: PBLPixelConverterCore): BLResult; cdecl;
 function blPixelConverterInitWeak(self: PBLPixelConverterCore; other: PBLPixelConverterCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPixelConverterInitWeak';
 
+function blPixelConverterDestroy(self: PBLPixelConverterCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blPixelConverterDestroy';
+
 function blPixelConverterReset(self: PBLPixelConverterCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blPixelConverterReset';
 
@@ -3092,6 +3197,9 @@ function blRandomNextDouble(self: _PBLRandom): Double; cdecl;
 
 function blRegionInit(self: PBLRegionCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blRegionInit';
+
+function blRegionDestroy(self: PBLRegionCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blRegionDestroy';
 
 function blRegionReset(self: PBLRegionCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blRegionReset';
@@ -3208,6 +3316,9 @@ function blResultFromPosixError(e: Integer): BLResult; cdecl;
 function blStringInit(self: PBLStringCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blStringInit';
 
+function blStringDestroy(self: PBLStringCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStringDestroy';
+
 function blStringReset(self: PBLStringCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blStringReset';
 
@@ -3302,6 +3413,9 @@ function blStrokeOptionsInitMove(self: PBLStrokeOptionsCore; other: PBLStrokeOpt
 function blStrokeOptionsInitWeak(self: PBLStrokeOptionsCore; other: PBLStrokeOptionsCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blStrokeOptionsInitWeak';
 
+function blStrokeOptionsDestroy(self: PBLStrokeOptionsCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStrokeOptionsDestroy';
+
 function blStrokeOptionsReset(self: PBLStrokeOptionsCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blStrokeOptionsReset';
 
@@ -3312,6 +3426,70 @@ function blStrokeOptionsAssignWeak(self: PBLStrokeOptionsCore; other: PBLStrokeO
   external LIB_BLEND2D name _PU + 'blStrokeOptionsAssignWeak';
 
 
+function blStyleInit(self: PBLStyleCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleInit';
+
+function blStyleInitMove(self, other: PBLStyleCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleInitMove';
+
+function blStyleInitWeak(self, other: PBLStyleCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleInitWeak';
+
+function blStyleInitRgba(self: PBLStyleCore; rgba: _PBLRgba): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleInitRgba';
+
+function blStyleInitRgba32(self: PBLStyleCore; rgba: UInt32): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleInitRgba32';
+
+function blStyleInitRgba64(self: PBLStyleCore; rgba: UInt64): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleInitRgba64';
+
+function blStyleInitObject(self: PBLStyleCore; &object: Pointer): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleInitObject';
+
+function blStyleDestroy(self: PBLStyleCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleDestroy';
+
+function blStyleReset(self: PBLStyleCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleReset';
+
+function blStyleAssignMove(self, other: PBLStyleCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleAssignMove';
+
+function blStyleAssignWeak(self, other: PBLStyleCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleAssignWeak';
+
+function blStyleAssignRgba(self: PBLStyleCore; rgba: _PBLRgba): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleAssignRgba';
+
+function blStyleAssignRgba32(self: PBLStyleCore; rgba: UInt32): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleAssignRgba32';
+
+function blStyleAssignRgba64(self: PBLStyleCore; rgba: UInt64): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleAssignRgba64';
+
+function blStyleAssignObject(self: PBLStyleCore; &object: Pointer): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleAssignObject';
+
+function blStyleGetType(self: PBLStyleCore): UInt32; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleGetType';
+
+function blStyleGetRgba(self: PBLStyleCore; rgbaOut: _PBLRgba): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleGetRgba';
+
+function blStyleGetRgba32(self: PBLStyleCore; rgba32Out: UInt32): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleGetRgba32';
+
+function blStyleGetRgba64(self: PBLStyleCore; rgba64Out: UInt64): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleGetRgba64';
+
+function blStyleGetObject(self: PBLStyleCore; &object: Pointer): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleGetObject';
+
+function blStyleEquals(a, b: PBLStyleCore): Boolean; cdecl;
+  external LIB_BLEND2D name _PU + 'blStyleEquals';
+
+
 function blVariantInit(self: Pointer): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blVariantInit';
 
@@ -3320,6 +3498,9 @@ function blVariantInitMove(self: Pointer; other: Pointer): BLResult; cdecl;
 
 function blVariantInitWeak(self: Pointer; other: Pointer): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blVariantInitWeak';
+
+function blVariantDestroy(self: Pointer): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blVariantDestroy';
 
 function blVariantReset(self: Pointer): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blVariantReset';

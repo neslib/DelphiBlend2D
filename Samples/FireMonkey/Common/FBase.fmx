@@ -37,6 +37,7 @@ object FormBase: TFormBase
       TabOrder = 1
       object ComboBoxRenderer: TComboBox
         Align = VertCenter
+        DropDownCount = 10
         Position.Y = 7.000000000000000000
         Size.Width = 110.000000000000000000
         Size.Height = 30.000000000000000000

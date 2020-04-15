@@ -31,32 +31,35 @@ inherited FormMain: TFormMain
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Operation:'
-      TabOrder = 0
+      TabOrder = 1
     end
     object LayoutOperation: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
       Position.X = 65.000000000000000000
-      Size.Width = 133.000000000000000000
+      Size.Width = 144.000000000000000000
       Size.Height = 44.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
+      TabOrder = 2
       object ComboBoxOperation: TComboBox
         Align = VertCenter
         DropDownCount = 15
         Items.Strings = (
           'Fill Poly'
+          'Stroke Poly (W=1)'
+          'Stroke Poly (W=3)'
+          'Stroke Poly (W=5)'
           'Fill Cubics'
-          'Stroke (W=1)'
-          'Stroke (W=2)'
-          'Stroke (W=5)')
+          'Stroke Cubics (W=1)'
+          'Stroke Cubics (W=3)'
+          'Stroke Cubics (W=5)')
         ItemIndex = 0
         Margins.Left = 4.000000000000000000
         Margins.Top = 4.000000000000000000
         Margins.Bottom = 4.000000000000000000
         Position.X = 4.000000000000000000
         Position.Y = 7.000000000000000000
-        Size.Width = 129.000000000000000000
+        Size.Width = 140.000000000000000000
         Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
@@ -70,14 +73,26 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 202.000000000000000000
+      Position.X = 252.000000000000000000
       Position.Y = 12.000000000000000000
-      Size.Width = 154.000000000000000000
+      Size.Width = 104.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
+      TabOrder = 3
       Value = 50.000000000000000000
       OnChange = TrackBarPointCountChange
+    end
+    object LabelCount: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 213.000000000000000000
+      Size.Width = 35.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Count:'
+      TabOrder = 0
     end
   end
 end

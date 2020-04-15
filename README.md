@@ -8,7 +8,7 @@ DelphiBlend2D opens op Blend2D for Delphi developers. It provides header transla
 
 > Note that Blend2D (and thus DelphiBlend2D) is still in beta. The API and framework is subject to change.
 
-DelphiBlend2D currently supports Windows (32 and 64-bit) and macOS (64-bit). Support for iOS and Android is planned for future versions.
+DelphiBlend2D currently supports Windows (32 and 64-bit). Support for macOS, iOS and Android is planned for future versions.
 
 > The Blend2D libraries that are currently used are not fully optimized yet. Although performance is already excellent, expect even better performance once Blend2D goes out of beta.
 

@@ -68,6 +68,7 @@ type
     LabelCaching: TLabel;
     LayoutCaching: TLayout;
     ComboBoxCaching: TComboBox;
+    LabelZoom: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure TrackBarScaleChange(Sender: TObject);

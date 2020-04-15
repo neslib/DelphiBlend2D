@@ -6,7 +6,8 @@ program blGettingStarted08;
 
 uses
   System.SysUtils,
-  Blend2D in '..\..\..\Blend2D.pas';
+  Blend2D in '..\..\..\Blend2D.pas',
+  Blend2D.Api in '..\..\..\Blend2D.Api.pas';
 
 procedure Run;
 const
@@ -24,7 +25,6 @@ var
   GlyphBuffer: IBLGlyphBuffer;
   P: TBLPoint;
   I: Integer;
-  Codec: IBLImageCodec;
 begin
   ReportMemoryLeaksOnShutdown := True;
   Image := TBLImage.Create(480, 480);
@@ -32,7 +32,7 @@ begin
   Context := TBLContext.Create(Image);
   Context.CompOp := TBLCompOp.SrcCopy;
   Context.FillAll;
-  Context.FillColor := BLRgba32($FFFFFFFF);
+  Context.FillColor := $FFFFFFFF;
 
   Face := TBLFontFace.Create;
   Face.InitializeFromFile('Resources/NotoSans-Regular.ttf');
@@ -58,9 +58,7 @@ begin
 
   Context.Finish;
 
-  Codec := TBLImageCodec.Create;
-  if (Codec.FindByName('BMP')) then
-    Image.WriteToFile('blGettingStarted08.bmp', Codec);
+  Image.WriteToFile('blGettingStarted08.bmp');
 end;
 
 begin

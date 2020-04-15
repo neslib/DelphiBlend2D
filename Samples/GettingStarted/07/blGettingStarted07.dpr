@@ -14,7 +14,6 @@ var
   Context: IBLContext;
   Face: IBLFontFace;
   Font: IBLFont;
-  Codec: IBLImageCodec;
 begin
   ReportMemoryLeaksOnShutdown := True;
   Image := TBLImage.Create(480, 480);
@@ -37,9 +36,7 @@ begin
 
   Context.Finish;
 
-  Codec := TBLImageCodec.Create;
-  if (Codec.FindByName('BMP')) then
-    Image.WriteToFile('blGettingStarted07.bmp', Codec);
+  Image.WriteToFile('blGettingStarted07.bmp');
 end;
 
 begin

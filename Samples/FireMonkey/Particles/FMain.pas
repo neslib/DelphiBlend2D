@@ -42,10 +42,11 @@ type
     ToolBar: TToolBar;
     TrackBarCount: TTrackBar;
     CheckBoxColors: TCheckBox;
+    LabelCount: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private const
-    MAX_AGE        = 250;
+    MAX_AGE        = 650;
     RADIUS_SCALE   = 6;
     CATEGORY_COUNT = 3;
     COLORS: array [0..CATEGORY_COUNT - 1] of TAlphaColor = (
@@ -110,7 +111,7 @@ begin
       Break;
 
     Angle := FRandom.NextDouble * Pi * 2;
-    Speed := Max(FRandom.NextDouble * 2, 0.1);
+    Speed := Max(FRandom.NextDouble, 0.1);
     SinCos(Angle, ASin, ACos);
 
     P.P.Reset;

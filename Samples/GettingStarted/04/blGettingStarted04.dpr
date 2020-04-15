@@ -13,7 +13,6 @@ var
   Image, Texture: IBLImage;
   Pattern: IBLPattern;
   Context: IBLContext;
-  Codec: IBLImageCodec;
 begin
   ReportMemoryLeaksOnShutdown := True;
   Image := TBLImage.Create(480, 480);
@@ -37,9 +36,7 @@ begin
   Context.FillRoundRect(50, 50, 380, 380, 80.5);
   Context.Finish;
 
-  Codec := TBLImageCodec.Create;
-  if (Codec.FindByName('BMP')) then
-    Image.WriteToFile('blGettingStarted04.bmp', Codec);
+  Image.WriteToFile('blGettingStarted04.bmp');
 end;
 
 begin

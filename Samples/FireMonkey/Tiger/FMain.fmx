@@ -42,12 +42,12 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 142.000000000000000000
+      Position.X = 180.000000000000000000
       Position.Y = 14.000000000000000000
-      Size.Width = 214.000000000000000000
+      Size.Width = 176.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
+      TabOrder = 3
       Value = 1.000000000000000000
       OnChange = TrackBarScaleChange
     end
@@ -61,7 +61,7 @@ inherited FormMain: TFormMain
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Caching'
-      TabOrder = 0
+      TabOrder = 1
     end
     object LayoutCaching: TLayout
       Align = Left
@@ -70,7 +70,7 @@ inherited FormMain: TFormMain
       Size.Width = 87.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
+      TabOrder = 2
       object ComboBoxCaching: TComboBox
         Align = VertCenter
         Items.Strings = (
@@ -87,6 +87,18 @@ inherited FormMain: TFormMain
         Size.PlatformDefault = False
         TabOrder = 0
       end
+    end
+    object LabelZoom: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 142.000000000000000000
+      Size.Width = 34.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Zoom:'
+      TabOrder = 0
     end
   end
 end

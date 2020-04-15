@@ -33,6 +33,7 @@ type
     LayoutOperation: TLayout;
     ComboBoxOperation: TComboBox;
     TrackBarPointCount: TTrackBar;
+    LabelCount: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure TrackBarPointCountChange(Sender: TObject);
   private
@@ -62,11 +63,14 @@ uses
   System.Math.Vectors;
 
 const
-  OP_FILL_POLY   = 0;
-  OP_FILL_CUBICS = 1;
-  OP_STROKE_W1   = 2;
-  OP_STROKE_W2   = 3;
-  OP_STROKE_W5   = 4;
+  OP_FILL_POLY        = 0;
+  OP_STROKE_POLY_W1   = 1;
+  OP_STROKE_POLY_W3   = 2;
+  OP_STROKE_POLY_W5   = 3;
+  OP_FILL_CUBICS      = 4;
+  OP_STROKE_CUBICS_W1 = 5;
+  OP_STROKE_CUBICS_W3 = 6;
+  OP_STROKE_CUBICS_W5 = 7;
 
 { TFormMain }
 
@@ -113,7 +117,7 @@ procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
 var
   Poly: TArray<TBLPoint>;
   Path: IBLPath;
-  I, N: Integer;
+  I, N, Op: Integer;
 begin
   AContext.FillColor := TAlphaColors.Black;
   AContext.FillAll;
@@ -123,41 +127,34 @@ begin
   AContext.StrokeColor := TAlphaColors.White;
 
   Poly := FPolyD;
-  case ComboBoxOperation.ItemIndex of
+  Op := ComboBoxOperation.ItemIndex;
+  case Op of
     OP_FILL_POLY:
       AContext.FillPolygon(Poly);
 
-    OP_FILL_CUBICS:
+    OP_STROKE_POLY_W1..OP_STROKE_POLY_W5:
       begin
-        N := Length(Poly);
-        Path := TBLPath.Create;
-        Path.MoveTo(Poly[0]);
-        I := 4;
-        while (I < N) do
-        begin
-          Path.CubicTo(Poly[I - 3], Poly[I - 2], Poly[I - 3]);
-          Inc(I, 3);
-        end;
-        AContext.FillPath(Path);
-      end;
-
-    OP_STROKE_W1:
-      begin
-        AContext.StrokeWidth := 1;
+        AContext.StrokeWidth := ((Op - OP_STROKE_POLY_W1) * 2) + 1;
         AContext.StrokePolygon(Poly);
       end;
+  else
+    N := Length(Poly);
+    Path := TBLPath.Create;
+    Path.MoveTo(Poly[0]);
+    I := 4;
+    while (I < N) do
+    begin
+      Path.CubicTo(Poly[I - 3], Poly[I - 2], Poly[I - 3]);
+      Inc(I, 3);
+    end;
 
-    OP_STROKE_W2:
-      begin
-        AContext.StrokeWidth := 2;
-        AContext.StrokePolygon(Poly);
-      end;
-
-    OP_STROKE_W5:
-      begin
-        AContext.StrokeWidth := 5;
-        AContext.StrokePolygon(Poly);
-      end;
+    if (Op = OP_FILL_CUBICS) then
+      AContext.FillPath(Path)
+    else
+    begin
+      AContext.StrokeWidth := ((Op - OP_STROKE_CUBICS_W1) * 2) + 1;
+      AContext.StrokePath(Path)
+    end;
   end;
 end;
 
@@ -165,7 +162,7 @@ procedure TFormMain.RenderFireMonkey(const ACanvas: TCanvas);
 var
   Poly: TPolygon;
   Path: TPathData;
-  I, N: Integer;
+  I, N, Op: Integer;
 begin
   ACanvas.Clear(TAlphaColors.Black);
 
@@ -173,45 +170,38 @@ begin
   ACanvas.Stroke.Color := TAlphaColors.White;
 
   Poly := TPolygon(FPolyF);
-  case ComboBoxOperation.ItemIndex of
+  Op := ComboBoxOperation.ItemIndex;
+  case Op of
     OP_FILL_POLY:
       ACanvas.FillPolygon(Poly, 1);
 
-    OP_FILL_CUBICS:
+    OP_STROKE_POLY_W1..OP_STROKE_POLY_W5:
       begin
-        N := Length(Poly);
-        Path := TPathData.Create;
-        try
-          Path.MoveTo(Poly[0]);
-          I := 4;
-          while (I < N) do
-          begin
-            Path.CurveTo(Poly[I - 3], Poly[I - 2], Poly[I - 3]);
-            Inc(I, 3);
-          end;
-          ACanvas.FillPath(Path, 1);
-        finally
-          Path.Free;
-        end;
-      end;
-
-    OP_STROKE_W1:
-      begin
-        ACanvas.Stroke.Thickness := 1;
+        ACanvas.Stroke.Thickness := ((Op - OP_STROKE_POLY_W1) * 2) + 1;
         ACanvas.DrawPolygon(Poly, 1);
       end;
-
-    OP_STROKE_W2:
+  else
+    N := Length(Poly);
+    Path := TPathData.Create;
+    try
+      Path.MoveTo(Poly[0]);
+      I := 4;
+      while (I < N) do
       begin
-        ACanvas.Stroke.Thickness := 2;
-        ACanvas.DrawPolygon(Poly, 1);
+        Path.CurveTo(Poly[I - 3], Poly[I - 2], Poly[I - 3]);
+        Inc(I, 3);
       end;
 
-    OP_STROKE_W5:
+      if (Op = OP_FILL_CUBICS) then
+        ACanvas.FillPath(Path, 1)
+      else
       begin
-        ACanvas.Stroke.Thickness := 5;
-        ACanvas.DrawPolygon(Poly, 1);
+        ACanvas.Stroke.Thickness := ((Op - OP_STROKE_CUBICS_W1) * 2) + 1;
+        ACanvas.DrawPath(Path, 1);
       end;
+    finally
+      Path.Free;
+    end;
   end;
 end;
 
@@ -220,7 +210,7 @@ procedure TFormMain.RenderSkia(const ACanvas: ISKCanvas);
 var
   Poly: TArray<TSKPoint>;
   Path: ISKPath;
-  I, N: Integer;
+  I, N, Op: Integer;
 begin
   ACanvas.Clear(TAlphaColors.Black);
 
@@ -228,7 +218,8 @@ begin
   FSkiaStroke.Color := TAlphaColors.White;
 
   Poly := TArray<TSKPoint>(FPolyF);
-  case ComboBoxOperation.ItemIndex of
+  Op := ComboBoxOperation.ItemIndex;
+  case Op of
     OP_FILL_POLY:
       begin
         Path := TSKPath.Create;
@@ -237,38 +228,30 @@ begin
         ACanvas.DrawPath(Path, FSkiaFill);
       end;
 
-    OP_FILL_CUBICS:
+    OP_STROKE_POLY_W1..OP_STROKE_POLY_W5:
       begin
-        N := Length(Poly);
-        Path := TSKPath.Create;
-        Path.FillType := TSKPathFillType.EvenOdd;
-        Path.MoveTo(Poly[0]);
-        I := 4;
-        while (I < N) do
-        begin
-          Path.CubicTo(Poly[I - 3], Poly[I - 2], Poly[I - 3]);
-          Inc(I, 3);
-        end;
-        ACanvas.DrawPath(Path, FSkiaFill);
-      end;
-
-    OP_STROKE_W1:
-      begin
-        FSkiaStroke.StrokeWidth := 1;
+        FSkiaStroke.StrokeWidth := ((Op - OP_STROKE_POLY_W1) * 2) + 1;
         ACanvas.DrawPoints(TSKPointMode.Polygon, Poly, FSkiaStroke);
       end;
+  else
+    N := Length(Poly);
+    Path := TSKPath.Create;
+    Path.FillType := TSKPathFillType.EvenOdd;
+    Path.MoveTo(Poly[0]);
+    I := 4;
+    while (I < N) do
+    begin
+      Path.CubicTo(Poly[I - 3], Poly[I - 2], Poly[I - 3]);
+      Inc(I, 3);
+    end;
 
-    OP_STROKE_W2:
-      begin
-        FSkiaStroke.StrokeWidth := 2;
-        ACanvas.DrawPoints(TSKPointMode.Polygon, Poly, FSkiaStroke);
-      end;
-
-    OP_STROKE_W5:
-      begin
-        FSkiaStroke.StrokeWidth := 5;
-        ACanvas.DrawPoints(TSKPointMode.Polygon, Poly, FSkiaStroke);
-      end;
+    if (Op = OP_FILL_CUBICS) then
+      ACanvas.DrawPath(Path, FSkiaFill)
+    else
+    begin
+      FSkiaStroke.StrokeWidth := ((Op - OP_STROKE_CUBICS_W1) * 2) + 1;
+      ACanvas.DrawPath(Path, FSkiaStroke);
+    end;
   end;
 end;
 {$ENDIF}

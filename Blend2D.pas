@@ -1,12 +1,15 @@
 unit Blend2D;
-{ OPP wrappers for Blend2D C API. 
+{ OPP wrappers for Blend2D C API.
 
-  Follows the C++ API where possible. The following C++ classes are not 
+  Follows the C++ API where possible. The following C++ classes are not
   converted because Delphi provides built-in alternatives for these:
   * BLArray<T>: uses TArray<T> instead
   * BLFile: uses TFileStream instead
   * BLString: uses String instead
-  * BLVariant: not needed }
+  * BLVariant: not needed
+  * BLStyle: style properties are used in another way. We may introduce a
+    TBLStyle type once Delphi has support for managed records (or use Scope
+    solution like TBLStrokeOptions). }
 
 {$SCOPEDENUMS ON}
 {$EXCESSPRECISION OFF}
@@ -419,21 +422,6 @@ type
     ReflectXRepeatY  = BL_EXTEND_MODE_REFLECT_X_REPEAT_Y);
 
 type
-  { Style type. }
-  TBLStyleType = (
-    { No style, nothing will be paint. }
-    None     = BL_STYLE_TYPE_NONE,
-
-    { Solid color style. }
-    Solid    = BL_STYLE_TYPE_SOLID,
-
-    { Pattern style. }
-    Pattern  = BL_STYLE_TYPE_PATTERN,
-
-    { Gradient style. }
-    Gradient = BL_STYLE_TYPE_GRADIENT);
-
-type
   { Text encoding. }
   TBLTextEncoding = (
     { UTF-8 encoding. }
@@ -592,34 +580,31 @@ function BLRgba64(const AValue: UInt64): TBLRgba64; overload; inline;
 function BLRgba64(const AR, AG, AB: Word; const AA: Word = $FFFF): TBLRgba64; overload; inline;
 function BLRgba64(const AValue: TBLRgba32): TBLRgba64; overload; inline;
 
-type
-  { Adds TBLRgba32 <-> TBLRgba64 conversion }
-  _TBLRgba32Helper = record helper for TBLRgba32
-  public
-    procedure Reset(const AValue: TBLRgba64); overload; inline;
-  end;
-
-function BLRgba32(const AValue: TBLRgba64): TBLRgba32; overload; inline;
-
 { ============================================================================
-   [BLRgba128]
+   [BLRgba]
   ============================================================================ }
 
 type
   { 128-bit RGBA color stored as 4 32-bit floating point values in [RGBA] order. }
-  TBLRgba128 = record
+  TBLRgba = record
   {$REGION 'Internal Declarations'}
   private
-    FHandle: BLRgba128;
+    FHandle: BLRgba;
     function GetIsOpaque: Boolean; inline;
     function GetIsTransparent: Boolean; inline;
   {$ENDREGION 'Internal Declarations'}
   public
-    class operator Equal(const ALeft, ARight: TBLRgba128): Boolean; inline; static;
-    class operator NotEqual(const ALeft, ARight: TBLRgba128): Boolean; inline; static;
+    class operator Equal(const ALeft, ARight: TBLRgba): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLRgba; const ARight: TBLRgba32): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLRgba; const ARight: TBLRgba64): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRgba): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLRgba; const ARight: TBLRgba32): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLRgba; const ARight: TBLRgba64): Boolean; inline; static;
   public
     procedure Reset; overload; inline;
     procedure Reset(const AR, AG, AB: Single; const AA: Single = 1); overload; inline;
+    procedure Reset(const ARgba: TBLRgba32); overload; inline;
+    procedure Reset(const ARgba: TBLRgba64); overload; inline;
 
     property R: Single read FHandle.r write FHandle.r;
     property G: Single read FHandle.g write FHandle.g;
@@ -629,10 +614,32 @@ type
     property IsOpaque: Boolean read GetIsOpaque;
     property IsTransparent: Boolean read GetIsTransparent;
   end;
-  PBLRgba128 = ^TBLRgba128;
+  PBLRgba = ^TBLRgba;
 
-function BLRgba128: TBLRgba128; overload; inline;
-function BLRgba128(const AR, AG, AB: Single; const AA: Single = 1): TBLRgba128; overload; inline;
+function BLRgba: TBLRgba; overload; inline;
+function BLRgba(const AR, AG, AB: Single; const AA: Single = 1): TBLRgba; overload; inline;
+function BLRgba(const ARgba: TBLRgba32): TBLRgba; overload; inline;
+function BLRgba(const ARgba: TBLRgba64): TBLRgba; overload; inline;
+
+type
+  { Adds TBLRgba32 <-> TBLRgba64 <-> TBLRgba conversion }
+  _TBLRgba32Helper = record helper for TBLRgba32
+  public
+    procedure Reset(const AValue: TBLRgba64); overload; inline;
+    procedure Reset(const AValue: TBLRgba); overload; inline;
+  end;
+
+function BLRgba32(const AValue: TBLRgba64): TBLRgba32; overload; inline;
+function BLRgba32(const AValue: TBLRgba): TBLRgba32; overload; inline;
+
+type
+  { Adds TBLRgba64 <-> TBLRgba conversion }
+  _TBLRgba64Helper = record helper for TBLRgba64
+  public
+    procedure Reset(const AValue: TBLRgba); overload; inline;
+  end;
+
+function BLRgba64(const AValue: TBLRgba): TBLRgba32; overload; inline;
 
 {$ENDREGION 'Color'}
 
@@ -759,7 +766,10 @@ type
     Path           = BL_GEOMETRY_TYPE_PATH,
 
     { IBLRegion. }
-    Region         = BL_GEOMETRY_TYPE_REGION);
+    Region         = BL_GEOMETRY_TYPE_REGION,
+
+    { The last simple type. }
+    SimpleLast     = TBLGeometryType.Triangle);
 
 type
   { Fill rule. }
@@ -1878,6 +1888,7 @@ type
   {$REGION 'Internal Declarations'}
   private
     FHandle: BLGradientCore;
+    FIsReference: Boolean;
   protected
     { IBLGradient }
     function GetIsNone: Boolean;
@@ -1996,6 +2007,9 @@ type
     procedure PostRotate(const AAngle: Double; const AP: TBLPoint); overload;
     procedure PostRotate(const AAngle: Double; const AP: TBLPointI); overload;
     procedure PostTransform(const AMatrix: TBLMatrix2D);
+  private
+    constructor Create(const AHandle: BLGradientCore;
+      const AIsReference: Boolean); overload;
   {$ENDREGION 'Internal Declarations'}
   public
     constructor Create; overload;
@@ -2872,6 +2886,9 @@ type
       const AStrokeOptions: TBLStrokeOptions;
       const AApproximationOptions: TBLApproximationOptions); overload;
 
+    { Manipulation }
+    procedure RemoveRange(const ARange: TBLRange);
+
     { Translates the whole path by AP. }
     procedure Translate(const AP: TBLPoint); overload;
 
@@ -3197,6 +3214,8 @@ type
       const AStrokeOptions: TBLStrokeOptions;
       const AApproximationOptions: TBLApproximationOptions); overload;
 
+    procedure RemoveRange(const ARange: TBLRange);
+
     procedure Translate(const AP: TBLPoint); overload;
     procedure Translate(const ARange: TBLRange; const AP: TBLPoint); overload;
     procedure Transform(const AMatrix: TBLMatrix2D); overload;
@@ -3335,6 +3354,23 @@ type
       AAShift: Byte); overload; inline;
     procedure SetSizes(const ARSize, AGSize, ABSize, AASize: Byte); inline;
     procedure SetShifts(const ARShift, AGShift, ABShift, AAShift: Byte); inline;
+
+    { Query Blend2D AFormat and copy it to this format info.
+
+      Raises TBLResultCode.InvalidValue if the format is invalid (and resets
+      this record in that case).
+
+      Note: TBLFormat.None is considered an invalid format, thus if it's passed
+      to Query, a TBLResultCode.InvalidValue error is raised. }
+    procedure Query(const AFormat: TBLFormat);
+
+    { Sanitize this record.
+
+      Sanitizer verifies whether the format is valid and updates the format
+      information about flags to values that Blend2D expects. For example
+      format flags are properly examined and simplified if possible, byte-swap
+      is implicitly performed for formats where a single component matches one
+      byte, etc... }
     procedure Sanitize;
 
     property Depth: Integer read FHandle.depth write FHandle.depth;
@@ -3600,7 +3636,8 @@ type
     procedure ReadFromData(const AView: TBLArrayView<Byte>;
       const ACodecs: TArray<IBLImageCodec>); overload;
 
-    procedure WriteToFile(const AFilename: String; const ACodec: IBLImageCodec);
+    procedure WriteToFile(const AFilename: String); overload;
+    procedure WriteToFile(const AFilename: String; const ACodec: IBLImageCodec); overload;
     function WriteToData(const ACodec: IBLImageCodec): TBytes;
 
     { Tests whether the image is a built-in nil instance. }
@@ -3636,6 +3673,7 @@ type
     PDestroyData = ^TDestroyData;
   private
     FHandle: BLImageCore;
+    FIsReference: Boolean;
   private
     class procedure DoDestroy(impl, destroyData: Pointer); cdecl; static;
   protected
@@ -3681,8 +3719,11 @@ type
     procedure ReadFromData(const AView: TBLArrayView<Byte>;
       const ACodecs: TArray<IBLImageCodec>); overload;
 
-    procedure WriteToFile(const AFilename: String; const ACodec: IBLImageCodec);
+    procedure WriteToFile(const AFilename: String); overload;
+    procedure WriteToFile(const AFilename: String; const ACodec: IBLImageCodec); overload;
     function WriteToData(const ACodec: IBLImageCodec): TBytes;
+  private
+    constructor Create(const AHandle: BLImageCore; const AIsReference: Boolean); overload;
   {$ENDREGION 'Internal Declarations'}
   public
     constructor Create; overload;
@@ -3903,6 +3944,9 @@ type
     function FindByName(const AName: String): Boolean; overload;
     function FindByName(const AName: String; const ACodecs: TArray<IBLImageCodec>): Boolean; overload;
 
+    function FindByExtension(const AExt: String): Boolean; overload;
+    function FindByExtension(const AExt: String; const ACodecs: TArray<IBLImageCodec>): Boolean; overload;
+
     function FindByData(const AData: Pointer; const ASize: Integer): Boolean; overload;
     function FindByData(const AData: Pointer; const ASize: Integer;
       const ACodecs: TArray<IBLImageCodec>): Boolean; overload;
@@ -3945,7 +3989,7 @@ type
   {$REGION 'Internal Declarations'}
   private
     FHandle: BLImageCodecCore;
-    FOwnsHandle: Boolean;
+    FIsReference: Boolean;
   private
     class function GetBuiltInCodecs: TArray<IBLImageCodec>; static;
   protected
@@ -3965,6 +4009,9 @@ type
     function FindByName(const AName: String): Boolean; overload;
     function FindByName(const AName: String; const ACodecs: TArray<IBLImageCodec>): Boolean; overload;
 
+    function FindByExtension(const AExt: String): Boolean; overload;
+    function FindByExtension(const AExt: String; const ACodecs: TArray<IBLImageCodec>): Boolean; overload;
+
     function FindByData(const AData: Pointer; const ASize: Integer): Boolean; overload;
     function FindByData(const AData: Pointer; const ASize: Integer;
       const ACodecs: TArray<IBLImageCodec>): Boolean; overload;
@@ -3977,7 +4024,7 @@ type
     function InspectData(const ABuffer: TBLArrayView<Byte>): Cardinal; overload;
     function InspectData(const ABuffer: Pointer; const ASize: Integer): Cardinal; overload;
   protected
-    constructor Create(const AHandle: BLImageCodecCore; const AOwnsHandle: Boolean); overload;
+    constructor Create(const AHandle: BLImageCodecCore; const AIsReference: Boolean); overload;
   {$ENDREGION 'Internal Declarations'}
   public
     constructor Create; overload;
@@ -4087,6 +4134,7 @@ type
   private
     FHandle: BLPatternCore;
     FImage: IBLImage;
+    FIsReference: Boolean;
   protected
     { IBLPattern }
     function GetIsNone: Boolean;
@@ -4149,6 +4197,9 @@ type
     procedure PostRotate(const AAngle: Double; const AP: TBLPoint); overload;
     procedure PostRotate(const AAngle: Double; const AP: TBLPointI); overload;
     procedure PostTransform(const AMatrix: TBLMatrix2D);
+  private
+    constructor Create(const AHandle: BLPatternCore;
+      const AIsReference: Boolean); overload;
   {$ENDREGION 'Internal Declarations'}
   public
     constructor Create; overload;
@@ -4188,7 +4239,7 @@ type
     { Each glyph has a TBLPoint offset in user-space units. }
     UserUnits     = BL_GLYPH_PLACEMENT_TYPE_USER_UNITS,
 
-    { Each glyph has a BLPoint offset in absolute units. }
+    { Each glyph has a TBLPoint offset in absolute units. }
     AbsoluteUnits = BL_GLYPH_PLACEMENT_TYPE_ABSOLUTE_UNITS);
 
 type
@@ -5369,7 +5420,7 @@ type
 
     Glyph buffer provides two separate buffers called 'primary' and 'secondary'
     that serve different purposes during processing. Primary buffer always holds
-    actualy text/glyph array, and secondary buffer is either used as a scratch
+    actual text/glyph array, and secondary buffer is either used as a scratch
     buffer during glyph substitution or to hold glyph positions after the
     processing is complete and glyph positions were calculated. }
   IBLGlyphBuffer = interface
@@ -5412,7 +5463,7 @@ type
     procedure SetText(const AText: Pointer; const ALength: Integer;
       const AEncoding: TBLTextEncoding); overload;
 
-    { Assigns glyph content of this OBLGlyphBuffer from the given AGlyphData. }
+    { Assigns glyph content of this IBLGlyphBuffer from the given AGlyphData. }
     procedure SetGlyphs(const AGlyphData: TArray<Cardinal>); overload;
     procedure SetGlyphs(const AGlyphData: PCardinal; const ALength: Integer); overload;
 
@@ -5620,7 +5671,7 @@ type
     PDestroyData = ^TDestroyData;
   private
     FHandle: BLFontDataCore;
-    FOwnsHandle: Boolean;
+    FIsReference: Boolean;
   private
     class procedure DoDestroy(impl, destroyData: Pointer); cdecl; static;
   protected
@@ -5649,7 +5700,7 @@ type
       out ATables: TArray<TBLFontTable>): Integer;
   private
     constructor Create(const AHandle: BLFontDataCore;
-      const AOwnsHandle: Boolean); overload;
+      const AIsReference: Boolean); overload;
   {$ENDREGION 'Internal Declarations'}
   public
     constructor Create; overload;
@@ -6335,6 +6386,30 @@ type
 
 {$ENDREGION 'Pixel Converter'}
 
+
+{$REGION 'Style'}
+
+{ ============================================================================
+   [BLStyle - Enums]
+  ============================================================================ }
+
+type
+  { Style type. }
+  TBLStyleType = (
+    { No style, nothing will be paint. }
+    None     = BL_STYLE_TYPE_NONE,
+
+    { Solid color style. }
+    Solid    = BL_STYLE_TYPE_SOLID,
+
+    { Pattern style. }
+    Pattern  = BL_STYLE_TYPE_PATTERN,
+
+    { Gradient style. }
+    Gradient = BL_STYLE_TYPE_GRADIENT);
+
+{$ENDREGION 'Style'}
+
 {$REGION 'Context'}
 
 { ============================================================================
@@ -6383,7 +6458,7 @@ type
   TBLContextFlushFlag = (
     _Dummy = 0,
 
-    { Wait for completion (will block). }
+    { Flush the command queue and wait for its completion (will block). }
     Sync = 31);
   TBLContextFlushFlags = set of TBLContextFlushFlag;
 
@@ -6394,19 +6469,32 @@ type
       rendering, the rendering context can sometimes allocate less threads
       than specified if the built-in thread-pool doesn't have enough threads
       available. This flag will force the thread-pool to override the thread
+      limit temporarily to allocate at least one thread.
+
+      Note: This flag is ignored if TBLContextCreateInfo.ThreadCount <= 1.
+      If it's specified with ForceAllThreads then the latter has a precedence. }
+    ForceOneThread      = 0,
+
+    { When creating an asynchronous rendering context that uses threads for
+      rendering, the rendering context can sometimes allocate less threads
+      than specified if the built-in thread-pool doesn't have enough threads
+      available. This flag will force the thread-pool to override the thread
       limit temporarily to fulfill the thread count requirement.
 
-      Note: This flag is ignored if TBLContextCreateInfo.ThreadCount = 0. }
-    ForceThreads = 0,
+      Note: This flag is ignored if TBLContextCreateInfo.ThreadCount <= 1. }
+    ForceAllThreads     = 1,
 
-    { Fallback to synchronous rendering in case that acquiring threads from
-      thread-pool failed. This flag only makes sense when asynchronous mode
-      was specified by having non-zero thread count. In that case if the
-      rendering context fails to acquire at least one thread it would fallback
-      to synchronous mode instead.
+    { Fallbacks to a synchronous rendering in case that acquiring threads
+      from the thread-pool failed. This flag only makes sense when the
+      asynchronous mode was specified by having `threadCount` greater than 0.
+      If the rendering context fails to acquire at least one thread it would
+      fallback to synchronous mode instead of staying asynchronous with no
+      worker threads, which is possible.
 
-      Note: This flag is ignored if TBLContextCreateInfo.ThreadCount = 0. }
-    FallbackToSync = 1,
+      Note: If this flag is specified with TBLContextCreateInfo.ThreadCount = 1
+      it means to immedialy fallback to synchronous rendering. It's only
+      practical to use this flag with 2 threads and higher. }
+    FallbackToSync      = 3,
 
     { If this flag is specified and asynchronous rendering is enabled then
       the context would create its own isolated thread-pool, which is useful
@@ -6415,7 +6503,7 @@ type
       Do not use this flag in production as rendering contexts with isolated
       thread-pool have to create and destroy all threads they use. This flag
       is only useful for testing, debugging, and isolated benchmarking. }
-    IsolatedThreads = 4,
+    IsolatedThreadPool  = 24,
 
     { If this flag is specified and JIT pipeline generation enabled then the
       rendering context would create its own isolated JIT runtime. which is
@@ -6427,11 +6515,61 @@ type
       rendering context is destroyed the JIT runtime is destroyed with it with
       all compiled pipelines. This flag is only useful for testing, debugging,
       and isolated benchmarking. }
-    IsolatedJit = 5,
+    IsolatedJit         = 25,
 
     { Override CPU features when creating isolated context. }
-    OverrideCpuFeatures = 6);
+    OverrideCpuFeatures = 26);
   TBLContextCreateFlags = set of TBLContextCreateFlag;
+
+type
+  { Specifies a rendering context property that can be specific to the rendering
+    context implementation and that doesn't have its own C and C++ API.
+    Different rendering context implementations may expose various properties
+    that users can query to get more details about the rendering context itself,
+    rendering details (like optimizations or possibly limitations), memory
+    details, and other information that was collected during the rendering.
+
+    Properties are never part of the rendering context state - they are
+    stateless and are not subject to Save and Restore. Many properties are
+    purely informative, but some not, e.g. AccumulatedErrorFlags. }
+  TBLContextProperty = (
+    { Number of threads that the rendering context uses for rendering. }
+    ThreadCount           = BL_CONTEXT_PROPERTY_THREAD_COUNT,
+
+    { Accumulated errors collected during the lifetime of the rendering
+      context. }
+    AccumulatedErrorFlags = BL_CONTEXT_PROPERTY_ACCUMULATED_ERROR_FLAGS);
+
+type
+  { Error flags that are accumulated during the rendering context lifetime and
+    that can be queried through TBLContext.QueryAccumulatedErrorFlags. The
+    reason why these flags exist is that errors can happen during asynchronous
+    rendering, and there is no way the user can catch these errors. }
+  TBLContextErrorFlag = (
+    { The rendering context returned or encountered TBLResultCode.InvalidValue,
+      which is mostly related to function argument handling. It's very likely
+      some argument was wrong when calling TBLContext API. }
+    InvalidValue    = 0,
+
+    { Invalid state describes something wrong, for example pipeline compilation
+      problem. }
+    InvalidState    = 1,
+
+    { The rendering context has encountered invalid geometry. }
+    InvalidGeometry = 2,
+
+    { The rendering context has encountered invalid glyph. }
+    InvalidGlyph    = 3,
+
+    { The rendering context has encountered invalid or uninitialized font. }
+    InvalidFont     = 4,
+
+    { Out of memory condition. }
+    OutOfMemory     = 30,
+
+    { Unknown error, which we don't have flag for. }
+    UnknownError    = 31);
+  TBLContextErrorFlags = set of TBLContextErrorFlag;
 
 type
   { Clip mode. }
@@ -6575,18 +6713,27 @@ type
     { Create flags, see TBLContextCreateFlags. }
     property Flags: TBLContextCreateFlags read GetFlags write SetFlags;
 
-    { Number of threads to acquire from thread-pool and use for rendering.
+    { Number of worker threads to use for asynchronous rendering, if non-zero.
 
       If ThreadCount is zero it means to initialize the context for synchronous
       rendering. This means that every operation will take effect immediately.
-      If the number is 1 or greater it means to initialize the context for
-      asynchronous rendering - in this case ThreadCount specifies how many
-      threads can execute in parallel. }
-    property ThreadCount: Cardinal read FHandle.threadCount write FHandle.threadCount;
+      If ThreadCount is 1 it means that the rendering will be asynchronous, but
+      no thread would be acquired from a thread-pool, because the user thread
+      will be used as a worker. And finally, if ThreadCount is greater than 1
+      then total of ThreadCount - 1 threads will be acquired from thread-pool
+      and used as additional workers. }
+    property ThreadCount: Integer read FHandle.threadCount write FHandle.threadCount;
 
     { CPU features to use in isolated JIT runtime (if supported), only used
       when Flags contains TBLContextCreateFlag.OverrideCpuFeatures. }
     property CpuFeatures: Cardinal read FHandle.cpuFeatures write FHandle.cpuFeatures;
+
+    { Maximum number of commands to be queued.
+
+      If this parameter is zero the queue size will be determined automatically.
+
+      TODO: To be documented, has no effect at the moment. }
+    property CommandQueueLimit: Integer read FHandle.commandQueueLimit write FHandle.commandQueueLimit;
   end;
   PBLContextCreateInfo = ^TBLContextCreateInfo;
 
@@ -6601,7 +6748,7 @@ type
     cookies with a security of any kind, it's just an arbitrary data that must
     match to proceed with a certain operation.
 
-    Cookies can be used with IBLContext.Save and IBLContextRestore functions. }
+    Cookies can be used with IBLContext.Save and IBLContextRestore operations. }
   TBLContextCookie = record
   {$REGION 'Internal Declarations'}
   private
@@ -6668,11 +6815,21 @@ type
     function GetSavedStateCount: Integer; inline;
     function GetStrokeOptions: TBLStrokeOptions; inline;
     function GetStrokeStyle: TBLStyleType; overload; inline;
+    function GetTargetImage: IBLImage; inline;
+    function GetTargetSize: TBLSize; inline;
     function GetUserMatrix: TBLMatrix2D; inline;
     function GetFillAlpha: Double; inline;
     function GetStrokeAlpha: Double; inline;
   {$ENDREGION 'Internal Declarations'}
   public
+    { Target image or image object with nil impl in case that the rendering
+      context doesn't render to an image. }
+    property TargetImage: IBLImage read GetTargetImage;
+
+    { Current size of the target in abstract units, pixels if rendering to
+      IBLImage. }
+    property TargetSize: TBLSize read GetTargetSize;
+
     { Current context hints. }
     property Hints: TBLContextHints read GetHints;
 
@@ -6726,6 +6883,7 @@ type
     function GetTargetSize: TBLSize;
     function GetTargetWidth: Double;
     function GetTargetHeight: Double;
+    function GetTargetImage: IBLImage;
     function GetContextType: TBLContextType;
     function GetIsNone: Boolean;
     function GetSavedStateCount: Integer;
@@ -6759,10 +6917,14 @@ type
     procedure SetFillColor(const AValue: TBLRgba32);
     function GetFillColor64: TBLRgba64;
     procedure SetFillColor64(const AValue: TBLRgba64);
+    function GetFillColorF: TBLRgba;
+    procedure SetFillColorF(const AValue: TBLRgba);
     function GetStrokeColor: TBLRgba32;
     procedure SetStrokeColor(const AValue: TBLRgba32);
     function GetStrokeColor64: TBLRgba64;
     procedure SetStrokeColor64(const AValue: TBLRgba64);
+    function GetStrokeColorF: TBLRgba;
+    procedure SetStrokeColorF(const AValue: TBLRgba);
     function GetFillPattern: IBLPattern;
     procedure SetFillPattern(const AValue: IBLPattern);
     function GetStrokePattern: IBLPattern;
@@ -6810,7 +6972,7 @@ type
       during rendering. }
     procedure Start(const AImage: IBLImage); overload;
     procedure Start(const AImage: IBLImage;
-      const AOptions: TBLContextCreateInfo); overload;
+      const ACreateInfo: TBLContextCreateInfo); overload;
 
     { Waits for completion of all render commands and detaches the rendering
       context from the rendering target. After Finish completes the rendering
@@ -6820,6 +6982,20 @@ type
 
     { Flushes the context }
     procedure Flush(const AFlags: TBLContextFlushFlags);
+
+    { Queries the number of threads that the rendering context uses.
+
+      If the returned value is zero it means that the rendering is synchronous,
+      otherwise it describes the number of threads used for asynchronous
+      rendering which include the user thread. For example if the returned value
+      is 2 it means that the rendering context uses the user thread and one more
+      worker. }
+    function QueryThreadCount: Integer;
+
+    { Queries accumulated errors as flags.
+
+      Errors may accumulate during the lifetime of the rendering context. }
+    function QueryAccumulatedErrorFlags: TBLContextErrorFlags;
 
     { Saves the current rendering context state.
 
@@ -6902,11 +7078,13 @@ type
       FillGradient properties. }
     procedure GetFillStyle(out ARgba: TBLRgba32); overload;
     procedure GetFillStyle(out ARgba: TBLRgba64); overload;
+    procedure GetFillStyle(out ARgba: TBLRgba); overload;
     procedure GetFillStyle(out APattern: IBLPattern); overload;
     procedure GetFillStyle(out AGradient: IBLGradient); overload;
 
     procedure SetFillStyle(const ARgba: TBLRgba32); overload;
     procedure SetFillStyle(const ARgba: TBLRgba64); overload;
+    procedure SetFillStyle(const ARgba: TBLRgba); overload;
     procedure SetFillStyle(const APattern: IBLPattern); overload;
     procedure SetFillStyle(const AGradient: IBLGradient); overload;
     procedure SetFillStyle(const AImage: IBLImage); overload;
@@ -6915,11 +7093,13 @@ type
       and StrokeGradient properties. }
     procedure GetStrokeStyle(out ARgba: TBLRgba32); overload;
     procedure GetStrokeStyle(out ARgba: TBLRgba64); overload;
+    procedure GetStrokeStyle(out ARgba: TBLRgba); overload;
     procedure GetStrokeStyle(out APattern: IBLPattern); overload;
     procedure GetStrokeStyle(out AGradient: IBLGradient); overload;
 
     procedure SetStrokeStyle(const ARgba: TBLRgba32); overload;
     procedure SetStrokeStyle(const ARgba: TBLRgba64); overload;
+    procedure SetStrokeStyle(const ARgba: TBLRgba); overload;
     procedure SetStrokeStyle(const APattern: IBLPattern); overload;
     procedure SetStrokeStyle(const AGradient: IBLGradient); overload;
     procedure SetStrokeStyle(const AImage: IBLImage); overload;
@@ -7173,6 +7353,18 @@ type
     { Target width in abstract units (pixels in case of IBLImage) }
     property TargetHeight: Double read GetTargetHeight;
 
+    { Returns the target image or nil if there is no target image.
+
+      Note: The rendering context doesn't own the image, but it increases its
+      writer count, which means that the image will not be destroyed even when
+      user destroys it during the rendering (in such case it will be destroyed
+      after the rendering ends when the writer count goes to zero). This means
+      that the rendering context must hold the image and not the pointer to
+      the IBLImage passed to either the constructor or Start function. So the
+      returned pointer is not the same as the pointer passed to Start, but it
+      points to the same impl. }
+    property TargetImage: IBLImage read GetTargetImage;
+
     { The type of this context }
     property ContextType: TBLContextType read GetContextType;
 
@@ -7241,10 +7433,12 @@ type
     { Fill color }
     property FillColor: TBLRgba32 read GetFillColor write SetFillColor;
     property FillColor64: TBLRgba64 read GetFillColor64 write SetFillColor64;
+    property FillColorF: TBLRgba read GetFillColorF write SetFillColorF;
 
     { Stroke color }
     property StrokeColor: TBLRgba32 read GetStrokeColor write SetStrokeColor;
     property StrokeColor64: TBLRgba64 read GetStrokeColor64 write SetStrokeColor64;
+    property StrokeColorF: TBLRgba read GetStrokeColorF write SetStrokeColorF;
 
     { Fill Pattern }
     property FillPattern: IBLPattern read GetFillPattern write SetFillPattern;
@@ -7303,6 +7497,7 @@ type
     function GetTargetSize: TBLSize;
     function GetTargetWidth: Double;
     function GetTargetHeight: Double;
+    function GetTargetImage: IBLImage;
     function GetContextType: TBLContextType;
     function GetIsNone: Boolean;
     function GetSavedStateCount: Integer;
@@ -7336,10 +7531,14 @@ type
     procedure SetFillColor(const AValue: TBLRgba32);
     function GetFillColor64: TBLRgba64;
     procedure SetFillColor64(const AValue: TBLRgba64);
+    function GetFillColorF: TBLRgba;
+    procedure SetFillColorF(const AValue: TBLRgba);
     function GetStrokeColor: TBLRgba32;
     procedure SetStrokeColor(const AValue: TBLRgba32);
     function GetStrokeColor64: TBLRgba64;
     procedure SetStrokeColor64(const AValue: TBLRgba64);
+    function GetStrokeColorF: TBLRgba;
+    procedure SetStrokeColorF(const AValue: TBLRgba);
     function GetFillPattern: IBLPattern;
     procedure SetFillPattern(const AValue: IBLPattern);
     function GetStrokePattern: IBLPattern;
@@ -7375,9 +7574,12 @@ type
 
     procedure Start(const AImage: IBLImage); overload;
     procedure Start(const AImage: IBLImage;
-      const AOptions: TBLContextCreateInfo); overload;
+      const ACreateInfo: TBLContextCreateInfo); overload;
     procedure Finish;
     procedure Flush(const AFlags: TBLContextFlushFlags);
+
+    function QueryThreadCount: Integer;
+    function QueryAccumulatedErrorFlags: TBLContextErrorFlags;
 
     procedure Save; overload;
     procedure Save(out ACookie: TBLContextCookie); overload;
@@ -7420,22 +7622,26 @@ type
 
     procedure GetFillStyle(out ARgba: TBLRgba32); overload;
     procedure GetFillStyle(out ARgba: TBLRgba64); overload;
+    procedure GetFillStyle(out ARgba: TBLRgba); overload;
     procedure GetFillStyle(out APattern: IBLPattern); overload;
     procedure GetFillStyle(out AGradient: IBLGradient); overload;
 
     procedure SetFillStyle(const ARgba: TBLRgba32); overload;
     procedure SetFillStyle(const ARgba: TBLRgba64); overload;
+    procedure SetFillStyle(const ARgba: TBLRgba); overload;
     procedure SetFillStyle(const APattern: IBLPattern); overload;
     procedure SetFillStyle(const AGradient: IBLGradient); overload;
     procedure SetFillStyle(const AImage: IBLImage); overload;
 
     procedure GetStrokeStyle(out ARgba: TBLRgba32); overload;
     procedure GetStrokeStyle(out ARgba: TBLRgba64); overload;
+    procedure GetStrokeStyle(out ARgba: TBLRgba); overload;
     procedure GetStrokeStyle(out APattern: IBLPattern); overload;
     procedure GetStrokeStyle(out AGradient: IBLGradient); overload;
 
     procedure SetStrokeStyle(const ARgba: TBLRgba32); overload;
     procedure SetStrokeStyle(const ARgba: TBLRgba64); overload;
+    procedure SetStrokeStyle(const ARgba: TBLRgba); overload;
     procedure SetStrokeStyle(const APattern: IBLPattern); overload;
     procedure SetStrokeStyle(const AGradient: IBLGradient); overload;
     procedure SetStrokeStyle(const AImage: IBLImage); overload;
@@ -7652,7 +7858,7 @@ type
       This overload accepts create options that can be used to change the
       implementation of the rendering context. }
     constructor Create(const ATarget: IBLImage;
-      const AOptions: TBLContextCreateInfo); overload;
+      const ACreateInfo: TBLContextCreateInfo); overload;
 
     destructor Destroy; override;
 
@@ -7821,7 +8027,7 @@ type
     { Number of threads of the host CPU/CPUs. }
     property ThreadCount: Integer read FHandle.threadCount;
 
-    { Minimum stack size of threads. }
+    { Minimum stack size of system threads (operating system specific). }
     property MinThreadStackSize: Integer read FHandle.minThreadStackSize;
 
     { Minimum stack size of worker threads used by Blend2D. }
@@ -7918,7 +8124,7 @@ type
   TBLArray = class(TInterfacedObject, IBLArray)
   private
     FHandle: BLArrayCore;
-    FOwnsHandle: Boolean;
+    FIsReference: Boolean;
   protected
     { IBLArray }
     function Handle: PBLArrayCore;
@@ -7944,13 +8150,12 @@ constructor TBLArray.Create(const AType: BLImplType);
 begin
   inherited Create;
   blArrayInit(@FHandle, AType);
-  FOwnsHandle := True;
 end;
 
 destructor TBLArray.Destroy;
 begin
-  if (FOwnsHandle) then
-    blArrayReset(@FHandle);
+  if (not FIsReference) then
+    blArrayDestroy(@FHandle);
   inherited;
 end;
 
@@ -7961,7 +8166,7 @@ end;
 
 procedure TBLArray.RevokeOwnership;
 begin
-  FOwnsHandle := False;
+  FIsReference := True;
 end;
 
 { TBLUtils }
@@ -8196,6 +8401,7 @@ const
     'Invalid SOF marker (JPEG).',
     'Multiple SOF markers (JPEG).',
     'Unsupported SOF marker (JPEG).',
+    'Font doesn''t have any data as it''s not initialized.',
     'Font has no character to glyph mapping data.',
     'Font has missing an important table.',
     'Font feature is not available.',
@@ -8333,6 +8539,11 @@ begin
   Result.Reset(AValue);
 end;
 
+function BLRgba32(const AValue: TBLRgba): TBLRgba32; overload; inline;
+begin
+  Result.Reset(AValue);
+end;
+
 class operator TBLRgba32.Implicit(const AValue: Cardinal): TBLRgba32;
 begin
   Result.FHandle.value := AValue;
@@ -8400,6 +8611,11 @@ begin
   Result.Reset(AValue);
 end;
 
+function BLRgba64(const AValue: TBLRgba): TBLRgba32; overload; inline;
+begin
+  Result.Reset(AValue);
+end;
+
 class operator TBLRgba64.Equal(const ALeft, ARight: TBLRgba64): Boolean;
 begin
   Result := (ALeft.FHandle.value = ARight.FHandle.value);
@@ -8454,19 +8670,29 @@ begin
   FHandle.value := 0;
 end;
 
-{ TBLRgba128 }
+{ TBLRgba }
 
-function BLRgba128: TBLRgba128; overload; inline;
+function BLRgba: TBLRgba; overload; inline;
 begin
   Result.Reset;
 end;
 
-function BLRgba128(const AR, AG, AB: Single; const AA: Single = 1): TBLRgba128; overload; inline;
+function BLRgba(const AR, AG, AB: Single; const AA: Single = 1): TBLRgba; overload; inline;
 begin
   Result.Reset(AR, AG, AB, AA);
 end;
 
-class operator TBLRgba128.Equal(const ALeft, ARight: TBLRgba128): Boolean;
+function BLRgba(const ARgba: TBLRgba32): TBLRgba; overload; inline;
+begin
+  Result.Reset(ARgba);
+end;
+
+function BLRgba(const ARgba: TBLRgba64): TBLRgba; overload; inline;
+begin
+  Result.Reset(ARgba);
+end;
+
+class operator TBLRgba.Equal(const ALeft, ARight: TBLRgba): Boolean;
 begin
   Result := (ALeft.FHandle.r = ARight.FHandle.r)
         and (ALeft.FHandle.g = ARight.FHandle.g)
@@ -8474,22 +8700,66 @@ begin
         and (ALeft.FHandle.a = ARight.FHandle.a);
 end;
 
-function TBLRgba128.GetIsOpaque: Boolean;
+class operator TBLRgba.Equal(const ALeft: TBLRgba;
+  const ARight: TBLRgba32): Boolean;
+begin
+  Result := (ALeft = BLRgba(ARight));
+end;
+
+class operator TBLRgba.Equal(const ALeft: TBLRgba;
+  const ARight: TBLRgba64): Boolean;
+begin
+  Result := (ALeft = BLRgba(ARight));
+end;
+
+function TBLRgba.GetIsOpaque: Boolean;
 begin
   Result := (FHandle.a >= 1);
 end;
 
-function TBLRgba128.GetIsTransparent: Boolean;
+function TBLRgba.GetIsTransparent: Boolean;
 begin
   Result := (FHandle.a = 0);
 end;
 
-class operator TBLRgba128.NotEqual(const ALeft, ARight: TBLRgba128): Boolean;
+class operator TBLRgba.NotEqual(const ALeft: TBLRgba;
+  const ARight: TBLRgba32): Boolean;
+begin
+  Result := (ALeft <> BLRgba(ARight));
+end;
+
+class operator TBLRgba.NotEqual(const ALeft: TBLRgba;
+  const ARight: TBLRgba64): Boolean;
+begin
+  Result := (ALeft <> BLRgba(ARight));
+end;
+
+class operator TBLRgba.NotEqual(const ALeft, ARight: TBLRgba): Boolean;
 begin
   Result := not (ALeft = ARight);
 end;
 
-procedure TBLRgba128.Reset;
+procedure TBLRgba.Reset(const ARgba: TBLRgba64);
+const
+  FACTOR = 1.0 / 65535.0;
+begin
+  FHandle.r := ARgba.R * FACTOR;
+  FHandle.g := ARgba.G * FACTOR;
+  FHandle.b := ARgba.B * FACTOR;
+  FHandle.a := ARgba.A * FACTOR;
+end;
+
+procedure TBLRgba.Reset(const ARgba: TBLRgba32);
+const
+  FACTOR = 1.0 / 255.0;
+begin
+  FHandle.r := ARgba.R * FACTOR;
+  FHandle.g := ARgba.G * FACTOR;
+  FHandle.b := ARgba.B * FACTOR;
+  FHandle.a := ARgba.A * FACTOR;
+end;
+
+procedure TBLRgba.Reset;
 begin
   FHandle.r := 0;
   FHandle.g := 0;
@@ -8497,7 +8767,7 @@ begin
   FHandle.a := 0;
 end;
 
-procedure TBLRgba128.Reset(const AR, AG, AB, AA: Single);
+procedure TBLRgba.Reset(const AR, AG, AB, AA: Single);
 begin
   FHandle.r := AR;
   FHandle.g := AG;
@@ -8517,6 +8787,24 @@ begin
                    ((Lo and $FF000000) shr 16) or
                    ((Hi and $0000FF00) shl  8) or
                    ((Lo and $0000FF00) shr  8);
+end;
+
+procedure _TBLRgba32Helper.Reset(const AValue: TBLRgba);
+begin
+  FHandle.a := EnsureRange(Trunc(AValue.A * 255.0), 0, 255);
+  FHandle.r := EnsureRange(Trunc(AValue.R * 255.0), 0, 255);
+  FHandle.g := EnsureRange(Trunc(AValue.G * 255.0), 0, 255);
+  FHandle.b := EnsureRange(Trunc(AValue.B * 255.0), 0, 255);
+end;
+
+{ _TBLRgba64Helper }
+
+procedure _TBLRgba64Helper.Reset(const AValue: TBLRgba);
+begin
+  FHandle.a := EnsureRange(Trunc(AValue.A * 65535.0), 0, 65535);
+  FHandle.r := EnsureRange(Trunc(AValue.R * 65535.0), 0, 65535);
+  FHandle.g := EnsureRange(Trunc(AValue.G * 65535.0), 0, 65535);
+  FHandle.b := EnsureRange(Trunc(AValue.B * 65535.0), 0, 65535);
 end;
 
 {$ENDREGION 'Color'}
@@ -10300,6 +10588,14 @@ begin
     Ord(AExtendMode), Pointer(AStops), Length(AStops), @AMatrix));
 end;
 
+constructor TBLGradient.Create(const AHandle: BLGradientCore;
+  const AIsReference: Boolean);
+begin
+  inherited Create;
+  FHandle := AHandle;
+  FIsReference := AIsReference;
+end;
+
 constructor TBLGradient.Create(const AValues: TBLRadialGradientValues;
   const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
   const AMatrix: TBLMatrix2D);
@@ -10320,7 +10616,8 @@ end;
 
 destructor TBLGradient.Destroy;
 begin
-  blGradientReset(@FHandle);
+  if (not FIsReference) then
+    blGradientDestroy(@FHandle);
   inherited;
 end;
 
@@ -10984,7 +11281,7 @@ end;
 
 destructor TBLRegion.Destroy;
 begin
-  blRegionReset(@FHandle);
+  blRegionDestroy(@FHandle);
   inherited;
 end;
 
@@ -11199,8 +11496,7 @@ end;
 procedure TBLStrokeOptions.Reset;
 begin
   if (FScope <> nil) then
-    { This will reset the options }
-    FScope := nil
+    blStrokeOptionsReset(@FHandle)
   else
   begin
     blStrokeOptionsInit(@FHandle);
@@ -11261,7 +11557,7 @@ end;
 
 destructor TBLStrokeOptions.TScope.Destroy;
 begin
-  blStrokeOptionsReset(FHandle);
+  blStrokeOptionsDestroy(FHandle);
   inherited;
 end;
 
@@ -11837,7 +12133,7 @@ end;
 
 destructor TBLPath.Destroy;
 begin
-  blPathReset(@FHandle);
+  blPathDestroy(@FHandle);
   inherited;
 end;
 
@@ -12027,6 +12323,11 @@ begin
   _BLCheck(blPathQuadTo(@FHandle, AX1, AY1, AX2, AY2));
 end;
 
+procedure TBLPath.RemoveRange(const ARange: TBLRange);
+begin
+  _BLCheck(blPathRemoveRange(@FHandle, @ARange.FHandle));
+end;
+
 procedure TBLPath.Reserve(const ACount: Integer);
 begin
   _BLCheck(blPathReserve(@FHandle, ACount));
@@ -12126,6 +12427,11 @@ begin
   Result := not CompareMem(@ALeft, @ARight, SizeOf(TBLFormatInfo));
 end;
 
+procedure TBLFormatInfo.Query(const AFormat: TBLFormat);
+begin
+  _BLCheck(blFormatInfoQuery(@FHandle, Ord(AFormat)));
+end;
+
 procedure TBLFormatInfo.Reset(const ADepth: Integer;
   const AFlags: TBLFormatFlags; const ARSize, AGSize, ABSize, AASize, ARShift,
   AGShift, ABShift, AAShift: Byte);
@@ -12177,33 +12483,8 @@ end;
 { _TBLFormatHelper }
 
 function _TBLFormatHelper.GetInfo: TBLFormatInfo;
-{ This code is taken from "format.cpp", since it is difficult to access the
-  external blFormatInfo variable. }
 begin
-  case Self of
-    TBLFormat.PRGB32:
-      Result.Reset(
-        32,
-        [TBLFormatFlag.RGB, TBLFormatFlag.Alpha, TBLFormatFlag.Premultiplied, TBLFormatFlag.ByteAligned],
-        8, 8, 8, 8,
-        16, 8, 0, 24);
-
-    TBLFormat.XRGB32:
-      Result.Reset(
-        32,
-        [TBLFormatFlag.RGB, TBLFormatFlag.Premultiplied, TBLFormatFlag.ByteAligned],
-        8, 8, 8, 0,
-        16, 8, 0, 0);
-
-    TBLFormat.A8:
-      Result.Reset(
-        8,
-        [TBLFormatFlag.Alpha, TBLFormatFlag.ByteAligned],
-        0, 0, 0, 8,
-        0, 0, 0, 0);
-  else
-    Result.Reset;
-  end;
+  _BLCheck(blFormatInfoQuery(@Result.FHandle, Ord(Self)));
 end;
 
 {$ENDREGION 'Format'}
@@ -12347,9 +12628,18 @@ begin
   _BLCheck(blImageInitAs(@FHandle, AWidth, AHeight, Ord(AFormat)));
 end;
 
+constructor TBLImage.Create(const AHandle: BLImageCore;
+  const AIsReference: Boolean);
+begin
+  inherited Create;
+  FHandle := AHandle;
+  FIsReference := AIsReference;
+end;
+
 destructor TBLImage.Destroy;
 begin
-  blImageReset(@FHandle);
+  if (not FIsReference) then
+    blImageDestroy(@FHandle);
   inherited;
 end;
 
@@ -12576,6 +12866,11 @@ begin
   Result := TBLUtils.BLArrayToArray<Byte>(Data);
 end;
 
+procedure TBLImage.WriteToFile(const AFilename: String);
+begin
+  _BLCheck(blImageWriteToFile(@FHandle, MarshaledAString(UTF8String(AFilename)), nil));
+end;
+
 procedure TBLImage.WriteToFile(const AFilename: String;
   const ACodec: IBLImageCodec);
 var
@@ -12603,7 +12898,7 @@ end;
 
 destructor TBLImageDecoder.Destroy;
 begin
-  blImageDecoderReset(@FHandle);
+  blImageDecoderDestroy(@FHandle);
   inherited;
 end;
 
@@ -12713,7 +13008,7 @@ end;
 
 destructor TBLImageEncoder.Destroy;
 begin
-  blImageEncoderReset(@FHandle);
+  blImageEncoderDestroy(@FHandle);
   inherited;
 end;
 
@@ -12796,21 +13091,20 @@ constructor TBLImageCodec.Create;
 begin
   inherited Create;
   blImageCodecInit(@FHandle);
-  FOwnsHandle := True;
 end;
 
 constructor TBLImageCodec.Create(const AHandle: BLImageCodecCore;
-  const AOwnsHandle: Boolean);
+  const AIsReference: Boolean);
 begin
   inherited Create;
   FHandle := AHandle;
-  FOwnsHandle := AOwnsHandle;
+  FIsReference := AIsReference;
 end;
 
 destructor TBLImageCodec.Destroy;
 begin
-  if (FOwnsHandle) then
-    blImageCodecReset(@FHandle);
+  if (not FIsReference) then
+    blImageCodecDestroy(@FHandle);
   inherited;
 end;
 
@@ -12838,6 +13132,46 @@ function TBLImageCodec.FindByData(const AData: TBytes;
   const ACodecs: TArray<IBLImageCodec>): Boolean;
 begin
   Result := FindByData(Pointer(AData), Length(AData), ACodecs);
+end;
+
+function TBLImageCodec.FindByExtension(const AExt: String;
+  const ACodecs: TArray<IBLImageCodec>): Boolean;
+var
+  CodecHandles: TArray<BLImageCodecCore>;
+  CodecArray: IBLArray;
+  Codecs: PBLArrayCore;
+  Ext: UTF8String;
+  Res: BLResultCode;
+  I: Integer;
+begin
+  if Assigned(ACodecs) then
+  begin
+    SetLength(CodecHandles, Length(ACodecs));
+    for I := 0 to Length(CodecHandles) - 1 do
+      CodecHandles[I] := ACodecs[I].Handle^;
+    CodecArray := TBLUtils.ArrayToBLArray<BLImageCodecCore>(CodecHandles);
+    Codecs := CodecArray.Handle;
+  end
+  else
+    Codecs := nil;
+
+  Ext := UTF8String(AExt);
+  Res := blImageCodecFindByExtension(@FHandle, MarshaledAString(Ext), Length(Ext), Codecs);
+  Result := (Res = BL_SUCCESS);
+  if (Res <> BL_ERROR_IMAGE_NO_MATCHING_CODEC) then
+    _BLCheck(Res);
+end;
+
+function TBLImageCodec.FindByExtension(const AExt: String): Boolean;
+var
+  Ext: UTF8String;
+  Res: BLResultCode;
+begin
+  Ext := UTF8String(AExt);
+  Res := blImageCodecFindByExtension(@FHandle, MarshaledAString(Ext), Length(Ext), nil);
+  Result := (Res = BL_SUCCESS);
+  if (Res <> BL_ERROR_IMAGE_NO_MATCHING_CODEC) then
+    _BLCheck(Res);
 end;
 
 function TBLImageCodec.FindByData(const AData: Pointer;
@@ -12939,7 +13273,7 @@ begin
 
   SetLength(Result, Length(CodecHandles));
   for I := 0 to Length(Result) - 1 do
-    Result[I] := TBLImageCodec.Create(CodecHandles[I], False);
+    Result[I] := TBLImageCodec.Create(CodecHandles[I], True);
 end;
 
 function TBLImageCodec.GetExtensions: String;
@@ -13066,9 +13400,19 @@ begin
     _BLCheck(blPatternInitAs(@FHandle, AImage.Handle, @AArea, Ord(AExtendMode), @AMatrix));
 end;
 
+constructor TBLPattern.Create(const AHandle: BLPatternCore;
+  const AIsReference: Boolean);
+begin
+  inherited Create;
+  FHandle := AHandle;
+  FIsReference := AIsReference;
+  FImage := TBLImage.Create(FHandle.impl.image, True);
+end;
+
 destructor TBLPattern.Destroy;
 begin
-  blPatternReset(@FHandle);
+  if (not FIsReference) then
+    blPatternDestroy(@FHandle);
   inherited;
 end;
 
@@ -13968,7 +14312,7 @@ end;
 
 destructor TBLGlyphBuffer.Destroy;
 begin
-  blGlyphBufferReset(@FHandle);
+  blGlyphBufferDestroy(@FHandle);
   inherited;
 end;
 
@@ -14096,21 +14440,20 @@ constructor TBLFontData.Create;
 begin
   inherited;
   blFontDataInit(@FHandle);
-  FOwnsHandle := True;
 end;
 
 constructor TBLFontData.Create(const AHandle: BLFontDataCore;
-  const AOwnsHandle: Boolean);
+  const AIsReference: Boolean);
 begin
   inherited Create;
   FHandle := AHandle;
-  FOwnsHandle := AOwnsHandle;
+  FIsReference := AIsReference;
 end;
 
 destructor TBLFontData.Destroy;
 begin
-  if (FOwnsHandle) then
-    blFontDataReset(@FHandle);
+  if (not FIsReference) then
+    blFontDataDestroy(@FHandle);
   inherited;
 end;
 
@@ -14252,7 +14595,7 @@ end;
 
 destructor TBLFontFace.Destroy;
 begin
-  blFontFaceReset(@FHandle);
+  blFontFaceDestroy(@FHandle);
   inherited;
 end;
 
@@ -14279,7 +14622,7 @@ end;
 function TBLFontFace.GetData: IBLFontData;
 begin
   if (FData = nil) then
-    FData := TBLFontData.Create(FHandle.impl.data, False);
+    FData := TBLFontData.Create(FHandle.impl.data, True);
 
   Result := FData;
 end;
@@ -14531,7 +14874,7 @@ end;
 
 destructor TBLFont.Destroy;
 begin
-  blFontReset(@FHandle);
+  blFontDestroy(@FHandle);
   inherited;
 end;
 
@@ -14811,7 +15154,7 @@ end;
 
 destructor TBLFontManager.Destroy;
 begin
-  blFontManagerReset(@FHandle);
+  blFontManagerDestroy(@FHandle);
   inherited;
 end;
 
@@ -14938,7 +15281,7 @@ end;
 
 destructor TBLPixelConverter.Destroy;
 begin
-  blPixelConverterReset(@FHandle);
+  blPixelConverterDestroy(@FHandle);
   inherited;
 end;
 
@@ -14972,7 +15315,7 @@ end;
 
 function TBLContextCreateInfo.GetFlags: TBLContextCreateFlags;
 begin
-  Byte(Result) := FHandle.flags;
+  Cardinal(Result) := FHandle.flags;
 end;
 
 procedure TBLContextCreateInfo.Reset;
@@ -14982,7 +15325,7 @@ end;
 
 procedure TBLContextCreateInfo.SetFlags(const AValue: TBLContextCreateFlags);
 begin
-  FHandle.flags := Byte(AValue);
+  FHandle.flags := Cardinal(AValue);
 end;
 
 { TBLContextCookie }
@@ -15110,6 +15453,19 @@ begin
   Result := TBLStyleType(FHandle.styleType[BL_CONTEXT_OP_TYPE_STROKE]);
 end;
 
+function TBLContextState.GetTargetImage: IBLImage;
+begin
+  if (FHandle.targetImage = nil) then
+    Result := nil
+  else
+    Result := TBLImage.Create(FHandle.targetImage^, True);
+end;
+
+function TBLContextState.GetTargetSize: TBLSize;
+begin
+  Result := TBLSize(FHandle.targetSize);
+end;
+
 function TBLContextState.GetStrokeAlpha: Double;
 begin
   Result := FHandle.styleAlpha[BL_CONTEXT_OP_TYPE_STROKE];
@@ -15230,18 +15586,18 @@ begin
 end;
 
 constructor TBLContext.Create(const ATarget: IBLImage;
-  const AOptions: TBLContextCreateInfo);
+  const ACreateInfo: TBLContextCreateInfo);
 begin
   inherited Create;
   if (ATarget = nil) then
     blContextInit(@FHandle)
   else
-    _BLCheck(blContextInitAs(@FHandle, ATarget.Handle, @AOptions.FHandle));
+    _BLCheck(blContextInitAs(@FHandle, ATarget.Handle, @ACreateInfo.FHandle));
 end;
 
 destructor TBLContext.Destroy;
 begin
-  blContextReset(@FHandle);
+  blContextDestroy(@FHandle);
   inherited;
 end;
 
@@ -15750,25 +16106,43 @@ begin
 end;
 
 function TBLContext.GetFillColor: TBLRgba32;
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetFillStyleRgba32(@FHandle, @Result));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  Result.Reset(TBLRgba(Style.rgba));
 end;
 
 function TBLContext.GetFillColor64: TBLRgba64;
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetFillStyleRgba64(@FHandle, @Result));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  Result.Reset(TBLRgba(Style.rgba));
+end;
+
+function TBLContext.GetFillColorF: TBLRgba;
+var
+  Style: BLStyleCore;
+begin
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  Result := TBLRgba(Style.rgba);
 end;
 
 function TBLContext.GetFillGradient: IBLGradient;
+var
+  Style: BLStyleCore;
 begin
-  Result := TBLGradient.Create;
-  _BLCheck(blContextGetFillStyle(@FHandle, Result.Handle));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  Result := TBLGradient.Create(Style.gradient, True);
 end;
 
 function TBLContext.GetFillPattern: IBLPattern;
+var
+  Style: BLStyleCore;
 begin
-  Result := TBLPattern.Create;
-  _BLCheck(blContextGetFillStyle(@FHandle, Result.Handle));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  Result := TBLPattern.Create(Style.pattern, True);
 end;
 
 function TBLContext.GetFillRule: TBLFillRule;
@@ -15777,25 +16151,43 @@ begin
 end;
 
 procedure TBLContext.GetFillStyle(out ARgba: TBLRgba32);
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetStrokeStyleRgba32(@FHandle, @ARgba.FHandle.value));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  ARgba.Reset(TBLRgba(Style.rgba));
 end;
 
 procedure TBLContext.GetFillStyle(out ARgba: TBLRgba64);
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetStrokeStyleRgba64(@FHandle, @ARgba.FHandle.value));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  ARgba.Reset(TBLRgba(Style.rgba));
 end;
 
 procedure TBLContext.GetFillStyle(out AGradient: IBLGradient);
+var
+  Style: BLStyleCore;
 begin
-  AGradient := TBLGradient.Create;
-  _BLCheck(blContextGetFillStyle(@FHandle, AGradient.Handle));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  AGradient := TBLGradient.Create(Style.gradient, True);
+end;
+
+procedure TBLContext.GetFillStyle(out ARgba: TBLRgba);
+var
+  Style: BLStyleCore;
+begin
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  ARgba := TBLRgba(Style.rgba);
 end;
 
 procedure TBLContext.GetFillStyle(out APattern: IBLPattern);
+var
+  Style: BLStyleCore;
 begin
-  APattern := TBLPattern.Create;
-  _BLCheck(blContextGetFillStyle(@FHandle, APattern.Handle));
+  _BLCheck(blContextGetFillStyle(@FHandle, @Style));
+  APattern := TBLPattern.Create(Style.pattern, True);
 end;
 
 function TBLContext.GetFillStyle: TBLStyleType;
@@ -15864,13 +16256,27 @@ begin
 end;
 
 function TBLContext.GetStrokeColor: TBLRgba32;
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetStrokeStyleRgba32(@FHandle, @Result));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  Result.Reset(TBLRgba(Style.rgba));
 end;
 
 function TBLContext.GetStrokeColor64: TBLRgba64;
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetStrokeStyleRgba64(@FHandle, @Result));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  Result.Reset(TBLRgba(Style.rgba));
+end;
+
+function TBLContext.GetStrokeColorF: TBLRgba;
+var
+  Style: BLStyleCore;
+begin
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  Result := TBLRgba(Style.rgba);
 end;
 
 function TBLContext.GetStrokeDashArray: TArray<Double>;
@@ -15889,9 +16295,11 @@ begin
 end;
 
 function TBLContext.GetStrokeGradient: IBLGradient;
+var
+  Style: BLStyleCore;
 begin
-  Result := TBLGradient.Create;
-  _BLCheck(blContextGetStrokeStyle(@FHandle, Result.Handle));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  Result := TBLGradient.Create(Style.gradient, True);
 end;
 
 function TBLContext.GetStrokeJoin: TBLStrokeJoin;
@@ -15910,9 +16318,11 @@ begin
 end;
 
 function TBLContext.GetStrokePattern: IBLPattern;
+var
+  Style: BLStyleCore;
 begin
-  Result := TBLPattern.Create;
-  _BLCheck(blContextGetStrokeStyle(@FHandle, Result.Handle));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  Result := TBLPattern.Create(Style.pattern, True);
 end;
 
 function TBLContext.GetStrokeStartCap: TBLStrokeCap;
@@ -15921,25 +16331,43 @@ begin
 end;
 
 procedure TBLContext.GetStrokeStyle(out ARgba: TBLRgba64);
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetStrokeStyleRgba64(@FHandle, @ARgba.FHandle.value));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  ARgba.Reset(TBLRgba(Style.rgba));
 end;
 
 procedure TBLContext.GetStrokeStyle(out ARgba: TBLRgba32);
+var
+  Style: BLStyleCore;
 begin
-  _BLCheck(blContextGetStrokeStyleRgba32(@FHandle, @ARgba.FHandle.value));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  ARgba.Reset(TBLRgba(Style.rgba));
 end;
 
 procedure TBLContext.GetStrokeStyle(out AGradient: IBLGradient);
+var
+  Style: BLStyleCore;
 begin
-  AGradient := TBLGradient.Create;
-  _BLCheck(blContextGetStrokeStyle(@FHandle, AGradient.Handle));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  AGradient := TBLGradient.Create(Style.gradient, True);
+end;
+
+procedure TBLContext.GetStrokeStyle(out ARgba: TBLRgba);
+var
+  Style: BLStyleCore;
+begin
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  ARgba := TBLRgba(Style.rgba);
 end;
 
 procedure TBLContext.GetStrokeStyle(out APattern: IBLPattern);
+var
+  Style: BLStyleCore;
 begin
-  APattern := TBLPattern.Create;
-  _BLCheck(blContextGetStrokeStyle(@FHandle, APattern.Handle));
+  _BLCheck(blContextGetStrokeStyle(@FHandle, @Style));
+  APattern := TBLPattern.Create(Style.pattern, True);
 end;
 
 function TBLContext.GetStrokeStyle: TBLStyleType;
@@ -15959,17 +16387,25 @@ end;
 
 function TBLContext.GetTargetHeight: Double;
 begin
-  Result := FHandle.impl.targetSize.h;
+  Result := FHandle.impl.state.targetSize.h;
+end;
+
+function TBLContext.GetTargetImage: IBLImage;
+begin
+  if (FHandle.impl.state.targetImage = nil) then
+    Result := nil
+  else
+    Result := TBLImage.Create(FHandle.impl.state.targetImage^, True);
 end;
 
 function TBLContext.GetTargetSize: TBLSize;
 begin
-  Result.FHandle := FHandle.impl.targetSize;
+  Result.FHandle := FHandle.impl.state.targetSize;
 end;
 
 function TBLContext.GetTargetWidth: Double;
 begin
-  Result := FHandle.impl.targetSize.w;
+  Result := FHandle.impl.state.targetSize.w;
 end;
 
 function TBLContext.GetUserMatrix: TBLMatrix2D;
@@ -16085,6 +16521,18 @@ end;
 procedure TBLContext.PostTranslate(const APoint: TBLPoint);
 begin
   _BLCheck(blContextMatrixOp(@FHandle, BL_MATRIX2D_OP_POST_TRANSLATE, @APoint));
+end;
+
+function TBLContext.QueryAccumulatedErrorFlags: TBLContextErrorFlags;
+begin
+  _BLCheck(blContextQueryProperty(@FHandle,
+    BL_CONTEXT_PROPERTY_ACCUMULATED_ERROR_FLAGS, @Result));
+end;
+
+function TBLContext.QueryThreadCount: Integer;
+begin
+  _BLCheck(blContextQueryProperty(@FHandle, BL_CONTEXT_PROPERTY_THREAD_COUNT,
+    @Result));
 end;
 
 procedure TBLContext.Reset;
@@ -16209,16 +16657,21 @@ begin
   _BLCheck(blContextSetFillStyleRgba64(@FHandle, AValue.FHandle.value));
 end;
 
+procedure TBLContext.SetFillColorF(const AValue: TBLRgba);
+begin
+  _BLCheck(blContextSetFillStyleRgba(@FHandle, @AValue));
+end;
+
 procedure TBLContext.SetFillGradient(const AValue: IBLGradient);
 begin
   if (AValue <> nil) then
-    _BLCheck(blContextSetFillStyle(@FHandle, AValue.Handle));
+    _BLCheck(blContextSetFillStyleObject(@FHandle, AValue.Handle));
 end;
 
 procedure TBLContext.SetFillPattern(const AValue: IBLPattern);
 begin
   if (AValue <> nil) then
-    _BLCheck(blContextSetFillStyle(@FHandle, AValue.Handle));
+    _BLCheck(blContextSetFillStyleObject(@FHandle, AValue.Handle));
 end;
 
 procedure TBLContext.SetFillRule(const AValue: TBLFillRule);
@@ -16239,19 +16692,24 @@ end;
 procedure TBLContext.SetFillStyle(const APattern: IBLPattern);
 begin
   if (APattern <> nil) then
-    _BLCheck(blContextSetFillStyle(@FHandle, APattern.Handle));
+    _BLCheck(blContextSetFillStyleObject(@FHandle, APattern.Handle));
 end;
 
 procedure TBLContext.SetFillStyle(const AImage: IBLImage);
 begin
   if (AImage <> nil) then
-    _BLCheck(blContextSetFillStyle(@FHandle, AImage.Handle));
+    _BLCheck(blContextSetFillStyleObject(@FHandle, AImage.Handle));
+end;
+
+procedure TBLContext.SetFillStyle(const ARgba: TBLRgba);
+begin
+  _BLCheck(blContextSetFillStyleRgba(@FHandle, @ARgba));
 end;
 
 procedure TBLContext.SetFillStyle(const AGradient: IBLGradient);
 begin
   if (AGradient <> nil) then
-    _BLCheck(blContextSetFillStyle(@FHandle, AGradient.Handle));
+    _BLCheck(blContextSetFillStyleObject(@FHandle, AGradient.Handle));
 end;
 
 procedure TBLContext.SetFlattenMode(const AValue: TBLFlattenMode);
@@ -16304,6 +16762,11 @@ begin
   _BLCheck(blContextSetStrokeStyleRgba64(@FHandle, AValue.FHandle.value));
 end;
 
+procedure TBLContext.SetStrokeColorF(const AValue: TBLRgba);
+begin
+  _BLCheck(blContextSetStrokeStyleRgba(@FHandle, @AValue));
+end;
+
 procedure TBLContext.SetStrokeDashArray(const AValue: TArray<Double>);
 var
   Value: IBLArray;
@@ -16325,7 +16788,7 @@ end;
 procedure TBLContext.SetStrokeGradient(const AValue: IBLGradient);
 begin
   if (AValue <> nil) then
-    _BLCheck(blContextSetStrokeStyle(@FHandle, AValue.Handle));
+    _BLCheck(blContextSetStrokeStyleObject(@FHandle, AValue.Handle));
 end;
 
 procedure TBLContext.SetStrokeJoin(const AValue: TBLStrokeJoin);
@@ -16346,7 +16809,7 @@ end;
 procedure TBLContext.SetStrokePattern(const AValue: IBLPattern);
 begin
   if (AValue <> nil) then
-    _BLCheck(blContextSetStrokeStyle(@FHandle, AValue.Handle));
+    _BLCheck(blContextSetStrokeStyleObject(@FHandle, AValue.Handle));
 end;
 
 procedure TBLContext.SetStrokeStartCap(const AValue: TBLStrokeCap);
@@ -16367,19 +16830,24 @@ end;
 procedure TBLContext.SetStrokeStyle(const APattern: IBLPattern);
 begin
   if (APattern <> nil) then
-    _BLCheck(blContextSetStrokeStyle(@FHandle, APattern.Handle));
+    _BLCheck(blContextSetStrokeStyleObject(@FHandle, APattern.Handle));
 end;
 
 procedure TBLContext.SetStrokeStyle(const AGradient: IBLGradient);
 begin
   if (AGradient <> nil) then
-    _BLCheck(blContextSetStrokeStyle(@FHandle, AGradient.Handle));
+    _BLCheck(blContextSetStrokeStyleObject(@FHandle, AGradient.Handle));
 end;
 
 procedure TBLContext.SetStrokeStyle(const AImage: IBLImage);
 begin
   if (AImage <> nil) then
-    _BLCheck(blContextSetStrokeStyle(@FHandle, AImage.Handle));
+    _BLCheck(blContextSetStrokeStyleObject(@FHandle, AImage.Handle));
+end;
+
+procedure TBLContext.SetStrokeStyle(const ARgba: TBLRgba);
+begin
+  _BLCheck(blContextSetStrokeStyleRgba(@FHandle, @ARgba));
 end;
 
 procedure TBLContext.SetStrokeTransformOrder(
@@ -16413,10 +16881,10 @@ begin
 end;
 
 procedure TBLContext.Start(const AImage: IBLImage;
-  const AOptions: TBLContextCreateInfo);
+  const ACreateInfo: TBLContextCreateInfo);
 begin
   if (AImage <> nil) then
-    _BLCheck(blContextBegin(@FHandle, AImage.Handle, @AOptions.FHandle));
+    _BLCheck(blContextBegin(@FHandle, AImage.Handle, @ACreateInfo.FHandle));
 end;
 
 procedure TBLContext.Start(const AImage: IBLImage);

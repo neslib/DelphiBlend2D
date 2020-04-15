@@ -28,9 +28,9 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 4.000000000000000000
+      Position.X = 43.000000000000000000
       Position.Y = 12.000000000000000000
-      Size.Width = 280.000000000000000000
+      Size.Width = 241.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
@@ -44,6 +44,18 @@ inherited FormMain: TFormMain
       Size.PlatformDefault = False
       TabOrder = 2
       Text = 'Colors'
+    end
+    object LabelCount: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 35.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Count:'
+      TabOrder = 0
     end
   end
 end

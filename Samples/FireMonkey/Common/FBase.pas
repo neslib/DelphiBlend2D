@@ -24,6 +24,7 @@ uses
   {$IFDEF USE_SKIA}
   Neslib.Skia,
   {$ENDIF}
+  Blend2D.Api,
   Blend2D;
 
 type
@@ -56,8 +57,8 @@ type
     FNextSecond: Int64;
   protected
     FBlend2DImage: IBLImage;
-    FBlend2DContext: IBLContext;
     FBlend2DBitmapData: TBitmapData;
+    FBlend2DContext: IBLContext;
     {$IFNDEF MSWINDOWS}
     FBlend2DConverter: IBLPixelConverter;
     {$ENDIF}
@@ -74,7 +75,7 @@ type
     class function RandomColor: TAlphaColor; static;
   private
     procedure RenderFireMonkeyInternal;
-    procedure RenderBlend2DInternal;
+    procedure RenderBlend2DInternal(const AThreadCount: Integer);
     {$IFDEF USE_SKIA}
     procedure RenderSkiaInternal;
     {$ENDIF}
@@ -102,9 +103,16 @@ uses
   System.Math.Vectors;
 
 const
-  TAG_FIREMONKEY = 0;
-  TAG_BLEND2D    = 1;
-  TAG_SKIA       = 2;
+  TAG_BLEND2D_DEF = 0;
+  TAG_BLEND2D_1T  = 1;
+  TAG_BLEND2D_2T  = 2;
+  TAG_BLEND2D_4T  = 4;
+  TAG_BLEND2D_8T  = 8;
+  TAG_BLEND2D_12T = 12;
+  TAG_BLEND2D_16T = 16;
+
+  TAG_FIREMONKEY  = -1;
+  TAG_SKIA        = -2;
 
 procedure TFormBase.AfterRender;
 begin
@@ -158,7 +166,13 @@ begin
   ComboBoxRenderer.BeginUpdate;
   try
     AddItem('FireMonkey', TAG_FIREMONKEY);
-    AddItem('Blend2D', TAG_BLEND2D);
+    AddItem('Blend2D', TAG_BLEND2D_DEF);
+    AddItem('Blend2D 1T', TAG_BLEND2D_1T);
+    AddItem('Blend2D 2T', TAG_BLEND2D_2T);
+    AddItem('Blend2D 4T', TAG_BLEND2D_4T);
+    AddItem('Blend2D 8T', TAG_BLEND2D_8T);
+    AddItem('Blend2D 12T', TAG_BLEND2D_12T);
+    AddItem('Blend2D 16T', TAG_BLEND2D_16T);
     {$IFDEF USE_SKIA}
     AddItem('Skia', TAG_SKIA);
     {$ENDIF}
@@ -227,13 +241,12 @@ begin
     TAG_FIREMONKEY:
       RenderFireMonkeyInternal;
 
-    TAG_BLEND2D:
-      RenderBlend2DInternal;
-
     {$IFDEF USE_SKIA}
     TAG_SKIA:
       RenderSkiaInternal;
     {$ENDIF}
+  else
+    RenderBlend2DInternal(ComboBoxRenderer.Selected.Tag);
   end;
   AfterRender;
 
@@ -267,9 +280,10 @@ begin
     Result := 1;
 end;
 
-procedure TFormBase.RenderBlend2DInternal;
+procedure TFormBase.RenderBlend2DInternal(const AThreadCount: Integer);
 var
   Data: TBitmapData;
+  CreateInfo: TBLContextCreateInfo;
 begin
   if (FBitmap.Map(TMapAccess.Write, Data)) then
   try
@@ -281,7 +295,10 @@ begin
       FBlend2DBitmapData.Pitch := Data.Pitch;
     end;
 
-    FBlend2DContext.Start(FBlend2DImage);
+    CreateInfo.Reset;
+    CreateInfo.ThreadCount := AThreadCount;
+
+    FBlend2DContext.Start(FBlend2DImage, CreateInfo);
     try
       FBlend2DContext.Scale(FPixelScale);
       RenderBlend2D(FBlend2DContext);

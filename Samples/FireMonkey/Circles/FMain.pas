@@ -30,6 +30,7 @@ type
   TFormMain = class(TFormBase)
     ToolBar: TToolBar;
     TrackBarCount: TTrackBar;
+    LabelCount: TLabel;
   private
     FAngle: Single;
   protected
