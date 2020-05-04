@@ -40,7 +40,9 @@ type
     FPolyF: TArray<TPointF>;
     FPolyD: TArray<TBLPoint>;
     FStep: TArray<TPointF>;
+    FRandom: TBLRandom;
     procedure SetPolyCount(const AValue: Integer);
+    function RandomSign: Double;
   protected
     procedure BeforeRender; override;
     procedure RenderFireMonkey(const ACanvas: TCanvas); override;
@@ -110,7 +112,16 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
+  FRandom.Reset($1234);
   SetPolyCount(Trunc(TrackBarPointCount.Value));
+end;
+
+function TFormMain.RandomSign: Double;
+begin
+  if (FRandom.NextDouble < 0.5) then
+    Result := 1.0
+  else
+    Result := -1.0;
 end;
 
 procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
@@ -271,10 +282,11 @@ begin
 
   while (Prev < AValue) do
   begin
-    P := PointF(Random * W, Random * H);
+    P := PointF(FRandom.NextDouble * W, FRandom.NextDouble * H);
     FPolyF[Prev] := P;
     FPolyD[Prev].Reset(P.X, P.Y);
-    FStep[Prev] := PointF((Random * 0.5 + 0.05) * RandomSign, (Random * 0.5 + 0.05) * RandomSign);
+    FStep[Prev] := PointF((FRandom.NextDouble * 0.5 + 0.05) * RandomSign,
+                          (FRandom.NextDouble * 0.5 + 0.05) * RandomSign);
     Inc(Prev);
   end;
 end;

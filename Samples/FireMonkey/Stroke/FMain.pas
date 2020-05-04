@@ -251,7 +251,7 @@ begin
   FGrabbedVertex := -1;
   FShowControl := True;
   FPath := TBLPath.Create;
-  FPrng.Reset(TBLRuntime.GetTickCount);
+  FPrng.Reset(TThread.GetTickCount);
   FStrokeOptions.Reset;
   FStrokeOptions.Width := TrackBarWidth.Value;
   FStrokeOptions.MiterLimit := TrackBarMiterLimit.Value;

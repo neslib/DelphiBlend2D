@@ -13,7 +13,7 @@ inherited FormMain: TFormMain
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Height = 392.000000000000000000
+    Size.Height = 348.000000000000000000
   end
   object ToolBar: TToolBar
     Position.Y = 44.000000000000000000
@@ -55,6 +55,40 @@ inherited FormMain: TFormMain
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Count:'
+      TabOrder = 0
+    end
+  end
+  object ToolBar1: TToolBar
+    Position.Y = 88.000000000000000000
+    Size.Width = 360.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 4
+    object TrackBarRotation: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 0.019999999552965160
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 56.000000000000000000
+      Position.Y = 12.000000000000000000
+      Size.Width = 300.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Value = 0.002000000094994903
+    end
+    object LabelRotation: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Rotation:'
       TabOrder = 0
     end
   end

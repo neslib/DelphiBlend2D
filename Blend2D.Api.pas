@@ -37,9 +37,10 @@ const
   BL_BYTE_ORDER = 1234;
 
 type
-  BLResult  = UInt32;
-  BLTag     = UInt32;
-  BLBitWord = NativeUInt;
+  BLResult   = UInt32;
+  BLTag      = UInt32;
+  BLUniqueId = UInt64;
+  BLBitWord  = NativeUInt;
 
 type
   _PBLTag = ^BLTag;
@@ -83,13 +84,14 @@ type
   BLContextErrorFlags = Cardinal;
 
 const
-  BL_CONTEXT_ERROR_FLAG_INVALID_VALUE    = $00000001;
-  BL_CONTEXT_ERROR_FLAG_INVALID_STATE    = $00000002;
-  BL_CONTEXT_ERROR_FLAG_INVALID_GEOMETRY = $00000004;
-  BL_CONTEXT_ERROR_FLAG_INVALID_GLYPH    = $00000008;
-  BL_CONTEXT_ERROR_FLAG_INVALID_FONT     = $00000010;
-  BL_CONTEXT_ERROR_FLAG_OUT_OF_MEMORY    = $40000000;
-  BL_CONTEXT_ERROR_FLAG_UNKNOWN_ERROR    = $80000000;
+  BL_CONTEXT_ERROR_FLAG_INVALID_VALUE         = $00000001;
+  BL_CONTEXT_ERROR_FLAG_INVALID_STATE         = $00000002;
+  BL_CONTEXT_ERROR_FLAG_INVALID_GEOMETRY      = $00000004;
+  BL_CONTEXT_ERROR_FLAG_INVALID_GLYPH         = $00000008;
+  BL_CONTEXT_ERROR_FLAG_INVALID_FONT          = $00000010;
+  BL_CONTEXT_ERROR_FLAG_THREAD_POOL_EXHAUSTED = $20000000;
+  BL_CONTEXT_ERROR_FLAG_OUT_OF_MEMORY         = $40000000;
+  BL_CONTEXT_ERROR_FLAG_UNKNOWN_ERROR         = $80000000;
 
 type
   BLClipMode = Integer;
@@ -139,11 +141,10 @@ type
   BLContextCreateFlags = Integer;
 
 const
-  BL_CONTEXT_CREATE_FLAG_FORCE_THREADS         = 1;
-  BL_CONTEXT_CREATE_FLAG_FALLBACK_TO_SYNC      = 2;
-  BL_CONTEXT_CREATE_FLAG_ISOLATED_THREADS      = 16;
-  BL_CONTEXT_CREATE_FLAG_ISOLATED_JIT          = 32;
-  BL_CONTEXT_CREATE_FLAG_OVERRIDE_CPU_FEATURES = 64;
+  BL_CONTEXT_CREATE_FLAG_FALLBACK_TO_SYNC      = $00000008;
+  BL_CONTEXT_CREATE_FLAG_ISOLATED_THREAD_POOL  = $01000000;
+  BL_CONTEXT_CREATE_FLAG_ISOLATED_JIT          = $02000000;
+  BL_CONTEXT_CREATE_FLAG_OVERRIDE_CPU_FEATURES = $04000000;
 
 type
   BLContextFlushFlags = Integer;
@@ -872,44 +873,46 @@ const
   BL_ERROR_TOO_MANY_OPEN_FILES_BY_OS    = 65571;
   BL_ERROR_TOO_MANY_LINKS               = 65572;
   BL_ERROR_TOO_MANY_THREADS             = 65573;
-  BL_ERROR_FILE_EMPTY                   = 65574;
-  BL_ERROR_OPEN_FAILED                  = 65575;
-  BL_ERROR_NOT_ROOT_DEVICE              = 65576;
-  BL_ERROR_UNKNOWN_SYSTEM_ERROR         = 65577;
-  BL_ERROR_INVALID_ALIGNMENT            = 65578;
-  BL_ERROR_INVALID_SIGNATURE            = 65579;
-  BL_ERROR_INVALID_DATA                 = 65580;
-  BL_ERROR_INVALID_STRING               = 65581;
-  BL_ERROR_DATA_TRUNCATED               = 65582;
-  BL_ERROR_DATA_TOO_LARGE               = 65583;
-  BL_ERROR_DECOMPRESSION_FAILED         = 65584;
-  BL_ERROR_INVALID_GEOMETRY             = 65585;
-  BL_ERROR_NO_MATCHING_VERTEX           = 65586;
-  BL_ERROR_NO_MATCHING_COOKIE           = 65587;
-  BL_ERROR_NO_STATES_TO_RESTORE         = 65588;
-  BL_ERROR_IMAGE_TOO_LARGE              = 65589;
-  BL_ERROR_IMAGE_NO_MATCHING_CODEC      = 65590;
-  BL_ERROR_IMAGE_UNKNOWN_FILE_FORMAT    = 65591;
-  BL_ERROR_IMAGE_DECODER_NOT_PROVIDED   = 65592;
-  BL_ERROR_IMAGE_ENCODER_NOT_PROVIDED   = 65593;
-  BL_ERROR_PNG_MULTIPLE_IHDR            = 65594;
-  BL_ERROR_PNG_INVALID_IDAT             = 65595;
-  BL_ERROR_PNG_INVALID_IEND             = 65596;
-  BL_ERROR_PNG_INVALID_PLTE             = 65597;
-  BL_ERROR_PNG_INVALID_TRNS             = 65598;
-  BL_ERROR_PNG_INVALID_FILTER           = 65599;
-  BL_ERROR_JPEG_UNSUPPORTED_FEATURE     = 65600;
-  BL_ERROR_JPEG_INVALID_SOS             = 65601;
-  BL_ERROR_JPEG_INVALID_SOF             = 65602;
-  BL_ERROR_JPEG_MULTIPLE_SOF            = 65603;
-  BL_ERROR_JPEG_UNSUPPORTED_SOF         = 65604;
-  BL_ERROR_FONT_NOT_INITIALIZED         = 65605;
-  BL_ERROR_FONT_NO_CHARACTER_MAPPING    = 65606;
-  BL_ERROR_FONT_MISSING_IMPORTANT_TABLE = 65607;
-  BL_ERROR_FONT_FEATURE_NOT_AVAILABLE   = 65608;
-  BL_ERROR_FONT_CFF_INVALID_DATA        = 65609;
-  BL_ERROR_FONT_PROGRAM_TERMINATED      = 65610;
-  BL_ERROR_INVALID_GLYPH                = 65611;
+  BL_ERROR_THREAD_POOL_EXHAUSTED        = 65574;
+  BL_ERROR_FILE_EMPTY                   = 65575;
+  BL_ERROR_OPEN_FAILED                  = 65576;
+  BL_ERROR_NOT_ROOT_DEVICE              = 65577;
+  BL_ERROR_UNKNOWN_SYSTEM_ERROR         = 65578;
+  BL_ERROR_INVALID_ALIGNMENT            = 65579;
+  BL_ERROR_INVALID_SIGNATURE            = 65580;
+  BL_ERROR_INVALID_DATA                 = 65581;
+  BL_ERROR_INVALID_STRING               = 65582;
+  BL_ERROR_DATA_TRUNCATED               = 65583;
+  BL_ERROR_DATA_TOO_LARGE               = 65584;
+  BL_ERROR_DECOMPRESSION_FAILED         = 65585;
+  BL_ERROR_INVALID_GEOMETRY             = 65586;
+  BL_ERROR_NO_MATCHING_VERTEX           = 65587;
+  BL_ERROR_NO_MATCHING_COOKIE           = 65588;
+  BL_ERROR_NO_STATES_TO_RESTORE         = 65589;
+  BL_ERROR_IMAGE_TOO_LARGE              = 65590;
+  BL_ERROR_IMAGE_NO_MATCHING_CODEC      = 65591;
+  BL_ERROR_IMAGE_UNKNOWN_FILE_FORMAT    = 65592;
+  BL_ERROR_IMAGE_DECODER_NOT_PROVIDED   = 65593;
+  BL_ERROR_IMAGE_ENCODER_NOT_PROVIDED   = 65594;
+  BL_ERROR_PNG_MULTIPLE_IHDR            = 65595;
+  BL_ERROR_PNG_INVALID_IDAT             = 65596;
+  BL_ERROR_PNG_INVALID_IEND             = 65597;
+  BL_ERROR_PNG_INVALID_PLTE             = 65598;
+  BL_ERROR_PNG_INVALID_TRNS             = 65599;
+  BL_ERROR_PNG_INVALID_FILTER           = 65600;
+  BL_ERROR_JPEG_UNSUPPORTED_FEATURE     = 65601;
+  BL_ERROR_JPEG_INVALID_SOS             = 65602;
+  BL_ERROR_JPEG_INVALID_SOF             = 65603;
+  BL_ERROR_JPEG_MULTIPLE_SOF            = 65604;
+  BL_ERROR_JPEG_UNSUPPORTED_SOF         = 65605;
+  BL_ERROR_FONT_NOT_INITIALIZED         = 65606;
+  BL_ERROR_FONT_NO_MATCH                = 65607;
+  BL_ERROR_FONT_NO_CHARACTER_MAPPING    = 65608;
+  BL_ERROR_FONT_MISSING_IMPORTANT_TABLE = 65609;
+  BL_ERROR_FONT_FEATURE_NOT_AVAILABLE   = 65610;
+  BL_ERROR_FONT_CFF_INVALID_DATA        = 65611;
+  BL_ERROR_FONT_PROGRAM_TERMINATED      = 65612;
+  BL_ERROR_INVALID_GLYPH                = 65613;
 
 type
   BLRuntimeLimits = Integer;
@@ -922,10 +925,10 @@ type
   BLRuntimeInfoType = Integer;
 
 const
-  BL_RUNTIME_INFO_TYPE_BUILD  = 0;
-  BL_RUNTIME_INFO_TYPE_SYSTEM = 1;
-  BL_RUNTIME_INFO_TYPE_MEMORY = 2;
-  BL_RUNTIME_INFO_TYPE_COUNT  = 3;
+  BL_RUNTIME_INFO_TYPE_BUILD    = 0;
+  BL_RUNTIME_INFO_TYPE_SYSTEM   = 1;
+  BL_RUNTIME_INFO_TYPE_RESOURCE = 2;
+  BL_RUNTIME_INFO_TYPE_COUNT    = 3;
 
 type
   BLRuntimeBuildType = Integer;
@@ -1527,7 +1530,7 @@ type
     stretch: UInt8;
     style: UInt8;
     faceInfo: BLFontFaceInfo;
-    faceUniqueId: UInt64;
+    uniqueId: BLUniqueId;
     data: BLFontDataCore;
     fullName: BLStringCore;
     familyName: BLStringCore;
@@ -1620,6 +1623,14 @@ type
     impl: _PBLFontManagerImpl;
   end;
   PBLFontManagerCore = ^BLFontManagerCore;
+
+type
+  BLFontQueryProperties = record
+    style: UInt32;
+    weight: UInt32;
+    stretch: UInt32;
+  end;
+  PBLFontQueryProperties = ^BLFontQueryProperties;
 
 type
   BLFontTable = record
@@ -2029,14 +2040,14 @@ type
     cpuFeatures: UInt32;
     coreCount: Int32;
     threadCount: Int32;
-    minThreadStackSize: Int32;
-    minWorkerStackSize: Int32;
+    threadStackSize: Int32;
+    removed: Int32;
     allocationGranularity: Int32;
     reserved: array [0..4] of UInt32;
   end;
 
 type
-  BLRuntimeMemoryInfo = record
+  BLRuntimeResourceInfo = record
     vmUsed: NativeInt;
     vmReserved: NativeInt;
     vmOverhead: NativeInt;
@@ -2046,6 +2057,9 @@ type
     zmOverhead: NativeInt;
     zmBlockCount: NativeInt;
     dynamicPipelineCount: NativeInt;
+    fileHandleCount: NativeInt;
+    fileMappingCount: NativeInt;
+    reserved: array [0..4] of NativeInt;
   end;
 
 type
@@ -2636,6 +2650,9 @@ function blFontFaceGetUnicodeCoverage(self: PBLFontFaceCore; &out: _PBLFontUnico
 function blFontManagerInit(self: PBLFontManagerCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontManagerInit';
 
+function blFontManagerInitNew(self: PBLFontManagerCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerInitNew';
+
 function blFontManagerDestroy(self: PBLFontManagerCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontManagerDestroy';
 
@@ -2647,6 +2664,27 @@ function blFontManagerAssignMove(self: PBLFontManagerCore; other: PBLFontManager
 
 function blFontManagerAssignWeak(self: PBLFontManagerCore; other: PBLFontManagerCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blFontManagerAssignWeak';
+
+function blFontManagerCreate(self: PBLFontManagerCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerCreate';
+
+function blFontManagerGetFaceCount(const self: PBLFontManagerCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerGetFaceCount';
+
+function blFontManagerGetFamilyCount(const self: PBLFontManagerCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerGetFamilyCount';
+
+function blFontManagerHasFace(const self: PBLFontManagerCore; const face: PBLFontFaceCore): Boolean; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerHasFace';
+
+function blFontManagerAddFace(self: PBLFontManagerCore; const face: PBLFontFaceCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerAddFace';
+
+function blFontManagerQueryFace(const self: PBLFontManagerCore; const name: MarshaledAString; nameSize: NativeUInt; const properties: PBLFontQueryProperties; _out: PBLFontFaceCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerQueryFace';
+
+function blFontManagerQueryFacesByFamilyName(const self: PBLFontManagerCore; const name: MarshaledAString; nameSize: NativeUInt; _out: PBLArrayCore): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blFontManagerQueryFacesByFamilyName';
 
 function blFontManagerEquals(a: PBLFontManagerCore; b: PBLFontManagerCore): Boolean; cdecl;
   external LIB_BLEND2D name _PU + 'blFontManagerEquals';
@@ -3298,9 +3336,6 @@ function blRuntimeMessageFmt(fmt: PUTF8Char): BLResult varargs; cdecl;
 function blRuntimeMessageVFmt(fmt: PUTF8Char; ap: Pointer): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blRuntimeMessageVFmt';
 
-function blRuntimeGetTickCount(): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeGetTickCount';
-
 procedure blRuntimeAssertionFailure(&file: PUTF8Char; line: Integer; msg: PUTF8Char); cdecl;
   external LIB_BLEND2D name _PU + 'blRuntimeAssertionFailure';
 
@@ -3315,6 +3350,9 @@ function blResultFromPosixError(e: Integer): BLResult; cdecl;
 
 function blStringInit(self: PBLStringCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blStringInit';
+
+function blStringInitWithData(self: PBLStringCore; const str: MarshaledAString; size: NativeUInt): BLResult; cdecl;
+  external LIB_BLEND2D name _PU + 'blStringInitWithData';
 
 function blStringDestroy(self: PBLStringCore): BLResult; cdecl;
   external LIB_BLEND2D name _PU + 'blStringDestroy';

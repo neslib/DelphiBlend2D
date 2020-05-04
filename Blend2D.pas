@@ -147,6 +147,9 @@ type
     { Too many threads              [EAGAIN]. }
     TooManyThreads            = BL_ERROR_TOO_MANY_THREADS,
 
+    { Thread pool is exhausted and couldn't acquire the requested thread count. }
+    ThreadPoolExhausted       = BL_ERROR_THREAD_POOL_EXHAUSTED,
+
     { File is empty (not specific to any OS error). }
     FileEmpty                 = BL_ERROR_FILE_EMPTY,
 
@@ -239,6 +242,12 @@ type
 
     { Unsupported SOF marker (JPEG). }
     JpegUnsupportedSOF        = BL_ERROR_JPEG_UNSUPPORTED_SOF,
+
+    { Font doesn't have any data as it's not initialized. }
+    FontNotInitialized        =  BL_ERROR_FONT_NOT_INITIALIZED,
+
+    { Font or font-face was not matched (BLFontManager). }
+    FontNoMatch               = BL_ERROR_FONT_NO_MATCH,
 
     { Font has no character to glyph mapping data. }
     FontNoCharacterMapping    = BL_ERROR_FONT_NO_CHARACTER_MAPPING,
@@ -354,6 +363,18 @@ type
     Blend2D uses TBLTag in public and internal APIs to distinguish between a
     regular UInt32 and tag. }
   TBLTag = BLTag;
+
+type
+  { Unique identifier that can be used for caching purposes.
+
+    Some objects such as IBLImage and IBLFontFace have assigned an unique
+    identifier that can be used to identify such objects for caching purposes.
+    This identifier is never zero, so zero can be safely used as "uncached".
+
+    Note: Unique identifier is per-process. It's implemented as an increasing
+    global or thread-local counter in a way that identifiers would not
+    collide. }
+  TBLUniqueId = BLUniqueId;
 
 type
   { A type used to store a pack of bits.
@@ -1792,10 +1813,10 @@ type
     procedure SetValues(const AValues: TBLRadialGradientValues); overload;
     procedure SetValues(const AValues: TBLConicalGradientValues); overload;
 
-    { Reserve the capacity of gradient stops for at least ACount stops. }
+    { Reserves the capacity of gradient for at least ACount stops. }
     procedure Reserve(const ACount: Integer);
 
-    { Shrink the capacity of gradient stops to fit the current usage. }
+    { Shrinks the capacity of gradient stops to fit the current usage. }
     procedure Shrink;
 
     procedure ResetStops;
@@ -1847,7 +1868,8 @@ type
     { Tests whether the gradient path is a built-in nil instance. }
     property IsNone: Boolean read GetIsNone;
 
-    { Tests whether the gradient is empty (its size equals zero). }
+    { Tests whether the gradient is empty.
+      Empty gradient is considered any gradient that has no stops. }
     property IsEmpty: Boolean read GetIsEmpty;
 
     { The type of the gradient }
@@ -1869,9 +1891,16 @@ type
     property R0: Double read GetR0 write SetR0;
     property Angle: Double read GetAngle write SetAngle;
 
+    { The number of stops the gradient has. }
     property Size: Integer read GetSize;
+
+    { The gradient capacity [in stops]. }
     property Capacity: Integer read GetCapacity;
+
+    { The gradient stop data. }
     property AllStops: PBLGradientStop read GetAllStops;
+
+    { A gradient stop at AIndex. }
     property Stops[const AIndex: Integer]: TBLGradientStop read GetStop write SetStop;
 
     property HasMatrix: Boolean read GetHasMatrix;
@@ -2082,6 +2111,7 @@ type
     function GetSize: Integer;
     function GetCapacity: Integer;
     function GetData: PBLBoxI;
+    function GetDataEnd: PBLBoxI;
     function GetBoundingBox: TBLBoxI;
     function GetView: TBLRegionView;
     function GetHandle: PBLRegionCore;
@@ -2154,6 +2184,9 @@ type
     { Pointer to the region data. }
     property Data: PBLBoxI read GetData;
 
+    { Pointer to the end of the region data. }
+    property DataEnd: PBLBoxI read GetDataEnd;
+
     { The region's bounding box. }
     property BoundingBox: TBLBoxI read GetBoundingBox;
 
@@ -2180,6 +2213,7 @@ type
     function GetSize: Integer;
     function GetCapacity: Integer;
     function GetData: PBLBoxI;
+    function GetDataEnd: PBLBoxI;
     function GetBoundingBox: TBLBoxI;
     function GetView: TBLRegionView;
     function GetHandle: PBLRegionCore;
@@ -4998,6 +5032,36 @@ type
   PBLFontFaceInfo = ^TBLFontFaceInfo;
 
 { ============================================================================
+   [BLFontQueryProperties]
+  ============================================================================ }
+
+type
+  { Properties that can be used to query IBLFont and IBLFontFace. }
+  TBLFontQueryProperties = record
+  {$REGION 'Internal Declarations'}
+  private
+    FHandle: BLFontQueryProperties;
+    function GetStyle: TBLFontStyle; inline;
+    procedure SetStyle(const AValue: TBLFontStyle); inline;
+    function GetWeight: TBLFontWeight; inline;
+    procedure SetWeight(const AValue: TBLFontWeight); inline;
+    function GetStretch: TBLFontStretch; inline;
+    procedure SetStretch(const AValue: TBLFontStretch); inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    { Font style }
+    property Style: TBLFontStyle read GetStyle write SetStyle;
+
+    { Font weight }
+    property Weight: TBLFontWeight read GetWeight write SetWeight;
+
+    { Font stretch }
+    property Stretch: TBLFontStretch read GetStretch write SetStretch;
+  end;
+
+{ ============================================================================
    [BLFontTable]
   ============================================================================ }
 
@@ -5744,7 +5808,7 @@ type
     function GetIsSymbolFont: Boolean;
     function GetIsLastResortFont: Boolean;
     function GetDiagFlags: TBLFontFaceDiagFlags;
-    function GetUniqueId: UInt64;
+    function GetUniqueId: TBLUniqueId;
     function GetData: IBLFontData;
     function GetFullName: String;
     function GetFamilyName: String;
@@ -5873,8 +5937,8 @@ type
     { Font-face diagnostics flags }
     property DiagFlags: TBLFontFaceDiagFlags read GetDiagFlags;
 
-    { Unique identifier describing this IBLFontFace. }
-    property UniqueId: UInt64 read GetUniqueId;
+    { A unique identifier describing this IBLFontFace. }
+    property UniqueId: TBLUniqueId read GetUniqueId;
 
     { IBLFontData associated with this font-face. }
     property Data: IBLFontData read GetData;
@@ -5918,6 +5982,7 @@ type
   private
     FHandle: BLFontFaceCore;
     FData: IBLFontData;
+    FIsReference: Boolean;
   protected
     { IBLFontFace }
     function GetIsNone: Boolean;
@@ -5946,7 +6011,7 @@ type
     function GetIsSymbolFont: Boolean;
     function GetIsLastResortFont: Boolean;
     function GetDiagFlags: TBLFontFaceDiagFlags;
-    function GetUniqueId: UInt64;
+    function GetUniqueId: TBLUniqueId;
     function GetData: IBLFontData;
     function GetFullName: String;
     function GetFamilyName: String;
@@ -5967,9 +6032,12 @@ type
     procedure Reset;
     function Equals(const AOther: IBLFontFace): Boolean; reintroduce; overload;
     function HasFaceFlag(const AFlag: TBLFontFaceFlag): Boolean;
+  private
+    constructor Create(const AHandle: BLFontFaceCore;
+      const AIsReference: Boolean); overload;
   {$ENDREGION 'Internal Declarations'}
   public
-    constructor Create;
+    constructor Create; overload;
     destructor Destroy; override;
 
     function Equals(Obj: TObject): Boolean; overload; override;
@@ -5997,6 +6065,7 @@ type
     function GetStyle: TBLFontStyle;
     function GetMatrix: TBLFontMatrix;
     function GetMetrics: TBLFontMetrics;
+    function GetMetricsPtr: PBLFontMetrics;
     function GetDesignMetrics: TBLFontDesignMetrics;
     function GetHandle: PBLFontCore;
     {$ENDREGION 'Internal Declarations'}
@@ -6087,6 +6156,7 @@ type
       The returned metrics is a scale of design metrics that match the font size
       and its options. }
     property Metrics: TBLFontMetrics read GetMetrics;
+    property MetricsPtr: PBLFontMetrics read GetMetricsPtr;
 
     { The design metrics of the font.
 
@@ -6125,6 +6195,7 @@ type
     function GetStyle: TBLFontStyle;
     function GetMatrix: TBLFontMatrix;
     function GetMetrics: TBLFontMetrics;
+    function GetMetricsPtr: PBLFontMetrics;
     function GetDesignMetrics: TBLFontDesignMetrics;
     function GetHandle: PBLFontCore;
 
@@ -6185,18 +6256,53 @@ type
   ['{A75AAED4-30E3-4A65-978F-590528AB2DCF}']
     {$REGION 'Internal Declarations'}
     function GetIsNone: Boolean;
+    function GetFaceCount: Integer;
+    function GetFamilyCount: Integer;
     function GetHandle: PBLFontManagerCore;
     {$ENDREGION 'Internal Declarations'}
 
     procedure Reset;
     function Equals(const AOther: IBLFontManager): Boolean;
 
+    procedure Initialize;
+
+    { Whether the font manager contains the given font AFace. }
+    function HasFace(const AFace: IBLFontFace): Boolean;
+
+    { Adds a font AFace to the font manager. Does nothing if the manager already
+      contans the font face.
+
+      Important conditions:
+      * TBLResultCode.FontNotInitializes is raised if the font AFace is invalid.
+      * TBLResultCode.OutOfMemory is raised if memory allocation failed. }
+    procedure AddFace(const AFace: IBLFontFace);
+
+    { Queries a font face by family name and returns the font face or nil if
+      not found. }
+    function QueryFace(const AName: String): IBLFontFace; overload;
+
+    { Queries a font face by family name and returns the font face or nil if
+      not found.
+
+      The AProperties parameter contains query properties that the query engine
+      will consider when doing the match. The best candidate will be selected
+      based on the following rules:
+      * Style has the highest priority.
+      * Weight has the lowest priority. }
+    function QueryFace(const AName: String;
+      const AProperties: TBLFontQueryProperties): IBLFontFace; overload;
+
+    { Queries all font-faces by family name and returns an array of font faces. }
+    function QueryFacesByFamilyName(const AName: String): TArray<IBLFontFace>;
+
     { Whether the font manager is a built-in null instance. }
     property IsNone: Boolean read GetIsNone;
 
-    { Tests whether the font-data is empty (which the same as IsNone in this
-      case). }
-    property IsEmpty: Boolean read GetIsNone;
+    { The number of IBLFontFace instances the font manager holds. }
+    property FaceCount: Integer read GetFaceCount;
+
+    { The number of unique font families the font manager holds. }
+    property FamilyCount: Integer read GetFamilyCount;
 
     { Internal handle for use with the C API }
     property Handle: PBLFontManagerCore read GetHandle;
@@ -6211,10 +6317,19 @@ type
   protected
     { IBLFontManager }
     function GetIsNone: Boolean;
+    function GetFaceCount: Integer;
+    function GetFamilyCount: Integer;
     function GetHandle: PBLFontManagerCore;
 
     procedure Reset;
     function Equals(const AOther: IBLFontManager): Boolean; reintroduce; overload;
+    procedure Initialize;
+    function HasFace(const AFace: IBLFontFace): Boolean;
+    procedure AddFace(const AFace: IBLFontFace);
+    function QueryFace(const AName: String): IBLFontFace; overload;
+    function QueryFace(const AName: String;
+      const AProperties: TBLFontQueryProperties): IBLFontFace; overload;
+    function QueryFacesByFamilyName(const AName: String): TArray<IBLFontFace>;
   {$ENDREGION 'Internal Declarations'}
   public
     constructor Create;
@@ -6386,7 +6501,6 @@ type
 
 {$ENDREGION 'Pixel Converter'}
 
-
 {$REGION 'Style'}
 
 { ============================================================================
@@ -6465,35 +6579,15 @@ type
 type
   { Rendering context create-flags. }
   TBLContextCreateFlag = (
-    { When creating an asynchronous rendering context that uses threads for
-      rendering, the rendering context can sometimes allocate less threads
-      than specified if the built-in thread-pool doesn't have enough threads
-      available. This flag will force the thread-pool to override the thread
-      limit temporarily to allocate at least one thread.
-
-      Note: This flag is ignored if TBLContextCreateInfo.ThreadCount <= 1.
-      If it's specified with ForceAllThreads then the latter has a precedence. }
-    ForceOneThread      = 0,
-
-    { When creating an asynchronous rendering context that uses threads for
-      rendering, the rendering context can sometimes allocate less threads
-      than specified if the built-in thread-pool doesn't have enough threads
-      available. This flag will force the thread-pool to override the thread
-      limit temporarily to fulfill the thread count requirement.
-
-      Note: This flag is ignored if TBLContextCreateInfo.ThreadCount <= 1. }
-    ForceAllThreads     = 1,
-
-    { Fallbacks to a synchronous rendering in case that acquiring threads
-      from the thread-pool failed. This flag only makes sense when the
-      asynchronous mode was specified by having `threadCount` greater than 0.
-      If the rendering context fails to acquire at least one thread it would
-      fallback to synchronous mode instead of staying asynchronous with no
-      worker threads, which is possible.
+    { Fallbacks to a synchronous rendering in case that the rendering engine
+      wasn't able to acquire threads. This flag only makes sense when the
+      asynchronous mode was specified by having TBLContextCreateInfo.ThreadCount
+      greater than 0. If the rendering context fails to acquire at least one
+      thread it would fallback to synchronous mode with no worker threads.
 
       Note: If this flag is specified with TBLContextCreateInfo.ThreadCount = 1
-      it means to immedialy fallback to synchronous rendering. It's only
-      practical to use this flag with 2 threads and higher. }
+      it means to immediately fallback to synchronous rendering. It's only
+      practical to use this flag with 2 or more requested threads. }
     FallbackToSync      = 3,
 
     { If this flag is specified and asynchronous rendering is enabled then
@@ -6549,26 +6643,30 @@ type
     { The rendering context returned or encountered TBLResultCode.InvalidValue,
       which is mostly related to function argument handling. It's very likely
       some argument was wrong when calling TBLContext API. }
-    InvalidValue    = 0,
+    InvalidValue        = 0,
 
     { Invalid state describes something wrong, for example pipeline compilation
       problem. }
-    InvalidState    = 1,
+    InvalidState        = 1,
 
     { The rendering context has encountered invalid geometry. }
-    InvalidGeometry = 2,
+    InvalidGeometry     = 2,
 
     { The rendering context has encountered invalid glyph. }
-    InvalidGlyph    = 3,
+    InvalidGlyph        = 3,
 
     { The rendering context has encountered invalid or uninitialized font. }
-    InvalidFont     = 4,
+    InvalidFont         = 4,
+
+    { Thread pool was exhausted and couldn't acquire the requested number of
+      threads. }
+    ThreadPoolExhausted = 29,
 
     { Out of memory condition. }
-    OutOfMemory     = 30,
+    OutOfMemory         = 30,
 
     { Unknown error, which we don't have flag for. }
-    UnknownError    = 31);
+    UnknownError        = 31);
   TBLContextErrorFlags = set of TBLContextErrorFlag;
 
 type
@@ -8027,11 +8125,8 @@ type
     { Number of threads of the host CPU/CPUs. }
     property ThreadCount: Integer read FHandle.threadCount;
 
-    { Minimum stack size of system threads (operating system specific). }
-    property MinThreadStackSize: Integer read FHandle.minThreadStackSize;
-
-    { Minimum stack size of worker threads used by Blend2D. }
-    property MinWorkerStackSize: Integer read FHandle.minWorkerStackSize;
+    { Minimum stack size of a worker thread used by Blend2D. }
+    property ThreadStackSize: Integer read FHandle.threadStackSize;
 
     { Allocation granularity of virtual memory (includes thread's stack). }
     property AllocationGranularity: Integer read FHandle.allocationGranularity;
@@ -8043,12 +8138,11 @@ type
   ============================================================================ }
 
 type
-  { Blend2D memory information that provides how much memory Blend2D allocated
-    and some other details about memory use. }
-  TBLRuntimeMemoryInfo = record
+  { Provides information about resources allocated by Blend2D. }
+  TBLRuntimeResourceInfo = record
   {$REGION 'Internal Declarations'}
   private
-    FHandle: BLRuntimeMemoryInfo;
+    FHandle: BLRuntimeResourceInfo;
   {$ENDREGION 'Internal Declarations'}
   public
     { Virtual memory used at this time. }
@@ -8077,8 +8171,23 @@ type
 
     { Count of dynamic pipelines created and cached. }
     property DynamicPipelineCount: NativeInt read FHandle.dynamicPipelineCount;
+
+    { Number of active file handles used by Blend2D.
+
+      Note: File handles are counted by IBLFile - when a file is opened a global
+      counter is incremented and when it's closed it's decremented.
+      This means that this number represents the actual use of IBLFile and
+      doesn't consider the origin of the use (it's either Blend2D or user). }
+    property FileHandleCount: NativeInt read FHandle.fileHandleCount;
+
+    { Number of active file mappings used by Blend2D.
+
+      Note: Blend2D maps file content to TBytes container, so this number
+      represents the actual number of TBytes instances that contain a mapped
+      file. }
+    property FileMappingCount: NativeInt read FHandle.fileMappingCount;
   end;
-  PBLRuntimeMemoryInfo = ^TBLRuntimeMemoryInfo;
+  PBLRuntimeMemoryInfo = ^TBLRuntimeResourceInfo;
 
 { ============================================================================
    [BLRuntime]
@@ -8090,10 +8199,9 @@ type
     class procedure Cleanup(const AFlags: TBLRuntimeCleanupFlags); static;
     class procedure QueryBuildInfo(out AInfo: TBLRuntimeBuildInfo); static;
     class procedure QuerySystemInfo(out AInfo: TBLRuntimeSystemInfo); static;
-    class procedure QueryMemoryInfo(out AInfo: TBLRuntimeMemoryInfo); static;
+    class procedure QueryResourceInfo(out AInfo: TBLRuntimeResourceInfo); static;
     class procedure LogMessage(const AMessage: String); overload; static;
     class procedure LogMessage(const AMessage: String; const AArgs: array of const); overload; static;
-    class function GetTickCount: Cardinal; static;
   end;
 
 {$ENDREGION 'Runtime'}
@@ -8370,6 +8478,7 @@ const
     'Too many open files by OS',
     'Too many symbolic links on FS',
     'Too many threads',
+    'Thread pool is exhausted and couldn''t acquire the requested thread count',
     'File is empty (not specific to any OS error).',
     'File open failed',
     'Not a root device/directory',
@@ -8402,6 +8511,7 @@ const
     'Multiple SOF markers (JPEG).',
     'Unsupported SOF marker (JPEG).',
     'Font doesn''t have any data as it''s not initialized.',
+    'Font or font-face was not matched (TBLFontManager).',
     'Font has no character to glyph mapping data.',
     'Font has missing an important table.',
     'Font feature is not available.',
@@ -11320,6 +11430,12 @@ begin
   Result := Pointer(FHandle.impl.data.data);
 end;
 
+function TBLRegion.GetDataEnd: PBLBoxI;
+begin
+  Result := Pointer(FHandle.impl.data.data);
+  Inc(Result, FHandle.impl.data.size);
+end;
+
 function TBLRegion.GetHandle: PBLRegionCore;
 begin
   Result := @FHandle;
@@ -14070,6 +14186,43 @@ begin
   FHandle.outlineType := Ord(AValue);
 end;
 
+{ TBLFontQueryProperties }
+
+function TBLFontQueryProperties.GetStretch: TBLFontStretch;
+begin
+  Result := TBLFontStretch(FHandle.stretch);
+end;
+
+function TBLFontQueryProperties.GetStyle: TBLFontStyle;
+begin
+  Result := TBLFontStyle(FHandle.style);
+end;
+
+function TBLFontQueryProperties.GetWeight: TBLFontWeight;
+begin
+  Result := TBLFontWeight(FHandle.weight);
+end;
+
+procedure TBLFontQueryProperties.Reset;
+begin
+  FillChar(FHandle, SizeOf(FHandle), 0);
+end;
+
+procedure TBLFontQueryProperties.SetStretch(const AValue: TBLFontStretch);
+begin
+  FHandle.stretch := Ord(AValue);
+end;
+
+procedure TBLFontQueryProperties.SetStyle(const AValue: TBLFontStyle);
+begin
+  FHandle.style := Ord(AValue);
+end;
+
+procedure TBLFontQueryProperties.SetWeight(const AValue: TBLFontWeight);
+begin
+  FHandle.weight := Ord(AValue);
+end;
+
 { TBLFontTable }
 
 function TBLFontTable.GetSize: Integer;
@@ -14593,9 +14746,18 @@ begin
   blFontFaceInit(@FHandle);
 end;
 
+constructor TBLFontFace.Create(const AHandle: BLFontFaceCore;
+  const AIsReference: Boolean);
+begin
+  inherited Create;
+  FHandle := AHandle;
+  FIsReference := AIsReference;
+end;
+
 destructor TBLFontFace.Destroy;
 begin
-  blFontFaceDestroy(@FHandle);
+  if (not FIsReference) then
+    blFontFaceDestroy(@FHandle);
   inherited;
 end;
 
@@ -14804,9 +14966,9 @@ begin
   Result.FHandle := FHandle.impl.unicodeCoverage;
 end;
 
-function TBLFontFace.GetUniqueId: UInt64;
+function TBLFontFace.GetUniqueId: TBLUniqueId;
 begin
-  Result := FHandle.impl.faceUniqueId;
+  Result := FHandle.impl.uniqueId;
 end;
 
 function TBLFontFace.GetUnitsPerEm: Integer;
@@ -15065,6 +15227,11 @@ begin
   Result.FHandle := FHandle.impl.metrics;
 end;
 
+function TBLFont.GetMetricsPtr: PBLFontMetrics;
+begin
+  Result := @FHandle.impl.metrics;
+end;
+
 function TBLFont.GetSize: Single;
 begin
   Result := FHandle.impl.metrics.size;
@@ -15146,10 +15313,16 @@ end;
 
 { TBLFontManager }
 
+procedure TBLFontManager.AddFace(const AFace: IBLFontFace);
+begin
+  if (AFace <> nil) then
+    _BLCheck(blFontManagerAddFace(@FHandle, AFace.Handle));
+end;
+
 constructor TBLFontManager.Create;
 begin
   inherited;
-  blFontManagerInit(@FHandle);
+  _BLCheck(blFontManagerInit(@FHandle));
 end;
 
 destructor TBLFontManager.Destroy;
@@ -15178,6 +15351,16 @@ begin
     Result := blFontManagerEquals(@FHandle, AOther.Handle);
 end;
 
+function TBLFontManager.GetFaceCount: Integer;
+begin
+  Result := blFontManagerGetFaceCount(@FHandle);
+end;
+
+function TBLFontManager.GetFamilyCount: Integer;
+begin
+  Result := blFontManagerGetFamilyCount(@FHandle);
+end;
+
 function TBLFontManager.GetHandle: PBLFontManagerCore;
 begin
   Result := @FHandle;
@@ -15186,6 +15369,70 @@ end;
 function TBLFontManager.GetIsNone: Boolean;
 begin
   Result := ((FHandle.impl.implTraits and BL_IMPL_TRAIT_NULL) <> 0);
+end;
+
+function TBLFontManager.HasFace(const AFace: IBLFontFace): Boolean;
+begin
+  if (AFace <> nil) then
+    Result := blFontManagerHasFace(@FHandle, AFace.Handle)
+  else
+    Result := False;
+end;
+
+procedure TBLFontManager.Initialize;
+begin
+  blFontManagerCreate(@FHandle);
+end;
+
+function TBLFontManager.QueryFace(const AName: String): IBLFontFace;
+var
+  Name: UTF8String;
+  Face: BLFontFaceCore;
+begin
+  Name := UTF8String(AName);
+  if (blFontManagerQueryFace(@FHandle, MarshaledAString(Name), Length(Name),
+    nil, @Face) = BL_SUCCESS)
+  then
+    Result := TBLFontFace.Create(Face, True)
+  else
+    Result := nil;
+end;
+
+function TBLFontManager.QueryFace(const AName: String;
+  const AProperties: TBLFontQueryProperties): IBLFontFace;
+var
+  Name: UTF8String;
+  Face: BLFontFaceCore;
+begin
+  Name := UTF8String(AName);
+  if (blFontManagerQueryFace(@FHandle, MarshaledAString(Name), Length(Name),
+    @AProperties.FHandle, @Face) = BL_SUCCESS)
+  then
+    Result := TBLFontFace.Create(Face, True)
+  else
+    Result := nil;
+end;
+
+function TBLFontManager.QueryFacesByFamilyName(
+  const AName: String): TArray<IBLFontFace>;
+var
+  Name: UTF8String;
+  FaceArray: IBLArray;
+  FaceHandles: TArray<BLFontFaceCore>;
+  I: Integer;
+begin
+  Name := UTF8String(AName);
+  FaceArray := TBLUtils.CreateBLArray<BLFontFaceCore>;
+  if (blFontManagerQueryFacesByFamilyName(@FHandle, MarshaledAString(Name),
+    Length(Name), FaceArray.Handle) = BL_SUCCESS) then
+  begin
+    FaceHandles := TBLUtils.BLArrayToArray<BLFontFaceCore>(FaceArray);
+    SetLength(Result, Length(FaceHandles));
+    for I := 0 to Length(Result) - 1 do
+      Result[I] := TBLFontFace.Create(FaceHandles[I], True);
+  end
+  else
+    Result := nil;
 end;
 
 procedure TBLFontManager.Reset;
@@ -17470,11 +17717,6 @@ begin
   _BLCheck(blRuntimeCleanup(Byte(AFlags)));
 end;
 
-class function TBLRuntime.GetTickCount: Cardinal;
-begin
-  Result := blRuntimeGetTickCount;
-end;
-
 class procedure TBLRuntime.LogMessage(const AMessage: String;
   const AArgs: array of const);
 begin
@@ -17491,9 +17733,9 @@ begin
   _BLCheck(blRuntimeQueryInfo(BL_RUNTIME_INFO_TYPE_BUILD, @AInfo));
 end;
 
-class procedure TBLRuntime.QueryMemoryInfo(out AInfo: TBLRuntimeMemoryInfo);
+class procedure TBLRuntime.QueryResourceInfo(out AInfo: TBLRuntimeResourceInfo);
 begin
-  _BLCheck(blRuntimeQueryInfo(BL_RUNTIME_INFO_TYPE_MEMORY, @AInfo));
+  _BLCheck(blRuntimeQueryInfo(BL_RUNTIME_INFO_TYPE_RESOURCE, @AInfo));
 end;
 
 class procedure TBLRuntime.QuerySystemInfo(out AInfo: TBLRuntimeSystemInfo);
@@ -17514,7 +17756,6 @@ end;
 {$ENDREGION 'Internal'}
 
 {$REGION 'Initialization'}
-
 initialization
   BLSetExceptionErrorHandler;
 

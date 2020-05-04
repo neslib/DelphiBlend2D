@@ -55,10 +55,13 @@ type
     FBlend2DCompOp: TBLCompOp;
     FShapeType: TShapeType;
     FRectSize: Double;
+    FRandom: TBLRandom;
     {$IFDEF USE_SKIA}
     FSkiaBlendMode: TSKBlendMode;
     {$ENDIF}
     procedure SetRectCount(const AValue: Integer);
+    function RandomSign: Double;
+    function RandomColor: TAlphaColor;
   protected
     procedure BeforeRender; override;
     procedure RenderFireMonkey(const ACanvas: TCanvas); override;
@@ -146,12 +149,26 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
+  FRandom.Reset($1234);
   FBlend2DCompOp := TBLCompOp.SrcOver;
   {$IFDEF USE_SKIA}
   FSkiaBlendMode := TSKBlendMode.SrcOver;
   {$ENDIF}
   SetRectCount(Trunc(TrackBarRectCount.Value));
   FRectSize := 64;
+end;
+
+function TFormMain.RandomColor: TAlphaColor;
+begin
+  Result := FRandom.NextUInt32;
+end;
+
+function TFormMain.RandomSign: Double;
+begin
+  if (FRandom.NextDouble < 0.5) then
+    Result := 1.0
+  else
+    Result := -1.0;
 end;
 
 procedure TFormMain.RenderBlend2D(const AContext: IBLContext);

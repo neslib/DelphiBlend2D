@@ -57,8 +57,10 @@ type
     FNumPoints: Integer;
     FClosestVertex: Integer;
     FGrabbedVertex: Integer;
+    FRandom: TBLRandom;
   private
     function GetClosestVertex(const AP: TBLPoint; const AMaxDistance: Double): Integer;
+    function RandomColor: TAlphaColor;
   protected
     procedure RenderBlend2D(const AContext: IBLContext); override;
   public
@@ -120,6 +122,7 @@ begin
   { Disable animation and FPS testing }
   Application.OnIdle := nil;
 
+  FRandom.Reset($1234);
   FPts[0].Reset(100, 80);
   FPts[1].Reset(350, 150);
   FNumPoints := 2;
@@ -195,6 +198,11 @@ begin
       PaintBox.Repaint;
     end;
   end;
+end;
+
+function TFormMain.RandomColor: TAlphaColor;
+begin
+  Result := FRandom.NextUInt32;
 end;
 
 procedure TFormMain.RenderBlend2D(const AContext: IBLContext);

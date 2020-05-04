@@ -451,9 +451,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="OSX64\Release\blFmxCircles" Configuration="Release" Class="ProjectOutput">
-                    <Platform Name="OSX64">
-                        <RemoteName>blFmxCircles</RemoteName>
+                <DeployFile LocalName="..\..\..\Bin\blFmxCircles.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>blFmxCircles.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -484,9 +484,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\..\Bin\blFmxCircles.exe" Configuration="Release" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>blFmxCircles.exe</RemoteName>
+                <DeployFile LocalName="OSX64\Release\blFmxCircles" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="OSX64">
+                        <RemoteName>blFmxCircles</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

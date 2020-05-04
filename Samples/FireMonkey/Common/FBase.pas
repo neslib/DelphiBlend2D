@@ -70,9 +70,6 @@ type
     FSkiaStroke: ISKPaint;
     FSkiaBitmapData: TBitmapData;
     {$ENDIF}
-  protected
-    class function RandomSign: Single; static;
-    class function RandomColor: TAlphaColor; static;
   private
     procedure RenderFireMonkeyInternal;
     procedure RenderBlend2DInternal(const AThreadCount: Integer);
@@ -260,24 +257,6 @@ begin
     FFrameCount := 0;
     UpdateStats;
   end;
-end;
-
-class function TFormBase.RandomColor: TAlphaColor;
-var
-  C: TAlphaColorRec absolute Result;
-begin
-  C.R := Random(256);
-  C.G := Random(256);
-  C.B := Random(256);
-  C.A := Random(256);
-end;
-
-class function TFormBase.RandomSign: Single;
-begin
-  if (Random(2) = 0) then
-    Result := -1
-  else
-    Result := 1;
 end;
 
 procedure TFormBase.RenderBlend2DInternal(const AThreadCount: Integer);

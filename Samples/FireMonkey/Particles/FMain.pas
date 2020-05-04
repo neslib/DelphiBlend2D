@@ -43,6 +43,9 @@ type
     TrackBarCount: TTrackBar;
     CheckBoxColors: TCheckBox;
     LabelCount: TLabel;
+    ToolBar1: TToolBar;
+    TrackBarRotation: TTrackBar;
+    LabelRotation: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private const
@@ -79,13 +82,14 @@ uses
 procedure TFormMain.BeforeRender;
 var
   I, J, N, Count, MaxParticles: Integer;
-  Angle, Speed, ASin, ACos: Double;
+  Angle, Speed, ASin, ACos, Rot: Double;
   P: TParticle;
   M: TBLMatrix2D;
 begin
   inherited;
   Count := FParticles.Count;
-  M.ResetToRotation(0.01);
+  Rot := TrackBarRotation.Value;
+  M.ResetToRotation(Rot);
 
   J := 0;
   for I := 0 to Count - 1 do
@@ -111,7 +115,7 @@ begin
       Break;
 
     Angle := FRandom.NextDouble * Pi * 2;
-    Speed := Max(FRandom.NextDouble, 0.1);
+    Speed := Max(FRandom.NextDouble * 2, 0.2);
     SinCos(Angle, ASin, ACos);
 
     P.P.Reset;
