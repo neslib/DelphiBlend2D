@@ -6092,8 +6092,10 @@ type
       const AIndex: Integer; const ALookups: TBLBitWord);
     function GetTextMetrics(const AGlyphBuffer: IBLGlyphBuffer): TBLTextMetrics;
 
+    function GetGlyphBounds(const AGlyphId: Cardinal): TBLBoxI; overload;
     function GetGlyphBounds(const AGlyphData: PCardinal;
-      const AGlyphAdvance, ACount: Integer): TArray<TBLBoxI>;
+      const AGlyphAdvance, ACount: Integer): TArray<TBLBoxI>; overload;
+    function GetGlyphAdvance(const AGlyphId: Cardinal): TBLGlyphPlacement;
     function GetGlyphAdvances(const AGlyphData: PCardinal;
       const AGlyphAdvance, ACount: Integer): TArray<TBLGlyphPlacement>;
     function GetGlyphOutlines(const AGlyphId: Cardinal;
@@ -6220,8 +6222,10 @@ type
       const AIndex: Integer; const ALookups: TBLBitWord);
     function GetTextMetrics(const AGlyphBuffer: IBLGlyphBuffer): TBLTextMetrics;
 
+    function GetGlyphBounds(const AGlyphId: Cardinal): TBLBoxI; overload;
     function GetGlyphBounds(const AGlyphData: PCardinal;
-      const AGlyphAdvance, ACount: Integer): TArray<TBLBoxI>;
+      const AGlyphAdvance, ACount: Integer): TArray<TBLBoxI>; overload;
+    function GetGlyphAdvance(const AGlyphId: Cardinal): TBLGlyphPlacement;
     function GetGlyphAdvances(const AGlyphData: PCardinal;
       const AGlyphAdvance, ACount: Integer): TArray<TBLGlyphPlacement>;
     function GetGlyphOutlines(const AGlyphId: Cardinal;
@@ -15099,12 +15103,22 @@ begin
   Result := TBLUtils.BLArrayToArray<TBLFontFeature>(FHandle.impl.features);
 end;
 
+function TBLFont.GetGlyphAdvance(const AGlyphId: Cardinal): TBLGlyphPlacement;
+begin
+  _BLCheck(blFontGetGlyphAdvances(@FHandle, @AGlyphId, 0, @Result, 1));
+end;
+
 function TBLFont.GetGlyphAdvances(const AGlyphData: PCardinal;
   const AGlyphAdvance, ACount: Integer): TArray<TBLGlyphPlacement>;
 begin
   SetLength(Result, ACount);
   _BLCheck(blFontGetGlyphAdvances(@FHandle, Pointer(AGlyphData), AGlyphAdvance,
     Pointer(Result), ACount));
+end;
+
+function TBLFont.GetGlyphBounds(const AGlyphId: Cardinal): TBLBoxI;
+begin
+  _BLCheck(blFontGetGlyphBounds(@FHandle, @AGlyphId, 0, @Result, 1));
 end;
 
 function TBLFont.GetGlyphBounds(const AGlyphData: PCardinal;
@@ -17762,3 +17776,4 @@ initialization
 {$ENDREGION 'Initialization'}
 
 end.
+

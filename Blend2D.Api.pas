@@ -7,12 +7,19 @@ unit Blend2D.Api;
 
 interface
 
+uses
+  {$IF Defined(MSWINDOWS)}
+  Winapi.Windows;
+  {$ELSEIF Defined(POSIX)}
+  Posix.StdDef;
+  {$ENDIF}
+
 const
   {$IF Defined(WIN32)}
-  LIB_BLEND2D = 'blend2d_win32.dll';
+  _LIB_BLEND2D = 'blend2d_win32.dll';
   _PU = '';
   {$ELSEIF Defined(WIN64)}
-  LIB_BLEND2D = 'blend2d_win64.dll';
+  _LIB_BLEND2D = 'blend2d_win64.dll';
   _PU = '';
   {$ELSEIF Defined(MACOS64) and not Defined(IOS)}
     {$MESSAGE Error 'Blend2D for macOS not available yet'}
@@ -29,1158 +36,1030 @@ const
 type
   PUInt8     = PByte;
   PPUInt8    = ^PByte;
+  PUInt16    = ^UInt16;
+  PInt32     = ^Int32;
   PUInt32    = ^UInt32;
+  PPUInt32   = ^PUInt32;
   PPUTF8Char = ^PUTF8Char;
 
-const
-  BL_VERSION    = (0 shl 16) or (0 shl 8) or 1;
-  BL_BYTE_ORDER = 1234;
-
-type
-  BLResult   = UInt32;
-  BLTag      = UInt32;
-  BLUniqueId = UInt64;
-  BLBitWord  = NativeUInt;
-
-type
-  _PBLTag = ^BLTag;
-
-function BL_MAKE_TAG(const A, B, C, D: Byte): BLTag; inline;
-
-type
-  PBLFileCore = Pointer;
-
-type
-  BLDestroyImplFunc = procedure(impl, destroyData: Pointer); cdecl;
-
-type
-  BLBooleanOp = Integer;
-
-const
-  BL_BOOLEAN_OP_COPY  = 0;
-  BL_BOOLEAN_OP_AND   = 1;
-  BL_BOOLEAN_OP_OR    = 2;
-  BL_BOOLEAN_OP_XOR   = 3;
-  BL_BOOLEAN_OP_SUB   = 4;
-  BL_BOOLEAN_OP_COUNT = 5;
-
-type
-  BLByteOrder = Integer;
-
-const
-  BL_BYTE_ORDER_LE      = 0;
-  BL_BYTE_ORDER_BE      = 1;
-  BL_BYTE_ORDER_NATIVE  = BL_BYTE_ORDER_LE;
-  BL_BYTE_ORDER_SWAPPED = BL_BYTE_ORDER_BE;
-
-type
-  BLContextProperty = Integer;
-
-const
-  BL_CONTEXT_PROPERTY_THREAD_COUNT            = 0;
-  BL_CONTEXT_PROPERTY_ACCUMULATED_ERROR_FLAGS = 10;
-
-type
-  BLContextErrorFlags = Cardinal;
-
-const
-  BL_CONTEXT_ERROR_FLAG_INVALID_VALUE         = $00000001;
-  BL_CONTEXT_ERROR_FLAG_INVALID_STATE         = $00000002;
-  BL_CONTEXT_ERROR_FLAG_INVALID_GEOMETRY      = $00000004;
-  BL_CONTEXT_ERROR_FLAG_INVALID_GLYPH         = $00000008;
-  BL_CONTEXT_ERROR_FLAG_INVALID_FONT          = $00000010;
-  BL_CONTEXT_ERROR_FLAG_THREAD_POOL_EXHAUSTED = $20000000;
-  BL_CONTEXT_ERROR_FLAG_OUT_OF_MEMORY         = $40000000;
-  BL_CONTEXT_ERROR_FLAG_UNKNOWN_ERROR         = $80000000;
-
-type
-  BLClipMode = Integer;
-
-const
-  BL_CLIP_MODE_ALIGNED_RECT   = 0;
-  BL_CLIP_MODE_UNALIGNED_RECT = 1;
-  BL_CLIP_MODE_MASK           = 2;
-  BL_CLIP_MODE_COUNT          = 3;
-
-type
-  BLCompOp = Integer;
-
-const
-  BL_COMP_OP_SRC_OVER     = 0;
-  BL_COMP_OP_SRC_COPY     = 1;
-  BL_COMP_OP_SRC_IN       = 2;
-  BL_COMP_OP_SRC_OUT      = 3;
-  BL_COMP_OP_SRC_ATOP     = 4;
-  BL_COMP_OP_DST_OVER     = 5;
-  BL_COMP_OP_DST_COPY     = 6;
-  BL_COMP_OP_DST_IN       = 7;
-  BL_COMP_OP_DST_OUT      = 8;
-  BL_COMP_OP_DST_ATOP     = 9;
-  BL_COMP_OP_XOR          = 10;
-  BL_COMP_OP_CLEAR        = 11;
-  BL_COMP_OP_PLUS         = 12;
-  BL_COMP_OP_MINUS        = 13;
-  BL_COMP_OP_MODULATE     = 14;
-  BL_COMP_OP_MULTIPLY     = 15;
-  BL_COMP_OP_SCREEN       = 16;
-  BL_COMP_OP_OVERLAY      = 17;
-  BL_COMP_OP_DARKEN       = 18;
-  BL_COMP_OP_LIGHTEN      = 19;
-  BL_COMP_OP_COLOR_DODGE  = 20;
-  BL_COMP_OP_COLOR_BURN   = 21;
-  BL_COMP_OP_LINEAR_BURN  = 22;
-  BL_COMP_OP_LINEAR_LIGHT = 23;
-  BL_COMP_OP_PIN_LIGHT    = 24;
-  BL_COMP_OP_HARD_LIGHT   = 25;
-  BL_COMP_OP_SOFT_LIGHT   = 26;
-  BL_COMP_OP_DIFFERENCE   = 27;
-  BL_COMP_OP_EXCLUSION    = 28;
-  BL_COMP_OP_COUNT        = 29;
-
-type
-  BLContextCreateFlags = Integer;
-
-const
-  BL_CONTEXT_CREATE_FLAG_FALLBACK_TO_SYNC      = $00000008;
-  BL_CONTEXT_CREATE_FLAG_ISOLATED_THREAD_POOL  = $01000000;
-  BL_CONTEXT_CREATE_FLAG_ISOLATED_JIT          = $02000000;
-  BL_CONTEXT_CREATE_FLAG_OVERRIDE_CPU_FEATURES = $04000000;
-
-type
-  BLContextFlushFlags = Integer;
-
-const
-  BL_CONTEXT_FLUSH_SYNC = $80000000;
-
-type
-  BLContextHint = Integer;
-
-const
-  BL_CONTEXT_HINT_RENDERING_QUALITY = 0;
-  BL_CONTEXT_HINT_GRADIENT_QUALITY  = 1;
-  BL_CONTEXT_HINT_PATTERN_QUALITY   = 2;
-  BL_CONTEXT_HINT_COUNT             = 8;
-
-type
-  BLContextOpType = Integer;
-
-const
-  BL_CONTEXT_OP_TYPE_FILL   = 0;
-  BL_CONTEXT_OP_TYPE_STROKE = 1;
-  BL_CONTEXT_OP_TYPE_COUNT  = 2;
-
-type
-  BLContextType = Integer;
-
-const
-  BL_CONTEXT_TYPE_NONE   = 0;
-  BL_CONTEXT_TYPE_DUMMY  = 1;
-  BL_CONTEXT_TYPE_RASTER = 3;
-  BL_CONTEXT_TYPE_COUNT  = 4;
-
-type
-  BLDataAccessFlags = Integer;
-
-const
-  BL_DATA_ACCESS_READ  = 1;
-  BL_DATA_ACCESS_WRITE = 2;
-  BL_DATA_ACCESS_RW    = 3;
-
-type
-  BLDataSourceType = Integer;
-
-const
-  BL_DATA_SOURCE_TYPE_NONE   = 0;
-  BL_DATA_SOURCE_TYPE_MEMORY = 1;
-  BL_DATA_SOURCE_TYPE_FILE   = 2;
-  BL_DATA_SOURCE_TYPE_CUSTOM = 3;
-  BL_DATA_SOURCE_TYPE_COUNT  = 4;
-
-type
-  BLExtendMode = Integer;
-
-const
-  BL_EXTEND_MODE_PAD                 = 0;
-  BL_EXTEND_MODE_REPEAT              = 1;
-  BL_EXTEND_MODE_REFLECT             = 2;
-  BL_EXTEND_MODE_PAD_X_PAD_Y         = 0;
-  BL_EXTEND_MODE_REPEAT_X_REPEAT_Y   = 1;
-  BL_EXTEND_MODE_REFLECT_X_REFLECT_Y = 2;
-  BL_EXTEND_MODE_PAD_X_REPEAT_Y      = 3;
-  BL_EXTEND_MODE_PAD_X_REFLECT_Y     = 4;
-  BL_EXTEND_MODE_REPEAT_X_PAD_Y      = 5;
-  BL_EXTEND_MODE_REPEAT_X_REFLECT_Y  = 6;
-  BL_EXTEND_MODE_REFLECT_X_PAD_Y     = 7;
-  BL_EXTEND_MODE_REFLECT_X_REPEAT_Y  = 8;
-  BL_EXTEND_MODE_SIMPLE_COUNT        = 3;
-  BL_EXTEND_MODE_COMPLEX_COUNT       = 9;
-
-type
-  BLFillRule = Integer;
-
-const
-  BL_FILL_RULE_NON_ZERO = 0;
-  BL_FILL_RULE_EVEN_ODD = 1;
-  BL_FILL_RULE_COUNT    = 2;
-
-type
-  BLFlattenMode = Integer;
-
-const
-  BL_FLATTEN_MODE_DEFAULT   = 0;
-  BL_FLATTEN_MODE_RECURSIVE = 1;
-
-type
-  BLFontDataFlags = Integer;
-
-const
-  BL_FONT_DATA_FLAG_COLLECTION = 1;
-
-type
-  BLFontFaceDiagFlags = Integer;
-
-const
-  BL_FONT_FACE_DIAG_WRONG_NAME_DATA   = 1;
-  BL_FONT_FACE_DIAG_FIXED_NAME_DATA   = 2;
-  BL_FONT_FACE_DIAG_WRONG_KERN_DATA   = 4;
-  BL_FONT_FACE_DIAG_FIXED_KERN_DATA   = 8;
-  BL_FONT_FACE_DIAG_WRONG_CMAP_DATA   = 16;
-  BL_FONT_FACE_DIAG_WRONG_CMAP_FORMAT = 32;
-  BL_FONT_FACE_DIAG_WRONG_GDEF_DATA   = 256;
-  BL_FONT_FACE_DIAG_WRONG_GPOS_DATA   = 1024;
-  BL_FONT_FACE_DIAG_WRONG_GSUB_DATA   = 4096;
-
-type
-  BLFontFaceFlags = Integer;
-
-const
-  BL_FONT_FACE_FLAG_TYPOGRAPHIC_NAMES     = $00000001;
-  BL_FONT_FACE_FLAG_TYPOGRAPHIC_METRICS   = $00000002;
-  BL_FONT_FACE_FLAG_CHAR_TO_GLYPH_MAPPING = $00000004;
-  BL_FONT_FACE_FLAG_HORIZONTAL_METRICS    = $00000010;
-  BL_FONT_FACE_FLAG_VERTICAL_METRICS      = $00000020;
-  BL_FONT_FACE_FLAG_HORIZONTAL_KERNING    = $00000040;
-  BL_FONT_FACE_FLAG_VERTICAL_KERNING      = $00000080;
-  BL_FONT_FACE_FLAG_OPENTYPE_FEATURES     = $00000100;
-  BL_FONT_FACE_FLAG_PANOSE_DATA           = $00000200;
-  BL_FONT_FACE_FLAG_UNICODE_COVERAGE      = $00000400;
-  BL_FONT_FACE_FLAG_BASELINE_Y_EQUALS_0   = $00001000;
-  BL_FONT_FACE_FLAG_LSB_POINT_X_EQUALS_0  = $00002000;
-  BL_FONT_FACE_FLAG_VARIATION_SEQUENCES   = $10000000;
-  BL_FONT_FACE_FLAG_OPENTYPE_VARIATIONS   = $20000000;
-  BL_FONT_FACE_FLAG_SYMBOL_FONT           = $40000000;
-  BL_FONT_FACE_FLAG_LAST_RESORT_FONT      = $80000000;
-
-type
-  BLFontFaceType = Integer;
-
-const
-  BL_FONT_FACE_TYPE_NONE     = 0;
-  BL_FONT_FACE_TYPE_OPENTYPE = 1;
-  BL_FONT_FACE_TYPE_COUNT    = 2;
-
-type
-  BLFontOutlineType = Integer;
-
-const
-  BL_FONT_OUTLINE_TYPE_NONE     = 0;
-  BL_FONT_OUTLINE_TYPE_TRUETYPE = 1;
-  BL_FONT_OUTLINE_TYPE_CFF      = 2;
-  BL_FONT_OUTLINE_TYPE_CFF2     = 3;
-
-type
-  BLFontStretch = Integer;
-
-const
-  BL_FONT_STRETCH_ULTRA_CONDENSED = 1;
-  BL_FONT_STRETCH_EXTRA_CONDENSED = 2;
-  BL_FONT_STRETCH_CONDENSED       = 3;
-  BL_FONT_STRETCH_SEMI_CONDENSED  = 4;
-  BL_FONT_STRETCH_NORMAL          = 5;
-  BL_FONT_STRETCH_SEMI_EXPANDED   = 6;
-  BL_FONT_STRETCH_EXPANDED        = 7;
-  BL_FONT_STRETCH_EXTRA_EXPANDED = 8;
-  BL_FONT_STRETCH_ULTRA_EXPANDED = 9;
-
-type
-  BLFontStringId = Integer;
-
-const
-  BL_FONT_STRING_COPYRIGHT_NOTICE              = 0;
-  BL_FONT_STRING_FAMILY_NAME                   = 1;
-  BL_FONT_STRING_SUBFAMILY_NAME                = 2;
-  BL_FONT_STRING_UNIQUE_IDENTIFIER             = 3;
-  BL_FONT_STRING_FULL_NAME                     = 4;
-  BL_FONT_STRING_VERSION_STRING                = 5;
-  BL_FONT_STRING_POST_SCRIPT_NAME              = 6;
-  BL_FONT_STRING_TRADEMARK                     = 7;
-  BL_FONT_STRING_MANUFACTURER_NAME             = 8;
-  BL_FONT_STRING_DESIGNER_NAME                 = 9;
-  BL_FONT_STRING_DESCRIPTION                   = 10;
-  BL_FONT_STRING_VENDOR_URL                    = 11;
-  BL_FONT_STRING_DESIGNER_URL                  = 12;
-  BL_FONT_STRING_LICENSE_DESCRIPTION           = 13;
-  BL_FONT_STRING_LICENSE_INFO_URL              = 14;
-  BL_FONT_STRING_RESERVED                      = 15;
-  BL_FONT_STRING_TYPOGRAPHIC_FAMILY_NAME       = 16;
-  BL_FONT_STRING_TYPOGRAPHIC_SUBFAMILY_NAME    = 17;
-  BL_FONT_STRING_COMPATIBLE_FULL_NAME          = 18;
-  BL_FONT_STRING_SAMPLE_TEXT                   = 19;
-  BL_FONT_STRING_POST_SCRIPT_CID_NAME          = 20;
-  BL_FONT_STRING_WWS_FAMILY_NAME               = 21;
-  BL_FONT_STRING_WWS_SUBFAMILY_NAME            = 22;
-  BL_FONT_STRING_LIGHT_BACKGROUND_PALETTE      = 23;
-  BL_FONT_STRING_DARK_BACKGROUND_PALETTE       = 24;
-  BL_FONT_STRING_VARIATIONS_POST_SCRIPT_PREFIX = 25;
-  BL_FONT_STRING_COMMON_COUNT                  = 26;
-  BL_FONT_STRING_CUSTOM_START_INDEX            = 255;
-
-type
-  BLFontStyle = Integer;
-
-const
-  BL_FONT_STYLE_NORMAL  = 0;
-  BL_FONT_STYLE_OBLIQUE = 1;
-  BL_FONT_STYLE_ITALIC  = 2;
-  BL_FONT_STYLE_COUNT   = 3;
-
-type
-  BLFontUnicodeCoverageIndex = Integer;
-
-const
-  BL_FONT_UC_INDEX_BASIC_LATIN                             = 0;
-  BL_FONT_UC_INDEX_LATIN1_SUPPLEMENT                       = 1;
-  BL_FONT_UC_INDEX_LATIN_EXTENDED_A                        = 2;
-  BL_FONT_UC_INDEX_LATIN_EXTENDED_B                        = 3;
-  BL_FONT_UC_INDEX_IPA_EXTENSIONS                          = 4;
-  BL_FONT_UC_INDEX_SPACING_MODIFIER_LETTERS                = 5;
-  BL_FONT_UC_INDEX_COMBINING_DIACRITICAL_MARKS             = 6;
-  BL_FONT_UC_INDEX_GREEK_AND_COPTIC                        = 7;
-  BL_FONT_UC_INDEX_COPTIC                                  = 8;
-  BL_FONT_UC_INDEX_CYRILLIC                                = 9;
-  BL_FONT_UC_INDEX_ARMENIAN                                = 10;
-  BL_FONT_UC_INDEX_HEBREW                                  = 11;
-  BL_FONT_UC_INDEX_VAI                                     = 12;
-  BL_FONT_UC_INDEX_ARABIC                                  = 13;
-  BL_FONT_UC_INDEX_NKO                                     = 14;
-  BL_FONT_UC_INDEX_DEVANAGARI                              = 15;
-  BL_FONT_UC_INDEX_BENGALI                                 = 16;
-  BL_FONT_UC_INDEX_GURMUKHI                                = 17;
-  BL_FONT_UC_INDEX_GUJARATI                                = 18;
-  BL_FONT_UC_INDEX_ORIYA                                   = 19;
-  BL_FONT_UC_INDEX_TAMIL                                   = 20;
-  BL_FONT_UC_INDEX_TELUGU                                  = 21;
-  BL_FONT_UC_INDEX_KANNADA                                 = 22;
-  BL_FONT_UC_INDEX_MALAYALAM                               = 23;
-  BL_FONT_UC_INDEX_THAI                                    = 24;
-  BL_FONT_UC_INDEX_LAO                                     = 25;
-  BL_FONT_UC_INDEX_GEORGIAN                                = 26;
-  BL_FONT_UC_INDEX_BALINESE                                = 27;
-  BL_FONT_UC_INDEX_HANGUL_JAMO                             = 28;
-  BL_FONT_UC_INDEX_LATIN_EXTENDED_ADDITIONAL               = 29;
-  BL_FONT_UC_INDEX_GREEK_EXTENDED                          = 30;
-  BL_FONT_UC_INDEX_GENERAL_PUNCTUATION                     = 31;
-  BL_FONT_UC_INDEX_SUPERSCRIPTS_AND_SUBSCRIPTS             = 32;
-  BL_FONT_UC_INDEX_CURRENCY_SYMBOLS                        = 33;
-  BL_FONT_UC_INDEX_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS = 34;
-  BL_FONT_UC_INDEX_LETTERLIKE_SYMBOLS                      = 35;
-  BL_FONT_UC_INDEX_NUMBER_FORMS                            = 36;
-  BL_FONT_UC_INDEX_ARROWS                                  = 37;
-  BL_FONT_UC_INDEX_MATHEMATICAL_OPERATORS                  = 38;
-  BL_FONT_UC_INDEX_MISCELLANEOUS_TECHNICAL                 = 39;
-  BL_FONT_UC_INDEX_CONTROL_PICTURES                        = 40;
-  BL_FONT_UC_INDEX_OPTICAL_CHARACTER_RECOGNITION           = 41;
-  BL_FONT_UC_INDEX_ENCLOSED_ALPHANUMERICS                  = 42;
-  BL_FONT_UC_INDEX_BOX_DRAWING                             = 43;
-  BL_FONT_UC_INDEX_BLOCK_ELEMENTS                          = 44;
-  BL_FONT_UC_INDEX_GEOMETRIC_SHAPES                        = 45;
-  BL_FONT_UC_INDEX_MISCELLANEOUS_SYMBOLS                   = 46;
-  BL_FONT_UC_INDEX_DINGBATS                                = 47;
-  BL_FONT_UC_INDEX_CJK_SYMBOLS_AND_PUNCTUATION             = 48;
-  BL_FONT_UC_INDEX_HIRAGANA                                = 49;
-  BL_FONT_UC_INDEX_KATAKANA                                = 50;
-  BL_FONT_UC_INDEX_BOPOMOFO                                = 51;
-  BL_FONT_UC_INDEX_HANGUL_COMPATIBILITY_JAMO               = 52;
-  BL_FONT_UC_INDEX_PHAGS_PA                                = 53;
-  BL_FONT_UC_INDEX_ENCLOSED_CJK_LETTERS_AND_MONTHS         = 54;
-  BL_FONT_UC_INDEX_CJK_COMPATIBILITY                       = 55;
-  BL_FONT_UC_INDEX_HANGUL_SYLLABLES                        = 56;
-  BL_FONT_UC_INDEX_NON_PLANE                               = 57;
-  BL_FONT_UC_INDEX_PHOENICIAN                              = 58;
-  BL_FONT_UC_INDEX_CJK_UNIFIED_IDEOGRAPHS                  = 59;
-  BL_FONT_UC_INDEX_PRIVATE_USE_PLANE0                      = 60;
-  BL_FONT_UC_INDEX_CJK_STROKES                             = 61;
-  BL_FONT_UC_INDEX_ALPHABETIC_PRESENTATION_FORMS           = 62;
-  BL_FONT_UC_INDEX_ARABIC_PRESENTATION_FORMS_A             = 63;
-  BL_FONT_UC_INDEX_COMBINING_HALF_MARKS                    = 64;
-  BL_FONT_UC_INDEX_VERTICAL_FORMS                          = 65;
-  BL_FONT_UC_INDEX_SMALL_FORM_VARIANTS                     = 66;
-  BL_FONT_UC_INDEX_ARABIC_PRESENTATION_FORMS_B             = 67;
-  BL_FONT_UC_INDEX_HALFWIDTH_AND_FULLWIDTH_FORMS           = 68;
-  BL_FONT_UC_INDEX_SPECIALS                                = 69;
-  BL_FONT_UC_INDEX_TIBETAN                                 = 70;
-  BL_FONT_UC_INDEX_SYRIAC                                  = 71;
-  BL_FONT_UC_INDEX_THAANA                                  = 72;
-  BL_FONT_UC_INDEX_SINHALA                                 = 73;
-  BL_FONT_UC_INDEX_MYANMAR                                 = 74;
-  BL_FONT_UC_INDEX_ETHIOPIC                                = 75;
-  BL_FONT_UC_INDEX_CHEROKEE                                = 76;
-  BL_FONT_UC_INDEX_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS   = 77;
-  BL_FONT_UC_INDEX_OGHAM                                   = 78;
-  BL_FONT_UC_INDEX_RUNIC                                   = 79;
-  BL_FONT_UC_INDEX_KHMER                                   = 80;
-  BL_FONT_UC_INDEX_MONGOLIAN                               = 81;
-  BL_FONT_UC_INDEX_BRAILLE_PATTERNS                        = 82;
-  BL_FONT_UC_INDEX_YI_SYLLABLES_AND_RADICALS               = 83;
-  BL_FONT_UC_INDEX_TAGALOG_HANUNOO_BUHID_TAGBANWA          = 84;
-  BL_FONT_UC_INDEX_OLD_ITALIC                              = 85;
-  BL_FONT_UC_INDEX_GOTHIC                                  = 86;
-  BL_FONT_UC_INDEX_DESERET                                 = 87;
-  BL_FONT_UC_INDEX_MUSICAL_SYMBOLS                         = 88;
-  BL_FONT_UC_INDEX_MATHEMATICAL_ALPHANUMERIC_SYMBOLS       = 89;
-  BL_FONT_UC_INDEX_PRIVATE_USE_PLANE_15_16                 = 90;
-  BL_FONT_UC_INDEX_VARIATION_SELECTORS                     = 91;
-  BL_FONT_UC_INDEX_TAGS                                    = 92;
-  BL_FONT_UC_INDEX_LIMBU                                   = 93;
-  BL_FONT_UC_INDEX_TAI_LE                                  = 94;
-  BL_FONT_UC_INDEX_NEW_TAI_LUE                             = 95;
-  BL_FONT_UC_INDEX_BUGINESE                                = 96;
-  BL_FONT_UC_INDEX_GLAGOLITIC                              = 97;
-  BL_FONT_UC_INDEX_TIFINAGH                                = 98;
-  BL_FONT_UC_INDEX_YIJING_HEXAGRAM_SYMBOLS                 = 99;
-  BL_FONT_UC_INDEX_SYLOTI_NAGRI                            = 100;
-  BL_FONT_UC_INDEX_LINEAR_B_SYLLABARY_AND_IDEOGRAMS        = 101;
-  BL_FONT_UC_INDEX_ANCIENT_GREEK_NUMBERS                   = 102;
-  BL_FONT_UC_INDEX_UGARITIC                                = 103;
-  BL_FONT_UC_INDEX_OLD_PERSIAN                             = 104;
-  BL_FONT_UC_INDEX_SHAVIAN                                 = 105;
-  BL_FONT_UC_INDEX_OSMANYA                                 = 106;
-  BL_FONT_UC_INDEX_CYPRIOT_SYLLABARY                       = 107;
-  BL_FONT_UC_INDEX_KHAROSHTHI                              = 108;
-  BL_FONT_UC_INDEX_TAI_XUAN_JING_SYMBOLS                   = 109;
-  BL_FONT_UC_INDEX_CUNEIFORM                               = 110;
-  BL_FONT_UC_INDEX_COUNTING_ROD_NUMERALS                   = 111;
-  BL_FONT_UC_INDEX_SUNDANESE                               = 112;
-  BL_FONT_UC_INDEX_LEPCHA                                  = 113;
-  BL_FONT_UC_INDEX_OL_CHIKI                                = 114;
-  BL_FONT_UC_INDEX_SAURASHTRA                              = 115;
-  BL_FONT_UC_INDEX_KAYAH_LI                                = 116;
-  BL_FONT_UC_INDEX_REJANG                                  = 117;
-  BL_FONT_UC_INDEX_CHAM                                    = 118;
-  BL_FONT_UC_INDEX_ANCIENT_SYMBOLS                         = 119;
-  BL_FONT_UC_INDEX_PHAISTOS_DISC                           = 120;
-  BL_FONT_UC_INDEX_CARIAN_LYCIAN_LYDIAN                    = 121;
-  BL_FONT_UC_INDEX_DOMINO_AND_MAHJONG_TILES                = 122;
-  BL_FONT_UC_INDEX_INTERNAL_USAGE_123                      = 123;
-  BL_FONT_UC_INDEX_INTERNAL_USAGE_124                      = 124;
-  BL_FONT_UC_INDEX_INTERNAL_USAGE_125                      = 125;
-  BL_FONT_UC_INDEX_INTERNAL_USAGE_126                      = 126;
-  BL_FONT_UC_INDEX_INTERNAL_USAGE_127                      = 127;
-
-type
-  BLFontWeight = Integer;
-
-const
-  BL_FONT_WEIGHT_THIN        = 100;
-  BL_FONT_WEIGHT_EXTRA_LIGHT = 200;
-  BL_FONT_WEIGHT_LIGHT       = 300;
-  BL_FONT_WEIGHT_SEMI_LIGHT  = 350;
-  BL_FONT_WEIGHT_NORMAL      = 400;
-  BL_FONT_WEIGHT_MEDIUM      = 500;
-  BL_FONT_WEIGHT_SEMI_BOLD   = 600;
-  BL_FONT_WEIGHT_BOLD        = 700;
-  BL_FONT_WEIGHT_EXTRA_BOLD  = 800;
-  BL_FONT_WEIGHT_BLACK       = 900;
-  BL_FONT_WEIGHT_EXTRA_BLACK = 950;
-
-type
-  BLFormat = Integer;
-
-const
-  BL_FORMAT_NONE           = 0;
-  BL_FORMAT_PRGB32         = 1;
-  BL_FORMAT_XRGB32         = 2;
-  BL_FORMAT_A8             = 3;
-  BL_FORMAT_COUNT          = 4;
-  BL_FORMAT_RESERVED_COUNT = 16;
-
-type
-  BLFormatFlags = Integer;
-
-const
-  BL_FORMAT_FLAG_RGB            = 1;
-  BL_FORMAT_FLAG_ALPHA          = 2;
-  BL_FORMAT_FLAG_RGBA           = 3;
-  BL_FORMAT_FLAG_LUM            = 4;
-  BL_FORMAT_FLAG_LUMA           = 6;
-  BL_FORMAT_FLAG_INDEXED        = 16;
-  BL_FORMAT_FLAG_PREMULTIPLIED  = 256;
-  BL_FORMAT_FLAG_BYTE_SWAP      = 512;
-  BL_FORMAT_FLAG_BYTE_ALIGNED   = 65536;
-  BL_FORMAT_FLAG_UNDEFINED_BITS = 131072;
-  BL_FORMAT_FLAG_LE             = 0;
-  BL_FORMAT_FLAG_BE             = 512;
-
-type
-  BLGeometryDirection = Integer;
-
-const
-  BL_GEOMETRY_DIRECTION_NONE = 0;
-  BL_GEOMETRY_DIRECTION_CW   = 1;
-  BL_GEOMETRY_DIRECTION_CCW  = 2;
-
-type
-  BLGeometryType = Integer;
-
-const
-  BL_GEOMETRY_TYPE_NONE             = 0;
-  BL_GEOMETRY_TYPE_BOXI             = 1;
-  BL_GEOMETRY_TYPE_BOXD             = 2;
-  BL_GEOMETRY_TYPE_RECTI            = 3;
-  BL_GEOMETRY_TYPE_RECTD            = 4;
-  BL_GEOMETRY_TYPE_CIRCLE           = 5;
-  BL_GEOMETRY_TYPE_ELLIPSE          = 6;
-  BL_GEOMETRY_TYPE_ROUND_RECT       = 7;
-  BL_GEOMETRY_TYPE_ARC              = 8;
-  BL_GEOMETRY_TYPE_CHORD            = 9;
-  BL_GEOMETRY_TYPE_PIE              = 10;
-  BL_GEOMETRY_TYPE_LINE             = 11;
-  BL_GEOMETRY_TYPE_TRIANGLE         = 12;
-  BL_GEOMETRY_TYPE_POLYLINEI        = 13;
-  BL_GEOMETRY_TYPE_POLYLINED        = 14;
-  BL_GEOMETRY_TYPE_POLYGONI         = 15;
-  BL_GEOMETRY_TYPE_POLYGOND         = 16;
-  BL_GEOMETRY_TYPE_ARRAY_VIEW_BOXI  = 17;
-  BL_GEOMETRY_TYPE_ARRAY_VIEW_BOXD  = 18;
-  BL_GEOMETRY_TYPE_ARRAY_VIEW_RECTI = 19;
-  BL_GEOMETRY_TYPE_ARRAY_VIEW_RECTD = 20;
-  BL_GEOMETRY_TYPE_PATH             = 21;
-  BL_GEOMETRY_TYPE_REGION           = 22;
-  BL_GEOMETRY_TYPE_COUNT            = 23;
-
-type
-  BLGlyphPlacementType = Integer;
-
-const
-  BL_GLYPH_PLACEMENT_TYPE_NONE           = 0;
-  BL_GLYPH_PLACEMENT_TYPE_ADVANCE_OFFSET = 1;
-  BL_GLYPH_PLACEMENT_TYPE_DESIGN_UNITS   = 2;
-  BL_GLYPH_PLACEMENT_TYPE_USER_UNITS     = 3;
-  BL_GLYPH_PLACEMENT_TYPE_ABSOLUTE_UNITS = 4;
-
-type
-  BLGlyphRunFlags = Integer;
-
-const
-  BL_GLYPH_RUN_FLAG_UCS4_CONTENT      = $10000000;
-  BL_GLYPH_RUN_FLAG_INVALID_TEXT      = $20000000;
-  BL_GLYPH_RUN_FLAG_UNDEFINED_GLYPHS  = $40000000;
-  BL_GLYPH_RUN_FLAG_INVALID_FONT_DATA = $80000000;
-
-type
-  BLGradientQuality = Integer;
-
-const
-  BL_GRADIENT_QUALITY_NEAREST = 0;
-  BL_GRADIENT_QUALITY_COUNT   = 1;
-
-type
-  BLGradientType = Integer;
-
-const
-  BL_GRADIENT_TYPE_LINEAR  = 0;
-  BL_GRADIENT_TYPE_RADIAL  = 1;
-  BL_GRADIENT_TYPE_CONICAL = 2;
-  BL_GRADIENT_TYPE_COUNT   = 3;
-
-type
-  BLGradientValue = Integer;
-
-const
-  BL_GRADIENT_VALUE_COMMON_X0     = 0;
-  BL_GRADIENT_VALUE_COMMON_Y0     = 1;
-  BL_GRADIENT_VALUE_COMMON_X1     = 2;
-  BL_GRADIENT_VALUE_COMMON_Y1     = 3;
-  BL_GRADIENT_VALUE_RADIAL_R0     = 4;
-  BL_GRADIENT_VALUE_CONICAL_ANGLE = 2;
-  BL_GRADIENT_VALUE_COUNT         = 6;
-
-type
-  BLHitTest = Integer;
-
-const
-  BL_HIT_TEST_IN      = 0;
-  BL_HIT_TEST_PART    = 1;
-  BL_HIT_TEST_OUT     = 2;
-  BL_HIT_TEST_INVALID = -1;
-
-type
-  BLImageInfoFlags = Integer;
-
-const
-  BL_IMAGE_INFO_FLAG_PROGRESSIVE = 1;
-
-type
-  BLImageScaleFilter = Integer;
-
-const
-  BL_IMAGE_SCALE_FILTER_NONE     = 0;
-  BL_IMAGE_SCALE_FILTER_NEAREST  = 1;
-  BL_IMAGE_SCALE_FILTER_BILINEAR = 2;
-  BL_IMAGE_SCALE_FILTER_BICUBIC  = 3;
-  BL_IMAGE_SCALE_FILTER_BELL     = 4;
-  BL_IMAGE_SCALE_FILTER_GAUSS    = 5;
-  BL_IMAGE_SCALE_FILTER_HERMITE  = 6;
-  BL_IMAGE_SCALE_FILTER_HANNING  = 7;
-  BL_IMAGE_SCALE_FILTER_CATROM   = 8;
-  BL_IMAGE_SCALE_FILTER_BESSEL   = 9;
-  BL_IMAGE_SCALE_FILTER_SINC     = 10;
-  BL_IMAGE_SCALE_FILTER_LANCZOS  = 11;
-  BL_IMAGE_SCALE_FILTER_BLACKMAN = 12;
-  BL_IMAGE_SCALE_FILTER_MITCHELL = 13;
-  BL_IMAGE_SCALE_FILTER_USER     = 14;
-  BL_IMAGE_SCALE_FILTER_COUNT    = 15;
-
-type
-  BLImplTraits = Integer;
-
-const
-  BL_IMPL_TRAIT_MUTABLE   = 1;
-  BL_IMPL_TRAIT_IMMUTABLE = 2;
-  BL_IMPL_TRAIT_EXTERNAL  = 4;
-  BL_IMPL_TRAIT_FOREIGN   = 8;
-  BL_IMPL_TRAIT_VIRT      = 16;
-  BL_IMPL_TRAIT_NULL      = 128;
-
-type
-  BLImplType = Integer;
-
-const
-  BL_IMPL_TYPE_NULL                   = 0;
-  BL_IMPL_TYPE_ARRAY_VAR              = 1;
-  BL_IMPL_TYPE_ARRAY_I8               = 2;
-  BL_IMPL_TYPE_ARRAY_U8               = 3;
-  BL_IMPL_TYPE_ARRAY_I16              = 4;
-  BL_IMPL_TYPE_ARRAY_U16              = 5;
-  BL_IMPL_TYPE_ARRAY_I32              = 6;
-  BL_IMPL_TYPE_ARRAY_U32              = 7;
-  BL_IMPL_TYPE_ARRAY_I64              = 8;
-  BL_IMPL_TYPE_ARRAY_U64              = 9;
-  BL_IMPL_TYPE_ARRAY_F32              = 10;
-  BL_IMPL_TYPE_ARRAY_F64              = 11;
-  BL_IMPL_TYPE_ARRAY_STRUCT_1         = 12;
-  BL_IMPL_TYPE_ARRAY_STRUCT_2         = 13;
-  BL_IMPL_TYPE_ARRAY_STRUCT_3         = 14;
-  BL_IMPL_TYPE_ARRAY_STRUCT_4         = 15;
-  BL_IMPL_TYPE_ARRAY_STRUCT_6         = 16;
-  BL_IMPL_TYPE_ARRAY_STRUCT_8         = 17;
-  BL_IMPL_TYPE_ARRAY_STRUCT_10        = 18;
-  BL_IMPL_TYPE_ARRAY_STRUCT_12        = 19;
-  BL_IMPL_TYPE_ARRAY_STRUCT_16        = 20;
-  BL_IMPL_TYPE_ARRAY_STRUCT_20        = 21;
-  BL_IMPL_TYPE_ARRAY_STRUCT_24        = 22;
-  BL_IMPL_TYPE_ARRAY_STRUCT_32        = 23;
-  BL_IMPL_TYPE_BIT_ARRAY              = 32;
-  BL_IMPL_TYPE_BIT_SET                = 33;
-  BL_IMPL_TYPE_STRING                 = 39;
-  BL_IMPL_TYPE_PATH                   = 40;
-  BL_IMPL_TYPE_REGION                 = 43;
-  BL_IMPL_TYPE_IMAGE                  = 44;
-  BL_IMPL_TYPE_IMAGE_CODEC            = 45;
-  BL_IMPL_TYPE_IMAGE_DECODER          = 46;
-  BL_IMPL_TYPE_IMAGE_ENCODER          = 47;
-  BL_IMPL_TYPE_GRADIENT               = 48;
-  BL_IMPL_TYPE_PATTERN                = 49;
-  BL_IMPL_TYPE_CONTEXT                = 55;
-  BL_IMPL_TYPE_FONT                   = 56;
-  BL_IMPL_TYPE_FONT_FACE              = 57;
-  BL_IMPL_TYPE_FONT_DATA              = 58;
-  BL_IMPL_TYPE_FONT_MANAGER           = 59;
-  BL_IMPL_TYPE_FONT_FEATURE_OPTIONS   = 60;
-  BL_IMPL_TYPE_FONT_VARIATION_OPTIONS = 61;
-  BL_IMPL_TYPE_COUNT                  = 64;
-
-type
-  BLMatrix2DOp = Integer;
-
-const
-  BL_MATRIX2D_OP_RESET          = 0;
-  BL_MATRIX2D_OP_ASSIGN         = 1;
-  BL_MATRIX2D_OP_TRANSLATE      = 2;
-  BL_MATRIX2D_OP_SCALE          = 3;
-  BL_MATRIX2D_OP_SKEW           = 4;
-  BL_MATRIX2D_OP_ROTATE         = 5;
-  BL_MATRIX2D_OP_ROTATE_PT      = 6;
-  BL_MATRIX2D_OP_TRANSFORM      = 7;
-  BL_MATRIX2D_OP_POST_TRANSLATE = 8;
-  BL_MATRIX2D_OP_POST_SCALE     = 9;
-  BL_MATRIX2D_OP_POST_SKEW      = 10;
-  BL_MATRIX2D_OP_POST_ROTATE    = 11;
-  BL_MATRIX2D_OP_POST_ROTATE_PT = 12;
-  BL_MATRIX2D_OP_POST_TRANSFORM = 13;
-  BL_MATRIX2D_OP_COUNT          = 14;
-
-type
-  BLMatrix2DType = Integer;
-
-const
-  BL_MATRIX2D_TYPE_IDENTITY  = 0;
-  BL_MATRIX2D_TYPE_TRANSLATE = 1;
-  BL_MATRIX2D_TYPE_SCALE     = 2;
-  BL_MATRIX2D_TYPE_SWAP      = 3;
-  BL_MATRIX2D_TYPE_AFFINE    = 4;
-  BL_MATRIX2D_TYPE_INVALID   = 5;
-  BL_MATRIX2D_TYPE_COUNT     = 6;
-
-type
-  BLMatrix2DValue = Integer;
-
-const
-  BL_MATRIX2D_VALUE_00    = 0;
-  BL_MATRIX2D_VALUE_01    = 1;
-  BL_MATRIX2D_VALUE_10    = 2;
-  BL_MATRIX2D_VALUE_11    = 3;
-  BL_MATRIX2D_VALUE_20    = 4;
-  BL_MATRIX2D_VALUE_21    = 5;
-  BL_MATRIX2D_VALUE_COUNT = 6;
-
-type
-  BLModifyOp = Integer;
-
-const
-  BL_MODIFY_OP_ASSIGN_FIT  = 0;
-  BL_MODIFY_OP_ASSIGN_GROW = 1;
-  BL_MODIFY_OP_APPEND_FIT  = 2;
-  BL_MODIFY_OP_APPEND_GROW = 3;
-  BL_MODIFY_OP_COUNT       = 4;
-
-type
-  BLOffsetMode = Integer;
-
-const
-  BL_OFFSET_MODE_DEFAULT   = 0;
-  BL_OFFSET_MODE_ITERATIVE = 1;
-
-type
-  BLPathCmd = Integer;
-
-const
-  BL_PATH_CMD_MOVE  = 0;
-  BL_PATH_CMD_ON    = 1;
-  BL_PATH_CMD_QUAD  = 2;
-  BL_PATH_CMD_CUBIC = 3;
-  BL_PATH_CMD_CLOSE = 4;
-  BL_PATH_CMD_COUNT = 5;
-
-type
-  BLPathCmdExtra = Integer;
-
-const
-  BL_PATH_CMD_PRESERVE = $FFFFFFFF;
-
-type
-  BLPathFlags = Integer;
-
-const
-  BL_PATH_FLAG_EMPTY    = $1;
-  BL_PATH_FLAG_MULTIPLE = $2;
-  BL_PATH_FLAG_QUADS    = $4;
-  BL_PATH_FLAG_CUBICS   = $8;
-  BL_PATH_FLAG_INVALID  = $40000000;
-  BL_PATH_FLAG_DIRTY    = $80000000;
-
-type
-  BLPathReverseMode = Integer;
-
-const
-  BL_PATH_REVERSE_MODE_COMPLETE = 0;
-  BL_PATH_REVERSE_MODE_SEPARATE = 1;
-  BL_PATH_REVERSE_MODE_COUNT    = 2;
-
-type
-  BLPatternQuality = Integer;
-
-const
-  BL_PATTERN_QUALITY_NEAREST  = 0;
-  BL_PATTERN_QUALITY_BILINEAR = 1;
-  BL_PATTERN_QUALITY_COUNT    = 2;
-
-type
-  BLPixelConverterCreateFlags = Integer;
-
-const
-  BL_PIXEL_CONVERTER_CREATE_FLAG_DONT_COPY_PALETTE = 1;
-  BL_PIXEL_CONVERTER_CREATE_FLAG_ALTERABLE_PALETTE = 2;
-  BL_PIXEL_CONVERTER_CREATE_FLAG_NO_MULTI_STEP     = 4;
-
-type
-  BLRegionType = Integer;
-
-const
-  BL_REGION_TYPE_EMPTY   = 0;
-  BL_REGION_TYPE_RECT    = 1;
-  BL_REGION_TYPE_COMPLEX = 2;
-  BL_REGION_TYPE_COUNT   = 3;
-
-type
-  BLRenderingQuality = Integer;
-
-const
-  BL_RENDERING_QUALITY_ANTIALIAS = 0;
-  BL_RENDERING_QUALITY_COUNT     = 1;
-
-type
-  BLResultCode = Integer;
-
-const
-  BL_SUCCESS                            = 0;
-  BL_ERROR_START_INDEX                  = 65536;
-  BL_ERROR_OUT_OF_MEMORY                = 65536;
-  BL_ERROR_INVALID_VALUE                = 65537;
-  BL_ERROR_INVALID_STATE                = 65538;
-  BL_ERROR_INVALID_HANDLE               = 65539;
-  BL_ERROR_VALUE_TOO_LARGE              = 65540;
-  BL_ERROR_NOT_INITIALIZED              = 65541;
-  BL_ERROR_NOT_IMPLEMENTED              = 65542;
-  BL_ERROR_NOT_PERMITTED                = 65543;
-  BL_ERROR_IO                           = 65544;
-  BL_ERROR_BUSY                         = 65545;
-  BL_ERROR_INTERRUPTED                  = 65546;
-  BL_ERROR_TRY_AGAIN                    = 65547;
-  BL_ERROR_TIMED_OUT                    = 65548;
-  BL_ERROR_BROKEN_PIPE                  = 65549;
-  BL_ERROR_INVALID_SEEK                 = 65550;
-  BL_ERROR_SYMLINK_LOOP                 = 65551;
-  BL_ERROR_FILE_TOO_LARGE               = 65552;
-  BL_ERROR_ALREADY_EXISTS               = 65553;
-  BL_ERROR_ACCESS_DENIED                = 65554;
-  BL_ERROR_MEDIA_CHANGED                = 65555;
-  BL_ERROR_READ_ONLY_FS                 = 65556;
-  BL_ERROR_NO_DEVICE                    = 65557;
-  BL_ERROR_NO_ENTRY                     = 65558;
-  BL_ERROR_NO_MEDIA                     = 65559;
-  BL_ERROR_NO_MORE_DATA                 = 65560;
-  BL_ERROR_NO_MORE_FILES                = 65561;
-  BL_ERROR_NO_SPACE_LEFT                = 65562;
-  BL_ERROR_NOT_EMPTY                    = 65563;
-  BL_ERROR_NOT_FILE                     = 65564;
-  BL_ERROR_NOT_DIRECTORY                = 65565;
-  BL_ERROR_NOT_SAME_DEVICE              = 65566;
-  BL_ERROR_NOT_BLOCK_DEVICE             = 65567;
-  BL_ERROR_INVALID_FILE_NAME            = 65568;
-  BL_ERROR_FILE_NAME_TOO_LONG           = 65569;
-  BL_ERROR_TOO_MANY_OPEN_FILES          = 65570;
-  BL_ERROR_TOO_MANY_OPEN_FILES_BY_OS    = 65571;
-  BL_ERROR_TOO_MANY_LINKS               = 65572;
-  BL_ERROR_TOO_MANY_THREADS             = 65573;
-  BL_ERROR_THREAD_POOL_EXHAUSTED        = 65574;
-  BL_ERROR_FILE_EMPTY                   = 65575;
-  BL_ERROR_OPEN_FAILED                  = 65576;
-  BL_ERROR_NOT_ROOT_DEVICE              = 65577;
-  BL_ERROR_UNKNOWN_SYSTEM_ERROR         = 65578;
-  BL_ERROR_INVALID_ALIGNMENT            = 65579;
-  BL_ERROR_INVALID_SIGNATURE            = 65580;
-  BL_ERROR_INVALID_DATA                 = 65581;
-  BL_ERROR_INVALID_STRING               = 65582;
-  BL_ERROR_DATA_TRUNCATED               = 65583;
-  BL_ERROR_DATA_TOO_LARGE               = 65584;
-  BL_ERROR_DECOMPRESSION_FAILED         = 65585;
-  BL_ERROR_INVALID_GEOMETRY             = 65586;
-  BL_ERROR_NO_MATCHING_VERTEX           = 65587;
-  BL_ERROR_NO_MATCHING_COOKIE           = 65588;
-  BL_ERROR_NO_STATES_TO_RESTORE         = 65589;
-  BL_ERROR_IMAGE_TOO_LARGE              = 65590;
-  BL_ERROR_IMAGE_NO_MATCHING_CODEC      = 65591;
-  BL_ERROR_IMAGE_UNKNOWN_FILE_FORMAT    = 65592;
-  BL_ERROR_IMAGE_DECODER_NOT_PROVIDED   = 65593;
-  BL_ERROR_IMAGE_ENCODER_NOT_PROVIDED   = 65594;
-  BL_ERROR_PNG_MULTIPLE_IHDR            = 65595;
-  BL_ERROR_PNG_INVALID_IDAT             = 65596;
-  BL_ERROR_PNG_INVALID_IEND             = 65597;
-  BL_ERROR_PNG_INVALID_PLTE             = 65598;
-  BL_ERROR_PNG_INVALID_TRNS             = 65599;
-  BL_ERROR_PNG_INVALID_FILTER           = 65600;
-  BL_ERROR_JPEG_UNSUPPORTED_FEATURE     = 65601;
-  BL_ERROR_JPEG_INVALID_SOS             = 65602;
-  BL_ERROR_JPEG_INVALID_SOF             = 65603;
-  BL_ERROR_JPEG_MULTIPLE_SOF            = 65604;
-  BL_ERROR_JPEG_UNSUPPORTED_SOF         = 65605;
-  BL_ERROR_FONT_NOT_INITIALIZED         = 65606;
-  BL_ERROR_FONT_NO_MATCH                = 65607;
-  BL_ERROR_FONT_NO_CHARACTER_MAPPING    = 65608;
-  BL_ERROR_FONT_MISSING_IMPORTANT_TABLE = 65609;
-  BL_ERROR_FONT_FEATURE_NOT_AVAILABLE   = 65610;
-  BL_ERROR_FONT_CFF_INVALID_DATA        = 65611;
-  BL_ERROR_FONT_PROGRAM_TERMINATED      = 65612;
-  BL_ERROR_INVALID_GLYPH                = 65613;
-
-type
-  BLRuntimeLimits = Integer;
-
-const
-  BL_RUNTIME_MAX_IMAGE_SIZE   = 65535;
-  BL_RUNTIME_MAX_THREAD_COUNT = 32;
-
-type
-  BLRuntimeInfoType = Integer;
-
-const
-  BL_RUNTIME_INFO_TYPE_BUILD    = 0;
-  BL_RUNTIME_INFO_TYPE_SYSTEM   = 1;
-  BL_RUNTIME_INFO_TYPE_RESOURCE = 2;
-  BL_RUNTIME_INFO_TYPE_COUNT    = 3;
-
-type
-  BLRuntimeBuildType = Integer;
-
-const
-  BL_RUNTIME_BUILD_TYPE_DEBUG   = 0;
-  BL_RUNTIME_BUILD_TYPE_RELEASE = 1;
-
-type
-  BLRuntimeCpuArch = Integer;
-
-const
-  BL_RUNTIME_CPU_ARCH_UNKNOWN = 0;
-  BL_RUNTIME_CPU_ARCH_X86     = 1;
-  BL_RUNTIME_CPU_ARCH_ARM     = 2;
-  BL_RUNTIME_CPU_ARCH_MIPS    = 3;
-
-type
-  BLRuntimeCpuFeatures = Integer;
-
-const
-  BL_RUNTIME_CPU_FEATURE_X86_SSE2   = 1;
-  BL_RUNTIME_CPU_FEATURE_X86_SSE3   = 2;
-  BL_RUNTIME_CPU_FEATURE_X86_SSSE3  = 4;
-  BL_RUNTIME_CPU_FEATURE_X86_SSE4_1 = 8;
-  BL_RUNTIME_CPU_FEATURE_X86_SSE4_2 = 16;
-  BL_RUNTIME_CPU_FEATURE_X86_AVX    = 32;
-  BL_RUNTIME_CPU_FEATURE_X86_AVX2   = 64;
-
-type
-  BLRuntimeCleanupFlags = Integer;
-
-const
-  BL_RUNTIME_CLEANUP_OBJECT_POOL = 1;
-  BL_RUNTIME_CLEANUP_ZEROED_POOL = 2;
-  BL_RUNTIME_CLEANUP_THREAD_POOL = 16;
-  BL_RUNTIME_CLEANUP_EVERYTHING  = $FFFFFFFF;
-
-type
-  BLStrokeCap = Integer;
-
-const
-  BL_STROKE_CAP_BUTT         = 0;
-  BL_STROKE_CAP_SQUARE       = 1;
-  BL_STROKE_CAP_ROUND        = 2;
-  BL_STROKE_CAP_ROUND_REV    = 3;
-  BL_STROKE_CAP_TRIANGLE     = 4;
-  BL_STROKE_CAP_TRIANGLE_REV = 5;
-  BL_STROKE_CAP_COUNT        = 6;
+{$REGION 'api.h'}
+const
+  { These constants are not in the header file, but taken from the BL_VERSION
+    macro in api.h }
+  _BL_VERSION_MAJOR = 0;
+  _BL_VERSION_MINOR = 12;
+  _BL_VERSION_PATCH = 0;
+
+const
+  _BL_VERSION    = (_BL_VERSION_MAJOR shl 16) or (_BL_VERSION_MINOR shl 8) or _BL_VERSION_PATCH;
+  _BL_BYTE_ORDER = 1234;
+
+type
+  _BLResult   = UInt32;
+  _BLTag      = UInt32;
+  _BLUniqueId = UInt64;
+  _PBLUnknown = Pointer;
+
+type
+  _BLDebugMessageSinkFunc = procedure(const message: PUTF8Char; size: size_t; userData: Pointer); cdecl;
+
+type
+  _PBLTag = ^_BLTag;
+
+function _BL_MAKE_TAG(const A, B, C, D: Byte): _BLTag; inline;
+
+type
+  _BLResultCode = Integer;
+
+const
+  _BL_SUCCESS                            = 0;
+  _BL_ERROR_START_INDEX                  = 65536;
+  _BL_ERROR_OUT_OF_MEMORY                = 65536;
+  _BL_ERROR_INVALID_VALUE                = 65537;
+  _BL_ERROR_INVALID_STATE                = 65538;
+  _BL_ERROR_INVALID_HANDLE               = 65539;
+  _BL_ERROR_INVALID_CONVERSION           = 65540;
+  _BL_ERROR_OVERFLOW                     = 65541;
+  _BL_ERROR_NOT_INITIALIZED              = 65542;
+  _BL_ERROR_NOT_IMPLEMENTED              = 65543;
+  _BL_ERROR_NOT_PERMITTED                = 65544;
+  _BL_ERROR_IO                           = 65545;
+  _BL_ERROR_BUSY                         = 65546;
+  _BL_ERROR_INTERRUPTED                  = 65547;
+  _BL_ERROR_TRY_AGAIN                    = 65548;
+  _BL_ERROR_TIMED_OUT                    = 65549;
+  _BL_ERROR_BROKEN_PIPE                  = 65550;
+  _BL_ERROR_INVALID_SEEK                 = 65551;
+  _BL_ERROR_SYMLINK_LOOP                 = 65552;
+  _BL_ERROR_FILE_TOO_LARGE               = 65553;
+  _BL_ERROR_ALREADY_EXISTS               = 65554;
+  _BL_ERROR_ACCESS_DENIED                = 65555;
+  _BL_ERROR_MEDIA_CHANGED                = 65556;
+  _BL_ERROR_READ_ONLY_FS                 = 65557;
+  _BL_ERROR_NO_DEVICE                    = 65558;
+  _BL_ERROR_NO_ENTRY                     = 65559;
+  _BL_ERROR_NO_MEDIA                     = 65560;
+  _BL_ERROR_NO_MORE_DATA                 = 65561;
+  _BL_ERROR_NO_MORE_FILES                = 65562;
+  _BL_ERROR_NO_SPACE_LEFT                = 65563;
+  _BL_ERROR_NOT_EMPTY                    = 65564;
+  _BL_ERROR_NOT_FILE                     = 65565;
+  _BL_ERROR_NOT_DIRECTORY                = 65566;
+  _BL_ERROR_NOT_SAME_DEVICE              = 65567;
+  _BL_ERROR_NOT_BLOCK_DEVICE             = 65568;
+  _BL_ERROR_INVALID_FILE_NAME            = 65569;
+  _BL_ERROR_FILE_NAME_TOO_LONG           = 65570;
+  _BL_ERROR_TOO_MANY_OPEN_FILES          = 65571;
+  _BL_ERROR_TOO_MANY_OPEN_FILES_BY_OS    = 65572;
+  _BL_ERROR_TOO_MANY_LINKS               = 65573;
+  _BL_ERROR_TOO_MANY_THREADS             = 65574;
+  _BL_ERROR_THREAD_POOL_EXHAUSTED        = 65575;
+  _BL_ERROR_FILE_EMPTY                   = 65576;
+  _BL_ERROR_OPEN_FAILED                  = 65577;
+  _BL_ERROR_NOT_ROOT_DEVICE              = 65578;
+  _BL_ERROR_UNKNOWN_SYSTEM_ERROR         = 65579;
+  _BL_ERROR_INVALID_ALIGNMENT            = 65580;
+  _BL_ERROR_INVALID_SIGNATURE            = 65581;
+  _BL_ERROR_INVALID_DATA                 = 65582;
+  _BL_ERROR_INVALID_STRING               = 65583;
+  _BL_ERROR_INVALID_KEY                  = 65584;
+  _BL_ERROR_DATA_TRUNCATED               = 65585;
+  _BL_ERROR_DATA_TOO_LARGE               = 65586;
+  _BL_ERROR_DECOMPRESSION_FAILED         = 65587;
+  _BL_ERROR_INVALID_GEOMETRY             = 65588;
+  _BL_ERROR_NO_MATCHING_VERTEX           = 65589;
+  _BL_ERROR_INVALID_CREATE_FLAGS         = 65590;
+  _BL_ERROR_NO_MATCHING_COOKIE           = 65591;
+  _BL_ERROR_NO_STATES_TO_RESTORE         = 65592;
+  _BL_ERROR_TOO_MANY_SAVED_STATES        = 65593;
+  _BL_ERROR_IMAGE_TOO_LARGE              = 65594;
+  _BL_ERROR_IMAGE_NO_MATCHING_CODEC      = 65595;
+  _BL_ERROR_IMAGE_UNKNOWN_FILE_FORMAT    = 65596;
+  _BL_ERROR_IMAGE_DECODER_NOT_PROVIDED   = 65597;
+  _BL_ERROR_IMAGE_ENCODER_NOT_PROVIDED   = 65598;
+  _BL_ERROR_PNG_MULTIPLE_IHDR            = 65599;
+  _BL_ERROR_PNG_INVALID_IDAT             = 65600;
+  _BL_ERROR_PNG_INVALID_IEND             = 65601;
+  _BL_ERROR_PNG_INVALID_PLTE             = 65602;
+  _BL_ERROR_PNG_INVALID_TRNS             = 65603;
+  _BL_ERROR_PNG_INVALID_FILTER           = 65604;
+  _BL_ERROR_JPEG_UNSUPPORTED_FEATURE     = 65605;
+  _BL_ERROR_JPEG_INVALID_SOS             = 65606;
+  _BL_ERROR_JPEG_INVALID_SOF             = 65607;
+  _BL_ERROR_JPEG_MULTIPLE_SOF            = 65608;
+  _BL_ERROR_JPEG_UNSUPPORTED_SOF         = 65609;
+  _BL_ERROR_FONT_NOT_INITIALIZED         = 65610;
+  _BL_ERROR_FONT_NO_MATCH                = 65611;
+  _BL_ERROR_FONT_NO_CHARACTER_MAPPING    = 65612;
+  _BL_ERROR_FONT_MISSING_IMPORTANT_TABLE = 65613;
+  _BL_ERROR_FONT_FEATURE_NOT_AVAILABLE   = 65614;
+  _BL_ERROR_FONT_CFF_INVALID_DATA        = 65615;
+  _BL_ERROR_FONT_PROGRAM_TERMINATED      = 65616;
+  _BL_ERROR_GLYPH_SUBSTITUTION_TOO_LARGE = 65617;
+  _BL_ERROR_INVALID_GLYPH                = 65618;
 
 type
-  BLStrokeCapPosition = Integer;
+  _BLByteOrder = Integer;
 
 const
-  BL_STROKE_CAP_POSITION_START = 0;
-  BL_STROKE_CAP_POSITION_END   = 1;
-  BL_STROKE_CAP_POSITION_COUNT = 2;
+  _BL_BYTE_ORDER_LE      = 0;
+  _BL_BYTE_ORDER_BE      = 1;
+  _BL_BYTE_ORDER_NATIVE  = _BL_BYTE_ORDER_LE;
+  _BL_BYTE_ORDER_SWAPPED = _BL_BYTE_ORDER_BE;
 
 type
-  BLStrokeJoin = Integer;
+  _BLDataAccessFlags = Integer;
 
 const
-  BL_STROKE_JOIN_MITER_CLIP  = 0;
-  BL_STROKE_JOIN_MITER_BEVEL = 1;
-  BL_STROKE_JOIN_MITER_ROUND = 2;
-  BL_STROKE_JOIN_BEVEL       = 3;
-  BL_STROKE_JOIN_ROUND       = 4;
-  BL_STROKE_JOIN_COUNT       = 5;
+  _BL_DATA_ACCESS_NO_FLAGS = 0;
+  _BL_DATA_ACCESS_READ     = 1;
+  _BL_DATA_ACCESS_WRITE    = 2;
+  _BL_DATA_ACCESS_RW       = 3;
 
 type
-  BLStrokeTransformOrder = Integer;
+  _BLDataSourceType = Integer;
 
 const
-  BL_STROKE_TRANSFORM_ORDER_AFTER  = 0;
-  BL_STROKE_TRANSFORM_ORDER_BEFORE = 1;
-  BL_STROKE_TRANSFORM_ORDER_COUNT  = 2;
+  _BL_DATA_SOURCE_TYPE_NONE      = 0;
+  _BL_DATA_SOURCE_TYPE_MEMORY    = 1;
+  _BL_DATA_SOURCE_TYPE_FILE      = 2;
+  _BL_DATA_SOURCE_TYPE_CUSTOM    = 3;
+  _BL_DATA_SOURCE_TYPE_MAX_VALUE = 3;
 
 type
-  BLStyleType = Integer;
+  _BLModifyOp = Integer;
 
 const
-  BL_STYLE_TYPE_NONE     = 0;
-  BL_STYLE_TYPE_SOLID    = 1;
-  BL_STYLE_TYPE_PATTERN  = 2;
-  BL_STYLE_TYPE_GRADIENT = 3;
-  BL_STYLE_TYPE_COUNT    = 4;
+  _BL_MODIFY_OP_ASSIGN_FIT  = 0;
+  _BL_MODIFY_OP_ASSIGN_GROW = 1;
+  _BL_MODIFY_OP_APPEND_FIT  = 2;
+  _BL_MODIFY_OP_APPEND_GROW = 3;
+  _BL_MODIFY_OP_MAX_VALUE   = 3;
 
 type
-  BLTextDirection = Integer;
+  _BLBooleanOp = Integer;
 
 const
-  BL_TEXT_DIRECTION_LTR   = 0;
-  BL_TEXT_DIRECTION_RTL   = 1;
-  BL_TEXT_DIRECTION_COUNT = 2;
+  _BL_BOOLEAN_OP_COPY      = 0;
+  _BL_BOOLEAN_OP_AND       = 1;
+  _BL_BOOLEAN_OP_OR        = 2;
+  _BL_BOOLEAN_OP_XOR       = 3;
+  _BL_BOOLEAN_OP_AND_NOT   = 4;
+  _BL_BOOLEAN_OP_NOT_AND   = 5;
+  _BL_BOOLEAN_OP_MAX_VALUE = 5;
 
 type
-  BLTextEncoding = Integer;
+  _BLExtendMode = Integer;
 
 const
-  BL_TEXT_ENCODING_UTF8   = 0;
-  BL_TEXT_ENCODING_UTF16  = 1;
-  BL_TEXT_ENCODING_UTF32  = 2;
-  BL_TEXT_ENCODING_LATIN1 = 3;
-  BL_TEXT_ENCODING_WCHAR  = 1;
-  BL_TEXT_ENCODING_COUNT  = 4;
+  _BL_EXTEND_MODE_PAD                 = 0;
+  _BL_EXTEND_MODE_REPEAT              = 1;
+  _BL_EXTEND_MODE_REFLECT             = 2;
+  _BL_EXTEND_MODE_PAD_X_PAD_Y         = 0;
+  _BL_EXTEND_MODE_PAD_X_REPEAT_Y      = 3;
+  _BL_EXTEND_MODE_PAD_X_REFLECT_Y     = 4;
+  _BL_EXTEND_MODE_REPEAT_X_REPEAT_Y   = 1;
+  _BL_EXTEND_MODE_REPEAT_X_PAD_Y      = 5;
+  _BL_EXTEND_MODE_REPEAT_X_REFLECT_Y  = 6;
+  _BL_EXTEND_MODE_REFLECT_X_REFLECT_Y = 2;
+  _BL_EXTEND_MODE_REFLECT_X_PAD_Y     = 7;
+  _BL_EXTEND_MODE_REFLECT_X_REPEAT_Y  = 8;
+  _BL_EXTEND_MODE_SIMPLE_MAX_VALUE    = 2;
+  _BL_EXTEND_MODE_COMPLEX_MAX_VALUE   = 8;
+  _BL_EXTEND_MODE_MAX_VALUE           = 8;
 
 type
-  BLTextOrientation = Integer;
+  _BLTextEncoding = Integer;
 
 const
-  BL_TEXT_ORIENTATION_HORIZONTAL = 0;
-  BL_TEXT_ORIENTATION_VERTICAL   = 1;
-  BL_TEXT_ORIENTATION_COUNT      = 2;
+  _BL_TEXT_ENCODING_UTF8      = 0;
+  _BL_TEXT_ENCODING_UTF16     = 1;
+  _BL_TEXT_ENCODING_UTF32     = 2;
+  _BL_TEXT_ENCODING_LATIN1    = 3;
+  _BL_TEXT_ENCODING_WCHAR     = _BL_TEXT_ENCODING_UTF16;
+  _BL_TEXT_ENCODING_MAX_VALUE = 3;
 
 type
-  BLApproximationOptions = record
-    flattenMode: UInt8;
-    offsetMode: UInt8;
-    reservedFlags: array [0..5] of UInt8;
-    flattenTolerance: Double;
-    simplifyTolerance: Double;
-    offsetParameter: Double;
+  _BLRange = record
+    start: Size_T;
+    &end: Size_T;
   end;
-  _PBLApproximationOptions = ^BLApproximationOptions;
+  _PBLRange = ^_BLRange;
 
 type
-  BLRgba32 = packed record
-  case Integer of
-    0: (value: UInt32);
-    1: (b: UInt8;
-        g: UInt8;
-        r: UInt8;
-        a: UInt8);
-  end;
-  _PBLRgba32 = ^BLRgba32;
-
-type
-  BLRgba64 = packed record
-  case Integer of
-    0: (value: UInt64);
-    1: (b: UInt16;
-        g: UInt16;
-        r: UInt16;
-        a: UInt16);
+  _BLArrayView = record
+    data: Pointer;
+    size: Size_T;
   end;
 
 type
-  BLRgba = record
+  _BLStringView = record
+    data: PUTF8Char;
+    size: Size_T;
+  end;
+
+type
+  _BLDataView = _BLArrayView;
+{$ENDREGION 'api.h'}
+
+{$REGION 'rgba.h'}
+type
+  _BLRgba32 = record
+    value: UInt32;
+  end;
+  _PBLRgba32 = ^_BLRgba32;
+
+type
+  _BLRgba64 = record
+    value: UInt64;
+  end;
+  _PBLRgba64 = ^_BLRgba64;
+
+type
+  _BLRgba = record
     r: Single;
     g: Single;
     b: Single;
     a: Single;
   end;
-  _PBLRgba = ^BLRgba;
+  _PBLRgba = ^_BLRgba;
+{$ENDREGION 'rgba.h'}
+
+{$REGION 'object.h'}
+type
+  _PBLObjectImpl = Pointer;
 
 type
-  BLArrayView = record
-    data: Pointer;
-    size: NativeUInt;
+  _BLObjectInfoShift = Integer;
+
+const
+  _BL_OBJECT_INFO_P_SHIFT    = 0;
+  _BL_OBJECT_INFO_Q_SHIFT    = 8;
+  _BL_OBJECT_INFO_C_SHIFT    = 8;
+  _BL_OBJECT_INFO_B_SHIFT    = 12;
+  _BL_OBJECT_INFO_A_SHIFT    = 16;
+  _BL_OBJECT_INFO_TYPE_SHIFT = 22;
+  _BL_OBJECT_INFO_R_SHIFT    = 29;
+  _BL_OBJECT_INFO_D_SHIFT    = 30;
+  _BL_OBJECT_INFO_M_SHIFT    = 31;
+
+type
+  _BLObjectInfoBits = Integer;
+
+const
+  _BL_OBJECT_INFO_P_MASK      = $FF shl _BL_OBJECT_INFO_P_SHIFT;
+  _BL_OBJECT_INFO_Q_MASK      = $FF shl _BL_OBJECT_INFO_Q_SHIFT;
+  _BL_OBJECT_INFO_C_MASK      = $0F shl _BL_OBJECT_INFO_C_SHIFT;
+  _BL_OBJECT_INFO_B_MASK      = $0F shl _BL_OBJECT_INFO_B_SHIFT;
+  _BL_OBJECT_INFO_A_MASK      = $3F shl _BL_OBJECT_INFO_A_SHIFT;
+  _BL_OBJECT_INFO_FIELDS_MASK = $003FFFFF;
+  _BL_OBJECT_INFO_TYPE_MASK   = $7F shl _BL_OBJECT_INFO_TYPE_SHIFT;
+  _BL_OBJECT_INFO_R_FLAG      = $01 shl _BL_OBJECT_INFO_R_SHIFT;
+  _BL_OBJECT_INFO_D_FLAG      = $01 shl _BL_OBJECT_INFO_D_SHIFT;
+  _BL_OBJECT_INFO_M_FLAG      = $01 shl _BL_OBJECT_INFO_M_SHIFT;
+  _BL_OBJECT_INFO_MD_FLAGS    = _BL_OBJECT_INFO_M_FLAG or _BL_OBJECT_INFO_D_FLAG;
+  _BL_OBJECT_INFO_MDR_FLAGS   = _BL_OBJECT_INFO_M_FLAG or _BL_OBJECT_INFO_D_FLAG or _BL_OBJECT_INFO_R_FLAG;
+
+type
+  _BLObjectType = Integer;
+
+const
+  _BL_OBJECT_TYPE_RGBA                    = 0;
+  _BL_OBJECT_TYPE_RGBA32                  = 1;
+  _BL_OBJECT_TYPE_RGBA64                  = 2;
+  _BL_OBJECT_TYPE_NULL                    = 3;
+  _BL_OBJECT_TYPE_PATTERN                 = 4;
+  _BL_OBJECT_TYPE_GRADIENT                = 5;
+  _BL_OBJECT_TYPE_IMAGE                   = 9;
+  _BL_OBJECT_TYPE_PATH                    = 10;
+  _BL_OBJECT_TYPE_FONT                    = 16;
+  _BL_OBJECT_TYPE_FONT_FEATURE_SETTINGS   = 17;
+  _BL_OBJECT_TYPE_FONT_VARIATION_SETTINGS = 18;
+  _BL_OBJECT_TYPE_BIT_ARRAY               = 25;
+  _BL_OBJECT_TYPE_BIT_SET                 = 26;
+  _BL_OBJECT_TYPE_BOOL                    = 28;
+  _BL_OBJECT_TYPE_INT64                   = 29;
+  _BL_OBJECT_TYPE_UINT64                  = 30;
+  _BL_OBJECT_TYPE_DOUBLE                  = 31;
+  _BL_OBJECT_TYPE_STRING                  = 32;
+  _BL_OBJECT_TYPE_ARRAY_OBJECT            = 33;
+  _BL_OBJECT_TYPE_ARRAY_INT8              = 34;
+  _BL_OBJECT_TYPE_ARRAY_UINT8             = 35;
+  _BL_OBJECT_TYPE_ARRAY_INT16             = 36;
+  _BL_OBJECT_TYPE_ARRAY_UINT16            = 37;
+  _BL_OBJECT_TYPE_ARRAY_INT32             = 38;
+  _BL_OBJECT_TYPE_ARRAY_UINT32            = 39;
+  _BL_OBJECT_TYPE_ARRAY_INT64             = 40;
+  _BL_OBJECT_TYPE_ARRAY_UINT64            = 41;
+  _BL_OBJECT_TYPE_ARRAY_FLOAT32           = 42;
+  _BL_OBJECT_TYPE_ARRAY_FLOAT64           = 43;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_1          = 44;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_2          = 45;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_3          = 46;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_4          = 47;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_6          = 48;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_8          = 49;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_10         = 50;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_12         = 51;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_16         = 52;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_20         = 53;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_24         = 54;
+  _BL_OBJECT_TYPE_ARRAY_STRUCT_32         = 55;
+  _BL_OBJECT_TYPE_CONTEXT                 = 100;
+  _BL_OBJECT_TYPE_IMAGE_CODEC             = 101;
+  _BL_OBJECT_TYPE_IMAGE_DECODER           = 102;
+  _BL_OBJECT_TYPE_IMAGE_ENCODER           = 103;
+  _BL_OBJECT_TYPE_FONT_FACE               = 104;
+  _BL_OBJECT_TYPE_FONT_DATA               = 105;
+  _BL_OBJECT_TYPE_FONT_MANAGER            = 106;
+  _BL_OBJECT_TYPE_MIN_ARRAY               = 33;
+  _BL_OBJECT_TYPE_MAX_ARRAY               = 55;
+  _BL_OBJECT_TYPE_MIN_STYLE               = 0;
+  _BL_OBJECT_TYPE_MAX_STYLE               = 5;
+  _BL_OBJECT_TYPE_MIN_VIRTUAL             = 100;
+  _BL_OBJECT_TYPE_MAX_VIRTUAL             = 127;
+  _BL_OBJECT_TYPE_MAX_VALUE               = 127;
+
+type
+  _BLObjectInfo = record
+    bits: UInt32;
   end;
 
 type
-  BLArc = record
-    cx: Double;
-    cy: Double;
-    rx: Double;
-    ry: Double;
-    start: Double;
-    sweep: Double;
+  _BLObjectDetail = packed record
+  case Byte of
+    0: (impl: _PBLObjectImpl);
+    1: (char_data: array [0..15] of UTF8Char);
+    2: (i8_data: array [0..15] of Int8);
+    3: (u8_data: array [0..15] of UInt8);
+    4: (i16_data: array [0..7] of Int16);
+    5: (u16_data: array [0..7] of UInt16);
+    6: (i32_data: array [0..3] of Int32);
+    7: (u32_data: array [0..3] of UInt32);
+    8: (i64_data: array [0..1] of Int64);
+    9: (u64_data: array [0..1] of UInt64);
+   10: (f32_data: array [0..3] of Single);
+   11: (f64_data: array [0..1] of Double);
+   12: (rgba: _BLRgba);
+   13: (rgba32: _BLRgba32);
+   14: (rgba64: _BLRgba64);
+   15: (u32_data_overlap: array [0..1] of UInt32;
+        impl_payload: UInt32;
+        info: _BLObjectInfo);
   end;
 
 type
-  BLCircle = record
-    cx: Double;
-    cy: Double;
-    r: Double;
+  _BLDestroyExternalDataFunc = procedure(impl, externalData, userData: Pointer); cdecl;
+
+type
+  _BLObjectCore = record
+    _d: _BLObjectDetail;
+  end;
+  _PBLObjectCore = ^_BLObjectCore;
+
+type
+  { var.h }
+  _BLVarCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLVarCore = ^_BLVarCore;
+
+type
+  _BLObjectVirtBase = record
+    destroy: function(impl: _PBLObjectImpl): _BLResult; cdecl;
+    getProperty: function(const impl: _PBLObjectImpl; const name: PUTF8Char; nameSize: Size_T; valueOut: _PBLVarCore): _BLResult; cdecl;
+    setProperty: function(impl: _PBLObjectImpl; const name: PUTF8Char; nameSize: Size_T; const value: _PBLVarCore): _BLResult; cdecl;
   end;
 
 type
-  BLEllipse = record
-    cx: Double;
-    cy: Double;
-    rx: Double;
-    ry: Double;
+  _BLObjectVirt = record
+    base: _BLObjectVirtBase;
   end;
 
+function _blObjectAllocImpl(self: _PBLObjectCore; objectInfo: UInt32; implSize: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAllocImpl';
+
+function _blObjectAllocImplAligned(self: _PBLObjectCore; objectInfo: UInt32; implSize: Size_T; implAlignment: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAllocImplAligned';
+
+function _blObjectAllocImplExternal(self: _PBLObjectCore; objectInfo: UInt32; implSize: Size_T; immutable: Boolean; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAllocImplExternal';
+
+function _blObjectFreeImpl(impl: _PBLObjectImpl): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectFreeImpl';
+
+function _blObjectInitMove(self: _PBLUnknown; other: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectInitMove';
+
+function _blObjectInitWeak(self: _PBLUnknown; const other: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectInitWeak';
+
+function _blObjectReset(self: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectReset';
+
+function _blObjectAssignMove(self: _PBLUnknown; other: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAssignMove';
+
+function _blObjectAssignWeak(self: _PBLUnknown; const other: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAssignWeak';
+
+function _blObjectGetProperty(const self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; valueOut: _PBLVarCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetProperty';
+
+function _blObjectGetPropertyBool(const self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; valueOut: PBoolean): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyBool';
+
+function _blObjectGetPropertyInt32(const self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; valueOut: PInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyInt32';
+
+function _blObjectGetPropertyInt64(const self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; valueOut: PInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyInt64';
+
+function _blObjectGetPropertyUInt32(const self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; valueOut: PUInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyUInt32';
+
+function _blObjectGetPropertyUInt64(const self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; valueOut: PUInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyUInt64';
+
+function _blObjectGetPropertyDouble(const self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; valueOut: PDouble): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyDouble';
+
+function _blObjectSetProperty(self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; const value: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetProperty';
+
+function _blObjectSetPropertyBool(self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; value: Boolean): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyBool';
+
+function _blObjectSetPropertyInt32(self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; value: Int32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyInt32';
+
+function _blObjectSetPropertyInt64(self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; value: Int64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyInt64';
+
+function _blObjectSetPropertyUInt32(self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; value: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyUInt32';
+
+function _blObjectSetPropertyUInt64(self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; value: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyUInt64';
+
+function _blObjectSetPropertyDouble(self: _PBLUnknown; const name: PUTF8Char; nameSize: Size_T; value: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyDouble';
+{$ENDREGION 'object.h'}
+
+{$REGION 'array.h'}
 type
-  BLLine = record
+  _BLArrayCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLArrayCore = ^_BLArrayCore;
+
+function _blArrayInit(self: _PBLArrayCore; arrayType: _BLObjectType): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInit';
+
+function _blArrayInitMove(self: _PBLArrayCore; other: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInitMove';
+
+function _blArrayInitWeak(self: _PBLArrayCore; const other: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInitWeak';
+
+function _blArrayDestroy(self: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayDestroy';
+
+function _blArrayReset(self: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReset';
+
+function _blArrayGetSize(const self: _PBLArrayCore): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetSize';
+
+function _blArrayGetCapacity(const self: _PBLArrayCore): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetCapacity';
+
+function _blArrayGetItemSize(self: _PBLArrayCore): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetItemSize';
+
+function _blArrayGetData(const self: _PBLArrayCore): Pointer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetData';
+
+function _blArrayClear(self: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayClear';
+
+function _blArrayShrink(self: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayShrink';
+
+function _blArrayReserve(self: _PBLArrayCore; n: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReserve';
+
+function _blArrayResize(self: _PBLArrayCore; n: Size_T; const fill: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayResize';
+
+function _blArrayMakeMutable(self: _PBLArrayCore; dataOut: PPointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayMakeMutable';
+
+function _blArrayModifyOp(self: _PBLArrayCore; op: _BLModifyOp; n: Size_T; dataOut: PPointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayModifyOp';
+
+function _blArrayInsertOp(self: _PBLArrayCore; index: Size_T; n: Size_T; dataOut: PPointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertOp';
+
+function _blArrayAssignMove(self: _PBLArrayCore; other: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignMove';
+
+function _blArrayAssignWeak(self: _PBLArrayCore; const other: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignWeak';
+
+function _blArrayAssignDeep(self: _PBLArrayCore; const other: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignDeep';
+
+function _blArrayAssignData(self: _PBLArrayCore; const data: Pointer; n: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignData';
+
+function _blArrayAssignExternalData(self: _PBLArrayCore; data: Pointer; size: Size_T; capacity: Size_T; dataAccessFlags: _BLDataAccessFlags; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignExternalData';
+
+function _blArrayAppendU8(self: _PBLArrayCore; value: UInt8): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU8';
+
+function _blArrayAppendU16(self: _PBLArrayCore; value: UInt16): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU16';
+
+function _blArrayAppendU32(self: _PBLArrayCore; value: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU32';
+
+function _blArrayAppendU64(self: _PBLArrayCore; value: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU64';
+
+function _blArrayAppendF32(self: _PBLArrayCore; value: Single): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendF32';
+
+function _blArrayAppendF64(self: _PBLArrayCore; value: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendF64';
+
+function _blArrayAppendItem(self: _PBLArrayCore; const item: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendItem';
+
+function _blArrayAppendData(self: _PBLArrayCore; const data: Pointer; n: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendData';
+
+function _blArrayInsertU8(self: _PBLArrayCore; index: Size_T; value: UInt8): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU8';
+
+function _blArrayInsertU16(self: _PBLArrayCore; index: Size_T; value: UInt16): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU16';
+
+function _blArrayInsertU32(self: _PBLArrayCore; index: Size_T; value: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU32';
+
+function _blArrayInsertU64(self: _PBLArrayCore; index: Size_T; value: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU64';
+
+function _blArrayInsertF32(self: _PBLArrayCore; index: Size_T; value: Single): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertF32';
+
+function _blArrayInsertF64(self: _PBLArrayCore; index: Size_T; value: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertF64';
+
+function _blArrayInsertItem(self: _PBLArrayCore; index: Size_T; const item: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertItem';
+
+function _blArrayInsertData(self: _PBLArrayCore; index: Size_T; const data: Pointer; n: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertData';
+
+function _blArrayReplaceU8(self: _PBLArrayCore; index: Size_T; value: UInt8): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU8';
+
+function _blArrayReplaceU16(self: _PBLArrayCore; index: Size_T; value: UInt16): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU16';
+
+function _blArrayReplaceU32(self: _PBLArrayCore; index: Size_T; value: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU32';
+
+function _blArrayReplaceU64(self: _PBLArrayCore; index: Size_T; value: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU64';
+
+function _blArrayReplaceF32(self: _PBLArrayCore; index: Size_T; value: Single): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceF32';
+
+function _blArrayReplaceF64(self: _PBLArrayCore; index: Size_T; value: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceF64';
+
+function _blArrayReplaceItem(self: _PBLArrayCore; index: Size_T; const item: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceItem';
+
+function _blArrayReplaceData(self: _PBLArrayCore; rStart: Size_T; rEnd: Size_T; const data: Pointer; n: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceData';
+
+function _blArrayRemoveIndex(self: _PBLArrayCore; index: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayRemoveIndex';
+
+function _blArrayRemoveRange(self: _PBLArrayCore; rStart: Size_T; rEnd: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayRemoveRange';
+
+function _blArrayEquals(const a: _PBLArrayCore; const b: _PBLArrayCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayEquals';
+{$ENDREGION 'array.h'}
+
+{$REGION 'bitarray.h'}
+type
+  _BLBitArrayCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLBitArrayCore = ^_BLBitArrayCore;
+
+function _blBitArrayInit(self: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayInit';
+
+function _blBitArrayInitMove(self: _PBLBitArrayCore; other: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayInitMove';
+
+function _blBitArrayInitWeak(self: _PBLBitArrayCore; const other: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayInitWeak';
+
+function _blBitArrayDestroy(self: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayDestroy';
+
+function _blBitArrayReset(self: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReset';
+
+function _blBitArrayAssignMove(self: _PBLBitArrayCore; other: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAssignMove';
+
+function _blBitArrayAssignWeak(self: _PBLBitArrayCore; const other: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAssignWeak';
+
+function _blBitArrayAssignWords(self: _PBLBitArrayCore; const wordData: PUInt32; wordCount: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAssignWords';
+
+function _blBitArrayIsEmpty(const self: _PBLBitArrayCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayIsEmpty';
+
+function _blBitArrayGetSize(const self: _PBLBitArrayCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetSize';
+
+function _blBitArrayGetWordCount(const self: _PBLBitArrayCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetWordCount';
+
+function _blBitArrayGetCapacity(const self: _PBLBitArrayCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetCapacity';
+
+function _blBitArrayGetData(const self: _PBLBitArrayCore): PUInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetData';
+
+function _blBitArrayGetCardinality(const self: _PBLBitArrayCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetCardinality';
+
+function _blBitArrayGetCardinalityInRange(const self: _PBLBitArrayCore; startBit: UInt32; endBit: UInt32): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetCardinalityInRange';
+
+function _blBitArrayHasBit(const self: _PBLBitArrayCore; bitIndex: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayHasBit';
+
+function _blBitArrayHasBitsInRange(const self: _PBLBitArrayCore; startBit: UInt32; endBit: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayHasBitsInRange';
+
+function _blBitArraySubsumes(const a: _PBLBitArrayCore; const b: _PBLBitArrayCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArraySubsumes';
+
+function _blBitArrayIntersects(const a: _PBLBitArrayCore; const b: _PBLBitArrayCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayIntersects';
+
+function _blBitArrayGetRange(const self: _PBLBitArrayCore; startOut: PUInt32; endOut: PUInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetRange';
+
+function _blBitArrayEquals(const a: _PBLBitArrayCore; const b: _PBLBitArrayCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayEquals';
+
+function _blBitArrayCompare(const a: _PBLBitArrayCore; const b: _PBLBitArrayCore): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayCompare';
+
+function _blBitArrayClear(self: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClear';
+
+function _blBitArrayResize(self: _PBLBitArrayCore; nBits: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayResize';
+
+function _blBitArrayReserve(self: _PBLBitArrayCore; nBits: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReserve';
+
+function _blBitArrayShrink(self: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayShrink';
+
+function _blBitArraySetBit(self: _PBLBitArrayCore; bitIndex: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArraySetBit';
+
+function _blBitArrayFillRange(self: _PBLBitArrayCore; startBit: UInt32; endBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayFillRange';
+
+function _blBitArrayFillWords(self: _PBLBitArrayCore; bitIndex: UInt32; const wordData: PUInt32; wordCount: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayFillWords';
+
+function _blBitArrayClearBit(self: _PBLBitArrayCore; bitIndex: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearBit';
+
+function _blBitArrayClearRange(self: _PBLBitArrayCore; startBit: UInt32; endBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearRange';
+
+function _blBitArrayClearWord(self: _PBLBitArrayCore; bitIndex: UInt32; wordValue: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearWord';
+
+function _blBitArrayClearWords(self: _PBLBitArrayCore; bitIndex: UInt32; const wordData: PUInt32; wordCount: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearWords';
+
+function _blBitArrayReplaceOp(self: _PBLBitArrayCore; nBits: UInt32; dataOut: PPUInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceOp';
+
+function _blBitArrayReplaceBit(self: _PBLBitArrayCore; bitIndex: UInt32; bitValue: Boolean): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceBit';
+
+function _blBitArrayReplaceWord(self: _PBLBitArrayCore; bitIndex: UInt32; wordValue: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceWord';
+
+function _blBitArrayReplaceWords(self: _PBLBitArrayCore; bitIndex: UInt32; const wordData: PUInt32; wordCount: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceWords';
+
+function _blBitArrayAppendBit(self: _PBLBitArrayCore; bitValue: Boolean): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAppendBit';
+
+function _blBitArrayAppendWord(self: _PBLBitArrayCore; wordValue: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAppendWord';
+
+function _blBitArrayAppendWords(self: _PBLBitArrayCore; const wordData: PUInt32; wordCount: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAppendWords';
+{$ENDREGION 'bitarray.h'}
+
+{$REGION 'bitset.h'}
+type
+  _BLBitSetConstants = Integer;
+
+const
+  _BL_BIT_SET_INVALID_INDEX      = $FFFFFFFF;
+  _BL_BIT_SET_RANGE_MASK         = $80000000;
+  _BL_BIT_SET_SEGMENT_WORD_COUNT = 4;
+
+type
+  _BLBitSetSegment = record
+    _startWord: UInt32;
+    _data: array [0.._BL_BIT_SET_SEGMENT_WORD_COUNT - 1] of UInt32;
+  end;
+  _PBLBitSetSegment = ^_BLBitSetSegment;
+
+type
+  _BLBitSetData = record
+    segmentData: _PBLBitSetSegment;
+    segmentCount: UInt32;
+    ssoSegments: array [0..2] of _BLBitSetSegment;
+  end;
+  _PBLBitSetData = ^_BLBitSetData;
+
+type
+  _BLBitSetCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLBitSetCore = ^_BLBitSetCore;
+
+type
+  _BLBitSetBuilderCore = record
+    _areaShift: UInt32;
+    _areaIndex: UInt32;
+  end;
+  _PBLBitSetBuilderCore = ^_BLBitSetBuilderCore;
+
+function _blBitSetInit(self: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetInit';
+
+function _blBitSetInitMove(self: _PBLBitSetCore; other: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetInitMove';
+
+function _blBitSetInitWeak(self: _PBLBitSetCore; const other: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetInitWeak';
+
+function _blBitSetInitRange(self: _PBLBitSetCore; startBit: UInt32; endBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetInitRange';
+
+function _blBitSetDestroy(self: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetDestroy';
+
+function _blBitSetReset(self: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetReset';
+
+function _blBitSetAssignMove(self: _PBLBitSetCore; other: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAssignMove';
+
+function _blBitSetAssignWeak(self: _PBLBitSetCore; const other: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAssignWeak';
+
+function _blBitSetAssignDeep(self: _PBLBitSetCore; const other: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAssignDeep';
+
+function _blBitSetAssignRange(self: _PBLBitSetCore; startBit: UInt32; endBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAssignRange';
+
+function _blBitSetAssignWords(self: _PBLBitSetCore; startWord: UInt32; const wordData: PUInt32; wordCount: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAssignWords';
+
+function _blBitSetIsEmpty(const self: _PBLBitSetCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetIsEmpty';
+
+function _blBitSetGetData(const self: _PBLBitSetCore; &out: _PBLBitSetData): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetGetData';
+
+function _blBitSetGetSegmentCount(const self: _PBLBitSetCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetGetSegmentCount';
+
+function _blBitSetGetSegmentCapacity(const self: _PBLBitSetCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetGetSegmentCapacity';
+
+function _blBitSetGetCardinality(const self: _PBLBitSetCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetGetCardinality';
+
+function _blBitSetGetCardinalityInRange(const self: _PBLBitSetCore; startBit: UInt32; endBit: UInt32): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetGetCardinalityInRange';
+
+function _blBitSetHasBit(const self: _PBLBitSetCore; bitIndex: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetHasBit';
+
+function _blBitSetHasBitsInRange(const self: _PBLBitSetCore; startBit: UInt32; endBit: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetHasBitsInRange';
+
+function _blBitSetSubsumes(const a: _PBLBitSetCore; const b: _PBLBitSetCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetSubsumes';
+
+function _blBitSetIntersects(const a: _PBLBitSetCore; const b: _PBLBitSetCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetIntersects';
+
+function _blBitSetGetRange(const self: _PBLBitSetCore; startOut: PUInt32; endOut: PUInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetGetRange';
+
+function _blBitSetEquals(const a: _PBLBitSetCore; const b: _PBLBitSetCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetEquals';
+
+function _blBitSetCompare(const a: _PBLBitSetCore; const b: _PBLBitSetCore): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetCompare';
+
+function _blBitSetClear(self: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetClear';
+
+function _blBitSetShrink(self: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetShrink';
+
+function _blBitSetOptimize(self: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetOptimize';
+
+function _blBitSetChop(self: _PBLBitSetCore; startBit: UInt32; endBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetChop';
+
+function _blBitSetAddBit(self: _PBLBitSetCore; bitIndex: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAddBit';
+
+function _blBitSetAddRange(self: _PBLBitSetCore; rangeStartBit: UInt32; rangeEndBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAddRange';
+
+function _blBitSetAddWords(self: _PBLBitSetCore; startWord: UInt32; const wordData: PUInt32; wordCount: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetAddWords';
+
+function _blBitSetClearBit(self: _PBLBitSetCore; bitIndex: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetClearBit';
+
+function _blBitSetClearRange(self: _PBLBitSetCore; rangeStartBit: UInt32; rangeEndBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetClearRange';
+
+function _blBitSetBuilderCommit(self: _PBLBitSetCore; builder: _PBLBitSetBuilderCore; newAreaIndex: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetBuilderCommit';
+
+function _blBitSetBuilderAddRange(self: _PBLBitSetCore; builder: _PBLBitSetBuilderCore; startBit: UInt32; endBit: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitSetBuilderAddRange';
+{$ENDREGION 'bitset.h'}
+
+{$REGION 'geometry.h'}
+type
+  _BLGeometryDirection = Integer;
+
+const
+  _BL_GEOMETRY_DIRECTION_NONE = 0;
+  _BL_GEOMETRY_DIRECTION_CW   = 1;
+  _BL_GEOMETRY_DIRECTION_CCW  = 2;
+
+type
+  _BLGeometryType = Integer;
+
+const
+  _BL_GEOMETRY_TYPE_NONE             = 0;
+  _BL_GEOMETRY_TYPE_BOXI             = 1;
+  _BL_GEOMETRY_TYPE_BOXD             = 2;
+  _BL_GEOMETRY_TYPE_RECTI            = 3;
+  _BL_GEOMETRY_TYPE_RECTD            = 4;
+  _BL_GEOMETRY_TYPE_CIRCLE           = 5;
+  _BL_GEOMETRY_TYPE_ELLIPSE          = 6;
+  _BL_GEOMETRY_TYPE_ROUND_RECT       = 7;
+  _BL_GEOMETRY_TYPE_ARC              = 8;
+  _BL_GEOMETRY_TYPE_CHORD            = 9;
+  _BL_GEOMETRY_TYPE_PIE              = 10;
+  _BL_GEOMETRY_TYPE_LINE             = 11;
+  _BL_GEOMETRY_TYPE_TRIANGLE         = 12;
+  _BL_GEOMETRY_TYPE_POLYLINEI        = 13;
+  _BL_GEOMETRY_TYPE_POLYLINED        = 14;
+  _BL_GEOMETRY_TYPE_POLYGONI         = 15;
+  _BL_GEOMETRY_TYPE_POLYGOND         = 16;
+  _BL_GEOMETRY_TYPE_ARRAY_VIEW_BOXI  = 17;
+  _BL_GEOMETRY_TYPE_ARRAY_VIEW_BOXD  = 18;
+  _BL_GEOMETRY_TYPE_ARRAY_VIEW_RECTI = 19;
+  _BL_GEOMETRY_TYPE_ARRAY_VIEW_RECTD = 20;
+  _BL_GEOMETRY_TYPE_PATH             = 21;
+  _BL_GEOMETRY_TYPE_MAX_VALUE        = 21;
+  _BL_GEOMETRY_TYPE_SIMPLE_LAST      = 12;
+
+type
+  _BLFillRule = Integer;
+
+const
+  _BL_FILL_RULE_NON_ZERO  = 0;
+  _BL_FILL_RULE_EVEN_ODD  = 1;
+  _BL_FILL_RULE_MAX_VALUE = 1;
+
+type
+  _BLHitTest = Integer;
+
+const
+  _BL_HIT_TEST_IN      = 0;
+  _BL_HIT_TEST_PART    = 1;
+  _BL_HIT_TEST_OUT     = 2;
+  _BL_HIT_TEST_INVALID = -1;
+
+type
+  _BLPointI = record
+    x: Integer;
+    y: Integer;
+  end;
+  _PBLPointI = ^_BLPointI;
+
+type
+  _BLSizeI = record
+    w: Integer;
+    h: Integer;
+  end;
+  _PBLSizeI = ^_BLSizeI;
+
+type
+  _BLBoxI = record
+    x0: Integer;
+    y0: Integer;
+    x1: Integer;
+    y1: Integer;
+  end;
+  _PBLBoxI = ^_BLBoxI;
+
+type
+  _BLRectI = record
+    x: Integer;
+    y: Integer;
+    w: Integer;
+    h: Integer;
+  end;
+  _PBLRectI = ^_BLRectI;
+
+type
+  _BLPoint = record
+    x: Double;
+    y: Double;
+  end;
+  _PBLPoint = ^_BLPoint;
+  _PPBLPoint = ^_PBLPoint;
+
+type
+  _BLSize = record
+    w: Double;
+    h: Double;
+  end;
+  _PBLSize = ^_BLSize;
+
+type
+  _BLBox = record
     x0: Double;
     y0: Double;
     x1: Double;
     y1: Double;
   end;
+  _PBLBox = ^_BLBox;
 
 type
-  BLPoint = record
-    x: Double;
-    y: Double;
-  end;
-  _PBLPoint = ^BLPoint;
-
-type
-  BLPointI = record
-    x: Integer;
-    y: Integer;
-  end;
-  _PBLPointI = ^BLPointI;
-
-type
-  BLSize = record
-    w: Double;
-    h: Double;
-  end;
-  _PBLSize = ^BLSize;
-
-type
-  BLSizeI = record
-    w: Integer;
-    h: Integer;
-  end;
-  _PBLSizeI = ^BLSizeI;
-
-type
-  BLRect = record
+  _BLRect = record
     x: Double;
     y: Double;
     w: Double;
     h: Double;
   end;
-  _PBLRect = ^BLRect;
+  _PBLRect = ^_BLRect;
 
 type
-  BLRectI = record
-    x: Integer;
-    y: Integer;
-    w: Integer;
-    h: Integer;
+  _BLLine = record
+    x0: Double;
+    y0: Double;
+    x1: Double;
+    y1: Double;
   end;
-  _PBLRectI = ^BLRectI;
+  _PBLLine = ^_BLLine;
 
 type
-  BLRoundRect = record
-    x: Double;
-    y: Double;
-    w: Double;
-    h: Double;
-    rx: Double;
-    ry: Double;
-  end;
-
-type
-  BLTriangle = record
+  _BLTriangle = record
     x0: Double;
     y0: Double;
     x1: Double;
@@ -1188,28 +1067,403 @@ type
     x2: Double;
     y2: Double;
   end;
+  _PBLTriangle = ^_BLTriangle;
 
 type
-  BLBox = record
-    x0: Double;
-    y0: Double;
-    x1: Double;
-    y1: Double;
+  _BLRoundRect = record
+    x: Double;
+    y: Double;
+    w: Double;
+    h: Double;
+    rx: Double;
+    ry: Double;
   end;
-  _PBLBox = ^BLBox;
+  _PBLRoundRect = ^_BLRoundRect;
 
 type
-  BLBoxI = record
-    x0: Integer;
-    y0: Integer;
-    x1: Integer;
-    y1: Integer;
+  _BLCircle = record
+    cx: Double;
+    cy: Double;
+    r: Double;
   end;
-  _PBLBoxI = ^BLBoxI;
+  _PBLCircle = ^_BLCircle;
 
 type
-  BLMatrix2D = record
-  case Integer of
+  _BLEllipse = record
+    cx: Double;
+    cy: Double;
+    rx: Double;
+    ry: Double;
+  end;
+  _PBLEllipse = ^_BLEllipse;
+
+type
+  _BLArc = record
+    cx: Double;
+    cy: Double;
+    rx: Double;
+    ry: Double;
+    start: Double;
+    sweep: Double;
+  end;
+  _PBLArc = ^_BLArc;
+{$ENDREGION 'geometry.h'}
+
+{$REGION 'format.h'}
+type
+  _BLFormat = Integer;
+
+const
+  _BL_FORMAT_NONE      = 0;
+  _BL_FORMAT_PRGB32    = 1;
+  _BL_FORMAT_XRGB32    = 2;
+  _BL_FORMAT_A8        = 3;
+  _BL_FORMAT_MAX_VALUE = 3;
+
+type
+  _BLFormatFlags = Integer;
+
+const
+  _BL_FORMAT_NO_FLAGS            = 0;
+  _BL_FORMAT_FLAG_RGB            = $00000001;
+  _BL_FORMAT_FLAG_ALPHA          = $00000002;
+  _BL_FORMAT_FLAG_RGBA           = $00000003;
+  _BL_FORMAT_FLAG_LUM            = $00000004;
+  _BL_FORMAT_FLAG_LUMA           = $00000006;
+  _BL_FORMAT_FLAG_INDEXED        = $00000010;
+  _BL_FORMAT_FLAG_PREMULTIPLIED  = $00000100;
+  _BL_FORMAT_FLAG_BYTE_SWAP      = $00000200;
+  _BL_FORMAT_FLAG_BYTE_ALIGNED   = $00010000;
+  _BL_FORMAT_FLAG_UNDEFINED_BITS = $00020000;
+  _BL_FORMAT_FLAG_LE             = 0;
+  _BL_FORMAT_FLAG_BE             = _BL_FORMAT_FLAG_BYTE_SWAP;
+
+type
+  _BLFormatInfo = packed record
+    depth: UInt32;
+    flags: _BLFormatFlags;
+    case Byte of
+      0: (sizes: array [0..3] of Byte;
+          shifts: array [0..3] of Byte);
+      1: (rSize: Byte;
+          gSize: Byte;
+          bSize: Byte;
+          aSize: Byte;
+          rShift: Byte;
+          gShift: Byte;
+          bShift: Byte;
+          aShift: Byte);
+      2: (palette: _PBLRgba32);
+  end;
+  _PBLFormatInfo = ^_BLFormatInfo;
+
+function _blFormatInfoQuery(self: _PBLFormatInfo; format: _BLFormat): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFormatInfoQuery';
+
+function _blFormatInfoSanitize(self: _PBLFormatInfo): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFormatInfoSanitize';
+{$ENDREGION 'format.h'}
+
+{$REGION 'image.h'}
+type
+  _BLImageInfoFlags = Integer;
+
+const
+  _BL_IMAGE_INFO_FLAG_NO_FLAGS    = 0;
+  _BL_IMAGE_INFO_FLAG_PROGRESSIVE = 1;
+
+type
+  _BLImageScaleFilter = Integer;
+
+const
+  _BL_IMAGE_SCALE_FILTER_NONE      = 0;
+  _BL_IMAGE_SCALE_FILTER_NEAREST   = 1;
+  _BL_IMAGE_SCALE_FILTER_BILINEAR  = 2;
+  _BL_IMAGE_SCALE_FILTER_BICUBIC   = 3;
+  _BL_IMAGE_SCALE_FILTER_LANCZOS   = 4;
+  _BL_IMAGE_SCALE_FILTER_MAX_VALUE = 4;
+
+type
+  _BLImageData = record
+    pixelData: Pointer;
+    stride: IntPtr;
+    size: _BLSizeI;
+    format: UInt32;
+    flags: UInt32;
+  end;
+  _PBLImageData = ^_BLImageData;
+
+type
+  _BLImageInfo = record
+    size: _BLSizeI;
+    density: _BLSize;
+    flags: UInt32;
+    depth: UInt16;
+    planeCount: UInt16;
+    frameCount: UInt64;
+    repeatCount: UInt32;
+    reserved: array [0..2] of UInt32;
+    format: array [0..15] of UTF8Char;
+    compression: array [0..15] of UTF8Char;
+  end;
+  _PBLImageInfo = ^_BLImageInfo;
+
+type
+  _BLImageCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLImageCore = ^_BLImageCore;
+
+type
+  { imagecodec.h }
+  _BLImageCodecCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLImageCodecCore = ^_BLImageCodecCore;
+
+function _blImageInit(self: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageInit';
+
+function _blImageInitMove(self: _PBLImageCore; other: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageInitMove';
+
+function _blImageInitWeak(self: _PBLImageCore; const other: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageInitWeak';
+
+function _blImageInitAs(self: _PBLImageCore; w: Integer; h: Integer; format: _BLFormat): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageInitAs';
+
+function _blImageInitAsFromData(self: _PBLImageCore; w: Integer; h: Integer; format: _BLFormat; pixelData: Pointer; stride: IntPtr; accessFlags: _BLDataAccessFlags; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageInitAsFromData';
+
+function _blImageDestroy(self: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDestroy';
+
+function _blImageReset(self: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageReset';
+
+function _blImageAssignMove(self: _PBLImageCore; other: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageAssignMove';
+
+function _blImageAssignWeak(self: _PBLImageCore; const other: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageAssignWeak';
+
+function _blImageAssignDeep(self: _PBLImageCore; const other: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageAssignDeep';
+
+function _blImageCreate(self: _PBLImageCore; w: Integer; h: Integer; format: _BLFormat): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCreate';
+
+function _blImageCreateFromData(self: _PBLImageCore; w: Integer; h: Integer; format: _BLFormat; pixelData: Pointer; stride: IntPtr; accessFlags: _BLDataAccessFlags; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCreateFromData';
+
+function _blImageGetData(const self: _PBLImageCore; dataOut: _PBLImageData): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageGetData';
+
+function _blImageMakeMutable(self: _PBLImageCore; dataOut: _PBLImageData): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageMakeMutable';
+
+function _blImageConvert(self: _PBLImageCore; format: _BLFormat): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageConvert';
+
+function _blImageEquals(const a: _PBLImageCore; const b: _PBLImageCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEquals';
+
+function _blImageScale(dst: _PBLImageCore; const src: _PBLImageCore; const size: _PBLSizeI; filter: _BLImageScaleFilter): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageScale';
+
+function _blImageReadFromFile(self: _PBLImageCore; const fileName: PUTF8Char; const codecs: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageReadFromFile';
+
+function _blImageReadFromData(self: _PBLImageCore; const data: Pointer; size: Size_T; const codecs: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageReadFromData';
+
+function _blImageWriteToFile(const self: _PBLImageCore; const fileName: PUTF8Char; const codec: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageWriteToFile';
+
+function _blImageWriteToData(const self: _PBLImageCore; dst: _PBLArrayCore; const codec: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageWriteToData';
+{$ENDREGION 'image.h'}
+
+{$REGION 'imagedecoder.h'}
+type
+  _BLImageDecoderCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLImageDecoderCore = ^_BLImageDecoderCore;
+
+function _blImageDecoderInit(self: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderInit';
+
+function _blImageDecoderInitMove(self: _PBLImageDecoderCore; other: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderInitMove';
+
+function _blImageDecoderInitWeak(self: _PBLImageDecoderCore; const other: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderInitWeak';
+
+function _blImageDecoderDestroy(self: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderDestroy';
+
+function _blImageDecoderReset(self: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderReset';
+
+function _blImageDecoderAssignMove(self: _PBLImageDecoderCore; other: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderAssignMove';
+
+function _blImageDecoderAssignWeak(self: _PBLImageDecoderCore; const other: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderAssignWeak';
+
+function _blImageDecoderRestart(self: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderRestart';
+
+function _blImageDecoderReadInfo(self: _PBLImageDecoderCore; infoOut: _PBLImageInfo; const data: PUInt8; size: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderReadInfo';
+
+function _blImageDecoderReadFrame(self: _PBLImageDecoderCore; imageOut: _PBLImageCore; const data: PUInt8; size: Size_T): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderReadFrame';
+{$ENDREGION 'imagedecoder.h'}
+
+{$REGION 'imageencoder.h'}
+type
+  _BLImageEncoderCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLImageEncoderCore = ^_BLImageEncoderCore;
+
+function _blImageEncoderInit(self: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderInit';
+
+function _blImageEncoderInitMove(self: _PBLImageEncoderCore; other: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderInitMove';
+
+function _blImageEncoderInitWeak(self: _PBLImageEncoderCore; const other: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderInitWeak';
+
+function _blImageEncoderDestroy(self: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderDestroy';
+
+function _blImageEncoderReset(self: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderReset';
+
+function _blImageEncoderAssignMove(self: _PBLImageEncoderCore; other: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderAssignMove';
+
+function _blImageEncoderAssignWeak(self: _PBLImageEncoderCore; const other: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderAssignWeak';
+
+function _blImageEncoderRestart(self: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderRestart';
+
+function _blImageEncoderWriteFrame(self: _PBLImageEncoderCore; dst: _PBLArrayCore; const image: _PBLImageCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderWriteFrame';
+{$ENDREGION 'imageencoder.h'}
+
+{$REGION 'imagecodec.h'}
+function _blImageCodecInit(self: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInit';
+
+function _blImageCodecInitMove(self: _PBLImageCodecCore; other: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInitMove';
+
+function _blImageCodecInitWeak(self: _PBLImageCodecCore; const other: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInitWeak';
+
+function _blImageCodecInitByName(self: _PBLImageCodecCore; const name: PUTF8Char; size: Size_T; const codecs: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInitByName';
+
+function _blImageCodecDestroy(self: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecDestroy';
+
+function _blImageCodecReset(self: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecReset';
+
+function _blImageCodecAssignMove(self: _PBLImageCodecCore; other: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecAssignMove';
+
+function _blImageCodecAssignWeak(self: _PBLImageCodecCore; const other: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecAssignWeak';
+
+function _blImageCodecFindByName(self: _PBLImageCodecCore; const name: PUTF8Char; size: Size_T; const codecs: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecFindByName';
+
+function _blImageCodecFindByExtension(self: _PBLImageCodecCore; const name: PUTF8Char; size: Size_T; const codecs: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecFindByExtension';
+
+function _blImageCodecFindByData(self: _PBLImageCodecCore; const data: Pointer; size: Size_T; const codecs: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecFindByData';
+
+function _blImageCodecInspectData(const self: _PBLImageCodecCore; const data: Pointer; size: Size_T): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInspectData';
+
+function _blImageCodecCreateDecoder(const self: _PBLImageCodecCore; dst: _PBLImageDecoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecCreateDecoder';
+
+function _blImageCodecCreateEncoder(const self: _PBLImageCodecCore; dst: _PBLImageEncoderCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecCreateEncoder';
+
+function _blImageCodecArrayInitBuiltInCodecs(self: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecArrayInitBuiltInCodecs';
+
+function _blImageCodecArrayAssignBuiltInCodecs(self: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecArrayAssignBuiltInCodecs';
+
+function _blImageCodecAddToBuiltIn(const codec: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecAddToBuiltIn';
+
+function _blImageCodecRemoveFromBuiltIn(const codec: _PBLImageCodecCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecRemoveFromBuiltIn';
+
+type
+  _BLImageCodecFeatures = Integer;
+
+const
+  _BL_IMAGE_CODEC_NO_FEATURES         = 0;
+  _BL_IMAGE_CODEC_FEATURE_READ        = $00000001;
+  _BL_IMAGE_CODEC_FEATURE_WRITE       = $00000002;
+  _BL_IMAGE_CODEC_FEATURE_LOSSLESS    = $00000004;
+  _BL_IMAGE_CODEC_FEATURE_LOSSY       = $00000008;
+  _BL_IMAGE_CODEC_FEATURE_MULTI_FRAME = $00000010;
+  _BL_IMAGE_CODEC_FEATURE_IPTC        = $10000000;
+  _BL_IMAGE_CODEC_FEATURE_EXIF        = $20000000;
+  _BL_IMAGE_CODEC_FEATURE_XMP         = $40000000;
+{$ENDREGION 'imagecodec.h'}
+
+{$REGION 'matrix.h'}
+type
+  _BLTransformType = Integer;
+
+const
+  _BL_TRANSFORM_TYPE_IDENTITY  = 0;
+  _BL_TRANSFORM_TYPE_TRANSLATE = 1;
+  _BL_TRANSFORM_TYPE_SCALE     = 2;
+  _BL_TRANSFORM_TYPE_SWAP      = 3;
+  _BL_TRANSFORM_TYPE_AFFINE    = 4;
+  _BL_TRANSFORM_TYPE_INVALID   = 5;
+  _BL_TRANSFORM_TYPE_MAX_VALUE = 5;
+
+type
+  _BLTransformOp = Integer;
+
+const
+  _BL_TRANSFORM_OP_RESET          = 0;
+  _BL_TRANSFORM_OP_ASSIGN         = 1;
+  _BL_TRANSFORM_OP_TRANSLATE      = 2;
+  _BL_TRANSFORM_OP_SCALE          = 3;
+  _BL_TRANSFORM_OP_SKEW           = 4;
+  _BL_TRANSFORM_OP_ROTATE         = 5;
+  _BL_TRANSFORM_OP_ROTATE_PT      = 6;
+  _BL_TRANSFORM_OP_TRANSFORM      = 7;
+  _BL_TRANSFORM_OP_POST_TRANSLATE = 8;
+  _BL_TRANSFORM_OP_POST_SCALE     = 9;
+  _BL_TRANSFORM_OP_POST_SKEW      = 10;
+  _BL_TRANSFORM_OP_POST_ROTATE    = 11;
+  _BL_TRANSFORM_OP_POST_ROTATE_PT = 12;
+  _BL_TRANSFORM_OP_POST_TRANSFORM = 13;
+  _BL_TRANSFORM_OP_MAX_VALUE      = 13;
+
+type
+  _BLMatrix2D = record
+  case Byte of
     0: (m: array [0..5] of Double);
     1: (m00: Double;
         m01: Double;
@@ -1218,350 +1472,934 @@ type
         m20: Double;
         m21: Double);
   end;
-  _PBLMatrix2D = ^BLMatrix2D;
+  _PBLMatrix2D = ^_BLMatrix2D;
+
+function _blMatrix2DSetIdentity(self: _PBLMatrix2D): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetIdentity';
+
+function _blMatrix2DSetTranslation(self: _PBLMatrix2D; x: Double; y: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetTranslation';
+
+function _blMatrix2DSetScaling(self: _PBLMatrix2D; x: Double; y: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetScaling';
+
+function _blMatrix2DSetSkewing(self: _PBLMatrix2D; x: Double; y: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetSkewing';
+
+function _blMatrix2DSetRotation(self: _PBLMatrix2D; angle: Double; cx: Double; cy: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetRotation';
+
+function _blMatrix2DApplyOp(self: _PBLMatrix2D; opType: _BLTransformOp; const opData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DApplyOp';
+
+function _blMatrix2DInvert(dst: _PBLMatrix2D; const src: _PBLMatrix2D): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DInvert';
+
+function _blMatrix2DGetType(const self: _PBLMatrix2D): _BLTransformType; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DGetType';
+
+function _blMatrix2DMapPointDArray(const self: _PBLMatrix2D; dst: _PBLPoint; const src: _PBLPoint; count: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DMapPointDArray';
+{$ENDREGION 'matrix.h'}
+
+{$REGION 'path.h'}
+type
+  _BLPathCmd = Integer;
+
+const
+  _BL_PATH_CMD_MOVE      = 0;
+  _BL_PATH_CMD_ON        = 1;
+  _BL_PATH_CMD_QUAD      = 2;
+  _BL_PATH_CMD_CONIC     = 3;
+  _BL_PATH_CMD_CUBIC     = 4;
+  _BL_PATH_CMD_CLOSE     = 5;
+  _BL_PATH_CMD_WEIGHT    = 6;
+  _BL_PATH_CMD_MAX_VALUE = 6;
 
 type
-  BLDataView = BLArrayView;
+  _BLPathCmdExtra = Integer;
+
+const
+  _BL_PATH_CMD_PRESERVE = $FFFFFFFF;
 
 type
-  BLArrayImpl = record
-    capacity: NativeUInt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    itemSize: UInt8;
-    dispatchType: UInt8;
-    reserved: array [0..1] of UInt8;
-    case Integer of
-      0: (data: Pointer;
-          size: NativeUInt);
-      1: (view: BLDataView);
+  _BLPathFlags = Integer;
+
+const
+  _BL_PATH_NO_FLAGS      = 0;
+  _BL_PATH_FLAG_EMPTY    = $00000001;
+  _BL_PATH_FLAG_MULTIPLE = $00000002;
+  _BL_PATH_FLAG_QUADS    = $00000004;
+  _BL_PATH_FLAG_CONICS   = $00000008;
+  _BL_PATH_FLAG_CUBICS   = $00000010;
+  _BL_PATH_FLAG_INVALID  = $40000000;
+  _BL_PATH_FLAG_DIRTY    = $80000000;
+
+type
+  _BLPathReverseMode = Integer;
+
+const
+  _BL_PATH_REVERSE_MODE_COMPLETE  = 0;
+  _BL_PATH_REVERSE_MODE_SEPARATE  = 1;
+  _BL_PATH_REVERSE_MODE_MAX_VALUE = 1;
+
+type
+  _BLStrokeJoin = Integer;
+
+const
+  _BL_STROKE_JOIN_MITER_CLIP  = 0;
+  _BL_STROKE_JOIN_MITER_BEVEL = 1;
+  _BL_STROKE_JOIN_MITER_ROUND = 2;
+  _BL_STROKE_JOIN_BEVEL       = 3;
+  _BL_STROKE_JOIN_ROUND       = 4;
+  _BL_STROKE_JOIN_MAX_VALUE   = 4;
+
+type
+  _BLStrokeCapPosition = Integer;
+
+const
+  _BL_STROKE_CAP_POSITION_START     = 0;
+  _BL_STROKE_CAP_POSITION_END       = 1;
+  _BL_STROKE_CAP_POSITION_MAX_VALUE = 1;
+
+type
+  _BLStrokeCap = Integer;
+
+const
+  _BL_STROKE_CAP_BUTT         = 0;
+  _BL_STROKE_CAP_SQUARE       = 1;
+  _BL_STROKE_CAP_ROUND        = 2;
+  _BL_STROKE_CAP_ROUND_REV    = 3;
+  _BL_STROKE_CAP_TRIANGLE     = 4;
+  _BL_STROKE_CAP_TRIANGLE_REV = 5;
+  _BL_STROKE_CAP_MAX_VALUE    = 5;
+
+type
+  _BLStrokeTransformOrder = Integer;
+
+const
+  _BL_STROKE_TRANSFORM_ORDER_AFTER     = 0;
+  _BL_STROKE_TRANSFORM_ORDER_BEFORE    = 1;
+  _BL_STROKE_TRANSFORM_ORDER_MAX_VALUE = 1;
+
+type
+  _BLFlattenMode = Integer;
+
+const
+  _BL_FLATTEN_MODE_DEFAULT   = 0;
+  _BL_FLATTEN_MODE_RECURSIVE = 1;
+  _BL_FLATTEN_MODE_MAX_VALUE = 1;
+
+type
+  _BLOffsetMode = Integer;
+
+const
+  _BL_OFFSET_MODE_DEFAULT   = 0;
+  _BL_OFFSET_MODE_ITERATIVE = 1;
+  _BL_OFFSET_MODE_MAX_VALUE = 1;
+
+type
+  _BLApproximationOptions = record
+    flattenMode: UInt8;
+    offsetMode: UInt8;
+    reservedFlags: array [0..5] of UInt8;
+    flattenTolerance: Double;
+    simplifyTolerance: Double;
+    offsetParameter: Double;
   end;
-  PBLArrayImpl = ^BLArrayImpl;
+  _PBLApproximationOptions = ^_BLApproximationOptions;
 
 type
-  BLArrayCore = record
-    impl: PBLArrayImpl;
+  _BLPathView = record
+    commandData: PUInt8;
+    vertexData: _PBLPoint;
+    size: Size_T;
   end;
-  PBLArrayCore = ^BLArrayCore;
 
 type
-  BLStrokeOptionsCore = record
-    options: record
-      case Integer of
-        0: (startCap: UInt8;
-            endCap: UInt8;
-            join: UInt8;
-            transformOrder: UInt8;
-            reserved: array [0..3] of UInt8);
-        1: (caps: array [0..1] of UInt8);
-        2: (hints: UInt64);
-    end;
+  _BLPathCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLPathCore = ^_BLPathCore;
+
+type
+  _BLPathSinkFunc = function(path: _PBLPathCore; const info: Pointer; userData: Pointer): _BLResult; cdecl;
+
+type
+  _BLPathStrokeSinkFunc = function(a: _PBLPathCore; b: _PBLPathCore; c: _PBLPathCore; inputStart: Size_T; inputEnd: Size_T; userData: Pointer): _BLResult; cdecl;
+
+type
+  _BLStrokeOptionsCore = packed record
+    opts: record
+            case Byte of
+              0: (startCap: UInt8;
+                  endCap: UInt8;
+                  join: UInt8;
+                  transformOrder: UInt8;
+                  reserved: array [0..3] of UInt8);
+              1: (caps: array [0.._BL_STROKE_CAP_POSITION_MAX_VALUE] of Byte);
+              2: (hints: UInt64);
+          end;
     width: Double;
     miterLimit: Double;
     dashOffset: Double;
-    dashArray: BLArrayCore;
+    dashArray: _BLArrayCore;
   end;
-  PBLStrokeOptionsCore = ^BLStrokeOptionsCore;
+  _PBLStrokeOptionsCore = ^_BLStrokeOptionsCore;
+
+function _blPathInit(self: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathInit';
+
+function _blPathInitMove(self: _PBLPathCore; other: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathInitMove';
+
+function _blPathInitWeak(self: _PBLPathCore; const other: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathInitWeak';
+
+function _blPathDestroy(self: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathDestroy';
+
+function _blPathReset(self: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathReset';
+
+function _blPathGetSize(const self: _PBLPathCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetSize';
+
+function _blPathGetCapacity(const self: _PBLPathCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetCapacity';
+
+function _blPathGetCommandData(const self: _PBLPathCore): PUInt8; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetCommandData';
+
+function _blPathGetVertexData(const self: _PBLPathCore): _PBLPoint; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetVertexData';
+
+function _blPathClear(self: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathClear';
+
+function _blPathShrink(self: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathShrink';
+
+function _blPathReserve(self: _PBLPathCore; n: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathReserve';
+
+function _blPathModifyOp(self: _PBLPathCore; op: _BLModifyOp; n: NativeUInt; cmdDataOut: PPUInt8; vtxDataOut: _PPBLPoint): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathModifyOp';
+
+function _blPathAssignMove(self: _PBLPathCore; other: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAssignMove';
+
+function _blPathAssignWeak(self: _PBLPathCore; const other: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAssignWeak';
+
+function _blPathAssignDeep(self: _PBLPathCore; const other: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAssignDeep';
+
+function _blPathSetVertexAt(self: _PBLPathCore; index: NativeUInt; cmd: UInt32; x: Double; y: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathSetVertexAt';
+
+function _blPathMoveTo(self: _PBLPathCore; x0: Double; y0: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathMoveTo';
+
+function _blPathLineTo(self: _PBLPathCore; x1: Double; y1: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathLineTo';
+
+function _blPathPolyTo(self: _PBLPathCore; const poly: _PBLPoint; count: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathPolyTo';
+
+function _blPathQuadTo(self: _PBLPathCore; x1: Double; y1: Double; x2: Double; y2: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathQuadTo';
+
+function _blPathConicTo(self: _PBLPathCore; x1: Double; y1: Double; x2: Double; y2: Double; w: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathConicTo';
+
+function _blPathCubicTo(self: _PBLPathCore; x1: Double; y1: Double; x2: Double; y2: Double; x3: Double; y3: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathCubicTo';
+
+function _blPathSmoothQuadTo(self: _PBLPathCore; x2: Double; y2: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathSmoothQuadTo';
+
+function _blPathSmoothCubicTo(self: _PBLPathCore; x2: Double; y2: Double; x3: Double; y3: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathSmoothCubicTo';
+
+function _blPathArcTo(self: _PBLPathCore; x: Double; y: Double; rx: Double; ry: Double; start: Double; sweep: Double; forceMoveTo: Boolean): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathArcTo';
+
+function _blPathArcQuadrantTo(self: _PBLPathCore; x1: Double; y1: Double; x2: Double; y2: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathArcQuadrantTo';
+
+function _blPathEllipticArcTo(self: _PBLPathCore; rx: Double; ry: Double; xAxisRotation: Double; largeArcFlag: Boolean; sweepFlag: Boolean; x1: Double; y1: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathEllipticArcTo';
+
+function _blPathClose(self: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathClose';
+
+function _blPathAddGeometry(self: _PBLPathCore; geometryType: _BLGeometryType; const geometryData: Pointer; const m: _PBLMatrix2D; dir: _BLGeometryDirection): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddGeometry';
+
+function _blPathAddBoxI(self: _PBLPathCore; const box: _PBLBoxI; dir: _BLGeometryDirection): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddBoxI';
+
+function _blPathAddBoxD(self: _PBLPathCore; const box: _PBLBox; dir: _BLGeometryDirection): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddBoxD';
+
+function _blPathAddRectI(self: _PBLPathCore; const rect: _PBLRectI; dir: _BLGeometryDirection): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddRectI';
+
+function _blPathAddRectD(self: _PBLPathCore; const rect: _PBLRect; dir: _BLGeometryDirection): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddRectD';
+
+function _blPathAddPath(self: _PBLPathCore; const other: _PBLPathCore; const range: _PBLRange): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddPath';
+
+function _blPathAddTranslatedPath(self: _PBLPathCore; const other: _PBLPathCore; const range: _PBLRange; const p: _PBLPoint): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddTranslatedPath';
+
+function _blPathAddTransformedPath(self: _PBLPathCore; const other: _PBLPathCore; const range: _PBLRange; const m: _PBLMatrix2D): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddTransformedPath';
+
+function _blPathAddReversedPath(self: _PBLPathCore; const other: _PBLPathCore; const range: _PBLRange; reverseMode: _BLPathReverseMode): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddReversedPath';
+
+function _blPathAddStrokedPath(self: _PBLPathCore; const other: _PBLPathCore; const range: _PBLRange; const options: _PBLStrokeOptionsCore; const approx: _PBLApproximationOptions): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathAddStrokedPath';
+
+function _blPathRemoveRange(self: _PBLPathCore; const range: _PBLRange): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathRemoveRange';
+
+function _blPathTranslate(self: _PBLPathCore; const range: _PBLRange; const p: _PBLPoint): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathTranslate';
+
+function _blPathTransform(self: _PBLPathCore; const range: _PBLRange; const m: _PBLMatrix2D): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathTransform';
+
+function _blPathFitTo(self: _PBLPathCore; const range: _PBLRange; const rect: _PBLRect; fitFlags: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathFitTo';
+
+function _blPathEquals(const a: _PBLPathCore; const b: _PBLPathCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathEquals';
+
+function _blPathGetInfoFlags(const self: _PBLPathCore; flagsOut: PUInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetInfoFlags';
+
+function _blPathGetControlBox(const self: _PBLPathCore; boxOut: _PBLBox): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetControlBox';
+
+function _blPathGetBoundingBox(const self: _PBLPathCore; boxOut: _PBLBox): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetBoundingBox';
+
+function _blPathGetFigureRange(const self: _PBLPathCore; index: NativeUInt; rangeOut: _PBLRange): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetFigureRange';
+
+function _blPathGetLastVertex(const self: _PBLPathCore; vtxOut: _PBLPoint): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetLastVertex';
+
+function _blPathGetClosestVertex(const self: _PBLPathCore; const p: _PBLPoint; maxDistance: Double; indexOut: PNativeUInt; distanceOut: PDouble): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathGetClosestVertex';
+
+function _blPathHitTest(const self: _PBLPathCore; const p: _PBLPoint; fillRule: _BLFillRule): _BLHitTest; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathHitTest';
+
+function _blStrokeOptionsInit(self: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsInit';
+
+function _blStrokeOptionsInitMove(self: _PBLStrokeOptionsCore; other: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsInitMove';
+
+function _blStrokeOptionsInitWeak(self: _PBLStrokeOptionsCore; const other: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsInitWeak';
+
+function _blStrokeOptionsDestroy(self: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsDestroy';
+
+function _blStrokeOptionsReset(self: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsReset';
+
+function _blStrokeOptionsEquals(const a: _PBLStrokeOptionsCore; const b: _PBLStrokeOptionsCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsEquals';
+
+function _blStrokeOptionsAssignMove(self: _PBLStrokeOptionsCore; other: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsAssignMove';
+
+function _blStrokeOptionsAssignWeak(self: _PBLStrokeOptionsCore; const other: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStrokeOptionsAssignWeak';
+
+function _blPathStrokeToSink(const self: _PBLPathCore; const range: _PBLRange; const strokeOptions: _PBLStrokeOptionsCore; const approximationOptions: _PBLApproximationOptions; a: _PBLPathCore; b: _PBLPathCore; c: _PBLPathCore; sink: _BLPathStrokeSinkFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPathStrokeToSink';
+{$ENDREGION 'path.h'}
+
+{$REGION 'filesystem.h'}
+type
+  _BLFileInfoFlags = Integer;
+
+const
+  _BL_FILE_INFO_OWNER_R          = $00000100;
+  _BL_FILE_INFO_OWNER_W          = $00000080;
+  _BL_FILE_INFO_OWNER_X          = $00000040;
+  _BL_FILE_INFO_OWNER_MASK       = $000001C0;
+  _BL_FILE_INFO_GROUP_R          = $00000020;
+  _BL_FILE_INFO_GROUP_W          = $00000010;
+  _BL_FILE_INFO_GROUP_X          = $00000008;
+  _BL_FILE_INFO_GROUP_MASK       = $00000038;
+  _BL_FILE_INFO_OTHER_R          = $00000004;
+  _BL_FILE_INFO_OTHER_W          = $00000002;
+  _BL_FILE_INFO_OTHER_X          = $00000001;
+  _BL_FILE_INFO_OTHER_MASK       = $00000007;
+  _BL_FILE_INFO_SUID             = $00000800;
+  _BL_FILE_INFO_SGID             = $00000400;
+  _BL_FILE_INFO_PERMISSIONS_MASK = $00000FFF;
+  _BL_FILE_INFO_REGULAR          = $00010000;
+  _BL_FILE_INFO_DIRECTORY        = $00020000;
+  _BL_FILE_INFO_SYMLINK          = $00040000;
+  _BL_FILE_INFO_CHAR_DEVICE      = $00100000;
+  _BL_FILE_INFO_BLOCK_DEVICE     = $00200000;
+  _BL_FILE_INFO_FIFO             = $00400000;
+  _BL_FILE_INFO_SOCKET           = $00800000;
+  _BL_FILE_INFO_HIDDEN           = $01000000;
+  _BL_FILE_INFO_EXECUTABLE       = $02000000;
+  _BL_FILE_INFO_ARCHIVE          = $04000000;
+  _BL_FILE_INFO_SYSTEM           = $08000000;
+  _BL_FILE_INFO_VALID            = $80000000;
 
 type
-  BLImageImpl = record
-    pixelData: Pointer;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    format: UInt8;
-    flags: UInt8;
-    depth: UInt16;
-    size: BLSizeI;
-    stride: IntPtr;
+  _BLFileOpenFlags = Integer;
+
+const
+  _BL_FILE_OPEN_NO_FLAGS         = 0;
+  _BL_FILE_OPEN_READ             = $00000001;
+  _BL_FILE_OPEN_WRITE            = $00000002;
+  _BL_FILE_OPEN_RW               = $00000003;
+  _BL_FILE_OPEN_CREATE           = $00000004;
+  _BL_FILE_OPEN_DELETE           = $00000008;
+  _BL_FILE_OPEN_TRUNCATE         = $00000010;
+  _BL_FILE_OPEN_READ_EXCLUSIVE   = $10000000;
+  _BL_FILE_OPEN_WRITE_EXCLUSIVE  = $20000000;
+  _BL_FILE_OPEN_RW_EXCLUSIVE     = $30000000;
+  _BL_FILE_OPEN_CREATE_EXCLUSIVE = $40000000;
+  _BL_FILE_OPEN_DELETE_EXCLUSIVE = $80000000;
+
+type
+  _BLFileSeekType = Integer;
+
+const
+  _BL_FILE_SEEK_SET       = 0;
+  _BL_FILE_SEEK_CUR       = 1;
+  _BL_FILE_SEEK_END       = 2;
+  _BL_FILE_SEEK_MAX_VALUE = 3;
+
+type
+  _BLFileReadFlags = Integer;
+
+const
+  _BL_FILE_READ_NO_FLAGS         = 0;
+  _BL_FILE_READ_MMAP_ENABLED     = $00000001;
+  _BL_FILE_READ_MMAP_AVOID_SMALL = $00000002;
+  _BL_FILE_READ_MMAP_NO_FALLBACK = $00000008;
+
+type
+  _BLFileCore = record
+    _base: _BLObjectCore;
   end;
-  _PBLImageImpl = ^BLImageImpl;
+  _PBLFileCore = ^_BLFileCore;
 
 type
-  BLImageCore = record
-    impl: _PBLImageImpl;
+  _BLFileInfo = record
+    size: UInt64;
+    modifiedTime: Int64;
+    flags: _BLFileInfoFlags;
+    uid: UInt32;
+    gid: UInt32;
+    reserved: array [0..4] of UInt32;
   end;
-  PBLImageCore = ^BLImageCore;
+  _PBLFileInfo = ^_BLFileInfo;
 
+function _blFileInit(self: _PBLFileCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileInit';
+
+function _blFileReset(self: _PBLFileCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileReset';
+
+function _blFileOpen(self: _PBLFileCore; const fileName: PUTF8Char; openFlags: _BLFileOpenFlags): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileOpen';
+
+function _blFileClose(self: _PBLFileCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileClose';
+
+function _blFileSeek(self: _PBLFileCore; offset: Int64; seekType: _BLFileSeekType; positionOut: PInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSeek';
+
+function _blFileRead(self: _PBLFileCore; buffer: Pointer; n: NativeUInt; bytesReadOut: PNativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileRead';
+
+function _blFileWrite(self: _PBLFileCore; const buffer: Pointer; n: NativeUInt; bytesWrittenOut: PNativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileWrite';
+
+function _blFileTruncate(self: _PBLFileCore; maxSize: Int64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileTruncate';
+
+function _blFileGetInfo(self: _PBLFileCore; infoOut: _PBLFileInfo): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileGetInfo';
+
+function _blFileGetSize(self: _PBLFileCore; fileSizeOut: PUInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileGetSize';
+
+function _blFileSystemGetInfo(const fileName: PUTF8Char; infoOut: _PBLFileInfo): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSystemGetInfo';
+
+function _blFileSystemReadFile(const fileName: PUTF8Char; dst: _PBLArrayCore; maxSize: NativeUInt; readFlags: _BLFileReadFlags): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSystemReadFile';
+
+function _blFileSystemWriteFile(const fileName: PUTF8Char; const data: Pointer; size: NativeUInt; bytesWrittenOut: PNativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSystemWriteFile';
+{$ENDREGION 'filesystem.h'}
+
+{$REGION 'string.h'}
 type
-  BLContextCookie = record
-    data: array [0..1] of UInt64;
+  _BLStringCore = record
+    base: _BLObjectCore;
   end;
-  _PBLContextCookie = ^BLContextCookie;
+  _PBLStringCore = ^_BLStringCore;
+
+function _blStringInit(self: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInit';
+
+function _blStringInitMove(self: _PBLStringCore; other: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInitMove';
+
+function _blStringInitWeak(self: _PBLStringCore; const other: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInitWeak';
+
+function _blStringInitWithData(self: _PBLStringCore; const str: PUTF8Char; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInitWithData';
+
+function _blStringDestroy(self: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringDestroy';
+
+function _blStringReset(self: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringReset';
+
+function _blStringGetData(const self: _PBLStringCore): PUTF8Char; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringGetData';
+
+function _blStringGetSize(const self: _PBLStringCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringGetSize';
+
+function _blStringGetCapacity(const self: _PBLStringCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringGetCapacity';
+
+function _blStringClear(self: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringClear';
+
+function _blStringShrink(self: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringShrink';
+
+function _blStringReserve(self: _PBLStringCore; n: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringReserve';
+
+function _blStringResize(self: _PBLStringCore; n: NativeUInt; fill: UTF8Char): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringResize';
+
+function _blStringMakeMutable(self: _PBLStringCore; dataOut: PPUTF8Char): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringMakeMutable';
+
+function _blStringModifyOp(self: _PBLStringCore; op: _BLModifyOp; n: NativeUInt; dataOut: PPUTF8Char): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringModifyOp';
+
+function _blStringInsertOp(self: _PBLStringCore; index: NativeUInt; n: NativeUInt; dataOut: PPUTF8Char): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertOp';
+
+function _blStringAssignMove(self: _PBLStringCore; other: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignMove';
+
+function _blStringAssignWeak(self: _PBLStringCore; const other: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignWeak';
+
+function _blStringAssignDeep(self: _PBLStringCore; const other: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignDeep';
+
+function _blStringAssignData(self: _PBLStringCore; const str: PUTF8Char; n: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignData';
+
+function _blStringApplyOpChar(self: _PBLStringCore; op: _BLModifyOp; c: UTF8Char; n: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpChar';
+
+function _blStringApplyOpData(self: _PBLStringCore; op: _BLModifyOp; const str: PUTF8Char; n: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpData';
+
+function _blStringApplyOpString(self: _PBLStringCore; op: _BLModifyOp; const other: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpString';
+
+function _blStringApplyOpFormat(self: _PBLStringCore; op: _BLModifyOp; const fmt: PUTF8Char): _BLResult varargs; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpFormat';
+
+function _blStringApplyOpFormatV(self: _PBLStringCore; op: _BLModifyOp; const fmt: PUTF8Char; ap: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpFormatV';
+
+function _blStringInsertChar(self: _PBLStringCore; index: NativeUInt; c: UTF8Char; n: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertChar';
+
+function _blStringInsertData(self: _PBLStringCore; index: NativeUInt; const str: PUTF8Char; n: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertData';
+
+function _blStringInsertString(self: _PBLStringCore; index: NativeUInt; const other: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertString';
+
+function _blStringRemoveIndex(self: _PBLStringCore; index: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringRemoveIndex';
+
+function _blStringRemoveRange(self: _PBLStringCore; rStart: NativeUInt; rEnd: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringRemoveRange';
+
+function _blStringEquals(const a: _PBLStringCore; const b: _PBLStringCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringEquals';
+
+function _blStringEqualsData(const self: _PBLStringCore; const str: PUTF8Char; n: NativeUInt): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringEqualsData';
+
+function _blStringCompare(const a: _PBLStringCore; const b: _PBLStringCore): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringCompare';
+
+function _blStringCompareData(const self: _PBLStringCore; const str: PUTF8Char; n: NativeUInt): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringCompareData';
+{$ENDREGION 'string.h'}
+
+{$REGION 'fontdefs.h'}
+type
+  _BLOrientation = Integer;
+
+const
+  _BL_ORIENTATION_HORIZONTAL = 0;
+  _BL_ORIENTATION_VERTICAL   = 1;
+  _BL_ORIENTATION_MAX_VALUE  = 1;
 
 type
-  BLContextCreateInfo = record
-    flags: UInt32;
-    threadCount: Int32;
-    cpuFeatures: UInt32;
-    commandQueueLimit: Int32;
-    reserved: array [0..3] of UInt32;
-  end;
-  _PBLContextCreateInfo = ^BLContextCreateInfo;
+  _BLFontFaceType = Integer;
+
+const
+  _BL_FONT_FACE_TYPE_NONE      = 0;
+  _BL_FONT_FACE_TYPE_OPENTYPE  = 1;
+  _BL_FONT_FACE_TYPE_MAX_VALUE = 1;
 
 type
-  BLContextHints = record
-    case Integer of
-      0: (renderingQuality: UInt8;
-          gradientQuality: UInt8;
-          patternQuality: UInt8);
-      1: (hints: array [0..7] of UInt8);
-  end;
-  _PBLContextHints = ^BLContextHints;
+  _BLFontStretch = Integer;
+
+const
+  _BL_FONT_STRETCH_ULTRA_CONDENSED = 1;
+  _BL_FONT_STRETCH_EXTRA_CONDENSED = 2;
+  _BL_FONT_STRETCH_CONDENSED       = 3;
+  _BL_FONT_STRETCH_SEMI_CONDENSED  = 4;
+  _BL_FONT_STRETCH_NORMAL          = 5;
+  _BL_FONT_STRETCH_SEMI_EXPANDED   = 6;
+  _BL_FONT_STRETCH_EXPANDED        = 7;
+  _BL_FONT_STRETCH_EXTRA_EXPANDED  = 8;
+  _BL_FONT_STRETCH_ULTRA_EXPANDED  = 9;
+  _BL_FONT_STRETCH_MAX_VALUE       = 9;
 
 type
-  BLContextState = record
-    targetImage: PBLImageCore;
-    targetSize: BLSize;
-    hints: BLContextHints;
-    compOp: UInt8;
-    fillRule: UInt8;
-    styleType: array [0..1] of UInt8;
-    reserved: array [0..3] of UInt8;
-    approximationOptions: BLApproximationOptions;
-    globalAlpha: Double;
-    styleAlpha: array [0..1] of Double;
-    strokeOptions: BLStrokeOptionsCore;
-    metaMatrix: BLMatrix2D;
-    userMatrix: BLMatrix2D;
-    savedStateCount: NativeUInt;
-  end;
-  _PBLContextState = ^BLContextState;
+  _BLFontStyle = Integer;
+
+const
+  _BL_FONT_STYLE_NORMAL    = 0;
+  _BL_FONT_STYLE_OBLIQUE   = 1;
+  _BL_FONT_STYLE_ITALIC    = 2;
+  _BL_FONT_STYLE_MAX_VALUE = 2;
 
 type
-  PBLContextVirt = Pointer;
+  _BLFontWeight = Integer;
+
+const
+  _BL_FONT_WEIGHT_THIN        = 100;
+  _BL_FONT_WEIGHT_EXTRA_LIGHT = 200;
+  _BL_FONT_WEIGHT_LIGHT       = 300;
+  _BL_FONT_WEIGHT_SEMI_LIGHT  = 350;
+  _BL_FONT_WEIGHT_NORMAL      = 400;
+  _BL_FONT_WEIGHT_MEDIUM      = 500;
+  _BL_FONT_WEIGHT_SEMI_BOLD   = 600;
+  _BL_FONT_WEIGHT_BOLD        = 700;
+  _BL_FONT_WEIGHT_EXTRA_BOLD  = 800;
+  _BL_FONT_WEIGHT_BLACK       = 900;
+  _BL_FONT_WEIGHT_EXTRA_BLACK = 950;
 
 type
-  BLContextImpl = record
-    virt: PBLContextVirt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    contextType: UInt32;
-    state: _PBLContextState;
-  end;
-  PBLContextImpl = ^BLContextImpl;
+  _BLFontStringId = Integer;
+
+const
+  _BL_FONT_STRING_ID_COPYRIGHT_NOTICE              = 0;
+  _BL_FONT_STRING_ID_FAMILY_NAME                   = 1;
+  _BL_FONT_STRING_ID_SUBFAMILY_NAME                = 2;
+  _BL_FONT_STRING_ID_UNIQUE_IDENTIFIER             = 3;
+  _BL_FONT_STRING_ID_FULL_NAME                     = 4;
+  _BL_FONT_STRING_ID_VERSION_STRING                = 5;
+  _BL_FONT_STRING_ID_POST_SCRIPT_NAME              = 6;
+  _BL_FONT_STRING_ID_TRADEMARK                     = 7;
+  _BL_FONT_STRING_ID_MANUFACTURER_NAME             = 8;
+  _BL_FONT_STRING_ID_DESIGNER_NAME                 = 9;
+  _BL_FONT_STRING_ID_DESCRIPTION                   = 10;
+  _BL_FONT_STRING_ID_VENDOR_URL                    = 11;
+  _BL_FONT_STRING_ID_DESIGNER_URL                  = 12;
+  _BL_FONT_STRING_ID_LICENSE_DESCRIPTION           = 13;
+  _BL_FONT_STRING_ID_LICENSE_INFO_URL              = 14;
+  _BL_FONT_STRING_ID_RESERVED                      = 15;
+  _BL_FONT_STRING_ID_TYPOGRAPHIC_FAMILY_NAME       = 16;
+  _BL_FONT_STRING_ID_TYPOGRAPHIC_SUBFAMILY_NAME    = 17;
+  _BL_FONT_STRING_ID_COMPATIBLE_FULL_NAME          = 18;
+  _BL_FONT_STRING_ID_SAMPLE_TEXT                   = 19;
+  _BL_FONT_STRING_ID_POST_SCRIPT_CID_NAME          = 20;
+  _BL_FONT_STRING_ID_WWS_FAMILY_NAME               = 21;
+  _BL_FONT_STRING_ID_WWS_SUBFAMILY_NAME            = 22;
+  _BL_FONT_STRING_ID_LIGHT_BACKGROUND_PALETTE      = 23;
+  _BL_FONT_STRING_ID_DARK_BACKGROUND_PALETTE       = 24;
+  _BL_FONT_STRING_ID_VARIATIONS_POST_SCRIPT_PREFIX = 25;
+  _BL_FONT_STRING_ID_COMMON_MAX_VALUE              = 26;
+  _BL_FONT_STRING_ID_CUSTOM_START_INDEX            = 255;
 
 type
-  BLContextCore = record
-    impl: PBLContextImpl;
-  end;
-  PBLContextCore = ^BLContextCore;
+  _BLFontUnicodeCoverageIndex = Integer;
+
+const
+  _BL_FONT_UC_INDEX_BASIC_LATIN                             = 0;
+  _BL_FONT_UC_INDEX_LATIN1_SUPPLEMENT                       = 1;
+  _BL_FONT_UC_INDEX_LATIN_EXTENDED_A                        = 2;
+  _BL_FONT_UC_INDEX_LATIN_EXTENDED_B                        = 3;
+  _BL_FONT_UC_INDEX_IPA_EXTENSIONS                          = 4;
+  _BL_FONT_UC_INDEX_SPACING_MODIFIER_LETTERS                = 5;
+  _BL_FONT_UC_INDEX_COMBINING_DIACRITICAL_MARKS             = 6;
+  _BL_FONT_UC_INDEX_GREEK_AND_COPTIC                        = 7;
+  _BL_FONT_UC_INDEX_COPTIC                                  = 8;
+  _BL_FONT_UC_INDEX_CYRILLIC                                = 9;
+  _BL_FONT_UC_INDEX_ARMENIAN                                = 10;
+  _BL_FONT_UC_INDEX_HEBREW                                  = 11;
+  _BL_FONT_UC_INDEX_VAI                                     = 12;
+  _BL_FONT_UC_INDEX_ARABIC                                  = 13;
+  _BL_FONT_UC_INDEX_NKO                                     = 14;
+  _BL_FONT_UC_INDEX_DEVANAGARI                              = 15;
+  _BL_FONT_UC_INDEX_BENGALI                                 = 16;
+  _BL_FONT_UC_INDEX_GURMUKHI                                = 17;
+  _BL_FONT_UC_INDEX_GUJARATI                                = 18;
+  _BL_FONT_UC_INDEX_ORIYA                                   = 19;
+  _BL_FONT_UC_INDEX_TAMIL                                   = 20;
+  _BL_FONT_UC_INDEX_TELUGU                                  = 21;
+  _BL_FONT_UC_INDEX_KANNADA                                 = 22;
+  _BL_FONT_UC_INDEX_MALAYALAM                               = 23;
+  _BL_FONT_UC_INDEX_THAI                                    = 24;
+  _BL_FONT_UC_INDEX_LAO                                     = 25;
+  _BL_FONT_UC_INDEX_GEORGIAN                                = 26;
+  _BL_FONT_UC_INDEX_BALINESE                                = 27;
+  _BL_FONT_UC_INDEX_HANGUL_JAMO                             = 28;
+  _BL_FONT_UC_INDEX_LATIN_EXTENDED_ADDITIONAL               = 29;
+  _BL_FONT_UC_INDEX_GREEK_EXTENDED                          = 30;
+  _BL_FONT_UC_INDEX_GENERAL_PUNCTUATION                     = 31;
+  _BL_FONT_UC_INDEX_SUPERSCRIPTS_AND_SUBSCRIPTS             = 32;
+  _BL_FONT_UC_INDEX_CURRENCY_SYMBOLS                        = 33;
+  _BL_FONT_UC_INDEX_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS = 34;
+  _BL_FONT_UC_INDEX_LETTERLIKE_SYMBOLS                      = 35;
+  _BL_FONT_UC_INDEX_NUMBER_FORMS                            = 36;
+  _BL_FONT_UC_INDEX_ARROWS                                  = 37;
+  _BL_FONT_UC_INDEX_MATHEMATICAL_OPERATORS                  = 38;
+  _BL_FONT_UC_INDEX_MISCELLANEOUS_TECHNICAL                 = 39;
+  _BL_FONT_UC_INDEX_CONTROL_PICTURES                        = 40;
+  _BL_FONT_UC_INDEX_OPTICAL_CHARACTER_RECOGNITION           = 41;
+  _BL_FONT_UC_INDEX_ENCLOSED_ALPHANUMERICS                  = 42;
+  _BL_FONT_UC_INDEX_BOX_DRAWING                             = 43;
+  _BL_FONT_UC_INDEX_BLOCK_ELEMENTS                          = 44;
+  _BL_FONT_UC_INDEX_GEOMETRIC_SHAPES                        = 45;
+  _BL_FONT_UC_INDEX_MISCELLANEOUS_SYMBOLS                   = 46;
+  _BL_FONT_UC_INDEX_DINGBATS                                = 47;
+  _BL_FONT_UC_INDEX_CJK_SYMBOLS_AND_PUNCTUATION             = 48;
+  _BL_FONT_UC_INDEX_HIRAGANA                                = 49;
+  _BL_FONT_UC_INDEX_KATAKANA                                = 50;
+  _BL_FONT_UC_INDEX_BOPOMOFO                                = 51;
+  _BL_FONT_UC_INDEX_HANGUL_COMPATIBILITY_JAMO               = 52;
+  _BL_FONT_UC_INDEX_PHAGS_PA                                = 53;
+  _BL_FONT_UC_INDEX_ENCLOSED_CJK_LETTERS_AND_MONTHS         = 54;
+  _BL_FONT_UC_INDEX_CJK_COMPATIBILITY                       = 55;
+  _BL_FONT_UC_INDEX_HANGUL_SYLLABLES                        = 56;
+  _BL_FONT_UC_INDEX_NON_PLANE                               = 57;
+  _BL_FONT_UC_INDEX_PHOENICIAN                              = 58;
+  _BL_FONT_UC_INDEX_CJK_UNIFIED_IDEOGRAPHS                  = 59;
+  _BL_FONT_UC_INDEX_PRIVATE_USE_PLANE0                      = 60;
+  _BL_FONT_UC_INDEX_CJK_STROKES                             = 61;
+  _BL_FONT_UC_INDEX_ALPHABETIC_PRESENTATION_FORMS           = 62;
+  _BL_FONT_UC_INDEX_ARABIC_PRESENTATION_FORMS_A             = 63;
+  _BL_FONT_UC_INDEX_COMBINING_HALF_MARKS                    = 64;
+  _BL_FONT_UC_INDEX_VERTICAL_FORMS                          = 65;
+  _BL_FONT_UC_INDEX_SMALL_FORM_VARIANTS                     = 66;
+  _BL_FONT_UC_INDEX_ARABIC_PRESENTATION_FORMS_B             = 67;
+  _BL_FONT_UC_INDEX_HALFWIDTH_AND_FULLWIDTH_FORMS           = 68;
+  _BL_FONT_UC_INDEX_SPECIALS                                = 69;
+  _BL_FONT_UC_INDEX_TIBETAN                                 = 70;
+  _BL_FONT_UC_INDEX_SYRIAC                                  = 71;
+  _BL_FONT_UC_INDEX_THAANA                                  = 72;
+  _BL_FONT_UC_INDEX_SINHALA                                 = 73;
+  _BL_FONT_UC_INDEX_MYANMAR                                 = 74;
+  _BL_FONT_UC_INDEX_ETHIOPIC                                = 75;
+  _BL_FONT_UC_INDEX_CHEROKEE                                = 76;
+  _BL_FONT_UC_INDEX_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS   = 77;
+  _BL_FONT_UC_INDEX_OGHAM                                   = 78;
+  _BL_FONT_UC_INDEX_RUNIC                                   = 79;
+  _BL_FONT_UC_INDEX_KHMER                                   = 80;
+  _BL_FONT_UC_INDEX_MONGOLIAN                               = 81;
+  _BL_FONT_UC_INDEX_BRAILLE_PATTERNS                        = 82;
+  _BL_FONT_UC_INDEX_YI_SYLLABLES_AND_RADICALS               = 83;
+  _BL_FONT_UC_INDEX_TAGALOG_HANUNOO_BUHID_TAGBANWA          = 84;
+  _BL_FONT_UC_INDEX_OLD_ITALIC                              = 85;
+  _BL_FONT_UC_INDEX_GOTHIC                                  = 86;
+  _BL_FONT_UC_INDEX_DESERET                                 = 87;
+  _BL_FONT_UC_INDEX_MUSICAL_SYMBOLS                         = 88;
+  _BL_FONT_UC_INDEX_MATHEMATICAL_ALPHANUMERIC_SYMBOLS       = 89;
+  _BL_FONT_UC_INDEX_PRIVATE_USE_PLANE_15_16                 = 90;
+  _BL_FONT_UC_INDEX_VARIATION_SELECTORS                     = 91;
+  _BL_FONT_UC_INDEX_TAGS                                    = 92;
+  _BL_FONT_UC_INDEX_LIMBU                                   = 93;
+  _BL_FONT_UC_INDEX_TAI_LE                                  = 94;
+  _BL_FONT_UC_INDEX_NEW_TAI_LUE                             = 95;
+  _BL_FONT_UC_INDEX_BUGINESE                                = 96;
+  _BL_FONT_UC_INDEX_GLAGOLITIC                              = 97;
+  _BL_FONT_UC_INDEX_TIFINAGH                                = 98;
+  _BL_FONT_UC_INDEX_YIJING_HEXAGRAM_SYMBOLS                 = 99;
+  _BL_FONT_UC_INDEX_SYLOTI_NAGRI                            = 100;
+  _BL_FONT_UC_INDEX_LINEAR_B_SYLLABARY_AND_IDEOGRAMS        = 101;
+  _BL_FONT_UC_INDEX_ANCIENT_GREEK_NUMBERS                   = 102;
+  _BL_FONT_UC_INDEX_UGARITIC                                = 103;
+  _BL_FONT_UC_INDEX_OLD_PERSIAN                             = 104;
+  _BL_FONT_UC_INDEX_SHAVIAN                                 = 105;
+  _BL_FONT_UC_INDEX_OSMANYA                                 = 106;
+  _BL_FONT_UC_INDEX_CYPRIOT_SYLLABARY                       = 107;
+  _BL_FONT_UC_INDEX_KHAROSHTHI                              = 108;
+  _BL_FONT_UC_INDEX_TAI_XUAN_JING_SYMBOLS                   = 109;
+  _BL_FONT_UC_INDEX_CUNEIFORM                               = 110;
+  _BL_FONT_UC_INDEX_COUNTING_ROD_NUMERALS                   = 111;
+  _BL_FONT_UC_INDEX_SUNDANESE                               = 112;
+  _BL_FONT_UC_INDEX_LEPCHA                                  = 113;
+  _BL_FONT_UC_INDEX_OL_CHIKI                                = 114;
+  _BL_FONT_UC_INDEX_SAURASHTRA                              = 115;
+  _BL_FONT_UC_INDEX_KAYAH_LI                                = 116;
+  _BL_FONT_UC_INDEX_REJANG                                  = 117;
+  _BL_FONT_UC_INDEX_CHAM                                    = 118;
+  _BL_FONT_UC_INDEX_ANCIENT_SYMBOLS                         = 119;
+  _BL_FONT_UC_INDEX_PHAISTOS_DISC                           = 120;
+  _BL_FONT_UC_INDEX_CARIAN_LYCIAN_LYDIAN                    = 121;
+  _BL_FONT_UC_INDEX_DOMINO_AND_MAHJONG_TILES                = 122;
+  _BL_FONT_UC_INDEX_INTERNAL_USAGE_123                      = 123;
+  _BL_FONT_UC_INDEX_INTERNAL_USAGE_124                      = 124;
+  _BL_FONT_UC_INDEX_INTERNAL_USAGE_125                      = 125;
+  _BL_FONT_UC_INDEX_INTERNAL_USAGE_126                      = 126;
+  _BL_FONT_UC_INDEX_INTERNAL_USAGE_127                      = 127;
+  _BL_FONT_UC_INDEX_MAX_VALUE                               = 128;
 
 type
-  BLCreateForeignInfo = record
-    data: Pointer;
-    size: NativeUInt;
-    destroyFunc: BLDestroyImplFunc;
-    destroyData: Pointer;
-  end;
+  _BLTextDirection = Integer;
+
+const
+  _BL_TEXT_DIRECTION_LTR       = 0;
+  _BL_TEXT_DIRECTION_RTL       = 1;
+  _BL_TEXT_DIRECTION_MAX_VALUE = 1;
 
 type
-  BLStringView = record
-    data: PUTF8Char;
-    size: NativeUInt;
-  end;
+  _BLGlyphId = UInt32;
 
 type
-  BLStringImpl = record
-    capacity: NativeUInt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
+  _BLGlyphInfo = record
+    cluster: UInt32;
     reserved: UInt32;
-    case Integer of
-      0: (data: PUTF8Char;
-          size: NativeUInt);
-      1: (view: BLStringView);
   end;
-  _PBLStringImpl = ^BLStringImpl;
+  _PBLGlyphInfo = ^_BLGlyphInfo;
 
 type
-  BLStringCore = record
-    impl: _PBLStringImpl;
+  _BLGlyphPlacement = record
+    placement: _BLPointI;
+    advance: _BLPointI;
   end;
-  PBLStringCore = ^BLStringCore;
-
-
-type
-  PBLFontDataVirt = Pointer;
+  _PBLGlyphPlacement = ^_BLGlyphPlacement;
 
 type
-  BLFontDataImpl = record
-    virt: PBLFontDataVirt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    faceType: UInt8;
-    reserved: array [0..2] of UInt8;
-    faceCount: UInt32;
-    flags: UInt32;
+  _BLGlyphMappingState = record
+    glyphCount: Size_T;
+    undefinedFirst: Size_T;
+    undefinedCount: Size_T;
   end;
-  _PBLFontDataImpl = ^BLFontDataImpl;
+  _PBLGlyphMappingState = ^_BLGlyphMappingState;
 
 type
-  BLFontDataCore = record
-    impl: _PBLFontDataImpl;
-  end;
-  PBLFontDataCore = ^BLFontDataCore;
-
-type
-  BLFontDesignMetrics = record
-    unitsPerEm: Integer;
-    lowestPPEM: Integer;
-    lineGap: Integer;
-    xHeight: Integer;
-    capHeight: Integer;
-    ascent: Integer;
-    vAscent: Integer;
-    descent: Integer;
-    vDescent: Integer;
-    hMinLSB: Integer;
-    vMinLSB: Integer;
-    hMinTSB: Integer;
-    vMinTSB: Integer;
-    hMaxAdvance: Integer;
-    vMaxAdvance: Integer;
-    glyphBoundingBox: BLBoxI;
-    underlinePosition: Integer;
-    underlineThickness: Integer;
-    strikethroughPosition: Integer;
-    strikethroughThickness: Integer;
-  end;
-  _PBLFontDesignMetrics = ^BLFontDesignMetrics;
-
-type
-  BLFontFaceInfo = record
-    faceType: UInt8;
-    outlineType: UInt8;
-    glyphCount: UInt16;
-    revision: UInt32;
-    faceIndex: Int32;
-    faceFlags: UInt32;
-    diagFlags: UInt32;
-    reserved: array [0..2] of UInt32;
-  end;
-  _PBLFontFaceInfo = ^BLFontFaceInfo;
-
-type
-  BLFontFeature = record
-    tag: BLTag;
-    value: UInt32;
+  _BLGlyphOutlineSinkInfo = record
+    glyphIndex: Size_T;
+    contourCount: Size_T;
   end;
 
 type
-  BLFontUnicodeCoverage = record
+  _BLFontUnicodeCoverage = record
     data: array [0..3] of UInt32;
   end;
-  _PBLFontUnicodeCoverage = ^BLFontUnicodeCoverage;
+  _PBLFontUnicodeCoverage = ^_BLFontUnicodeCoverage;
 
 type
-  BLFontPanose = record
-  case Integer of
-    0: (data: array [0..9] of UInt8);
-    1: (familyKind: UInt8);
+  _BLFontPanose = record
+  case Byte of
+    0: (data: array [0..9] of Byte);
+    1: (familyKind: Byte);
     2: (text: record
-          familyKind: UInt8;
-          serifStyle: UInt8;
-          weight: UInt8;
-          proportion: UInt8;
-          contrast: UInt8;
-          strokeVariation: UInt8;
-          armStyle: UInt8;
-          letterform: UInt8;
-          midline: UInt8;
-          xHeight: UInt8
+          familyKind: Byte;
+          serifStyle: Byte;
+          weight: Byte;
+          proportion: Byte;
+          contrast: Byte;
+          strokeVariation: Byte;
+          armStyle: Byte;
+          letterform: Byte;
+          midline: Byte;
+          xHeight: Byte;
         end);
     3: (script: record
-          familyKind: UInt8;
-          toolKind: UInt8;
-          weight: UInt8;
-          spacing: UInt8;
-          aspectRatio: UInt8;
-          contrast: UInt8;
-          topology: UInt8;
-          form: UInt8;
-          finials: UInt8;
-          xAscent: UInt8;
+          familyKind: Byte;
+          toolKind: Byte;
+          weight: Byte;
+          spacing: Byte;
+          aspectRatio: Byte;
+          contrast: Byte;
+          topology: Byte;
+          form: Byte;
+          finals: Byte;
+          xAscent: Byte;
         end);
     4: (decorative: record
-          familyKind: UInt8;
-          decorativeClass: UInt8;
-          weight: UInt8;
-          aspect: UInt8;
-          contrast: UInt8;
-          serifVariant: UInt8;
-          treatment: UInt8;
-          lining: UInt8;
-          topology: UInt8;
-          characterRange: UInt8;
+          familyKind: Byte;
+          decorativeClass: Byte;
+          weight: Byte;
+          aspect: Byte;
+          contrast: Byte;
+          serifVariant: Byte;
+          treatment: Byte;
+          lining: Byte;
+          topology: Byte;
+          characterRange: Byte;
         end);
     5: (symbol: record
-          familyKind: UInt8;
-          symbolKind: UInt8;
-          weight: UInt8;
-          spacing: UInt8;
-          aspectRatioAndContrast: UInt8;
-          aspectRatio94: UInt8;
-          aspectRatio119: UInt8;
-          aspectRatio157: UInt8;
-          aspectRatio163: UInt8;
-          aspectRatio211: UInt8;
+          familyKind: Byte;
+          symbolKind: Byte;
+          weight: Byte;
+          spacing: Byte;
+          aspectRatioAndContrast: Byte;
+          aspectRatio94: Byte;
+          aspectRatio119: Byte;
+          aspectRatio157: Byte;
+          aspectRatio163: Byte;
+          aspectRatio211: Byte;
         end);
   end;
 
 type
-  PBLFontFaceVirt = Pointer;
-
-type
-  BLFontFaceImpl = record
-    virt: PBLFontFaceVirt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    weight: UInt16;
-    stretch: UInt8;
-    style: UInt8;
-    faceInfo: BLFontFaceInfo;
-    uniqueId: BLUniqueId;
-    data: BLFontDataCore;
-    fullName: BLStringCore;
-    familyName: BLStringCore;
-    subfamilyName: BLStringCore;
-    postScriptName: BLStringCore;
-    designMetrics: BLFontDesignMetrics;
-    unicodeCoverage: BLFontUnicodeCoverage;
-    panose: BLFontPanose;
-  end;
-  _PBLFontFaceImpl = ^BLFontFaceImpl;
-
-type
-  BLFontFaceCore = record
-    impl: _PBLFontFaceImpl;
-  end;
-  PBLFontFaceCore = ^BLFontFaceCore;
-
-type
-  BLFontMatrix = record
-  case Integer of
+  _BLFontMatrix = record
+  case Byte of
     0: (m: array [0..3] of Double);
     1: (m00: Double;
         m01: Double;
         m10: Double;
-        m11: Double
-        );
+        m11: Double);
   end;
-  _PBLFontMatrix = ^BLFontMatrix;
+  _PBLFontMatrix = ^_BLFontMatrix;
 
 type
-  BLFontMetrics = record
+  _BLFontMetrics = record
     size: Single;
     ascent: Single;
     vAscent: Single;
@@ -1579,1985 +2417,1386 @@ type
     strikethroughPosition: Single;
     strikethroughThickness: Single;
   end;
-  _PBLFontMetrics = ^BLFontMetrics;
+  _PBLFontMetrics = ^_BLFontMetrics;
 
 type
-  BLFontImpl = record
-    face: BLFontFaceCore;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    weight: UInt16;
-    stretch: UInt8;
-    style: UInt8;
-    features: BLArrayCore;
-    variations: BLArrayCore;
-    metrics: BLFontMetrics;
-    matrix: BLFontMatrix;
+  _BLFontDesignMetrics = record
+    unitsPerEm: Integer;
+    lowestPPEM: Integer;
+    lineGap: Integer;
+    xHeight: Integer;
+    capHeight: Integer;
+    ascent: Integer;
+    vAscent: Integer;
+    descent: Integer;
+    vDescent: Integer;
+    hMinLSB: Integer;
+    vMinLSB: Integer;
+    hMinTSB: Integer;
+    vMinTSB: Integer;
+    hMaxAdvance: Integer;
+    vMaxAdvance: Integer;
+    glyphBoundingBox: _BLBoxI;
+    underlinePosition: Integer;
+    underlineThickness: Integer;
+    strikethroughPosition: Integer;
+    strikethroughThickness: Integer;
   end;
-  _PBLFontImpl = ^BLFontImpl;
+  _PBLFontDesignMetrics = ^_BLFontDesignMetrics;
 
 type
-  BLFontCore = record
-    impl: _PBLFontImpl;
+  _BLTextMetrics = record
+    advance: _BLPoint;
+    leadingBearing: _BLPoint;
+    trailingBearing: _BLPoint;
+    boundingBox: _BLBox;
   end;
-  PBLFontCore = ^BLFontCore;
+  _PBLTextMetrics = ^_BLTextMetrics;
+{$ENDREGION 'fontdefs.h'}
+
+{$REGION 'fontdata.h'}
+type
+  _BLFontDataFlags = Integer;
+
+const
+  _BL_FONT_DATA_NO_FLAGS        = 0;
+  _BL_FONT_DATA_FLAG_COLLECTION = $00000001;
 
 type
-  PBLFontManagerVirt = Pointer;
-
-type
-  BLFontManagerImpl = record
-    virt: PBLFontManagerVirt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    reserved: array [0..3] of UInt8;
+  _BLFontTable = record
+    data: PUInt8;
+    size: Size_T;
   end;
-  _PBLFontManagerImpl = ^BLFontManagerImpl;
+  _PBLFontTable = ^_BLFontTable;
 
 type
-  BLFontManagerCore = record
-    impl: _PBLFontManagerImpl;
+  _BLFontDataCore = record
+    _base: _BLObjectCore;
   end;
-  PBLFontManagerCore = ^BLFontManagerCore;
+  _PBLFontDataCore = ^_BLFontDataCore;
+
+function _blFontDataInit(self: _PBLFontDataCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataInit';
+
+function _blFontDataInitMove(self: _PBLFontDataCore; other: _PBLFontDataCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataInitMove';
+
+function _blFontDataInitWeak(self: _PBLFontDataCore; const other: _PBLFontDataCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataInitWeak';
+
+function _blFontDataDestroy(self: _PBLFontDataCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataDestroy';
+
+function _blFontDataReset(self: _PBLFontDataCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataReset';
+
+function _blFontDataAssignMove(self: _PBLFontDataCore; other: _PBLFontDataCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataAssignMove';
+
+function _blFontDataAssignWeak(self: _PBLFontDataCore; const other: _PBLFontDataCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataAssignWeak';
+
+function _blFontDataCreateFromFile(self: _PBLFontDataCore; const fileName: PUTF8Char; readFlags: _BLFileReadFlags): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataCreateFromFile';
+
+function _blFontDataCreateFromDataArray(self: _PBLFontDataCore; const dataArray: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataCreateFromDataArray';
+
+function _blFontDataCreateFromData(self: _PBLFontDataCore; const data: Pointer; dataSize: NativeUInt; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataCreateFromData';
+
+function _blFontDataEquals(const a: _PBLFontDataCore; const b: _PBLFontDataCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataEquals';
+
+function _blFontDataGetFaceCount(const self: _PBLFontDataCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetFaceCount';
+
+function _blFontDataGetFaceType(const self: _PBLFontDataCore): _BLFontFaceType; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetFaceType';
+
+function _blFontDataGetFlags(const self: _PBLFontDataCore): _BLFontDataFlags; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetFlags';
+
+function _blFontDataGetTableTags(const self: _PBLFontDataCore; faceIndex: UInt32; dst: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetTableTags';
+
+function _blFontDataGetTables(const self: _PBLFontDataCore; faceIndex: UInt32; dst: _PBLFontTable; const tags: _PBLTag; count: NativeUInt): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetTables';
+{$ENDREGION 'fontdata.h'}
+
+{$REGION 'fontface.h'}
+type
+  _BLFontFaceFlags = Integer;
+
+const
+  _BL_FONT_FACE_NO_FLAGS                   = 0;
+  _BL_FONT_FACE_FLAG_TYPOGRAPHIC_NAMES     = $00000001;
+  _BL_FONT_FACE_FLAG_TYPOGRAPHIC_METRICS   = $00000002;
+  _BL_FONT_FACE_FLAG_CHAR_TO_GLYPH_MAPPING = $00000004;
+  _BL_FONT_FACE_FLAG_HORIZONTAL_METIRCS    = $00000010;
+  _BL_FONT_FACE_FLAG_VERTICAL_METRICS      = $00000020;
+  _BL_FONT_FACE_FLAG_HORIZONTAL_KERNING    = $00000040;
+  _BL_FONT_FACE_FLAG_VERTICAL_KERNING      = $00000080;
+  _BL_FONT_FACE_FLAG_OPENTYPE_FEATURES     = $00000100;
+  _BL_FONT_FACE_FLAG_PANOSE_DATA           = $00000200;
+  _BL_FONT_FACE_FLAG_UNICODE_COVERAGE      = $00000400;
+  _BL_FONT_FACE_FLAG_BASELINE_Y_EQUALS_0   = $00001000;
+  _BL_FONT_FACE_FLAG_LSB_POINT_X_EQUALS_0  = $00002000;
+  _BL_FONT_FACE_FLAG_VARIATION_SEQUENCES   = $10000000;
+  _BL_FONT_FACE_FLAG_OPENTYPE_VARIATIONS   = $20000000;
+  _BL_FONT_FACE_FLAG_SYMBOL_FONT           = $40000000;
+  _BL_FONT_FACE_FLAG_LAST_RESORT_FONT      = $80000000;
 
 type
-  BLFontQueryProperties = record
-    style: UInt32;
-    weight: UInt32;
-    stretch: UInt32;
+  _BLFontFaceDiagFlags = Integer;
+
+const
+  _BL_FONT_FACE_DIAG_NO_FLAGS          = 0;
+  _BL_FONT_FACE_DIAG_WRONG_NAME_DATA   = $00000001;
+  _BL_FONT_FACE_DIAG_FIXED_NAME_DATA   = $00000002;
+  _BL_FONT_FACE_DIAG_WRONG_KERN_DATA   = $00000004;
+  _BL_FONT_FACE_DIAG_FIXED_KERN_DATA   = $00000008;
+  _BL_FONT_FACE_DIAG_WRONG_CMAP_DATA   = $00000010;
+  _BL_FONT_FACE_DIAG_WRONG_CMAP_FORMAT = $00000020;
+
+type
+  _BLFontOutlineType = Integer;
+
+const
+  _BL_FONT_OUTLINE_TYPE_NONE      = 0;
+  _BL_FONT_OUTLINE_TYPE_TRUETYPE  = 1;
+  _BL_FONT_OUTLINE_TYPE_CFF       = 2;
+  _BL_FONT_OUTLINE_TYPE_CFF2      = 3;
+  _BL_FONT_OUTLINE_TYPE_MAX_VALUE = 3;
+
+type
+  _BLFontFaceInfo = record
+    faceType: UInt8;
+    outlineType: UInt8;
+    reserved8: array [0..1] of UInt8;
+    glyphCount: UInt32;
+    revision: UInt32;
+    faceIndex: UInt32;
+    faceFlags: UInt32;
+    diagFlags: UInt32;
+    reserved: array [0..1] of UInt32;
   end;
-  PBLFontQueryProperties = ^BLFontQueryProperties;
+  _PBLFontFaceInfo = ^_BLFontFaceInfo;
 
 type
-  BLFontTable = record
-    data: Pointer;
-    size: NativeUInt;
+  _BLFontFaceCore = record
+    _base: _BLObjectCore;
   end;
-  _PBLFontTable = ^BLFontTable;
+  _PBLFontFaceCore = ^_BLFontFaceCore;
+
+function _blFontFaceInit(self: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceInit';
+
+function _blFontFaceInitMove(self: _PBLFontFaceCore; other: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceInitMove';
+
+function _blFontFaceInitWeak(self: _PBLFontFaceCore; const other: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceInitWeak';
+
+function _blFontFaceDestroy(self: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceDestroy';
+
+function _blFontFaceReset(self: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceReset';
+
+function _blFontFaceAssignMove(self: _PBLFontFaceCore; other: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceAssignMove';
+
+function _blFontFaceAssignWeak(self: _PBLFontFaceCore; const other: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceAssignWeak';
+
+function _blFontFaceEquals(const a: _PBLFontFaceCore; const b: _PBLFontFaceCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceEquals';
+
+function _blFontFaceCreateFromFile(self: _PBLFontFaceCore; const fileName: PUTF8Char; readFlags: _BLFileReadFlags): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceCreateFromFile';
+
+function _blFontFaceCreateFromData(self: _PBLFontFaceCore; const fontData: _PBLFontDataCore; faceIndex: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceCreateFromData';
+
+function _blFontFaceGetFullName(const self: _PBLFontFaceCore; &out: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFullName';
+
+function _blFontFaceGetFamilyName(const self: _PBLFontFaceCore; &out: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFamilyName';
+
+function _blFontFaceGetSubfamilyName(const self: _PBLFontFaceCore; &out: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetSubfamilyName';
+
+function _blFontFaceGetPostScriptName(const self: _PBLFontFaceCore; &out: _PBLStringCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetPostScriptName';
+
+function _blFontFaceGetFaceInfo(const self: _PBLFontFaceCore; &out: _PBLFontFaceInfo): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFaceInfo';
+
+function _blFontFaceGetDesignMetrics(const self: _PBLFontFaceCore; &out: _PBLFontDesignMetrics): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetDesignMetrics';
+
+function _blFontFaceGetUnicodeCoverage(const self: _PBLFontFaceCore; &out: _PBLFontUnicodeCoverage): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetUnicodeCoverage';
+
+function _blFontFaceGetCharacterCoverage(const self: _PBLFontFaceCore; &out: _PBLBitSetCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetCharacterCoverage';
+
+function _blFontFaceHasScriptTag(const self: _PBLFontFaceCore; scriptTag: _BLTag): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceHasScriptTag';
+
+function _blFontFaceHasFeatureTag(const self: _PBLFontFaceCore; featureTag: _BLTag): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceHasFeatureTag';
+
+function _blFontFaceHasVariationTag(const self: _PBLFontFaceCore; variationTag: _BLTag): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceHasVariationTag';
+
+function _blFontFaceGetScriptTags(const self: _PBLFontFaceCore; &out: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetScriptTags';
+
+function _blFontFaceGetFeatureTags(const self: _PBLFontFaceCore; &out: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFeatureTags';
+
+function _blFontFaceGetVariationTags(const self: _PBLFontFaceCore; &out: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetVariationTags';
+{$ENDREGION 'fontface.h'}
+
+{$REGION 'fontfeaturesettings.h'}
+type
+  _BLFontFeatureSettingsCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLFontFeatureSettingsCore = ^_BLFontFeatureSettingsCore;
+
+const
+  _BL_FONT_FEATURE_INVALID_VALUE = $FFFFFFFF;
 
 type
-  BLFontVariation = record
-    tag: BLTag;
+  _BLFontFeatureItem = record
+    tag: _BLTag;
+    value: UInt32;
+  end;
+  _PBLFontFeatureItem = ^_BLFontFeatureItem;
+
+type
+  _BLFontFeatureSettingsView = record
+    data: _PBLFontFeatureItem;
+    size: Size_T;
+    ssoData: array [0..35] of _BLFontFeatureItem;
+  end;
+  _PBLFontFeatureSettingsView = ^_BLFontFeatureSettingsView;
+
+function _blFontFeatureSettingsInit(self: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsInit';
+
+function _blFontFeatureSettingsInitMove(self: _PBLFontFeatureSettingsCore; other: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsInitMove';
+
+function _blFontFeatureSettingsInitWeak(self: _PBLFontFeatureSettingsCore; const other: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsInitWeak';
+
+function _blFontFeatureSettingsDestroy(self: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsDestroy';
+
+function _blFontFeatureSettingsReset(self: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsReset';
+
+function _blFontFeatureSettingsClear(self: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsClear';
+
+function _blFontFeatureSettingsShrink(self: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsShrink';
+
+function _blFontFeatureSettingsAssignMove(self: _PBLFontFeatureSettingsCore; other: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsAssignMove';
+
+function _blFontFeatureSettingsAssignWeak(self: _PBLFontFeatureSettingsCore; const other: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsAssignWeak';
+
+function _blFontFeatureSettingsGetSize(const self: _PBLFontFeatureSettingsCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetSize';
+
+function _blFontFeatureSettingsGetCapacity(const self: _PBLFontFeatureSettingsCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetCapacity';
+
+function _blFontFeatureSettingsGetView(const self: _PBLFontFeatureSettingsCore; &out: _PBLFontFeatureSettingsView): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetView';
+
+function _blFontFeatureSettingsHasValue(const self: _PBLFontFeatureSettingsCore; featureTag: _BLTag): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsHasValue';
+
+function _blFontFeatureSettingsGetValue(const self: _PBLFontFeatureSettingsCore; featureTag: _BLTag): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetValue';
+
+function _blFontFeatureSettingsSetValue(self: _PBLFontFeatureSettingsCore; featureTag: _BLTag; value: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsSetValue';
+
+function _blFontFeatureSettingsRemoveValue(self: _PBLFontFeatureSettingsCore; featureTag: _BLTag): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsRemoveValue';
+
+function _blFontFeatureSettingsEquals(const a: _PBLFontFeatureSettingsCore; const b: _PBLFontFeatureSettingsCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsEquals';
+{$ENDREGION 'fontfeaturesettings.h'}
+
+{$REGION 'fontvariationsettings.h'}
+type
+  _BLFontVariationSettingsCore = record
+    _base: _BLObjectCore;
+  end;
+  _PBLFontVariationSettingsCore = ^_BLFontVariationSettingsCore;
+
+type
+  _BLFontVariationItem = record
+    tag: _BLTag;
     value: Single;
   end;
+  _PBLFontVariationItem = ^_BLFontVariationItem;
 
 type
-  BLFormatInfo = record
-    depth: Int32;
-    flags: UInt32;
-    case Integer of
-      0: (sizes: array [0..3] of UInt8;
-          shifts: array [0..3] of UInt8);
-      1: (rSize: UInt8;
-          gSize: UInt8;
-          bSize: UInt8;
-          aSize: UInt8;
-          rShift: UInt8;
-          gShift: UInt8;
-          bShift: UInt8;
-          aShift: UInt8);
-      2: (palette: _PBLRgba32);
+  _BLFontVariationSettingsView = record
+    data: _PBLFontVariationItem;
+    size: Size_T;
+    ssoData: array [0..2] of _BLFontVariationItem;
   end;
-  _PBLFormatInfo = ^BLFormatInfo;
+  _PBLFontVariationSettingsView = ^_BLFontVariationSettingsView;
+
+function _blFontVariationSettingsInit(self: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsInit';
+
+function _blFontVariationSettingsInitMove(self: _PBLFontVariationSettingsCore; other: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsInitMove';
+
+function _blFontVariationSettingsInitWeak(self: _PBLFontVariationSettingsCore; const other: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsInitWeak';
+
+function _blFontVariationSettingsDestroy(self: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsDestroy';
+
+function _blFontVariationSettingsReset(self: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsReset';
+
+function _blFontVariationSettingsClear(self: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsClear';
+
+function _blFontVariationSettingsShrink(self: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsShrink';
+
+function _blFontVariationSettingsAssignMove(self: _PBLFontVariationSettingsCore; other: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsAssignMove';
+
+function _blFontVariationSettingsAssignWeak(self: _PBLFontVariationSettingsCore; const other: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsAssignWeak';
+
+function _blFontVariationSettingsGetSize(const self: _PBLFontVariationSettingsCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetSize';
+
+function _blFontVariationSettingsGetCapacity(const self: _PBLFontVariationSettingsCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetCapacity';
+
+function _blFontVariationSettingsGetView(const self: _PBLFontVariationSettingsCore; &out: _PBLFontVariationSettingsView): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetView';
+
+function _blFontVariationSettingsHasValue(const self: _PBLFontVariationSettingsCore; variationTag: _BLTag): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsHasValue';
+
+function _blFontVariationSettingsGetValue(const self: _PBLFontVariationSettingsCore; variationTag: _BLTag): Single; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetValue';
+
+function _blFontVariationSettingsSetValue(self: _PBLFontVariationSettingsCore; variationTag: _BLTag; value: Single): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsSetValue';
+
+function _blFontVariationSettingsRemoveValue(self: _PBLFontVariationSettingsCore; variationTag: _BLTag): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsRemoveValue';
+
+function _blFontVariationSettingsEquals(const a: _PBLFontVariationSettingsCore; const b: _PBLFontVariationSettingsCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsEquals';
+{$ENDREGION 'fontvariationsettings.h'}
+
+{$REGION 'glyphrun.h'}
+type
+  _BLGlyphRunFlags = Integer;
+
+const
+  _BL_GLYPH_RUN_NO_FLAGS               = 0;
+  _BL_GLYPH_RUN_FLAG_UCS4_CONTENT      = $10000000;
+  _BL_GLYPH_RUN_FLAG_INVALID_TEXT      = $20000000;
+  _BL_GLYPH_RUN_FLAG_UNDEFINED_GLYPHS  = $40000000;
+  _BL_GLYPH_RUN_FLAG_INVALID_FONT_DATA = $80000000;
 
 type
-  BLGlyphPlacement = record
-    placement: BLPointI;
-    advance: BLPointI;
-  end;
-  _PBLGlyphPlacement = ^BLGlyphPlacement;
+  _BLGlyphPlacementType = Integer;
+
+const
+  _BL_GLYPH_PLACEMENT_TYPE_NONE           = 0;
+  _BL_GLYPH_PLACEMENT_TYPE_ADVANCE_OFFSET = 1;
+  _BL_GLYPH_PLACEMENT_TYPE_DESIGN_UNITS   = 2;
+  _BL_GLYPH_PLACEMENT_TYPE_USER_UNITS     = 3;
+  _BL_GLYPH_PLACEMENT_TYPE_ABSOLUTE_UNITS = 4;
+  _BL_GLYPH_PLACEMENT_TYPE_MAX_VALUE      = 4;
 
 type
-  BLGlyphRun = record
+  _BLGlyphRun = record
     glyphData: Pointer;
     placementData: Pointer;
-    size: NativeUInt;
-    glyphSize: UInt8;
+    size: Size_T;
+    reserved: UInt8;
     placementType: UInt8;
     glyphAdvance: Int8;
     placementAdvance: Int8;
     flags: UInt32;
   end;
-  _PBLGlyphRun = ^BLGlyphRun;
+  _PBLGlyphRun = ^_BLGlyphRun;
+{$ENDREGION 'glyphrun.h'}
 
+{$REGION 'glyphbuffer.h'}
 type
-  BLGlyphInfo = record
-    cluster: UInt32;
-    reserved: array [0..1] of UInt32;
-  end;
-  _PBLGlyphInfo = ^BLGlyphInfo;
-
-type
-  BLGlyphBufferImpl = record
-    data: record
-        case Integer of
-          0: (content: PUInt32;
-              placementData: _PBLGlyphPlacement;
-              size: NativeUInt;
-              reserved: UInt32;
-              flags: UInt32);
-          1: (glyphRun: BLGlyphRun);
-        end;
+  _BLGlyphBufferImpl = record
+    run: record
+           case Byte of
+             0: (content: PUInt32;
+                 placementData: _PBLGlyphPlacement;
+                 size: Size_T;
+                 reserved: UInt32;
+                 flags: UInt32);
+             1: (glyphRun: _BLGlyphRun);
+         end;
     infoData: _PBLGlyphInfo;
   end;
-  _PBLGlyphBufferImpl = ^BLGlyphBufferImpl;
+  _PBLGlyphBufferImpl = ^_BLGlyphBufferImpl;
 
 type
-  BLGlyphBufferCore = record
-    impl: _PBLGlyphBufferImpl;
+  _BLGlyphBufferCore = record
+    _base: _BLObjectCore;
   end;
-  PBLGlyphBufferCore = ^BLGlyphBufferCore;
+  _PBLGlyphBufferCore = ^_BLGlyphBufferCore;
 
+function _blGlyphBufferInit(self: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferInit';
+
+function _blGlyphBufferInitMove(self: _PBLGlyphBufferCore; other: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferInitMove';
+
+function _blGlyphBufferDestroy(self: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferDestroy';
+
+function _blGlyphBufferReset(self: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferReset';
+
+function _blGlyphBufferClear(self: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferClear';
+
+function _blGlyphBufferGetSize(const self: _PBLGlyphBufferCore): NativeUInt; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetSize';
+
+function _blGlyphBufferGetFlags(const self: _PBLGlyphBufferCore): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetFlags';
+
+function _blGlyphBufferGetGlyphRun(const self: _PBLGlyphBufferCore): _PBLGlyphRun; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetGlyphRun';
+
+function _blGlyphBufferGetContent(const self: _PBLGlyphBufferCore): PUInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetContent';
+
+function _blGlyphBufferGetInfoData(const self: _PBLGlyphBufferCore): _PBLGlyphInfo; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetInfoData';
+
+function _blGlyphBufferGetPlacementData(const self: _PBLGlyphBufferCore): _PBLGlyphPlacement; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetPlacementData';
+
+function _blGlyphBufferSetText(self: _PBLGlyphBufferCore; const textData: Pointer; size: NativeUInt; encoding: _BLTextEncoding): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetText';
+
+function _blGlyphBufferSetGlyphs(self: _PBLGlyphBufferCore; const glyphData: PUInt32; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetGlyphs';
+
+function _blGlyphBufferSetGlyphsFromStruct(self: _PBLGlyphBufferCore; const glyphData: Pointer; size: NativeUInt; glyphIdSize: NativeUInt; glyphIdAdvance: IntPtr): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetGlyphsFromStruct';
+
+function _blGlyphBufferSetDebugSink(self: _PBLGlyphBufferCore; sink: _BLDebugMessageSinkFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetDebugSink';
+
+function _blGlyphBufferResetDebugSink(self: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferResetDebugSink';
+{$ENDREGION 'glyphbuffer.h'}
+
+{$REGION 'font.h'}
 type
-  BLGlyphMappingState = record
-    glyphCount: NativeUInt;
-    undefinedFirst: NativeUInt;
-    undefinedCount: NativeUInt;
+  _BLFontCore = record
+    _base: _BLObjectCore;
   end;
-  _PBLGlyphMappingState = ^BLGlyphMappingState;
+  _PBLFontCore = ^_BLFontCore;
+
+function _blFontInit(self: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontInit';
+
+function _blFontInitMove(self: _PBLFontCore; other: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontInitMove';
+
+function _blFontInitWeak(self: _PBLFontCore; const other: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontInitWeak';
+
+function _blFontDestroy(self: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDestroy';
+
+function _blFontReset(self: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontReset';
+
+function _blFontAssignMove(self: _PBLFontCore; other: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontAssignMove';
+
+function _blFontAssignWeak(self: _PBLFontCore; const other: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontAssignWeak';
+
+function _blFontEquals(const a: _PBLFontCore; const b: _PBLFontCore): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontEquals';
+
+function _blFontCreateFromFace(self: _PBLFontCore; const face: _PBLFontFaceCore; size: Single): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontCreateFromFace';
+
+function _blFontCreateFromFaceWithSettings(self: _PBLFontCore; const face: _PBLFontFaceCore; size: Single; const featureSettings: _PBLFontFeatureSettingsCore; const variationSettings: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontCreateFromFaceWithSettings';
+
+function _blFontGetFace(const self: _PBLFontCore; &out: _PBLFontFaceCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetFace';
+
+function _blFontGetSize(const self: _PBLFontCore): Single; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetSize';
+
+function _blFontSetSize(self: _PBLFontCore; size: Single): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontSetSize';
+
+function _blFontGetMetrics(const self: _PBLFontCore; &out: _PBLFontMetrics): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetMetrics';
+
+function _blFontGetMatrix(const self: _PBLFontCore; &out: _PBLFontMatrix): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetMatrix';
+
+function _blFontGetDesignMetrics(const self: _PBLFontCore; &out: _PBLFontDesignMetrics): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetDesignMetrics';
+
+function _blFontGetFeatureSettings(const self: _PBLFontCore; &out: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetFeatureSettings';
+
+function _blFontSetFeatureSettings(self: _PBLFontCore; const featureSettings: _PBLFontFeatureSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontSetFeatureSettings';
+
+function _blFontResetFeatureSettings(self: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontResetFeatureSettings';
+
+function _blFontGetVariationSettings(const self: _PBLFontCore; &out: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetVariationSettings';
+
+function _blFontSetVariationSettings(self: _PBLFontCore; const variationSettings: _PBLFontVariationSettingsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontSetVariationSettings';
+
+function _blFontResetVariationSettings(self: _PBLFontCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontResetVariationSettings';
+
+function _blFontShape(const self: _PBLFontCore; gb: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontShape';
+
+function _blFontMapTextToGlyphs(const self: _PBLFontCore; gb: _PBLGlyphBufferCore; stateOut: _PBLGlyphMappingState): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontMapTextToGlyphs';
+
+function _blFontPositionGlyphs(const self: _PBLFontCore; gb: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontPositionGlyphs';
+
+function _blFontApplyKerning(const self: _PBLFontCore; gb: _PBLGlyphBufferCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontApplyKerning';
+
+function _blFontApplyGSub(const self: _PBLFontCore; gb: _PBLGlyphBufferCore; const lookups: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontApplyGSub';
+
+function _blFontApplyGPos(const self: _PBLFontCore; gb: _PBLGlyphBufferCore; const lookups: _PBLBitArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontApplyGPos';
+
+function _blFontGetTextMetrics(const self: _PBLFontCore; gb: _PBLGlyphBufferCore; &out: _PBLTextMetrics): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetTextMetrics';
+
+function _blFontGetGlyphBounds(const self: _PBLFontCore; const glyphData: PUInt32; glyphAdvance: IntPtr; &out: _PBLBoxI; count: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphBounds';
+
+function _blFontGetGlyphAdvances(const self: _PBLFontCore; const glyphData: PUInt32; glyphAdvance: IntPtr; &out: _PBLGlyphPlacement; count: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphAdvances';
+
+function _blFontGetGlyphOutlines(const self: _PBLFontCore; glyphId: _BLGlyphId; const userTransform: _PBLMatrix2D; &out: _PBLPathCore; sink: _BLPathSinkFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphOutlines';
+
+function _blFontGetGlyphRunOutlines(const self: _PBLFontCore; const glyphRun: _PBLGlyphRun; const userTransform: _PBLMatrix2D; &out: _PBLPathCore; sink: _BLPathSinkFunc; userData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphRunOutlines';
+{$ENDREGION 'font.h'}
+
+{$REGION 'fontmanager.h'}
+{$ENDREGION 'fontmanager.h'}
+
+{$REGION 'context.h'}
+type
+  _BLContextType = Integer;
+
+const
+  _BL_CONTEXT_TYPE_NONE       = 0;
+  _BL_CONTEXT_TYPE_DUMMY      = 1;
+  _BL_CONTEXT_TYPE_RASTER     = 3;
+  _BL_CONTEXT_TYPE_MAX_VALUE  = 3;
 
 type
-  BLGlyphOutlineSinkInfo = record
-    glyphIndex: NativeUInt;
-    contourCount: NativeUInt;
-  end;
-  _PBLGlyphOutlineSinkInfo = ^BLGlyphOutlineSinkInfo;
+  _BLContextHint = Integer;
+
+const
+  _BL_CONTEXT_HINT_RENDERING_QUALITY = 0;
+  _BL_CONTEXT_HINT_GRADIENT_QUALITY  = 1;
+  _BL_CONTEXT_HINT_PATTERN_QUALITY   = 2;
+  _BL_CONTEXT_HINT_MAX_VALUE         = 7;
 
 type
-  BLGradientStop = record
-    offset: Double;
-    rgba: BLRgba64;
-  end;
-  _PBLGradientStop = ^BLGradientStop;
+  _BLContextStyleSlot = Integer;
+
+const
+  _BL_CONTEXT_STYLE_SLOT_FILL      = 0;
+  _BL_CONTEXT_STYLE_SLOT_STROKE    = 1;
+  _BL_CONTEXT_STYLE_SLOT_MAX_VALUE = 1;
 
 type
-  BLLinearGradientValues = record
-    x0: Double;
-    y0: Double;
-    x1: Double;
-    y1: Double;
-  end;
+  _BLContextRenderTextOp = Integer;
+
+const
+  _BL_CONTEXT_RENDER_TEXT_OP_UTF8      = _BL_TEXT_ENCODING_UTF8;
+  _BL_CONTEXT_RENDER_TEXT_OP_UTF16     = _BL_TEXT_ENCODING_UTF16;
+  _BL_CONTEXT_RENDER_TEXT_OP_UTF32     = _BL_TEXT_ENCODING_UTF32;
+  _BL_CONTEXT_RENDER_TEXT_OP_LATIN1    = _BL_TEXT_ENCODING_LATIN1;
+  _BL_CONTEXT_RENDER_TEXT_OP_WCHAR     = _BL_TEXT_ENCODING_WCHAR;
+  _BL_CONTEXT_RENDER_TEXT_OP_GLYPH_RUN = 4;
+  _BL_CONTEXT_RENDER_TEXT_OP_MAX_VALUE = 4;
 
 type
-  BLRadialGradientValues = record
-    x0: Double;
-    y0: Double;
-    x1: Double;
-    y1: Double;
-    r0: Double;
-  end;
+  _BLContextFlushFlags = Integer;
+
+const
+  _BL_CONTEXT_FLUSH_NO_FLAGS = 0;
+  _BL_CONTEXT_FLUSH_SYNC     = $80000000;
 
 type
-  BLConicalGradientValues = record
-    x0: Double;
-    y0: Double;
-    angle: Double;
-  end;
+  _BLContextCreateFlags = Integer;
+
+const
+  _BL_CONTEXT_CREATE_NO_FLAGS                   = 0;
+  _BL_CONTEXT_CREATE_FLAG_DISABLE_JIT           = $00000001;
+  _BL_CONTEXT_CREATE_FLAG_FALLBACK_TO_SYNC      = $00100000;
+  _BL_CONTEXT_CREATE_FLAG_ISOLATED_THREAD_POOL  = $01000000;
+  _BL_CONTEXT_CREATE_FLAG_ISOLATED_JIT_RUNTIME  = $02000000;
+  _BL_CONTEXT_CREATE_FLAG_ISOLATED_JIT_LOGGING  = $04000000;
+  _BL_CONTEXT_CREATE_FLAG_OVERRIDE_CPU_FEATURES = $08000000;
 
 type
-  BLGradientImpl = record
-    capacity: NativeUInt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    gradientType: UInt8;
-    extendMode: UInt8;
-    matrixType: UInt8;
-    reserved: array [0..0] of UInt8;
-    stops: record
-      stops: _PBLGradientStop;
-      size: NativeUInt;
-    end;
-    matrix: BLMatrix2D;
-    case Integer of
-      0: (values: array [0..5] of Double);
-      1: (linear: BLLinearGradientValues);
-      2: (radial: BLRadialGradientValues);
-      3: (conical: BLConicalGradientValues);
-  end;
-  _PBLGradientImpl = ^BLGradientImpl;
+  _BLContextErrorFlags = Integer;
+
+const
+  _BL_CONTEXT_ERROR_NO_FLAGS                   = 0;
+  _BL_CONTEXT_ERROR_FLAG_INVALID_VALUE         = $00000001;
+  _BL_CONTEXT_ERROR_FLAG_INVALID_STATE         = $00000002;
+  _BL_CONTEXT_ERROR_FLAG_INVALID_GEOMETRY      = $00000004;
+  _BL_CONTEXT_ERROR_FLAG_INVALID_GLYPH         = $00000008;
+  _BL_CONTEXT_ERROR_FLAG_INVALID_FONT          = $00000010;
+  _BL_CONTEXT_ERROR_FLAG_THREAD_POOL_EXHAUSTED = $20000000;
+  _BL_CONTEXT_ERROR_FLAG_OUT_OF_MEMORY         = $40000000;
+  _BL_CONTEXT_ERROR_FLAG_UNKNOWN_ERROR         = $80000000;
 
 type
-  BLGradientCore = record
-    impl: _PBLGradientImpl;
-  end;
-  PBLGradientCore = ^BLGradientCore;
+  _BLContextStyleSwapMode = Integer;
+
+const
+  _BL_CONTEXT_STYLE_SWAP_MODE_STYLES            = 0;
+  _BL_CONTEXT_STYLE_SWAP_MODE_STYLES_WITH_ALPHA = 1;
+  _BL_CONTEXT_STYLE_SWAP_MODE_MAX_VALUE         = 1;
 
 type
-  PBLImageCodecVirt = Pointer;
+  _BLContextStyleTransformMode = Integer;
+
+const
+  _BL_CONTEXT_STYLE_TRANSFORM_MODE_USER      = 0;
+  _BL_CONTEXT_STYLE_TRANSFORM_MODE_META      = 1;
+  _BL_CONTEXT_STYLE_TRANSFORM_MODE_NONE      = 2;
+  _BL_CONTEXT_STYLE_TRANSFORM_MODE_MAX_VALUE = 2;
+
+//! Clip mode.
+type
+  _BLClipMode = Integer;
+
+const
+  _BL_CLIP_MODE_ALIGNED_RECT   = 0;
+  _BL_CLIP_MODE_UNALIGNED_RECT = 1;
+  _BL_CLIP_MODE_MASK           = 2;
+  _BL_CLIP_MODE_COUNT          = 3;
 
 type
-  BLImageCodecImpl = record
-    virt: PBLImageCodecVirt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    features: UInt32;
-    name: PUTF8Char;
-    vendor: PUTF8Char;
-    mimeType: PUTF8Char;
-    extensions: PUTF8Char;
-  end;
-  _PBLImageCodecImpl = ^BLImageCodecImpl;
+  _BLCompOp = Integer;
+
+const
+  _BL_COMP_OP_SRC_OVER     = 0;
+  _BL_COMP_OP_SRC_COPY     = 1;
+  _BL_COMP_OP_SRC_IN       = 2;
+  _BL_COMP_OP_SRC_OUT      = 3;
+  _BL_COMP_OP_SRC_ATOP     = 4;
+  _BL_COMP_OP_DST_OVER     = 5;
+  _BL_COMP_OP_DST_COPY     = 6;
+  _BL_COMP_OP_DST_IN       = 7;
+  _BL_COMP_OP_DST_OUT      = 8;
+  _BL_COMP_OP_DST_ATOP     = 9;
+  _BL_COMP_OP_XOR          = 10;
+  _BL_COMP_OP_CLEAR        = 11;
+  _BL_COMP_OP_PLUS         = 12;
+  _BL_COMP_OP_MINUS        = 13;
+  _BL_COMP_OP_MODULATE     = 14;
+  _BL_COMP_OP_MULTIPLY     = 15;
+  _BL_COMP_OP_SCREEN       = 16;
+  _BL_COMP_OP_OVERLAY      = 17;
+  _BL_COMP_OP_DARKEN       = 18;
+  _BL_COMP_OP_LIGHTEN      = 19;
+  _BL_COMP_OP_COLOR_DODGE  = 20;
+  _BL_COMP_OP_COLOR_BURN   = 21;
+  _BL_COMP_OP_LINEAR_BURN  = 22;
+  _BL_COMP_OP_LINEAR_LIGHT = 23;
+  _BL_COMP_OP_PIN_LIGHT    = 24;
+  _BL_COMP_OP_HARD_LIGHT   = 25;
+  _BL_COMP_OP_SOFT_LIGHT   = 26;
+  _BL_COMP_OP_DIFFERENCE   = 27;
+  _BL_COMP_OP_EXCLUSION    = 28;
+  _BL_COMP_OP_MAX_VALUE    = 28;
 
 type
-  BLImageCodecCore = record
-    impl: _PBLImageCodecImpl;
-  end;
-  PBLImageCodecCore = ^BLImageCodecCore;
+  _BLRenderingQuality = Integer;
+
+const
+  _BL_RENDERING_QUALITY_ANTIALIAS = 0;
+  _BL_RENDERING_QUALITY_MAX_VALUE = 0;
 
 type
-  PBLImageDecoderVirt = Pointer;
-
-type
-  BLImageDecoderImpl = record
-    virt: PBLImageDecoderVirt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    lastResult: BLResult;
-    codec: BLImageCodecCore;
-    handle: Pointer;
-    frameIndex: UInt64;
-    bufferIndex: NativeUInt;
-  end;
-  _PBLImageDecoderImpl = ^BLImageDecoderImpl;
-
-type
-  BLImageDecoderCore = record
-    impl: _PBLImageDecoderImpl;
-  end;
-  PBLImageDecoderCore = ^BLImageDecoderCore;
-
-type
-  PBLImageEncoderVirt = Pointer;
-
-type
-  BLImageEncoderImpl = record
-    virt: PBLImageEncoderVirt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    lastResult: BLResult;
-    codec: BLImageCodecCore;
-    handle: Pointer;
-    frameIndex: UInt64;
-    bufferIndex: NativeUInt;
-  end;
-  _PBLImageEncoderImpl = ^BLImageEncoderImpl;
-
-type
-  BLImageEncoderCore = record
-    impl: _PBLImageEncoderImpl;
-  end;
-  PBLImageEncoderCore = ^BLImageEncoderCore;
-
-type
-  BLImageData = record
-    pixelData: Pointer;
-    stride: IntPtr;
-    size: BLSizeI;
-    format: UInt32;
+  _BLContextCreateInfo = record
     flags: UInt32;
+    threadCount: UInt32;
+    cpuFeatures: UInt32;
+    commandQueueLimit: UInt32;
+    savedStateLimit: UInt32;
+    pixelOrigin: _BLPointI;
+    reserved: array [0..0] of UInt32;
   end;
-  _PBLImageData = ^BLImageData;
+  _PBLContextCreateInfo = ^_BLContextCreateInfo;
 
 type
-  BLImageInfo = record
-    size: BLSizeI;
-    density: BLSize;
-    flags: UInt32;
-    depth: UInt16;
-    planeCount: UInt16;
-    frameCount: UInt64;
-    format: array [0..15] of UTF8Char;
-    compression: array [0..15] of UTF8Char;
-  end;
-  _PBLImageInfo = ^BLImageInfo;
-
-type
-  BLImageScaleUserFunc = function(dst: PDouble; tArray: PDouble; n: NativeUInt; data: Pointer): Cardinal; cdecl;
-
-type
-  BLImageScaleOptions = record
-    userFunc: BLImageScaleUserFunc;
-    userData: Pointer;
-    radius: Double;
-    case Integer of
-      0: (data: array [0..2] of Double);
-      1: (mitchell: record
-            b: Double;
-            c: Double
-          end);
-  end;
-  _PBLImageScaleOptions = ^BLImageScaleOptions;
-
-type
-  BLPatternImpl = record
-    image: BLImageCore;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    patternType: UInt8;
-    extendMode: UInt8;
-    matrixType: UInt8;
-    reserved: array [0..0] of UInt8;
-    matrix: BLMatrix2D;
-    area: BLRectI;
-  end;
-  _PBLPatternImpl = ^BLPatternImpl;
-
-type
-  BLPatternCore = record
-    impl: _PBLPatternImpl;
-  end;
-  PBLPatternCore = ^BLPatternCore;
-
-type
-  BLPathView = record
-    commandData: PUInt8;
-    vertexData: _PBLPoint;
-    size: NativeUInt;
-  end;
-
-type
-  BLPathImpl = record
-    capacity: NativeUInt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    flags: UInt32;
-    case Integer of
-      0: (commandData: PUInt8;
-          vertexData: _PBLPoint;
-          size: NativeUInt);
-      1: (view: BLPathView);
-  end;
-  _PBLPathImpl = ^BLPathImpl;
-
-type
-  BLPathCore = record
-    impl: _PBLPathImpl;
-  end;
-  PBLPathCore = ^BLPathCore;
-
-type
-  BLPathSinkFunc = function(path: PBLPathCore; info: Pointer; closure: Pointer): Cardinal; cdecl;
-
-type
-  BLPixelConverterOptions = record
-    origin: BLPointI;
-    gap: NativeUInt;
-  end;
-  _PBLPixelConverterOptions = ^BLPixelConverterOptions;
-
-type
-  PBLPixelConverterCore = ^BLPixelConverterCore;
-
-  BLPixelConverterFunc = function(self: PBLPixelConverterCore; dstData: PUInt8; dstStride: IntPtr; srcData: PUInt8; srcStride: IntPtr; w: UInt32; h: UInt32; options: _PBLPixelConverterOptions): Cardinal; cdecl;
-
-  BLPixelConverterCore = record
-  case Integer of
-    0: (convertFunc: BLPixelConverterFunc;
-        internalFlags: UInt8);
-    1: (data: array [0..79] of UInt8);
-  end;
-
-type
-  BLRandom = record
+  _BLContextCookie = record
     data: array [0..1] of UInt64;
   end;
-  _PBLRandom = ^BLRandom;
+  _PBLContextCookie = ^_BLContextCookie;
 
 type
-  BLRange = record
-    start: NativeUInt;
-    &end: NativeUInt;
+  _BLContextHints = packed record
+  case Byte of
+    0: (renderingQuality: Byte;
+        gradientQuality: Byte;
+        patternQuality: Byte);
+    1: (hints: array [0.._BL_CONTEXT_HINT_MAX_VALUE] of Byte);
   end;
-  _PBLRange = ^BLRange;
+  _PBLContextHints = ^_BLContextHints;
 
 type
-  BLRegionView = record
-    data: _PBLBoxI;
-    size: NativeUInt;
+  _BLContextCore = record
+    _base: _BLObjectCore;
   end;
+  _PBLContextCore = ^_BLContextCore;
 
 type
-  BLRegionImpl = record
-    capacity: NativeUInt;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    reserved: array [0..3] of UInt8;
-    data: record
-      case Integer of
-        0: (data: _PBLBoxI;
-            size: NativeUInt);
-        1: (view: BLRegionView);
-      end;
-    boundingBox: BLBoxI;
-  end;
-  _PBLRegionImpl = ^BLRegionImpl;
-
-type
-  BLRegionCore = record
-    impl: _PBLRegionImpl;
-  end;
-  PBLRegionCore = ^BLRegionCore;
-
-type
-  BLRuntimeBuildInfo = record
-    version: record
-      case Integer of
-        0: (version: UInt32);
-        1: (patchVersion: UInt8;
-            minorVersion: UInt8;
-            majorVersion: UInt16);
-      end;
-    buildType: UInt32;
-    baselineCpuFeatures: UInt32;
-    supportedCpuFeatures: UInt32;
-    maxImageSize: Int32;
-    maxThreadCount: Int32;
-    reserved: array [0..1] of UInt32;
-    compilerInfo: array [0..31] of UTF8Char;
+  _BLContextState = record
+    targetImage: _PBLImageCore;
+    targetSize: _BLSize;
+    hints: _BLContextHints;
+    compOp: UInt8;
+    fillRule: UInt8;
+    styleType: array [0..1] of UInt8;
+    savedStateCount: UInt32;
+    globalAlpha: Double;
+    styleAlpha: array [0..1] of Double;
+    strokeOptions: _BLStrokeOptionsCore;
+    approximationOptions: _BLApproximationOptions;
+    metaTransform: _BLMatrix2D;
+    userTransform: _BLMatrix2D;
+    finalTransform: _BLMatrix2D;
   end;
 
-type
-  BLRuntimeSystemInfo = record
-    cpuArch: UInt32;
-    cpuFeatures: UInt32;
-    coreCount: Int32;
-    threadCount: Int32;
-    threadStackSize: Int32;
-    removed: Int32;
-    allocationGranularity: Int32;
-    reserved: array [0..4] of UInt32;
-  end;
-
-type
-  BLRuntimeResourceInfo = record
-    vmUsed: NativeInt;
-    vmReserved: NativeInt;
-    vmOverhead: NativeInt;
-    vmBlockCount: NativeInt;
-    zmUsed: NativeInt;
-    zmReserved: NativeInt;
-    zmOverhead: NativeInt;
-    zmBlockCount: NativeInt;
-    dynamicPipelineCount: NativeInt;
-    fileHandleCount: NativeInt;
-    fileMappingCount: NativeInt;
-    reserved: array [0..4] of NativeInt;
-  end;
-
-type
-  BLTextMetrics = record
-    advance: BLPoint;
-    leadingBearing: BLPoint;
-    trailingBearing: BLPoint;
-    boundingBox: BLBox;
-  end;
-  _PBLTextMetrics = ^BLTextMetrics;
-
-type
-  BLVariantImpl = record
-    f1: record
-      case Integer of
-        0: (virt: Pointer);
-        1: (unknownHeaderData: UIntPtr);
-    end;
-    refCount: NativeUInt;
-    implType: UInt8;
-    implTraits: UInt8;
-    memPoolData: UInt16;
-    reserved: array [0..3] of UInt8;
-  end;
-  _PBLVariantImpl = ^BLVariantImpl;
-
-type
-  BLVariantCore = record
-    impl: _PBLVariantImpl;
-  end;
-  PBLVariantCore = ^BLVariantCore;
-
-type
-  BLStyleCore = record
-  case Integer of
-    0: (rgba: BLRgba);
-    1: (variant: BLVariantCore);
-    2: (pattern: BLPatternCore);
-    3: (gradient: BLGradientCore);
-    4: (data: record
-          unknown: UInt64;
-          &type: UInt32;
-          tag: UInt32;
-        end);
-    5: (u64data: array [0..1] of UInt64);
-  end;
-  PBLStyleCore = ^BLStyleCore;
-
-
-function blArrayInit(self: PBLArrayCore; arrayTypeId: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInit';
-
-function blArrayDestroy(self: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayDestroy';
-
-function blArrayReset(self: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReset';
-
-function blArrayCreateFromData(self: PBLArrayCore; data: Pointer; size: NativeUInt; capacity: NativeUInt; dataAccessFlags: UInt32; destroyFunc: BLDestroyImplFunc; destroyData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayCreateFromData';
-
-function blArrayGetSize(self: PBLArrayCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayGetSize';
-
-function blArrayGetCapacity(self: PBLArrayCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayGetCapacity';
-
-function blArrayGetData(self: PBLArrayCore): Pointer; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayGetData';
-
-function blArrayClear(self: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayClear';
-
-function blArrayShrink(self: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayShrink';
+function _blContextInit(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextInit';
 
-function blArrayReserve(self: PBLArrayCore; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReserve';
+function _blContextInitMove(self: _PBLContextCore; other: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextInitMove';
 
-function blArrayResize(self: PBLArrayCore; n: NativeUInt; fill: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayResize';
+function _blContextInitWeak(self: _PBLContextCore; const other: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextInitWeak';
 
-function blArrayMakeMutable(self: PBLArrayCore; dataOut: PPointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayMakeMutable';
+function _blContextInitAs(self: _PBLContextCore; image: _PBLImageCore; const cci: _PBLContextCreateInfo): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextInitAs';
 
-function blArrayModifyOp(self: PBLArrayCore; op: UInt32; n: NativeUInt; dataOut: PPointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayModifyOp';
+function _blContextDestroy(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextDestroy';
 
-function blArrayInsertOp(self: PBLArrayCore; index: NativeUInt; n: NativeUInt; dataOut: PPointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertOp';
+function _blContextReset(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextReset';
 
-function blArrayAssignMove(self: PBLArrayCore; other: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAssignMove';
+function _blContextAssignMove(self: _PBLContextCore; other: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextAssignMove';
 
-function blArrayAssignWeak(self: PBLArrayCore; other: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAssignWeak';
+function _blContextAssignWeak(self: _PBLContextCore; const other: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextAssignWeak';
 
-function blArrayAssignDeep(self: PBLArrayCore; other: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAssignDeep';
+function _blContextGetType(const self: _PBLContextCore): _BLContextType; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetType';
 
-function blArrayAssignView(self: PBLArrayCore; items: Pointer; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAssignView';
+function _blContextGetTargetSize(const self: _PBLContextCore; targetSizeOut: _PBLSize): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetTargetSize';
 
-function blArrayAppendU8(self: PBLArrayCore; value: UInt8): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendU8';
+function _blContextGetTargetImage(const self: _PBLContextCore): _PBLImageCore; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetTargetImage';
 
-function blArrayAppendU16(self: PBLArrayCore; value: UInt16): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendU16';
+function _blContextBegin(self: _PBLContextCore; image: _PBLImageCore; const cci: _PBLContextCreateInfo): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextBegin';
 
-function blArrayAppendU32(self: PBLArrayCore; value: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendU32';
+function _blContextEnd(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextEnd';
 
-function blArrayAppendU64(self: PBLArrayCore; value: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendU64';
+function _blContextFlush(self: _PBLContextCore; flags: _BLContextFlushFlags): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFlush';
 
-function blArrayAppendF32(self: PBLArrayCore; value: Single): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendF32';
+function _blContextSave(self: _PBLContextCore; cookie: _PBLContextCookie): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSave';
 
-function blArrayAppendF64(self: PBLArrayCore; value: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendF64';
+function _blContextRestore(self: _PBLContextCore; const cookie: _PBLContextCookie): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextRestore';
 
-function blArrayAppendItem(self: PBLArrayCore; item: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendItem';
+function _blContextGetMetaTransform(const self: _PBLContextCore; transformOut: _PBLMatrix2D): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetMetaTransform';
 
-function blArrayAppendView(self: PBLArrayCore; items: Pointer; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayAppendView';
+function _blContextGetUserTransform(const self: _PBLContextCore; transformOut: _PBLMatrix2D): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetUserTransform';
 
-function blArrayInsertU8(self: PBLArrayCore; index: NativeUInt; value: UInt8): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertU8';
+function _blContextGetFinalTransform(const self: _PBLContextCore; transformOut: _PBLMatrix2D): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetFinalTransform';
 
-function blArrayInsertU16(self: PBLArrayCore; index: NativeUInt; value: UInt16): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertU16';
+function _blContextUserToMeta(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextUserToMeta';
 
-function blArrayInsertU32(self: PBLArrayCore; index: NativeUInt; value: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertU32';
+function _blContextApplyTransformOp(self: _PBLContextCore; opType: _BLTransformOp; const opData: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextApplyTransformOp';
 
-function blArrayInsertU64(self: PBLArrayCore; index: NativeUInt; value: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertU64';
+function _blContextGetHint(const self: _PBLContextCore; hintType: _BLContextHint): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetHint';
 
-function blArrayInsertF32(self: PBLArrayCore; index: NativeUInt; value: Single): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertF32';
+function _blContextSetHint(self: _PBLContextCore; hintType: _BLContextHint; value: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetHint';
 
-function blArrayInsertF64(self: PBLArrayCore; index: NativeUInt; value: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertF64';
+function _blContextGetHints(const self: _PBLContextCore; hintsOut: _PBLContextHints): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetHints';
 
-function blArrayInsertItem(self: PBLArrayCore; index: NativeUInt; item: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertItem';
+function _blContextSetHints(self: _PBLContextCore; const hints: _PBLContextHints): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetHints';
 
-function blArrayInsertView(self: PBLArrayCore; index: NativeUInt; items: Pointer; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayInsertView';
+function _blContextSetFlattenMode(self: _PBLContextCore; mode: _BLFlattenMode): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFlattenMode';
 
-function blArrayReplaceU8(self: PBLArrayCore; index: NativeUInt; value: UInt8): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceU8';
+function _blContextSetFlattenTolerance(self: _PBLContextCore; tolerance: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFlattenTolerance';
 
-function blArrayReplaceU16(self: PBLArrayCore; index: NativeUInt; value: UInt16): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceU16';
+function _blContextSetApproximationOptions(self: _PBLContextCore; const options: _PBLApproximationOptions): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetApproximationOptions';
 
-function blArrayReplaceU32(self: PBLArrayCore; index: NativeUInt; value: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceU32';
+function _blContextGetFillStyle(const self: _PBLContextCore; styleOut: _PBLVarCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetFillStyle';
 
-function blArrayReplaceU64(self: PBLArrayCore; index: NativeUInt; value: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceU64';
+function _blContextGetTransformedFillStyle(const self: _PBLContextCore; styleOut: _PBLVarCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetTransformedFillStyle';
 
-function blArrayReplaceF32(self: PBLArrayCore; index: NativeUInt; value: Single): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceF32';
+function _blContextSetFillStyle(self: _PBLContextCore; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFillStyle';
 
-function blArrayReplaceF64(self: PBLArrayCore; index: NativeUInt; value: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceF64';
+function _blContextSetFillStyleWithMode(self: _PBLContextCore; const style: _PBLUnknown; transformMode: _BLContextStyleTransformMode): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFillStyleWithMode';
 
-function blArrayReplaceItem(self: PBLArrayCore; index: NativeUInt; item: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceItem';
+function _blContextSetFillStyleRgba(self: _PBLContextCore; const rgba: _PBLRgba): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba';
 
-function blArrayReplaceView(self: PBLArrayCore; rStart: NativeUInt; rEnd: NativeUInt; items: Pointer; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayReplaceView';
+function _blContextSetFillStyleRgba32(self: _PBLContextCore; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba32';
 
-function blArrayRemoveIndex(self: PBLArrayCore; index: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayRemoveIndex';
+function _blContextSetFillStyleRgba64(self: _PBLContextCore; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba64';
 
-function blArrayRemoveRange(self: PBLArrayCore; rStart: NativeUInt; rEnd: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayRemoveRange';
+function _blContextDisableFillStyle(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextDisableFillStyle';
 
-function blArrayEquals(a: PBLArrayCore; b: PBLArrayCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blArrayEquals';
+function _blContextGetFillAlpha(const self: _PBLContextCore): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetFillAlpha';
 
+function _blContextSetFillAlpha(self: _PBLContextCore; alpha: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFillAlpha';
 
-function blContextInit(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextInit';
+function _blContextGetStrokeStyle(const self: _PBLContextCore; styleOut: _PBLVarCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeStyle';
 
-function blContextInitAs(self: PBLContextCore; image: PBLImageCore; options: _PBLContextCreateInfo): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextInitAs';
+function _blContextGetTransformedStrokeStyle(const self: _PBLContextCore; styleOut: _PBLVarCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetTransformedStrokeStyle';
 
-function blContextDestroy(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextDestroy';
+function _blContextSetStrokeStyle(self: _PBLContextCore; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeStyle';
 
-function blContextReset(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextReset';
+function _blContextSetStrokeStyleWithMode(self: _PBLContextCore; const style: _PBLUnknown; transformMode: _BLContextStyleTransformMode): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeStyleWithMode';
 
-function blContextAssignMove(self: PBLContextCore; other: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextAssignMove';
+function _blContextSetStrokeStyleRgba(self: _PBLContextCore; const rgba: _PBLRgba): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba';
 
-function blContextAssignWeak(self: PBLContextCore; other: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextAssignWeak';
+function _blContextSetStrokeStyleRgba32(self: _PBLContextCore; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba32';
 
-function blContextGetType(self: PBLContextCore): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetType';
+function _blContextSetStrokeStyleRgba64(self: _PBLContextCore; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba64';
 
-function blContextGetTargetSize(self: PBLContextCore; targetSizeOut: _PBLSize): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetTargetSize';
+function _blContextDisableStrokeStyle(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextDisableStrokeStyle';
 
-function blContextGetTargetImage(self: PBLContextCore): PBLImageCore; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetTargetImage';
+function _blContextGetStrokeAlpha(const self: _PBLContextCore): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeAlpha';
 
-function blContextBegin(self: PBLContextCore; image: PBLImageCore; options: _PBLContextCreateInfo): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextBegin';
+function _blContextSetStrokeAlpha(self: _PBLContextCore; alpha: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeAlpha';
 
-function blContextEnd(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextEnd';
+function _blContextSwapStyles(self: _PBLContextCore; mode: _BLContextStyleSwapMode): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSwapStyles';
 
-function blContextFlush(self: PBLContextCore; flags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFlush';
+function _blContextGetGlobalAlpha(const self: _PBLContextCore): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetGlobalAlpha';
 
-function blContextQueryProperty(self: PBLContextCore; propertyId: UInt32; valueOut: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextQueryProperty';
+function _blContextSetGlobalAlpha(self: _PBLContextCore; alpha: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetGlobalAlpha';
 
-function blContextSave(self: PBLContextCore; cookie: _PBLContextCookie): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSave';
+function _blContextGetCompOp(const self: _PBLContextCore): _BLCompOp; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetCompOp';
 
-function blContextRestore(self: PBLContextCore; cookie: _PBLContextCookie): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextRestore';
+function _blContextSetCompOp(self: _PBLContextCore; compOp: _BLCompOp): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetCompOp';
 
-function blContextGetMetaMatrix(self: PBLContextCore; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetMetaMatrix';
+function _blContextGetFillRule(const self: _PBLContextCore): _BLFillRule; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetFillRule';
 
-function blContextGetUserMatrix(self: PBLContextCore; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetUserMatrix';
+function _blContextSetFillRule(self: _PBLContextCore; fillRule: _BLFillRule): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetFillRule';
 
-function blContextUserToMeta(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextUserToMeta';
+function _blContextGetStrokeWidth(const self: _PBLContextCore): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeWidth';
 
-function blContextMatrixOp(self: PBLContextCore; opType: UInt32; opData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextMatrixOp';
+function _blContextSetStrokeWidth(self: _PBLContextCore; width: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeWidth';
 
-function blContextSetHint(self: PBLContextCore; hintType: UInt32; value: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetHint';
+function _blContextGetStrokeMiterLimit(const self: _PBLContextCore): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeMiterLimit';
 
-function blContextSetHints(self: PBLContextCore; hints: _PBLContextHints): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetHints';
+function _blContextSetStrokeMiterLimit(self: _PBLContextCore; miterLimit: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeMiterLimit';
 
-function blContextSetFlattenMode(self: PBLContextCore; mode: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFlattenMode';
+function _blContextGetStrokeCap(const self: _PBLContextCore; position: _BLStrokeCapPosition): _BLStrokeCap; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeCap';
 
-function blContextSetFlattenTolerance(self: PBLContextCore; tolerance: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFlattenTolerance';
+function _blContextSetStrokeCap(self: _PBLContextCore; position: _BLStrokeCapPosition; strokeCap: _BLStrokeCap): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeCap';
 
-function blContextSetApproximationOptions(self: PBLContextCore; options: _PBLApproximationOptions): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetApproximationOptions';
+function _blContextSetStrokeCaps(self: _PBLContextCore; strokeCap: _BLStrokeCap): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeCaps';
 
-function blContextSetCompOp(self: PBLContextCore; compOp: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetCompOp';
+function _blContextGetStrokeJoin(const self: _PBLContextCore): _BLStrokeJoin; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeJoin';
 
-function blContextSetGlobalAlpha(self: PBLContextCore; alpha: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetGlobalAlpha';
+function _blContextSetStrokeJoin(self: _PBLContextCore; strokeJoin: _BLStrokeJoin): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeJoin';
 
-function blContextSetFillAlpha(self: PBLContextCore; alpha: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFillAlpha';
+function _blContextGetStrokeTransformOrder(const self: _PBLContextCore): _BLStrokeTransformOrder; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeTransformOrder';
 
-function blContextGetFillStyle(self: PBLContextCore; styleOut: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetFillStyle';
+function _blContextSetStrokeTransformOrder(self: _PBLContextCore; transformOrder: _BLStrokeTransformOrder): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeTransformOrder';
 
-function blContextSetFillStyle(self: PBLContextCore; style: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFillStyle';
+function _blContextGetStrokeDashOffset(const self: _PBLContextCore): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeDashOffset';
 
-function blContextSetFillStyleRgba(self: PBLContextCore; rgba: _PBLRgba): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba';
+function _blContextSetStrokeDashOffset(self: _PBLContextCore; dashOffset: Double): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeDashOffset';
 
-function blContextSetFillStyleRgba32(self: PBLContextCore; rgba32: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba32';
+function _blContextGetStrokeDashArray(const self: _PBLContextCore; dashArrayOut: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeDashArray';
 
-function blContextSetFillStyleRgba64(self: PBLContextCore; rgba64: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFillStyleRgba64';
+function _blContextSetStrokeDashArray(self: _PBLContextCore; const dashArray: _PBLArrayCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeDashArray';
 
-function blContextSetFillStyleObject(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFillStyleObject';
+function _blContextGetStrokeOptions(const self: _PBLContextCore; options: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextGetStrokeOptions';
 
-function blContextSetFillRule(self: PBLContextCore; fillRule: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetFillRule';
+function _blContextSetStrokeOptions(self: _PBLContextCore; const options: _PBLStrokeOptionsCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextSetStrokeOptions';
 
-function blContextSetStrokeAlpha(self: PBLContextCore; alpha: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeAlpha';
+function _blContextClipToRectI(self: _PBLContextCore; const rect: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextClipToRectI';
 
-function blContextGetStrokeStyle(self: PBLContextCore; styleout: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetStrokeStyle';
+function _blContextClipToRectD(self: _PBLContextCore; const rect: _PBLRect): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextClipToRectD';
 
-function blContextSetStrokeStyle(self: PBLContextCore; style: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeStyle';
+function _blContextRestoreClipping(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextRestoreClipping';
 
-function blContextSetStrokeStyleRgba(self: PBLContextCore; rgba: _PBLRgba): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba';
+function _blContextClearAll(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextClearAll';
 
-function blContextSetStrokeStyleRgba32(self: PBLContextCore; rgba32: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba32';
+function _blContextClearRectI(self: _PBLContextCore; const rect: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextClearRectI';
 
-function blContextSetStrokeStyleRgba64(self: PBLContextCore; rgba64: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleRgba64';
+function _blContextClearRectD(self: _PBLContextCore; const rect: _PBLRect): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextClearRectD';
 
-function blContextSetStrokeStyleObject(self: PBLContextCore; &object: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeStyleObject';
+function _blContextFillAll(self: _PBLContextCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillAll';
 
-function blContextSetStrokeWidth(self: PBLContextCore; width: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeWidth';
+function _blContextFillAllRgba32(self: _PBLContextCore; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillAllRgba32';
 
-function blContextSetStrokeMiterLimit(self: PBLContextCore; miterLimit: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeMiterLimit';
+function _blContextFillAllRgba64(self: _PBLContextCore; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillAllRgba64';
 
-function blContextSetStrokeCap(self: PBLContextCore; position: UInt32; strokeCap: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeCap';
+function _blContextFillAllExt(self: _PBLContextCore; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillAllExt';
 
-function blContextSetStrokeCaps(self: PBLContextCore; strokeCap: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeCaps';
+function _blContextFillRectI(self: _PBLContextCore; const rect: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectI';
 
-function blContextSetStrokeJoin(self: PBLContextCore; strokeJoin: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeJoin';
+function _blContextFillRectIRgba32(self: _PBLContextCore; const rect: _PBLRectI; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectIRgba32';
 
-function blContextSetStrokeDashOffset(self: PBLContextCore; dashOffset: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeDashOffset';
+function _blContextFillRectIRgba64(self: _PBLContextCore; const rect: _PBLRectI; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectIRgba64';
 
-function blContextSetStrokeDashArray(self: PBLContextCore; dashArray: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeDashArray';
+function _blContextFillRectIExt(self: _PBLContextCore; const rect: _PBLRectI; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectIExt';
 
-function blContextSetStrokeTransformOrder(self: PBLContextCore; transformOrder: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeTransformOrder';
+function _blContextFillRectD(self: _PBLContextCore; const rect: _PBLRect): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectD';
 
-function blContextGetStrokeOptions(self: PBLContextCore; options: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextGetStrokeOptions';
+function _blContextFillRectDRgba32(self: _PBLContextCore; const rect: _PBLRect; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectDRgba32';
 
-function blContextSetStrokeOptions(self: PBLContextCore; options: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextSetStrokeOptions';
+function _blContextFillRectDRgba64(self: _PBLContextCore; const rect: _PBLRect; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectDRgba64';
 
-function blContextClipToRectI(self: PBLContextCore; rect: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextClipToRectI';
+function _blContextFillRectDExt(self: _PBLContextCore; const rect: _PBLRect; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillRectDExt';
 
-function blContextClipToRectD(self: PBLContextCore; rect: _PBLRect): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextClipToRectD';
+function _blContextFillPathD(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillPathD';
 
-function blContextRestoreClipping(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextRestoreClipping';
+function _blContextFillPathDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillPathDRgba32';
 
-function blContextClearAll(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextClearAll';
+function _blContextFillPathDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillPathDRgba64';
 
-function blContextClearRectI(self: PBLContextCore; rect: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextClearRectI';
+function _blContextFillPathDExt(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillPathDExt';
 
-function blContextClearRectD(self: PBLContextCore; rect: _PBLRect): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextClearRectD';
+function _blContextFillGeometry(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGeometry';
 
-function blContextFillAll(self: PBLContextCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillAll';
+function _blContextFillGeometryRgba32(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGeometryRgba32';
 
-function blContextFillRectI(self: PBLContextCore; rect: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillRectI';
+function _blContextFillGeometryRgba64(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGeometryRgba64';
 
-function blContextFillRectD(self: PBLContextCore; rect: _PBLRect): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillRectD';
+function _blContextFillGeometryExt(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGeometryExt';
 
-function blContextFillPathD(self: PBLContextCore; path: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillPathD';
+function _blContextFillUtf8TextI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextI';
 
-function blContextFillGeometry(self: PBLContextCore; geometryType: UInt32; geometryData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillGeometry';
+function _blContextFillUtf8TextIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextIRgba32';
 
-function blContextFillTextI(self: PBLContextCore; pt: _PBLPointI; font: PBLFontCore; text: Pointer; size: NativeUInt; encoding: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillTextI';
+function _blContextFillUtf8TextIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextIRgba64';
 
-function blContextFillTextD(self: PBLContextCore; pt: _PBLPoint; font: PBLFontCore; text: Pointer; size: NativeUInt; encoding: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillTextD';
+function _blContextFillUtf8TextIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextIExt';
 
-function blContextFillGlyphRunI(self: PBLContextCore; pt: _PBLPointI; font: PBLFontCore; glyphRun: _PBLGlyphRun): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillGlyphRunI';
+function _blContextFillUtf8TextD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextD';
 
-function blContextFillGlyphRunD(self: PBLContextCore; pt: _PBLPoint; font: PBLFontCore; glyphRun: _PBLGlyphRun): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextFillGlyphRunD';
+function _blContextFillUtf8TextDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextDRgba32';
 
-function blContextStrokeRectI(self: PBLContextCore; rect: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokeRectI';
+function _blContextFillUtf8TextDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextDRgba64';
 
-function blContextStrokeRectD(self: PBLContextCore; rect: _PBLRect): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokeRectD';
+function _blContextFillUtf8TextDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf8TextDExt';
 
-function blContextStrokePathD(self: PBLContextCore; path: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokePathD';
+function _blContextFillUtf16TextI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextI';
 
-function blContextStrokeGeometry(self: PBLContextCore; geometryType: UInt32; geometryData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokeGeometry';
+function _blContextFillUtf16TextIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextIRgba32';
 
-function blContextStrokeTextI(self: PBLContextCore; pt: _PBLPointI; font: PBLFontCore; text: Pointer; size: NativeUInt; encoding: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokeTextI';
+function _blContextFillUtf16TextIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextIRgba64';
 
-function blContextStrokeTextD(self: PBLContextCore; pt: _PBLPoint; font: PBLFontCore; text: Pointer; size: NativeUInt; encoding: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokeTextD';
+function _blContextFillUtf16TextIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextIExt';
 
-function blContextStrokeGlyphRunI(self: PBLContextCore; pt: _PBLPointI; font: PBLFontCore; glyphRun: _PBLGlyphRun): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunI';
+function _blContextFillUtf16TextD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextD';
 
-function blContextStrokeGlyphRunD(self: PBLContextCore; pt: _PBLPoint; font: PBLFontCore; glyphRun: _PBLGlyphRun): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunD';
+function _blContextFillUtf16TextDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextDRgba32';
 
-function blContextBlitImageI(self: PBLContextCore; pt: _PBLPointI; img: PBLImageCore; imgArea: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextBlitImageI';
+function _blContextFillUtf16TextDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextDRgba64';
 
-function blContextBlitImageD(self: PBLContextCore; pt: _PBLPoint; img: PBLImageCore; imgArea: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextBlitImageD';
+function _blContextFillUtf16TextDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf16TextDExt';
 
-function blContextBlitScaledImageI(self: PBLContextCore; rect: _PBLRectI; img: PBLImageCore; imgArea: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextBlitScaledImageI';
+function _blContextFillUtf32TextI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextI';
 
-function blContextBlitScaledImageD(self: PBLContextCore; rect: _PBLRect; img: PBLImageCore; imgArea: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blContextBlitScaledImageD';
+function _blContextFillUtf32TextIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextIRgba32';
 
+function _blContextFillUtf32TextIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextIRgba64';
 
-function blFileInit(self: PBLFileCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileInit';
+function _blContextFillUtf32TextIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextIExt';
 
-function blFileReset(self: PBLFileCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileReset';
+function _blContextFillUtf32TextD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextD';
 
-function blFileOpen(self: PBLFileCore; fileName: PUTF8Char; openFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileOpen';
+function _blContextFillUtf32TextDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextDRgba32';
 
-function blFileClose(self: PBLFileCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileClose';
+function _blContextFillUtf32TextDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextDRgba64';
 
-function blFileSeek(self: PBLFileCore; offset: Int64; seekType: UInt32; positionOut: PInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileSeek';
+function _blContextFillUtf32TextDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillUtf32TextDExt';
 
-function blFileRead(self: PBLFileCore; buffer: Pointer; n: NativeUInt; bytesReadOut: PNativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileRead';
+function _blContextFillGlyphRunI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunI';
 
-function blFileWrite(self: PBLFileCore; buffer: Pointer; n: NativeUInt; bytesWrittenOut: PNativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileWrite';
+function _blContextFillGlyphRunIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunIRgba32';
 
-function blFileTruncate(self: PBLFileCore; maxSize: Int64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileTruncate';
+function _blContextFillGlyphRunIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunIRgba64';
 
-function blFileGetSize(self: PBLFileCore; fileSizeOut: PUInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileGetSize';
+function _blContextFillGlyphRunIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunIExt';
 
+function _blContextFillGlyphRunD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunD';
 
-function blFileSystemReadFile(fileName: PUTF8Char; dst: PBLArrayCore; maxSize: NativeUInt; readFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileSystemReadFile';
+function _blContextFillGlyphRunDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunDRgba32';
 
-function blFileSystemWriteFile(fileName: PUTF8Char; data: Pointer; size: NativeUInt; bytesWrittenOut: PNativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFileSystemWriteFile';
+function _blContextFillGlyphRunDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunDRgba64';
 
+function _blContextFillGlyphRunDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillGlyphRunDExt';
 
-function blFontInit(self: PBLFontCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontInit';
+function _blContextFillMaskI(self: _PBLContextCore; const origin: _PBLPointI; const mask: _PBLImageCore; const maskArea: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskI';
 
-function blFontDestroy(self: PBLFontCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDestroy';
+function _blContextFillMaskIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const mask: _PBLImageCore; const maskArea: _PBLRectI; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskIRgba32';
 
-function blFontReset(self: PBLFontCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontReset';
+function _blContextFillMaskIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const mask: _PBLImageCore; const maskArea: _PBLRectI; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskIRgba64';
 
-function blFontAssignMove(self: PBLFontCore; other: PBLFontCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontAssignMove';
+function _blContextFillMaskIExt(self: _PBLContextCore; const origin: _PBLPointI; const mask: _PBLImageCore; const maskArea: _PBLRectI; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskIExt';
 
-function blFontAssignWeak(self: PBLFontCore; other: PBLFontCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontAssignWeak';
+function _blContextFillMaskD(self: _PBLContextCore; const origin: _PBLPoint; const mask: _PBLImageCore; const maskArea: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskD';
 
-function blFontEquals(a: PBLFontCore; b: PBLFontCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontEquals';
+function _blContextFillMaskDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const mask: _PBLImageCore; const maskArea: _PBLRectI; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskDRgba32';
 
-function blFontCreateFromFace(self: PBLFontCore; face: PBLFontFaceCore; size: Single): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontCreateFromFace';
+function _blContextFillMaskDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const mask: _PBLImageCore; const maskArea: _PBLRectI; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskDRgba64';
 
-function blFontShape(self: PBLFontCore; gb: PBLGlyphBufferCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontShape';
+function _blContextFillMaskDExt(self: _PBLContextCore; const origin: _PBLPoint; const mask: _PBLImageCore; const maskArea: _PBLRectI; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextFillMaskDExt';
 
-function blFontMapTextToGlyphs(self: PBLFontCore; gb: PBLGlyphBufferCore; stateOut: _PBLGlyphMappingState): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontMapTextToGlyphs';
+function _blContextStrokeRectI(self: _PBLContextCore; const rect: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectI';
 
-function blFontPositionGlyphs(self: PBLFontCore; gb: PBLGlyphBufferCore; positioningFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontPositionGlyphs';
+function _blContextStrokeRectIRgba32(self: _PBLContextCore; const rect: _PBLRectI; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectIRgba32';
 
-function blFontApplyKerning(self: PBLFontCore; gb: PBLGlyphBufferCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontApplyKerning';
+function _blContextStrokeRectIRgba64(self: _PBLContextCore; const rect: _PBLRectI; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectIRgba64';
 
-function blFontApplyGSub(self: PBLFontCore; gb: PBLGlyphBufferCore; index: NativeUInt; lookups: BLBitWord): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontApplyGSub';
+function _blContextStrokeRectIExt(self: _PBLContextCore; const rect: _PBLRectI; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectIExt';
 
-function blFontApplyGPos(self: PBLFontCore; gb: PBLGlyphBufferCore; index: NativeUInt; lookups: BLBitWord): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontApplyGPos';
+function _blContextStrokeRectD(self: _PBLContextCore; const rect: _PBLRect): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectD';
 
-function blFontGetMatrix(self: PBLFontCore; &out: _PBLFontMatrix): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetMatrix';
+function _blContextStrokeRectDRgba32(self: _PBLContextCore; const rect: _PBLRect; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectDRgba32';
 
-function blFontGetMetrics(self: PBLFontCore; &out: _PBLFontMetrics): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetMetrics';
+function _blContextStrokeRectDRgba64(self: _PBLContextCore; const rect: _PBLRect; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectDRgba64';
 
-function blFontGetDesignMetrics(self: PBLFontCore; &out: _PBLFontDesignMetrics): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetDesignMetrics';
+function _blContextStrokeRectDExt(self: _PBLContextCore; const rect: _PBLRect; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeRectDExt';
 
-function blFontGetTextMetrics(self: PBLFontCore; gb: PBLGlyphBufferCore; &out: _PBLTextMetrics): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetTextMetrics';
+function _blContextStrokePathD(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokePathD';
 
-function blFontGetGlyphBounds(self: PBLFontCore; glyphData: PUInt32; glyphAdvance: IntPtr; &out: _PBLBoxI; count: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetGlyphBounds';
+function _blContextStrokePathDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokePathDRgba32';
 
-function blFontGetGlyphAdvances(self: PBLFontCore; glyphData: PUInt32; glyphAdvance: IntPtr; &out: _PBLGlyphPlacement; count: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetGlyphAdvances';
+function _blContextStrokePathDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokePathDRgba64';
 
-function blFontGetGlyphOutlines(self: PBLFontCore; glyphId: UInt32; userMatrix: _PBLMatrix2D; &out: PBLPathCore; sink: BLPathSinkFunc; closure: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetGlyphOutlines';
+function _blContextStrokePathDExt(self: _PBLContextCore; const origin: _PBLPoint; const path: _PBLPathCore; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokePathDExt';
 
-function blFontGetGlyphRunOutlines(self: PBLFontCore; glyphRun: _PBLGlyphRun; userMatrix: _PBLMatrix2D; &out: PBLPathCore; sink: BLPathSinkFunc; closure: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontGetGlyphRunOutlines';
+function _blContextStrokeGeometry(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGeometry';
 
+function _blContextStrokeGeometryRgba32(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGeometryRgba32';
 
-function blFontDataInit(self: PBLFontDataCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataInit';
+function _blContextStrokeGeometryRgba64(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGeometryRgba64';
 
-function blFontDataDestroy(self: PBLFontDataCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataDestroy';
+function _blContextStrokeGeometryExt(self: _PBLContextCore; &type: _BLGeometryType; const data: Pointer; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGeometryExt';
 
-function blFontDataReset(self: PBLFontDataCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataReset';
+function _blContextStrokeUtf8TextI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextI';
 
-function blFontDataAssignMove(self: PBLFontDataCore; other: PBLFontDataCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataAssignMove';
+function _blContextStrokeUtf8TextIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextIRgba32';
 
-function blFontDataAssignWeak(self: PBLFontDataCore; other: PBLFontDataCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataAssignWeak';
+function _blContextStrokeUtf8TextIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextIRgba64';
 
-function blFontDataCreateFromFile(self: PBLFontDataCore; fileName: PUTF8Char; readFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataCreateFromFile';
+function _blContextStrokeUtf8TextIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextIExt';
 
-function blFontDataCreateFromDataArray(self: PBLFontDataCore; dataArray: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataCreateFromDataArray';
+function _blContextStrokeUtf8TextD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextD';
 
-function blFontDataCreateFromData(self: PBLFontDataCore; data: Pointer; dataSize: NativeUInt; destroyFunc: BLDestroyImplFunc; destroyData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataCreateFromData';
+function _blContextStrokeUtf8TextDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextDRgba32';
 
-function blFontDataEquals(a: PBLFontDataCore; b: PBLFontDataCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataEquals';
+function _blContextStrokeUtf8TextDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextDRgba64';
 
-function blFontDataListTags(self: PBLFontDataCore; faceIndex: UInt32; dst: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataListTags';
+function _blContextStrokeUtf8TextDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUTF8Char; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf8TextDExt';
 
-function blFontDataQueryTables(self: PBLFontDataCore; faceIndex: UInt32; dst: _PBLFontTable; tags: _PBLTag; count: NativeUInt): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontDataQueryTables';
+function _blContextStrokeUtf16TextI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextI';
 
+function _blContextStrokeUtf16TextIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextIRgba32';
 
-function blFontFaceInit(self: PBLFontFaceCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceInit';
+function _blContextStrokeUtf16TextIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextIRgba64';
 
-function blFontFaceDestroy(self: PBLFontFaceCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceDestroy';
+function _blContextStrokeUtf16TextIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextIExt';
 
-function blFontFaceReset(self: PBLFontFaceCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceReset';
+function _blContextStrokeUtf16TextD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextD';
 
-function blFontFaceAssignMove(self: PBLFontFaceCore; other: PBLFontFaceCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceAssignMove';
+function _blContextStrokeUtf16TextDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextDRgba32';
 
-function blFontFaceAssignWeak(self: PBLFontFaceCore; other: PBLFontFaceCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceAssignWeak';
+function _blContextStrokeUtf16TextDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextDRgba64';
 
-function blFontFaceEquals(a: PBLFontFaceCore; b: PBLFontFaceCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceEquals';
+function _blContextStrokeUtf16TextDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt16; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf16TextDExt';
 
-function blFontFaceCreateFromFile(self: PBLFontFaceCore; fileName: PUTF8Char; readFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceCreateFromFile';
+function _blContextStrokeUtf32TextI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextI';
 
-function blFontFaceCreateFromData(self: PBLFontFaceCore; fontData: PBLFontDataCore; faceIndex: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceCreateFromData';
+function _blContextStrokeUtf32TextIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextIRgba32';
 
-function blFontFaceGetFaceInfo(self: PBLFontFaceCore; &out: _PBLFontFaceInfo): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceGetFaceInfo';
+function _blContextStrokeUtf32TextIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextIRgba64';
 
-function blFontFaceGetDesignMetrics(self: PBLFontFaceCore; &out: _PBLFontDesignMetrics): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceGetDesignMetrics';
+function _blContextStrokeUtf32TextIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextIExt';
 
-function blFontFaceGetUnicodeCoverage(self: PBLFontFaceCore; &out: _PBLFontUnicodeCoverage): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontFaceGetUnicodeCoverage';
+function _blContextStrokeUtf32TextD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextD';
 
+function _blContextStrokeUtf32TextDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextDRgba32';
 
-function blFontManagerInit(self: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerInit';
+function _blContextStrokeUtf32TextDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextDRgba64';
 
-function blFontManagerInitNew(self: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerInitNew';
+function _blContextStrokeUtf32TextDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const text: PUInt32; size: NativeUInt; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeUtf32TextDExt';
 
-function blFontManagerDestroy(self: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerDestroy';
+function _blContextStrokeGlyphRunI(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunI';
 
-function blFontManagerReset(self: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerReset';
+function _blContextStrokeGlyphRunIRgba32(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunIRgba32';
 
-function blFontManagerAssignMove(self: PBLFontManagerCore; other: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerAssignMove';
+function _blContextStrokeGlyphRunIRgba64(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunIRgba64';
 
-function blFontManagerAssignWeak(self: PBLFontManagerCore; other: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerAssignWeak';
+function _blContextStrokeGlyphRunIExt(self: _PBLContextCore; const origin: _PBLPointI; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunIExt';
 
-function blFontManagerCreate(self: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerCreate';
+function _blContextStrokeGlyphRunD(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunD';
 
-function blFontManagerGetFaceCount(const self: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerGetFaceCount';
+function _blContextStrokeGlyphRunDRgba32(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba32: UInt32): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunDRgba32';
 
-function blFontManagerGetFamilyCount(const self: PBLFontManagerCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerGetFamilyCount';
+function _blContextStrokeGlyphRunDRgba64(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; rgba64: UInt64): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunDRgba64';
 
-function blFontManagerHasFace(const self: PBLFontManagerCore; const face: PBLFontFaceCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerHasFace';
+function _blContextStrokeGlyphRunDExt(self: _PBLContextCore; const origin: _PBLPoint; const font: _PBLFontCore; const glyphRun: _PBLGlyphRun; const style: _PBLUnknown): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextStrokeGlyphRunDExt';
 
-function blFontManagerAddFace(self: PBLFontManagerCore; const face: PBLFontFaceCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerAddFace';
+function _blContextBlitImageI(self: _PBLContextCore; const origin: _PBLPointI; const img: _PBLImageCore; const imgArea: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextBlitImageI';
 
-function blFontManagerQueryFace(const self: PBLFontManagerCore; const name: MarshaledAString; nameSize: NativeUInt; const properties: PBLFontQueryProperties; _out: PBLFontFaceCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerQueryFace';
+function _blContextBlitImageD(self: _PBLContextCore; const origin: _PBLPoint; const img: _PBLImageCore; const imgArea: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextBlitImageD';
 
-function blFontManagerQueryFacesByFamilyName(const self: PBLFontManagerCore; const name: MarshaledAString; nameSize: NativeUInt; _out: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerQueryFacesByFamilyName';
+function _blContextBlitScaledImageI(self: _PBLContextCore; const rect: _PBLRectI; const img: _PBLImageCore; const imgArea: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextBlitScaledImageI';
 
-function blFontManagerEquals(a: PBLFontManagerCore; b: PBLFontManagerCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blFontManagerEquals';
-
-
-function blFormatInfoQuery(self: _PBLFormatInfo; format: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFormatInfoQuery';
-
-function blFormatInfoSanitize(self: _PBLFormatInfo): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blFormatInfoSanitize';
-
-
-function blGlyphBufferInit(self: PBLGlyphBufferCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferInit';
-
-function blGlyphBufferInitMove(self: PBLGlyphBufferCore; other: PBLGlyphBufferCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferInitMove';
-
-function blGlyphBufferDestroy(self: PBLGlyphBufferCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferDestroy';
-
-function blGlyphBufferReset(self: PBLGlyphBufferCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferReset';
-
-function blGlyphBufferClear(self: PBLGlyphBufferCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferClear';
-
-function blGlyphBufferGetSize(self: PBLGlyphBufferCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferGetSize';
-
-function blGlyphBufferGetFlags(self: PBLGlyphBufferCore): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferGetFlags';
-
-function blGlyphBufferGetGlyphRun(self: PBLGlyphBufferCore): _PBLGlyphRun; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferGetGlyphRun';
-
-function blGlyphBufferGetContent(self: PBLGlyphBufferCore): PUInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferGetContent';
-
-function blGlyphBufferGetInfoData(self: PBLGlyphBufferCore): _PBLGlyphInfo; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferGetInfoData';
-
-function blGlyphBufferGetPlacementData(self: PBLGlyphBufferCore): _PBLGlyphPlacement; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferGetPlacementData';
-
-function blGlyphBufferSetText(self: PBLGlyphBufferCore; textData: Pointer; size: NativeUInt; encoding: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferSetText';
-
-function blGlyphBufferSetGlyphs(self: PBLGlyphBufferCore; glyphData: PUInt32; size: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferSetGlyphs';
-
-function blGlyphBufferSetGlyphsFromStruct(self: PBLGlyphBufferCore; glyphData: Pointer; size: NativeUInt; glyphIdSize: NativeUInt; glyphIdAdvance: IntPtr): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGlyphBufferSetGlyphsFromStruct';
-
-
-function blGradientInit(self: PBLGradientCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientInit';
-
-function blGradientInitAs(self: PBLGradientCore; &type: UInt32; values: Pointer; extendMode: UInt32; stops: _PBLGradientStop; n: NativeUInt; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientInitAs';
-
-function blGradientDestroy(self: PBLGradientCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientDestroy';
-
-function blGradientReset(self: PBLGradientCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientReset';
-
-function blGradientAssignMove(self: PBLGradientCore; other: PBLGradientCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientAssignMove';
-
-function blGradientAssignWeak(self: PBLGradientCore; other: PBLGradientCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientAssignWeak';
-
-function blGradientCreate(self: PBLGradientCore; &type: UInt32; values: Pointer; extendMode: UInt32; stops: _PBLGradientStop; n: NativeUInt; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientCreate';
-
-function blGradientShrink(self: PBLGradientCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientShrink';
-
-function blGradientReserve(self: PBLGradientCore; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientReserve';
-
-function blGradientGetType(self: PBLGradientCore): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientGetType';
-
-function blGradientSetType(self: PBLGradientCore; &type: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientSetType';
-
-function blGradientGetValue(self: PBLGradientCore; index: NativeUInt): Double; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientGetValue';
-
-function blGradientSetValue(self: PBLGradientCore; index: NativeUInt; value: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientSetValue';
-
-function blGradientSetValues(self: PBLGradientCore; index: NativeUInt; values: PDouble; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientSetValues';
-
-function blGradientGetExtendMode(self: PBLGradientCore): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientGetExtendMode';
-
-function blGradientSetExtendMode(self: PBLGradientCore; extendMode: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientSetExtendMode';
-
-function blGradientGetSize(self: PBLGradientCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientGetSize';
-
-function blGradientGetCapacity(self: PBLGradientCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientGetCapacity';
-
-function blGradientGetStops(self: PBLGradientCore): _PBLGradientStop; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientGetStops';
-
-function blGradientResetStops(self: PBLGradientCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientResetStops';
-
-function blGradientAssignStops(self: PBLGradientCore; stops: _PBLGradientStop; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientAssignStops';
-
-function blGradientAddStopRgba32(self: PBLGradientCore; offset: Double; argb32: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientAddStopRgba32';
-
-function blGradientAddStopRgba64(self: PBLGradientCore; offset: Double; argb64: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientAddStopRgba64';
-
-function blGradientRemoveStop(self: PBLGradientCore; index: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientRemoveStop';
-
-function blGradientRemoveStopByOffset(self: PBLGradientCore; offset: Double; all: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientRemoveStopByOffset';
-
-function blGradientRemoveStops(self: PBLGradientCore; rStart: NativeUInt; rEnd: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientRemoveStops';
-
-function blGradientRemoveStopsFromTo(self: PBLGradientCore; offsetMin: Double; offsetMax: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientRemoveStopsFromTo';
-
-function blGradientReplaceStopRgba32(self: PBLGradientCore; index: NativeUInt; offset: Double; rgba32: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientReplaceStopRgba32';
-
-function blGradientReplaceStopRgba64(self: PBLGradientCore; index: NativeUInt; offset: Double; rgba64: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientReplaceStopRgba64';
-
-function blGradientIndexOfStop(self: PBLGradientCore; offset: Double): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientIndexOfStop';
-
-function blGradientApplyMatrixOp(self: PBLGradientCore; opType: UInt32; opData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientApplyMatrixOp';
-
-function blGradientEquals(a: PBLGradientCore; b: PBLGradientCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blGradientEquals';
-
-
-function blImageInit(self: PBLImageCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageInit';
-
-function blImageInitAs(self: PBLImageCore; w: Integer; h: Integer; format: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageInitAs';
-
-function blImageInitAsFromData(self: PBLImageCore; w: Integer; h: Integer; format: UInt32; pixelData: Pointer; stride: IntPtr; destroyFunc: BLDestroyImplFunc; destroyData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageInitAsFromData';
-
-function blImageDestroy(self: PBLImageCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDestroy';
-
-function blImageReset(self: PBLImageCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageReset';
-
-function blImageAssignMove(self: PBLImageCore; other: PBLImageCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageAssignMove';
-
-function blImageAssignWeak(self: PBLImageCore; other: PBLImageCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageAssignWeak';
-
-function blImageAssignDeep(self: PBLImageCore; other: PBLImageCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageAssignDeep';
-
-function blImageCreate(self: PBLImageCore; w: Integer; h: Integer; format: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCreate';
-
-function blImageCreateFromData(self: PBLImageCore; w: Integer; h: Integer; format: UInt32; pixelData: Pointer; stride: IntPtr; destroyFunc: BLDestroyImplFunc; destroyData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCreateFromData';
-
-function blImageGetData(self: PBLImageCore; dataOut: _PBLImageData): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageGetData';
-
-function blImageMakeMutable(self: PBLImageCore; dataOut: _PBLImageData): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageMakeMutable';
-
-function blImageConvert(self: PBLImageCore; format: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageConvert';
-
-function blImageEquals(a: PBLImageCore; b: PBLImageCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEquals';
-
-function blImageScale(dst: PBLImageCore; src: PBLImageCore; size: _PBLSizeI; filter: UInt32; options: _PBLImageScaleOptions): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageScale';
-
-function blImageReadFromFile(self: PBLImageCore; fileName: PUTF8Char; codecs: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageReadFromFile';
-
-function blImageReadFromData(self: PBLImageCore; data: Pointer; size: NativeUInt; codecs: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageReadFromData';
-
-function blImageWriteToFile(self: PBLImageCore; fileName: PUTF8Char; codec: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageWriteToFile';
-
-function blImageWriteToData(self: PBLImageCore; dst: PBLArrayCore; codec: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageWriteToData';
-
-
-function blImageCodecInit(self: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecInit';
-
-function blImageCodecDestroy(self: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecDestroy';
-
-function blImageCodecReset(self: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecReset';
-
-function blImageCodecAssignWeak(self: PBLImageCodecCore; other: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecAssignWeak';
-
-function blImageCodecFindByName(self: PBLImageCodecCore; name: PUTF8Char; size: NativeUInt; codecs: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecFindByName';
-
-function blImageCodecFindByExtension(self: PBLImageCodecCore; name: PUTF8Char; size: NativeUInt; codecs: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecFindByExtension';
-
-function blImageCodecFindByData(self: PBLImageCodecCore; data: Pointer; size: NativeUInt; codecs: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecFindByData';
-
-function blImageCodecInspectData(self: PBLImageCodecCore; data: Pointer; size: NativeUInt): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecInspectData';
-
-function blImageCodecCreateDecoder(self: PBLImageCodecCore; dst: PBLImageDecoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecCreateDecoder';
-
-function blImageCodecCreateEncoder(self: PBLImageCodecCore; dst: PBLImageEncoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecCreateEncoder';
-
-function blImageCodecArrayInitBuiltInCodecs(self: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecArrayInitBuiltInCodecs';
-
-function blImageCodecArrayAssignBuiltInCodecs(self: PBLArrayCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecArrayAssignBuiltInCodecs';
-
-function blImageCodecAddToBuiltIn(codec: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecAddToBuiltIn';
-
-function blImageCodecRemoveFromBuiltIn(codec: PBLImageCodecCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageCodecRemoveFromBuiltIn';
-
-
-function blImageDecoderInit(self: PBLImageDecoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderInit';
-
-function blImageDecoderDestroy(self: PBLImageDecoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderDestroy';
-
-function blImageDecoderReset(self: PBLImageDecoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderReset';
-
-function blImageDecoderAssignMove(self: PBLImageDecoderCore; other: PBLImageDecoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderAssignMove';
-
-function blImageDecoderAssignWeak(self: PBLImageDecoderCore; other: PBLImageDecoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderAssignWeak';
-
-function blImageDecoderRestart(self: PBLImageDecoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderRestart';
-
-function blImageDecoderReadInfo(self: PBLImageDecoderCore; infoOut: _PBLImageInfo; data: PUInt8; size: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderReadInfo';
-
-function blImageDecoderReadFrame(self: PBLImageDecoderCore; imageOut: PBLImageCore; data: PUInt8; size: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageDecoderReadFrame';
-
-
-function blImageEncoderInit(self: PBLImageEncoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEncoderInit';
-
-function blImageEncoderDestroy(self: PBLImageEncoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEncoderDestroy';
-
-function blImageEncoderReset(self: PBLImageEncoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEncoderReset';
-
-function blImageEncoderAssignMove(self: PBLImageEncoderCore; other: PBLImageEncoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEncoderAssignMove';
-
-function blImageEncoderAssignWeak(self: PBLImageEncoderCore; other: PBLImageEncoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEncoderAssignWeak';
-
-function blImageEncoderRestart(self: PBLImageEncoderCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEncoderRestart';
-
-function blImageEncoderWriteFrame(self: PBLImageEncoderCore; dst: PBLArrayCore; image: PBLImageCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blImageEncoderWriteFrame';
-
-
-function blMatrix2DSetIdentity(self: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DSetIdentity';
-
-function blMatrix2DSetTranslation(self: _PBLMatrix2D; x: Double; y: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DSetTranslation';
-
-function blMatrix2DSetScaling(self: _PBLMatrix2D; x: Double; y: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DSetScaling';
-
-function blMatrix2DSetSkewing(self: _PBLMatrix2D; x: Double; y: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DSetSkewing';
-
-function blMatrix2DSetRotation(self: _PBLMatrix2D; angle: Double; cx: Double; cy: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DSetRotation';
-
-function blMatrix2DApplyOp(self: _PBLMatrix2D; opType: UInt32; opData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DApplyOp';
-
-function blMatrix2DInvert(dst: _PBLMatrix2D; src: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DInvert';
-
-function blMatrix2DGetType(self: _PBLMatrix2D): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DGetType';
-
-function blMatrix2DMapPointDArray(self: _PBLMatrix2D; dst: _PBLPoint; src: _PBLPoint; count: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blMatrix2DMapPointDArray';
-
-
-function blPathInit(self: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathInit';
-
-function blPathDestroy(self: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathDestroy';
-
-function blPathReset(self: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathReset';
-
-function blPathGetSize(self: PBLPathCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetSize';
-
-function blPathGetCapacity(self: PBLPathCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetCapacity';
-
-function blPathGetCommandData(self: PBLPathCore): PUInt8; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetCommandData';
-
-function blPathGetVertexData(self: PBLPathCore): _PBLPoint; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetVertexData';
-
-function blPathClear(self: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathClear';
-
-function blPathShrink(self: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathShrink';
-
-function blPathReserve(self: PBLPathCore; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathReserve';
-
-function blPathModifyOp(self: PBLPathCore; op: UInt32; n: NativeUInt; cmdDataOut: PPUInt8; out vtxDataOut: _PBLPoint): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathModifyOp';
-
-function blPathAssignMove(self: PBLPathCore; other: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAssignMove';
-
-function blPathAssignWeak(self: PBLPathCore; other: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAssignWeak';
-
-function blPathAssignDeep(self: PBLPathCore; other: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAssignDeep';
-
-function blPathSetVertexAt(self: PBLPathCore; index: NativeUInt; cmd: UInt32; x: Double; y: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathSetVertexAt';
-
-function blPathMoveTo(self: PBLPathCore; x0: Double; y0: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathMoveTo';
-
-function blPathLineTo(self: PBLPathCore; x1: Double; y1: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathLineTo';
-
-function blPathPolyTo(self: PBLPathCore; poly: _PBLPoint; count: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathPolyTo';
-
-function blPathQuadTo(self: PBLPathCore; x1: Double; y1: Double; x2: Double; y2: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathQuadTo';
-
-function blPathCubicTo(self: PBLPathCore; x1: Double; y1: Double; x2: Double; y2: Double; x3: Double; y3: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathCubicTo';
-
-function blPathSmoothQuadTo(self: PBLPathCore; x2: Double; y2: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathSmoothQuadTo';
-
-function blPathSmoothCubicTo(self: PBLPathCore; x2: Double; y2: Double; x3: Double; y3: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathSmoothCubicTo';
-
-function blPathArcTo(self: PBLPathCore; x: Double; y: Double; rx: Double; ry: Double; start: Double; sweep: Double; forceMoveTo: Boolean): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathArcTo';
-
-function blPathArcQuadrantTo(self: PBLPathCore; x1: Double; y1: Double; x2: Double; y2: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathArcQuadrantTo';
-
-function blPathEllipticArcTo(self: PBLPathCore; rx: Double; ry: Double; xAxisRotation: Double; largeArcFlag: Boolean; sweepFlag: Boolean; x1: Double; y1: Double): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathEllipticArcTo';
-
-function blPathClose(self: PBLPathCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathClose';
-
-function blPathAddGeometry(self: PBLPathCore; geometryType: UInt32; geometryData: Pointer; m: _PBLMatrix2D; dir: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddGeometry';
-
-function blPathAddBoxI(self: PBLPathCore; box: _PBLBoxI; dir: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddBoxI';
-
-function blPathAddBoxD(self: PBLPathCore; box: _PBLBox; dir: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddBoxD';
-
-function blPathAddRectI(self: PBLPathCore; rect: _PBLRectI; dir: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddRectI';
-
-function blPathAddRectD(self: PBLPathCore; rect: _PBLRect; dir: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddRectD';
-
-function blPathAddPath(self: PBLPathCore; other: PBLPathCore; range: _PBLRange): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddPath';
-
-function blPathAddTranslatedPath(self: PBLPathCore; other: PBLPathCore; range: _PBLRange; p: _PBLPoint): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddTranslatedPath';
-
-function blPathAddTransformedPath(self: PBLPathCore; other: PBLPathCore; range: _PBLRange; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddTransformedPath';
-
-function blPathAddReversedPath(self: PBLPathCore; other: PBLPathCore; range: _PBLRange; reverseMode: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddReversedPath';
-
-function blPathAddStrokedPath(self: PBLPathCore; other: PBLPathCore; range: _PBLRange; options: PBLStrokeOptionsCore; approx: _PBLApproximationOptions): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathAddStrokedPath';
-
-function blPathRemoveRange(self: PBLPathCore; range: _PBLRange): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathRemoveRange';
-
-function blPathTranslate(self: PBLPathCore; range: _PBLRange; p: _PBLPoint): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathTranslate';
-
-function blPathTransform(self: PBLPathCore; range: _PBLRange; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathTransform';
-
-function blPathFitTo(self: PBLPathCore; range: _PBLRange; rect: _PBLRect; fitFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathFitTo';
-
-function blPathEquals(a: PBLPathCore; b: PBLPathCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathEquals';
-
-function blPathGetInfoFlags(self: PBLPathCore; flagsOut: PUInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetInfoFlags';
-
-function blPathGetControlBox(self: PBLPathCore; boxOut: _PBLBox): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetControlBox';
-
-function blPathGetBoundingBox(self: PBLPathCore; boxOut: _PBLBox): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetBoundingBox';
-
-function blPathGetFigureRange(self: PBLPathCore; index: NativeUInt; rangeOut: _PBLRange): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetFigureRange';
-
-function blPathGetLastVertex(self: PBLPathCore; vtxOut: _PBLPoint): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetLastVertex';
-
-function blPathGetClosestVertex(self: PBLPathCore; p: _PBLPoint; maxDistance: Double; indexOut: PNativeUInt; distanceOut: PDouble): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathGetClosestVertex';
-
-function blPathHitTest(self: PBLPathCore; p: _PBLPoint; fillRule: UInt32): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blPathHitTest';
-
-
-function blPatternInit(self: PBLPatternCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternInit';
-
-function blPatternInitAs(self: PBLPatternCore; image: PBLImageCore; area: _PBLRectI; extendMode: UInt32; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternInitAs';
-
-function blPatternDestroy(self: PBLPatternCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternDestroy';
-
-function blPatternReset(self: PBLPatternCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternReset';
-
-function blPatternAssignMove(self: PBLPatternCore; other: PBLPatternCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternAssignMove';
-
-function blPatternAssignWeak(self: PBLPatternCore; other: PBLPatternCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternAssignWeak';
-
-function blPatternAssignDeep(self: PBLPatternCore; other: PBLPatternCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternAssignDeep';
-
-function blPatternCreate(self: PBLPatternCore; image: PBLImageCore; area: _PBLRectI; extendMode: UInt32; m: _PBLMatrix2D): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternCreate';
-
-function blPatternSetImage(self: PBLPatternCore; image: PBLImageCore; area: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternSetImage';
-
-function blPatternSetArea(self: PBLPatternCore; area: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternSetArea';
-
-function blPatternSetExtendMode(self: PBLPatternCore; extendMode: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternSetExtendMode';
-
-function blPatternApplyMatrixOp(self: PBLPatternCore; opType: UInt32; opData: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternApplyMatrixOp';
-
-function blPatternEquals(a: PBLPatternCore; b: PBLPatternCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blPatternEquals';
-
-
-function blPixelConverterInit(self: PBLPixelConverterCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPixelConverterInit';
-
-function blPixelConverterInitWeak(self: PBLPixelConverterCore; other: PBLPixelConverterCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPixelConverterInitWeak';
-
-function blPixelConverterDestroy(self: PBLPixelConverterCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPixelConverterDestroy';
-
-function blPixelConverterReset(self: PBLPixelConverterCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPixelConverterReset';
-
-function blPixelConverterAssign(self: PBLPixelConverterCore; other: PBLPixelConverterCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPixelConverterAssign';
-
-function blPixelConverterCreate(self: PBLPixelConverterCore; dstInfo: _PBLFormatInfo; srcInfo: _PBLFormatInfo; createFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPixelConverterCreate';
-
-function blPixelConverterConvert(self: PBLPixelConverterCore; dstData: Pointer; dstStride: IntPtr; srcData: Pointer; srcStride: IntPtr; w: UInt32; h: UInt32; options: _PBLPixelConverterOptions): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blPixelConverterConvert';
-
-
-function blRandomReset(self: _PBLRandom; seed: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRandomReset';
-
-function blRandomNextUInt32(self: _PBLRandom): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blRandomNextUInt32';
-
-function blRandomNextUInt64(self: _PBLRandom): UInt64; cdecl;
-  external LIB_BLEND2D name _PU + 'blRandomNextUInt64';
-
-function blRandomNextDouble(self: _PBLRandom): Double; cdecl;
-  external LIB_BLEND2D name _PU + 'blRandomNextDouble';
-
-
-function blRegionInit(self: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionInit';
-
-function blRegionDestroy(self: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionDestroy';
-
-function blRegionReset(self: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionReset';
-
-function blRegionGetSize(self: PBLRegionCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionGetSize';
-
-function blRegionGetCapacity(self: PBLRegionCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionGetCapacity';
-
-function blRegionGetData(self: PBLRegionCore): _PBLBoxI; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionGetData';
-
-function blRegionClear(self: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionClear';
-
-function blRegionShrink(self: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionShrink';
-
-function blRegionReserve(self: PBLRegionCore; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionReserve';
-
-function blRegionAssignMove(self: PBLRegionCore; other: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionAssignMove';
-
-function blRegionAssignWeak(self: PBLRegionCore; other: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionAssignWeak';
-
-function blRegionAssignDeep(self: PBLRegionCore; other: PBLRegionCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionAssignDeep';
-
-function blRegionAssignBoxI(self: PBLRegionCore; src: _PBLBoxI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionAssignBoxI';
-
-function blRegionAssignBoxIArray(self: PBLRegionCore; data: _PBLBoxI; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionAssignBoxIArray';
-
-function blRegionAssignRectI(self: PBLRegionCore; rect: _PBLRectI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionAssignRectI';
-
-function blRegionAssignRectIArray(self: PBLRegionCore; data: _PBLRectI; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionAssignRectIArray';
-
-function blRegionCombine(self: PBLRegionCore; a: PBLRegionCore; b: PBLRegionCore; booleanOp: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionCombine';
-
-function blRegionCombineRB(self: PBLRegionCore; a: PBLRegionCore; b: _PBLBoxI; booleanOp: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionCombineRB';
-
-function blRegionCombineBR(self: PBLRegionCore; a: _PBLBoxI; b: PBLRegionCore; booleanOp: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionCombineBR';
-
-function blRegionCombineBB(self: PBLRegionCore; a: _PBLBoxI; b: _PBLBoxI; booleanOp: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionCombineBB';
-
-function blRegionTranslate(self: PBLRegionCore; r: PBLRegionCore; pt: _PBLPointI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionTranslate';
-
-function blRegionTranslateAndClip(self: PBLRegionCore; r: PBLRegionCore; pt: _PBLPointI; clipBox: _PBLBoxI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionTranslateAndClip';
-
-function blRegionIntersectAndClip(self: PBLRegionCore; a: PBLRegionCore; b: PBLRegionCore; clipBox: _PBLBoxI): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionIntersectAndClip';
-
-function blRegionEquals(a: PBLRegionCore; b: PBLRegionCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionEquals';
-
-function blRegionGetType(self: PBLRegionCore): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionGetType';
-
-function blRegionHitTest(self: PBLRegionCore; pt: _PBLPointI): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionHitTest';
-
-function blRegionHitTestBoxI(self: PBLRegionCore; box: _PBLBoxI): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blRegionHitTestBoxI';
-
-
-function blRuntimeInit(): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeInit';
-
-function blRuntimeShutdown(): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeShutdown';
-
-function blRuntimeCleanup(cleanupFlags: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeCleanup';
-
-function blRuntimeQueryInfo(infoType: UInt32; infoOut: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeQueryInfo';
-
-function blRuntimeMessageOut(msg: PUTF8Char): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeMessageOut';
-
-function blRuntimeMessageFmt(fmt: PUTF8Char): BLResult varargs; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeMessageFmt';
-
-function blRuntimeMessageVFmt(fmt: PUTF8Char; ap: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeMessageVFmt';
-
-procedure blRuntimeAssertionFailure(&file: PUTF8Char; line: Integer; msg: PUTF8Char); cdecl;
-  external LIB_BLEND2D name _PU + 'blRuntimeAssertionFailure';
-
-{$IFDEF MSWINDOWS}
-function blResultFromWinError(e: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blResultFromWinError';
-{$ELSE}
-function blResultFromPosixError(e: Integer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blResultFromPosixError';
-{$ENDIF}
-
-
-function blStringInit(self: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringInit';
-
-function blStringInitWithData(self: PBLStringCore; const str: MarshaledAString; size: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringInitWithData';
-
-function blStringDestroy(self: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringDestroy';
-
-function blStringReset(self: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringReset';
-
-function blStringGetSize(self: PBLStringCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringGetSize';
-
-function blStringGetCapacity(self: PBLStringCore): NativeUInt; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringGetCapacity';
-
-function blStringGetData(self: PBLStringCore): PUTF8Char; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringGetData';
-
-function blStringClear(self: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringClear';
-
-function blStringShrink(self: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringShrink';
-
-function blStringReserve(self: PBLStringCore; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringReserve';
-
-function blStringResize(self: PBLStringCore; n: NativeUInt; fill: UTF8Char): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringResize';
-
-function blStringMakeMutable(self: PBLStringCore; dataOut: PPUTF8Char): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringMakeMutable';
-
-function blStringModifyOp(self: PBLStringCore; op: UInt32; n: NativeUInt; dataOut: PPUTF8Char): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringModifyOp';
-
-function blStringInsertOp(self: PBLStringCore; index: NativeUInt; n: NativeUInt; dataOut: PPUTF8Char): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringInsertOp';
-
-function blStringAssignMove(self: PBLStringCore; other: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringAssignMove';
-
-function blStringAssignWeak(self: PBLStringCore; other: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringAssignWeak';
-
-function blStringAssignDeep(self: PBLStringCore; other: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringAssignDeep';
-
-function blStringAssignData(self: PBLStringCore; str: PUTF8Char; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringAssignData';
-
-function blStringApplyOpChar(self: PBLStringCore; op: UInt32; c: UTF8Char; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringApplyOpChar';
-
-function blStringApplyOpData(self: PBLStringCore; op: UInt32; str: PUTF8Char; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringApplyOpData';
-
-function blStringApplyOpString(self: PBLStringCore; op: UInt32; other: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringApplyOpString';
-
-function blStringApplyOpFormat(self: PBLStringCore; op: UInt32; fmt: PUTF8Char): BLResult varargs; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringApplyOpFormat';
-
-function blStringApplyOpFormatV(self: PBLStringCore; op: UInt32; fmt: PUTF8Char; ap: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringApplyOpFormatV';
-
-function blStringInsertChar(self: PBLStringCore; index: NativeUInt; c: UTF8Char; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringInsertChar';
-
-function blStringInsertData(self: PBLStringCore; index: NativeUInt; str: PUTF8Char; n: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringInsertData';
-
-function blStringInsertString(self: PBLStringCore; index: NativeUInt; other: PBLStringCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringInsertString';
-
-function blStringRemoveRange(self: PBLStringCore; rStart: NativeUInt; rEnd: NativeUInt): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringRemoveRange';
-
-function blStringEquals(self: PBLStringCore; other: PBLStringCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringEquals';
-
-function blStringEqualsData(self: PBLStringCore; str: PUTF8Char; n: NativeUInt): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringEqualsData';
-
-function blStringCompare(self: PBLStringCore; other: PBLStringCore): Integer; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringCompare';
-
-function blStringCompareData(self: PBLStringCore; str: PUTF8Char; n: NativeUInt): Integer; cdecl;
-  external LIB_BLEND2D name _PU + 'blStringCompareData';
-
-
-function blStrokeOptionsInit(self: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStrokeOptionsInit';
-
-function blStrokeOptionsInitMove(self: PBLStrokeOptionsCore; other: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStrokeOptionsInitMove';
-
-function blStrokeOptionsInitWeak(self: PBLStrokeOptionsCore; other: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStrokeOptionsInitWeak';
-
-function blStrokeOptionsDestroy(self: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStrokeOptionsDestroy';
-
-function blStrokeOptionsReset(self: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStrokeOptionsReset';
-
-function blStrokeOptionsAssignMove(self: PBLStrokeOptionsCore; other: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStrokeOptionsAssignMove';
-
-function blStrokeOptionsAssignWeak(self: PBLStrokeOptionsCore; other: PBLStrokeOptionsCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStrokeOptionsAssignWeak';
-
-
-function blStyleInit(self: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleInit';
-
-function blStyleInitMove(self, other: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleInitMove';
-
-function blStyleInitWeak(self, other: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleInitWeak';
-
-function blStyleInitRgba(self: PBLStyleCore; rgba: _PBLRgba): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleInitRgba';
-
-function blStyleInitRgba32(self: PBLStyleCore; rgba: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleInitRgba32';
-
-function blStyleInitRgba64(self: PBLStyleCore; rgba: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleInitRgba64';
-
-function blStyleInitObject(self: PBLStyleCore; &object: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleInitObject';
-
-function blStyleDestroy(self: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleDestroy';
-
-function blStyleReset(self: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleReset';
-
-function blStyleAssignMove(self, other: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleAssignMove';
-
-function blStyleAssignWeak(self, other: PBLStyleCore): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleAssignWeak';
-
-function blStyleAssignRgba(self: PBLStyleCore; rgba: _PBLRgba): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleAssignRgba';
-
-function blStyleAssignRgba32(self: PBLStyleCore; rgba: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleAssignRgba32';
-
-function blStyleAssignRgba64(self: PBLStyleCore; rgba: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleAssignRgba64';
-
-function blStyleAssignObject(self: PBLStyleCore; &object: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleAssignObject';
-
-function blStyleGetType(self: PBLStyleCore): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleGetType';
-
-function blStyleGetRgba(self: PBLStyleCore; rgbaOut: _PBLRgba): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleGetRgba';
-
-function blStyleGetRgba32(self: PBLStyleCore; rgba32Out: UInt32): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleGetRgba32';
-
-function blStyleGetRgba64(self: PBLStyleCore; rgba64Out: UInt64): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleGetRgba64';
-
-function blStyleGetObject(self: PBLStyleCore; &object: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleGetObject';
-
-function blStyleEquals(a, b: PBLStyleCore): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blStyleEquals';
-
-
-function blVariantInit(self: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantInit';
-
-function blVariantInitMove(self: Pointer; other: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantInitMove';
-
-function blVariantInitWeak(self: Pointer; other: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantInitWeak';
-
-function blVariantDestroy(self: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantDestroy';
-
-function blVariantReset(self: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantReset';
-
-function blVariantGetImplType(self: Pointer): UInt32; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantGetImplType';
-
-function blVariantAssignMove(self: Pointer; other: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantAssignMove';
-
-function blVariantAssignWeak(self: Pointer; other: Pointer): BLResult; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantAssignWeak';
-
-function blVariantEquals(a: Pointer; b: Pointer): Boolean; cdecl;
-  external LIB_BLEND2D name _PU + 'blVariantEquals';
+function _blContextBlitScaledImageD(self: _PBLContextCore; const rect: _PBLRect; const img: _PBLImageCore; const imgArea: _PBLRectI): _BLResult; cdecl;
+  external _LIB_BLEND2D name _PU + 'blContextBlitScaledImageD';
+{$ENDREGION 'context.h'}
 
 implementation
 
-function BL_MAKE_TAG(const A, B, C, D: Byte): BLTag; inline;
+function _BL_MAKE_TAG(const A, B, C, D: Byte): _BLTag; inline;
 begin
   Result := (A shl 24) or (B shl 16) or (C shl 8) or D;
 end;

@@ -166,6 +166,7 @@ begin
 
     FSrcRect := RectF(0, 0, SrcSize.Width, SrcSize.Height);
     FDstRect := RectF(0, 0, FDstSize.Width, FDstSize.Height);
+    FForceResize := False;
   end;
 
   if (FBitmap.Map(TMapAccess.Write, Data)) then

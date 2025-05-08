@@ -80,6 +80,10 @@ Features planned for future releases include:
 * ~~Provide a `TPaintBox`-like control for VCL and FireMonkey that renders using Blend42 instead.~~
 * Provide the possibility to replace the system canvas in FireMonkey applications with a Blend2D canvas. This way, the entire FireMonkey UI will be rendered using Blend2D.
 
+## Version
+
+Based on Blend2D beta 14 (https://github.com/blend2d/blend2d/tree/841360f653d8f2a749e40d4e31807dfac3d6df29). New version on https://blend2d.com/download/blend2d-0.12.0-all.zip
+
 ## License
 
 Both Blend2D and DelphiBlend2D are released under the Zlib license. See License.txt for details.
