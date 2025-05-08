@@ -25,3 +25,5 @@ Win64/
 *.dproj.local
 *.identcache
 *.groupproj.local
+*.delphilsp.json
+*.tvsconfig
