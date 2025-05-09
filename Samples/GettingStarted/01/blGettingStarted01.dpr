@@ -9,39 +9,33 @@ uses
   Blend2D in '..\..\..\Blend2D.pas';
 
 procedure Run;
-var
-  Image: IBLImage;
-  Context: IBLContext;
-  Path: IBLPath;
-  Codec: IBLImageCodec;
 begin
   ReportMemoryLeaksOnShutdown := True;
-  Image := TBLImage.Create(480, 480);
+
+  { Use constructor or `Make` method to allocate a new image data of the
+    required format. }
+  var Image := TBLImage.Create(480, 480, TBLFormat.Prgb32);
 
   { Attach a rendering context into Image. }
-  Context := TBLContext.Create(Image);
+  var Context := TBLContext.Create(Image);
 
-  { Clear the image. }
-  Context.CompOp := TBLCompOp.SrcCopy;
-  Context.FillAll;
+  { Clearing the image would make it transparent. }
+  Context.ClearAll;
 
-  { Fill some path. }
-  Path := TBLPath.Create;
+  { Create a path having cubic curves. }
+  var Path: TBLPath;
   Path.MoveTo(26, 31);
   Path.CubicTo(642, 132, 587, -136, 25, 464);
   Path.CubicTo(882, 404, 144, 267, 27, 31);
 
-  Context.CompOp := TBLCompOp.SrcOver;
-  Context.FillColor := $FFFFFFFF;
-  Context.FillPath(Path);
+  { Fill a path with opaque white - $AARRGGBB. }
+  Context.FillPath(Path, $FFFFFFFF);
 
-  { Detach the rendering context from Image. }
+  { Detach the rendering context from `AImg`.}
   Context.Finish;
 
   { Let's use some built-in codecs provided by Blend2D. }
-  Codec := TBLImageCodec.Create;
-  if (Codec.FindByName('BMP')) then
-    Image.WriteToFile('blGettingStarted01.bmp', Codec);
+  Image.WriteToFile('bl_sample_1.png');
 end;
 
 begin

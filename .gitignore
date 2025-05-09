@@ -27,3 +27,5 @@ Win64/
 *.groupproj.local
 *.delphilsp.json
 *.tvsconfig
+*.rsm
+Bin/*.png
