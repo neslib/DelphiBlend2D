@@ -20,6 +20,7 @@ const
 type
   PUInt8 = PByte;
   PPUInt8 = ^PByte;
+  PPUTF8Char = ^PUTF8Char;
   {$IF Defined(MACOS)}
   Size_T = LongWord;
   {$ELSE}
@@ -31,6 +32,152 @@ type
 type
   _BLDestroyExternalDataFunc = procedure(impl, externalData, userData: Pointer); cdecl;
 {$ENDREGION 'object.h'}
+
+{$REGION 'array.h'}
+function _blArrayInit(self: Pointer; arrayType: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInit';
+
+function _blArrayInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInitMove';
+
+function _blArrayInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInitWeak';
+
+function _blArrayDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayDestroy';
+
+function _blArrayReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReset';
+
+function _blArrayGetSize(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetSize';
+
+function _blArrayGetCapacity(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetCapacity';
+
+function _blArrayGetItemSize(self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetItemSize';
+
+function _blArrayGetData(const self: Pointer): Pointer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayGetData';
+
+function _blArrayClear(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayClear';
+
+function _blArrayShrink(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayShrink';
+
+function _blArrayReserve(self: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReserve';
+
+function _blArrayResize(self: Pointer; n: Size_T; const fill: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayResize';
+
+function _blArrayMakeMutable(self: Pointer; dataOut: PPointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayMakeMutable';
+
+function _blArrayModifyOp(self: Pointer; op: Integer; n: Size_T; dataOut: PPointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayModifyOp';
+
+function _blArrayInsertOp(self: Pointer; index: Size_T; n: Size_T; dataOut: PPointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertOp';
+
+function _blArrayAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignMove';
+
+function _blArrayAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignWeak';
+
+function _blArrayAssignDeep(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignDeep';
+
+function _blArrayAssignData(self: Pointer; const data: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignData';
+
+function _blArrayAssignExternalData(self: Pointer; data: Pointer; size: Size_T; capacity: Size_T; dataAccessFlags: Integer; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAssignExternalData';
+
+function _blArrayAppendU8(self: Pointer; value: UInt8): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU8';
+
+function _blArrayAppendU16(self: Pointer; value: UInt16): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU16';
+
+function _blArrayAppendU32(self: Pointer; value: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU32';
+
+function _blArrayAppendU64(self: Pointer; value: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendU64';
+
+function _blArrayAppendF32(self: Pointer; value: Single): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendF32';
+
+function _blArrayAppendF64(self: Pointer; value: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendF64';
+
+function _blArrayAppendItem(self: Pointer; const item: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendItem';
+
+function _blArrayAppendData(self: Pointer; const data: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayAppendData';
+
+function _blArrayInsertU8(self: Pointer; index: Size_T; value: UInt8): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU8';
+
+function _blArrayInsertU16(self: Pointer; index: Size_T; value: UInt16): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU16';
+
+function _blArrayInsertU32(self: Pointer; index: Size_T; value: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU32';
+
+function _blArrayInsertU64(self: Pointer; index: Size_T; value: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertU64';
+
+function _blArrayInsertF32(self: Pointer; index: Size_T; value: Single): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertF32';
+
+function _blArrayInsertF64(self: Pointer; index: Size_T; value: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertF64';
+
+function _blArrayInsertItem(self: Pointer; index: Size_T; const item: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertItem';
+
+function _blArrayInsertData(self: Pointer; index: Size_T; const data: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayInsertData';
+
+function _blArrayReplaceU8(self: Pointer; index: Size_T; value: UInt8): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU8';
+
+function _blArrayReplaceU16(self: Pointer; index: Size_T; value: UInt16): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU16';
+
+function _blArrayReplaceU32(self: Pointer; index: Size_T; value: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU32';
+
+function _blArrayReplaceU64(self: Pointer; index: Size_T; value: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceU64';
+
+function _blArrayReplaceF32(self: Pointer; index: Size_T; value: Single): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceF32';
+
+function _blArrayReplaceF64(self: Pointer; index: Size_T; value: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceF64';
+
+function _blArrayReplaceItem(self: Pointer; index: Size_T; const item: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceItem';
+
+function _blArrayReplaceData(self: Pointer; rStart: Size_T; rEnd: Size_T; const data: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayReplaceData';
+
+function _blArrayRemoveIndex(self: Pointer; index: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayRemoveIndex';
+
+function _blArrayRemoveRange(self: Pointer; rStart: Size_T; rEnd: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayRemoveRange';
+
+function _blArrayEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blArrayEquals';
+{$ENDREGION 'array.h'}
 
 {$REGION 'context.h'}
 function _blContextInit(self: Pointer): Integer; cdecl;
@@ -853,4 +1000,108 @@ function _blStrokeOptionsAssignWeak(self: Pointer; const other: Pointer): Intege
 function _blPathStrokeToSink(const self: Pointer; const range: Pointer; const strokeOptions: Pointer; const approximationOptions: Pointer; a: Pointer; b: Pointer; c: Pointer; sink: _BLPathStrokeSinkFunc; userData: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blPathStrokeToSink';
 {$ENDREGION 'path.h'}
+
+{$REGION 'string.h'}
+function _blStringInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInit';
+
+function _blStringInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInitMove';
+
+function _blStringInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInitWeak';
+
+function _blStringInitWithData(self: Pointer; const str: PUTF8Char; size: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInitWithData';
+
+function _blStringDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringDestroy';
+
+function _blStringReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringReset';
+
+function _blStringGetData(const self: Pointer): PUTF8Char; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringGetData';
+
+function _blStringGetSize(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringGetSize';
+
+function _blStringGetCapacity(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringGetCapacity';
+
+function _blStringClear(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringClear';
+
+function _blStringShrink(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringShrink';
+
+function _blStringReserve(self: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringReserve';
+
+function _blStringResize(self: Pointer; n: Size_T; fill: UTF8Char): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringResize';
+
+function _blStringMakeMutable(self: Pointer; dataOut: PPUTF8Char): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringMakeMutable';
+
+function _blStringModifyOp(self: Pointer; op: Integer; n: Size_T; dataOut: PPUTF8Char): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringModifyOp';
+
+function _blStringInsertOp(self: Pointer; index: Size_T; n: Size_T; dataOut: PPUTF8Char): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertOp';
+
+function _blStringAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignMove';
+
+function _blStringAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignWeak';
+
+function _blStringAssignDeep(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignDeep';
+
+function _blStringAssignData(self: Pointer; const str: PUTF8Char; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringAssignData';
+
+function _blStringApplyOpChar(self: Pointer; op: Integer; c: UTF8Char; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpChar';
+
+function _blStringApplyOpData(self: Pointer; op: Integer; const str: PUTF8Char; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpData';
+
+function _blStringApplyOpString(self: Pointer; op: Integer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpString';
+
+function _blStringApplyOpFormat(self: Pointer; op: Integer; const fmt: PUTF8Char): Integer varargs; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpFormat';
+
+function _blStringApplyOpFormatV(self: Pointer; op: Integer; const fmt: PUTF8Char; ap: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringApplyOpFormatV';
+
+function _blStringInsertChar(self: Pointer; index: Size_T; c: UTF8Char; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertChar';
+
+function _blStringInsertData(self: Pointer; index: Size_T; const str: PUTF8Char; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertData';
+
+function _blStringInsertString(self: Pointer; index: Size_T; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringInsertString';
+
+function _blStringRemoveIndex(self: Pointer; index: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringRemoveIndex';
+
+function _blStringRemoveRange(self: Pointer; rStart: Size_T; rEnd: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringRemoveRange';
+
+function _blStringEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringEquals';
+
+function _blStringEqualsData(const self: Pointer; const str: PUTF8Char; n: Size_T): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringEqualsData';
+
+function _blStringCompare(const a: Pointer; const b: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringCompare';
+
+function _blStringCompareData(const self: Pointer; const str: PUTF8Char; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blStringCompareData';
+{$ENDREGION 'string.h'}
 
