@@ -3,6 +3,9 @@ unit Blend2D;
 
   Follows the C++ API where possible. The following C++ classes are not
   converted because Delphi provides built-in alternatives for these:
+  * TBLBitSet: will be deprecated according to https://blend2d.com/doc/group__bl__containers.html
+
+
   * BLArray<T>: uses TArray<T> instead
   * BLFile: uses TFileStream instead
   * BLString: uses String instead
@@ -1957,23 +1960,553 @@ type
     /// </remarks>
     property Chars[const AIndex: NativeInt]: UTF8Char read GetChar; default;
   end;
+
+{ ============================================================================
+   [Containers - Bit Containers]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  BitArray container.
+  /// </summary>
+  TBLBitArray = record
+  {$REGION 'Internal Declarations'}
+  private
+    FBase: TBLObjectCore;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: Integer; inline;
+    function GetWordCount: Integer; inline;
+    function GetCapacity: Integer; inline;
+    function GetCardinality: Integer; inline;
+    function GetData: PUInt32; inline;
+    function GetBit(const AIndex: Integer): Boolean; inline;
+    procedure SetBit(const AIndex: Integer; const AValue: Boolean); overload; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates an empty bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLBitArray);
+
+    /// <summary>
+    ///  Destroys the bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLBitArray);
+
+    /// <summary>
+    ///  Copy constructor.
+    ///
+    ///  Performs weak copy of the data held by the `ASrc` bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLBitArray; const [ref] ASrc: TBLBitArray); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty bit array).
+    /// </summary>
+    class operator Equal(const ALeft: TBLBitArray; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two bit arrays are equal (have the same contents).
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLBitArray): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty bit array).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLBitArray; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two bit arrays are not equal (do not have the same contents).
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLBitArray): Boolean; inline; static;
+
+    class operator LessThan(const ALeft, ARight: TBLBitArray): Boolean; inline; static;
+    class operator LessThanOrEqual(const ALeft, ARight: TBLBitArray): Boolean; inline; static;
+    class operator GreaterThan(const ALeft, ARight: TBLBitArray): Boolean; inline; static;
+    class operator GreaterThanOrEqual(const ALeft, ARight: TBLBitArray): Boolean; inline; static;
+
+    /// <summary>
+    ///  Clears the content of the bit array and releases its data.
+    ///
+    ///  After reset the bit array content matches a default constructed instance.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Swaps the content of this bit array with the `AOther` bit array.
+    /// </summary>
+    procedure Swap(var AOther: TBLBitArray); inline;
+
+    /// <summary>
+    ///  Returns whether this bit array and `AOther` are bitwise equal.
+    /// </summary>
+    function Equals(const AOther: TBLBitArray): Boolean; inline;
+
+    /// <summary>
+    ///  Compares this bit array with `AOther` and returns either `-1`, `0`,
+    ///  or `1`.
+    /// </summary>
+    function Compare(const AOther: TBLBitArray): Integer; inline;
+
+    /// <summary>
+    ///  Returns the number of bits set in the given `[AStartBit, AEndBit)` range.
+    /// </summary>
+    function CardinalityInRange(const AStartBit, AEndBit: Integer): Integer; inline;
+
+    /// <summary>
+    ///  Returns a bit-value at the given `ABitIndex`.
+    /// </summary>
+    function HasBit(const ABitIndex: Integer): Boolean; inline;
+
+    /// <summary>
+    ///  Sets a bit to True at the given `ABitIndex`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetBit(const ABitIndex: Integer); overload; inline;
+
+    /// <summary>
+    ///  Sets a bit to False at the given `ABitIndex`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ClearBit(const ABitIndex: Integer); overload; inline;
+
+    /// <summary>
+    ///  Replaces a bit in the bit array at the given `ABitIndex` to match
+    ///  `ABitValue`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ReplaceBit(const ABitIndex: Integer; const ABitValue: Boolean); inline;
+
+    /// <summary>
+    ///  Returns whether the bit-set has at least on bit in the given
+    ///  `[AStartBit, AEndbit)` range.
+    /// </summary>
+    function HasBitsInRange(const AStartBit, AEndBit: Integer): Boolean; inline;
+
+    /// <summary>
+    ///  Returns whether this bit array subsumes `AOther`.
+    /// </summary>
+    function Subsumes(const AOther: TBLBitArray): Boolean; inline;
+
+    /// <summary>
+    ///  Returns whether this bit array intersects with `AOther`.
+    /// </summary>
+    function Intersects(const AOther: TBLBitArray): Boolean; inline;
+
+    /// <summary>
+    ///  Replaces the content of the bit array by bits specified by `AWordData`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignWords(const AWordData: TArray<UInt32>); overload; inline;
+
+    /// <summary>
+    ///  Replaces the content of the bit array by bits specified by `AWordData`
+    ///  of size `AWordCount` [the size is in UInt32 units].
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignWords(const AWordData: PUInt32; const AWordCount: Integer); overload; inline;
+
+    /// <summary>
+    ///  Clears the content of the bit array without releasing its dynamically
+    ///  allocated data, if possible.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Clear; inline;
+
+    /// <summary>
+    ///  Resizes the bit array so its size matches `ANumBits`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Resize(const ANumBits: Integer); inline;
+
+    /// <summary>
+    ///  Reserves `ANumBits` in the bit array (capacity would match `ANumBits`)
+    ///  without changing its size.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reserve(const ANumBits: Integer); inline;
+
+    /// <summary>
+    ///  Shrinks the capacity of the bit array to match the actual content with
+    ///  the intention to save memory.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Shrink; inline;
+
+    /// <summary>
+    ///  Fills bits in `[AStartBit, AEndBit)` range to True.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRange(const AStartBit, AEndBit: Integer); inline;
+
+    /// <summary>
+    ///  Fills bits starting from `ABitIndex` specified by `AWordData` to True
+    ///  (zeros in AWordData are ignored).
+    /// </summary>
+    /// <remarks>
+    ///  This operation uses an `OR` operator - bits in `AWordData` are combined
+    ///  with OR operator with existing bits in bit array.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillWords(const ABitIndex: Integer; const AWordData: TArray<UInt32>); overload; inline;
+
+    /// <summary>
+    ///  Fills bits starting from `ABitIndex` specified by `AWordData` and
+    ///  `AWordCount` to True (zeros in AWordData are ignored).
+    /// </summary>
+    /// <remarks>
+    ///  This operation uses an `OR` operator - bits in `AWordData` are combined
+    ///  with OR operator with existing bits in bit array.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillWords(const ABitIndex: Integer; const AWordData: PUInt32;
+      const AWordCount: UInt32); overload; inline;
+
+    /// <summary>
+    ///  Sets bits in `[AStartBit, EndBit)` range to False.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ClearRange(const AStartBit, AEndBit: Integer); inline;
+
+    /// <summary>
+    ///  Sets bits starting from `ABitIndex` specified by `AWordValue` to False
+    ///  (zeros in ASordValue are ignored).
+    /// </summary>
+    /// <remarks>
+    ///  This operation uses an `AND_NOT` operator - bits in `AWordData` are
+    ///  negated and then combined with AND operator with existing bits in
+    ///  bit array.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ClearWord(const ABitIndex: Integer; const AWordValue: UInt32); inline;
+
+    /// <summary>
+    ///  Sets bits starting from `ABitIndex` specified by `AWordData` to False
+    ///  (zeros in AWordData are ignored).
+    /// </summary>
+    /// <remarks>
+    ///  This operation uses an `AND_NOT` operator - bits in `AWordData` are
+    ///  negated and then combined with AND operator with existing bits in
+    ///  bit array.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ClearWords(const ABitIndex: Integer; const AWordData: TArray<UInt32>); overload; inline;
+
+    /// <summary>
+    ///  Sets bits starting from `ABitIndex` specified by `AWordData` and
+    ///  `AWordCount` to False (zeros in AWordData are ignored).
+    /// </summary>
+    /// <remarks>
+    ///  This operation uses an `AND_NOT` operator - bits in `AWordData` are
+    ///  negated and then combined with AND operator with existing bits in
+    ///  bit array.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ClearWords(const ABitIndex: Integer; const AWordData: PUInt32;
+      const AWordCount: UInt32); overload; inline;
+
+    /// <summary>
+    ///  Makes the bit array mutable with the intention to replace all bits of it.
+    /// </summary>
+    /// <remarks>
+    ///  All bits in the bit array will be set to zero.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ReplaceOp(const ANumBits: Integer): PUInt32; inline;
+
+    /// <summary>
+    ///  Replaces bits starting from `ABitIndex` to match the bits specified by
+    ///  `AWordValue`.
+    /// </summary>
+    /// <remarks>
+    ///  Replaced bits from bit array are not combined by using any operator,
+    ///  `AWordValue` is copied as is, thus replaces fully the existing bits.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ReplaceWord(const ABitIndex: Integer; const AWordValue: UInt32); inline;
+
+    /// <summary>
+    ///  Replaces bits starting from `ABitIndex` to match the bits specified by
+    ///  `AWordData`.
+    /// </summary>
+    /// <remarks>
+    ///  Replaced bits from bit array are not combined by using any operator,
+    ///  `AWordData` is copied as is, thus replaces fully the existing bits.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ReplaceWords(const ABitIndex: Integer; const AWordData: TArray<UInt32>); overload; inline;
+
+    /// <summary>
+    ///  Replaces bits starting from `ABitIndex` to match the bits specified by
+    ///  `AWordData` and `AWordCount`.
+    /// </summary>
+    /// <remarks>
+    ///  Replaced bits from bit array are not combined by using any operator,
+    ///  `AWordData` is copied as is, thus replaces fully the existing bits.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ReplaceWords(const ABitIndex: Integer; const AWordData: PUInt32;
+      const AWordCount: UInt32); overload; inline;
+
+    /// <summary>
+    ///  Appends a bit `ABitValue` to the bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AppendBit(const ABitValue: Boolean); inline;
+
+    /// <summary>
+    ///  Appends a single word `AWordValue` to the bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AppendWord(const AWordValue: UInt32); inline;
+
+    /// <summary>
+    ///  Appends whole words to the bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AppendWords(const AWordData: TArray<UInt32>); overload; inline;
+
+    /// <summary>
+    ///  Appends whole words to the bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AppendWords(const AWordData: PUInt32; const AWordCount: Integer); overload; inline;
+
+    /// <summary>
+    ///  Whether the bit array is empty (has no content).
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  The size of the bit array in bits.
+    /// </summary>
+    property Size: Integer read GetSize;
+
+    /// <summary>
+    ///  The bits in the bit array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Bits[const AIndex: Integer]: Boolean read GetBit write SetBit; default;
+
+    /// <summary>
+    ///  The number of bit words this bit array uses.
+    /// </summary>
+    property WordCount: Integer read GetWordCount;
+
+    /// <summary>
+    ///  The capacity of the bit array in bits.
+    /// </summary>
+    property Capacity: Integer read GetCapacity;
+
+    /// <summary>
+    ///  The number of bits set in the bit array.
+    /// </summary>
+    property Cardinality: Integer read GetCardinality;
+
+    /// <summary>
+    ///  The bit data.
+    /// </summary>
+    property Data: PUInt32 read GetData;
+  end;
+
 {$ENDREGION 'Containers'}
 
 {$REGION 'Geometries'}
 
 { ============================================================================
-   [Geometries - Lightweight Geometries and Structs]
+   [Geometries - Geometry Enums]
   ============================================================================ }
 
 type
   /// <summary>
-  ///  Size specified as [W, H] using `Integer` as a storage type.
+  ///  Direction of a geometry used by geometric primitives and paths.
   /// </summary>
-  TBLSizeI = record
-  public
-    W: Integer;
-    H: Integer;
-  end;
+  TBLGeometryDirection = (
+    /// <summary>
+    ///  No direction specified.
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///  Clockwise direction.
+    /// </summary>
+    CW,
+
+    /// <summary>
+    ///  Counter-clockwise direction.
+    /// </summary>
+    CCW);
+
+type
+  /// <summary>
+  ///  Geometry type.
+  ///
+  ///  Geometry describes a shape or path that can be either rendered or added
+  ///  to `TBLPath` container. Both `TBLPath` and `TBLContext` provide
+  ///  functionality to work with all geometry types. Please note that each type
+  ///  provided here requires to pass a matching record to the function that
+  ///  consumes `AGeometryType` and `AGeometryData` arguments.
+  /// </summary>
+  /// <seealso cref="TBLPath"/>
+  /// <seealso cref="TBLContext"/>
+  TBLGeometryType = (
+    /// <summary>
+    ///  No geometry provided.
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///  TBLBoxI record.
+    /// </summary>
+    BoxI,
+
+    /// <summary>
+    ///  TBLBox record.
+    /// </summary>
+    BoxD,
+
+    /// <summary>
+    ///  TBLRectI record.
+    /// </summary>
+    RectI,
+
+    /// <summary>
+    ///  TBLRect record.
+    /// </summary>
+    RectD,
+
+    /// <summary>
+    ///  TBLCircle record.
+    /// </summary>
+    Circle,
+
+    /// <summary>
+    ///  TBLEllipse record.
+    /// </summary>
+    Ellipse,
+
+    /// <summary>
+    ///  TBLRoundRect record.
+    /// </summary>
+    RoundRect,
+
+    /// <summary>
+    ///  TBLArc record.
+    /// </summary>
+    Arc,
+
+    /// <summary>
+    ///  TBLArc record representing chord.
+    /// </summary>
+    Chord,
+
+    /// <summary>
+    ///  TBLArc record representing pie.
+    /// </summary>
+    Pie,
+
+    /// <summary>
+    ///  TBLLine record.
+    /// </summary>
+    Line,
+
+    /// <summary>
+    ///  TBLTriangle record.
+    /// </summary>
+    Triangle,
+
+    /// <summary>
+    ///  TBLArrayView<TBLPointI> representing a polyline.
+    /// </summary>
+    PolylineI,
+
+    /// <summary>
+    ///  TBLArrayView<TBLPoint> representing a polyline.
+    /// </summary>
+    PolylineD,
+
+    /// <summary>
+    ///  TBLArrayView<BLPointI> representing a polygon.
+    /// </summary>
+    PolygonI,
+
+    /// <summary>
+    ///  TBLArrayView<BLPoint> representing a polygon.
+    /// </summary>
+    PolygonD,
+
+    /// <summary>
+    ///  TBLArrayView<BLBoxI> record.
+    /// </summary>
+    ArrayViewBoxI,
+
+    /// <summary>
+    ///  TBLArrayView<BLBox> record.
+    /// </summary>
+    ArrayViewBoxD,
+
+    /// <summary>
+    ///  TBLArrayView<BLRectI> record.
+    /// </summary>
+    ArrayViewRectI,
+
+    /// <summary>
+    ///  TBLArrayView<BLRect> record.
+    /// </summary>
+    ArrayViewRectD,
+
+    /// <summary>
+    ///  TBLPath.
+    /// </summary>
+    Path);
+
+type
+  /// <summary>
+  ///  Fill rule.
+  /// </summary>
+  TBLFillRule = (
+    /// <summary>
+    ///  Non-zero fill-rule.
+    /// </summary>
+    NonZero,
+
+    /// <summary>
+    ///  Even-odd fill-rule.
+    /// </summary>
+    EvenOdd);
+
+type
+  /// <summary>
+  ///  Hit-test result.
+  /// </summary>
+  TBLHitTest = (
+    /// <summary>
+    ///  Fully in.
+    /// </summary>
+    FullyIn,
+
+    /// <summary>
+    ///  Partially in/out.
+    /// </summary>
+    Partial,
+
+    /// <summary>
+    ///  Fully out.
+    /// </summary>
+    FullyOut,
+
+    /// <summary>
+    ///  Hit test failed (invalid argument, NaNs, etc).
+    /// </summary>
+    Invalid = $FFFFFFFF);
+
+{ ============================================================================
+   [Geometries - Lightweight Geometries and Structs]
+  ============================================================================ }
 
 type
   /// <summary>
@@ -1983,7 +2516,32 @@ type
   public
     X: Double;
     Y: Double;
+  public
+    constructor Create(const AX, AY: Double);
+
+    class operator Equal(const ALeft, ARight: TBLPoint): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLPoint): Boolean; inline; static;
+    class operator Negative(const AValue: TBLPoint): TBLPoint; inline; static;
+    class operator Add(const ALeft: TBLPoint; const ARight: Double): TBLPoint; inline; static;
+    class operator Subtract(const ALeft: TBLPoint; const ARight: Double): TBLPoint; inline; static;
+    class operator Multiply(const ALeft: TBLPoint; const ARight: Double): TBLPoint; inline; static;
+    class operator Divide(const ALeft: TBLPoint; const ARight: Double): TBLPoint; inline; static;
+    class operator Add(const ALeft: Double; const ARight: TBLPoint): TBLPoint; inline; static;
+    class operator Subtract(const ALeft: Double; const ARight: TBLPoint): TBLPoint; inline; static;
+    class operator Multiply(const ALeft: Double; const ARight: TBLPoint): TBLPoint; inline; static;
+    class operator Divide(const ALeft: Double; const ARight: TBLPoint): TBLPoint; inline; static;
+    class operator Add(const ALeft, ARight: TBLPoint): TBLPoint; inline; static;
+    class operator Subtract(const ALeft, ARight: TBLPoint): TBLPoint; inline; static;
+    class operator Multiply(const ALeft, ARight: TBLPoint): TBLPoint; inline; static;
+    class operator Divide(const ALeft, ARight: TBLPoint): TBLPoint; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX, AY: Double); overload; inline;
+    procedure Reset(const AOther: TBLPoint); overload; inline;
+
+    function Equals(const AOther: TBLPoint): Boolean; inline;
   end;
+  PBLPoint = ^TBLPoint;
 
 type
   /// <summary>
@@ -1994,9 +2552,1327 @@ type
     Empty: TBLPoint = (X: 0; Y: 0);
   end;
 
+function BLPoint(const AX, AY: Double): TBLPoint; inline;
+function BLAbs(const AValue: TBLPoint): TBLPoint; overload; inline;
+function BLMin(const AA, AB: TBLPoint): TBLPoint; overload; inline;
+function BLMin(const AA: TBLPoint; const AB: Double): TBLPoint; overload; inline;
+function BLMin(const AA: Double; const AB: TBLPoint): TBLPoint; overload; inline;
+function BLMax(const AA, AB: TBLPoint): TBLPoint; overload; inline;
+function BLMax(const AA: TBLPoint; const AB: Double): TBLPoint; overload; inline;
+function BLMax(const AA: Double; const AB: TBLPoint): TBLPoint; overload; inline;
+function BLClamp(const AA: TBLPoint; const AB, AC: Double): TBLPoint; inline;
+
+type
+  /// <summary>
+  ///  Point specified as [X, Y] using `Integer` as a storage type.
+  /// </summary>
+  TBLPointI = record
+  public
+    X: Integer;
+    Y: Integer;
+  public
+    constructor Create(const AX, AY: Integer);
+
+    class operator Equal(const ALeft, ARight: TBLPointI): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLPointI): Boolean; inline; static;
+    class operator Negative(const AValue: TBLPointI): TBLPointI; inline; static;
+    class operator Add(const ALeft: TBLPointI; const ARight: Integer): TBLPointI; inline; static;
+    class operator Subtract(const ALeft: TBLPointI; const ARight: Integer): TBLPointI; inline; static;
+    class operator Multiply(const ALeft: TBLPointI; const ARight: Integer): TBLPointI; inline; static;
+    class operator Add(const ALeft: Integer; const ARight: TBLPointI): TBLPointI; inline; static;
+    class operator Subtract(const ALeft: Integer; const ARight: TBLPointI): TBLPointI; inline; static;
+    class operator Multiply(const ALeft: Integer; const ARight: TBLPointI): TBLPointI; inline; static;
+    class operator Add(const ALeft, ARight: TBLPointI): TBLPointI; inline; static;
+    class operator Subtract(const ALeft, ARight: TBLPointI): TBLPointI; inline; static;
+    class operator Multiply(const ALeft, ARight: TBLPointI): TBLPointI; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX, AY: Integer); overload; inline;
+    procedure Reset(const AOther: TBLPointI); overload; inline;
+
+    function Equals(const AOther: TBLPointI): Boolean; inline;
+  end;
+  PBLPointI = ^TBLPointI;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLPointI
+  /// </summary>
+  _TBLPointIHelper = record helper for TBLPointI
+  public const
+    Empty: TBLPointI = (X: 0; Y: 0);
+  end;
+
+function BLPointI(const AX, AY: Integer): TBLPointI; inline;
+
+type
+  /// <summary>
+  ///  Size specified as [W, H] using `Double` as a storage type.
+  /// </summary>
+  TBLSize = record
+  public
+    W: Double;
+    H: Double;
+  public
+    constructor Create(const AW, AH: Double);
+
+    class operator Equal(const ALeft, ARight: TBLSize): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLSize): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AW, AH: Double); overload; inline;
+    procedure Reset(const AOther: TBLSize); overload; inline;
+
+    function Equals(const AOther: TBLSize): Boolean; inline;
+  end;
+  PBLSize = ^TBLSize;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLSize
+  /// </summary>
+  _TBLSizeHelper = record helper for TBLSize
+  public const
+    Empty: TBLSize = (W: 0; H: 0);
+  end;
+
+function BLSize(const AW, AH: Double): TBLSize; inline;
+function BLAbs(const AValue: TBLSize): TBLSize; overload; inline;
+function BLMin(const AA, AB: TBLSize): TBLSize; overload; inline;
+function BLMax(const AA, AB: TBLSize): TBLSize; overload; inline;
+
+type
+  /// <summary>
+  ///  Size specified as [W, H] using `Integer` as a storage type.
+  /// </summary>
+  TBLSizeI = record
+  public
+    W: Integer;
+    H: Integer;
+  public
+    constructor Create(const AW, AH: Integer);
+
+    class operator Equal(const ALeft, ARight: TBLSizeI): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLSizeI): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AW, AH: Integer); overload; inline;
+    procedure Reset(const AOther: TBLSizeI); overload; inline;
+
+    function Equals(const AOther: TBLSizeI): Boolean; inline;
+  end;
+  PBLSizeI = ^TBLSizeI;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLSizeI
+  /// </summary>
+  _TBLSizeIHelper = record helper for TBLSizeI
+  public const
+    Empty: TBLSizeI = (W: 0; H: 0);
+  end;
+
+function BLSizeI(const AW, AH: Integer): TBLSizeI; inline;
+
+type
+  /// <summary>
+  ///  Box specified as [X0, Y0, X1, Y1] using `Double` as a storage type.
+  /// </summary>
+  TBLBox = record
+  public
+    X0: Double;
+    Y0: Double;
+    X1: Double;
+    Y1: Double;
+  public
+    constructor Create(const AX0, AY0, AX1, AY1: Double);
+
+    class operator Equal(const ALeft, ARight: TBLBox): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLBox): Boolean; inline; static;
+    class operator Add(const ALeft: TBLBox; const ARight: Double): TBLBox; inline; static;
+    class operator Subtract(const ALeft: TBLBox; const ARight: Double): TBLBox; inline; static;
+    class operator Multiply(const ALeft: TBLBox; const ARight: Double): TBLBox; inline; static;
+    class operator Divide(const ALeft: TBLBox; const ARight: Double): TBLBox; inline; static;
+    class operator Add(const ALeft: Double; const ARight: TBLBox): TBLBox; inline; static;
+    class operator Subtract(const ALeft: Double; const ARight: TBLBox): TBLBox; inline; static;
+    class operator Multiply(const ALeft: Double; const ARight: TBLBox): TBLBox; inline; static;
+    class operator Divide(const ALeft: Double; const ARight: TBLBox): TBLBox; inline; static;
+    class operator Add(const ALeft: TBLBox; const ARight: TBLPoint): TBLBox; inline; static;
+    class operator Subtract(const ALeft: TBLBox; const ARight: TBLPoint): TBLBox; inline; static;
+    class operator Multiply(const ALeft: TBLBox; const ARight: TBLPoint): TBLBox; inline; static;
+    class operator Divide(const ALeft: TBLBox; const ARight: TBLPoint): TBLBox; inline; static;
+    class operator Add(const ALeft: TBLPoint; const ARight: TBLBox): TBLBox; inline; static;
+    class operator Subtract(const ALeft: TBLPoint; const ARight: TBLBox): TBLBox; inline; static;
+    class operator Multiply(const ALeft: TBLPoint; const ARight: TBLBox): TBLBox; inline; static;
+    class operator Divide(const ALeft: TBLPoint; const ARight: TBLBox): TBLBox; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1: Double); overload; inline;
+    procedure Reset(const AOther: TBLBox); overload; inline;
+
+    function Equals(const AOther: TBLBox): Boolean; inline;
+    function Contains(const AX, AY: Double): Boolean; overload; inline;
+    function Contains(const APoint: TBLPoint): Boolean; overload; inline;
+  end;
+  PBLBox = ^TBLBox;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLBox
+  /// </summary>
+  _TBLBoxHelper = record helper for TBLBox
+  public const
+    Empty: TBLBox = (X0: 0; Y0: 0; X1: 0; Y1: 0);
+  end;
+
+function BLBox(const AX0, AY0, AX1, AY1: Double): TBLBox; inline;
+
+type
+  /// <summary>
+  ///  Box specified as [X0, Y0, X1, Y1] using `Integer` as a storage type.
+  /// </summary>
+  TBLBoxI = record
+  public
+    X0: Integer;
+    Y0: Integer;
+    X1: Integer;
+    Y1: Integer;
+  public
+    constructor Create(const AX0, AY0, AX1, AY1: Integer);
+
+    class operator Equal(const ALeft, ARight: TBLBoxI): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLBoxI): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1: Integer); overload; inline;
+    procedure Reset(const AOther: TBLBoxI); overload; inline;
+
+    function Equals(const AOther: TBLBoxI): Boolean; inline;
+    function Contains(const AX, AY: Integer): Boolean; overload; inline;
+    function Contains(const APoint: TBLPointI): Boolean; overload; inline;
+  end;
+  PBLBoxI = ^TBLBoxI;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLBoxI
+  /// </summary>
+  _TBLBoxIHelper = record helper for TBLBoxI
+  public const
+    Empty: TBLBoxI = (X0: 0; Y0: 0; X1: 0; Y1: 0);
+  end;
+
+function BLBoxI(const AX0, AY0, AX1, AY1: Integer): TBLBoxI; inline;
+
+type
+  /// <summary>
+  ///  Rectangle specified as [X, Y, W, H] using `Double` as a storage type.
+  /// </summary>
+  TBLRect = record
+  public
+    X: Double;
+    Y: Double;
+    W: Double;
+    H: Double;
+  public
+    constructor Create(const AX, AY, AW, AH: Double);
+
+    class operator Equal(const ALeft, ARight: TBLRect): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRect): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX, AY, AW, AH: Double); overload; inline;
+    procedure Reset(const AOther: TBLRect); overload; inline;
+
+    function Equals(const AOther: TBLRect): Boolean; inline;
+  end;
+  PBLRect = ^TBLRect;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLRect
+  /// </summary>
+  _TBLRectHelper = record helper for TBLRect
+  public const
+    Empty: TBLRect = (X: 0; Y: 0; W: 0; H: 0);
+  end;
+
+function BLRect(const AX, AY, AW, AH: Double): TBLRect; inline;
+
+type
+  /// <summary>
+  ///  Rectangle specified as [X, Y, W, H] using `Integer` as a storage type.
+  /// </summary>
+  TBLRectI = record
+  public
+    X: Integer;
+    Y: Integer;
+    W: Integer;
+    H: Integer;
+  public
+    constructor Create(const AX, AY, AW, AH: Integer);
+
+    class operator Equal(const ALeft, ARight: TBLRectI): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRectI): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX, AY, AW, AH: Integer); overload; inline;
+    procedure Reset(const AOther: TBLRectI); overload; inline;
+
+    function Equals(const AOther: TBLRectI): Boolean; inline;
+  end;
+  PBLRectI = ^TBLRectI;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLRectI
+  /// </summary>
+  _TBLRectIHelper = record helper for TBLRectI
+  public const
+    Empty: TBLRectI = (X: 0; Y: 0; W: 0; H: 0);
+  end;
+
+function BLRectI(const AX, AY, AW, AH: Integer): TBLRectI; inline;
+
+type
+  /// <summary>
+  ///  Rounded rectangle specified as [X, Y, W, H, RX, RY] using `Double` as a
+  ///  storage type.
+  /// </summary>
+  TBLRoundRect = record
+  public
+    X: Double;
+    Y: Double;
+    W: Double;
+    H: Double;
+    RX: Double;
+    RY: Double;
+  public
+    constructor Create(const ARect: TBLRect; const AR: Double); overload;
+    constructor Create(const ARect: TBLRect; const ARX, ARY: Double); overload;
+    constructor Create(const AX, AY, AW, AH, AR: Double); overload;
+    constructor Create(const AX, AY, AW, AH, ARX, ARY: Double); overload;
+
+    class operator Equal(const ALeft, ARight: TBLRoundRect): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRoundRect): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const ARect: TBLRect; const AR: Double); overload; inline;
+    procedure Reset(const ARect: TBLRect; const ARX, ARY: Double); overload; inline;
+    procedure Reset(const AX, AY, AW, AH, AR: Double); overload; inline;
+    procedure Reset(const AX, AY, AW, AH, ARX, ARY: Double); overload; inline;
+    procedure Reset(const AOther: TBLRoundRect); overload; inline;
+
+    function Equals(const AOther: TBLRoundRect): Boolean; inline;
+  end;
+  PBLRoundRect = ^TBLRoundRect;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLRoundRect
+  /// </summary>
+  _TBLRoundRectHelper = record helper for TBLRoundRect
+  public const
+    Empty: TBLRoundRect = (X: 0; Y: 0; W: 0; H: 0; RX: 0; RY: 0);
+  end;
+
+function BLRoundRect(const ARect: TBLRect; const AR: Double): TBLRoundRect; overload; inline;
+function BLRoundRect(const ARect: TBLRect; const ARX, ARY: Double): TBLRoundRect; overload; inline;
+function BLRoundRect(const AX, AY, AW, AH, AR: Double): TBLRoundRect; overload; inline;
+function BLRoundRect(const AX, AY, AW, AH, ARX, ARY: Double): TBLRoundRect; overload; inline;
+
+type
+  /// <summary>
+  ///  Circle specified as [CX, CY, R] using `Double` as a storage type.
+  /// </summary>
+  TBLCircle = record
+  public
+    CX: Double;
+    CY: Double;
+    R: Double;
+  public
+    constructor Create(const ACX, ACY, AR: Double);
+
+    class operator Equal(const ALeft, ARight: TBLCircle): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLCircle): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const ACX, ACY, AR: Double); overload; inline;
+    procedure Reset(const AOther: TBLCircle); overload; inline;
+
+    function Equals(const AOther: TBLCircle): Boolean; inline;
+  end;
+  PBLCircle = ^TBLCircle;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLCircle
+  /// </summary>
+  _TBLCircleHelper = record helper for TBLCircle
+  public const
+    Empty: TBLCircle = (CX: 0; CY: 0; R: 0);
+  end;
+
+function BLCircle(const ACX, ACY, AR: Double): TBLCircle; inline;
+
+type
+  /// <summary>
+  ///  Ellipse specified as [CX, CY, RX, RY] using `Double` as a storage type.
+  /// </summary>
+  TBLEllipse = record
+  public
+    CX: Double;
+    CY: Double;
+    RX: Double;
+    RY: Double;
+  public
+    constructor Create(const ACX, ACY, AR: Double); overload;
+    constructor Create(const ACX, ACY, ARX, ARY: Double); overload;
+
+    class operator Equal(const ALeft, ARight: TBLEllipse): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLEllipse): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const ACX, ACY, AR: Double); overload; inline;
+    procedure Reset(const ACX, ACY, ARX, ARY: Double); overload; inline;
+    procedure Reset(const AOther: TBLEllipse); overload; inline;
+
+    function Equals(const AOther: TBLEllipse): Boolean; inline;
+  end;
+  PBLEllipse = ^TBLEllipse;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLEllipse
+  /// </summary>
+  _TBLEllipseHelper = record helper for TBLEllipse
+  public const
+    Empty: TBLEllipse = (CX: 0; CY: 0; RX: 0; RY: 0);
+  end;
+
+function BLEllipse(const ACX, ACY, AR: Double): TBLEllipse; overload; inline;
+function BLEllipse(const ACX, ACY, ARX, ARY: Double): TBLEllipse; overload; inline;
+
+type
+  /// <summary>
+  ///  Arc specified as [CX, CY, RX, RY, Start, Sweep] using `Double` as a
+  ///  storage type.
+  /// </summary>
+  TBLArc = record
+  public
+    CX: Double;
+    CY: Double;
+    RX: Double;
+    RY: Double;
+    Start: Double;
+    Sweep: Double;
+  public
+    constructor Create(const ACX, ACY, ARX, ARY, AStart, ASweep: Double);
+
+    class operator Equal(const ALeft, ARight: TBLArc): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLArc): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const ACX, ACY, ARX, ARY, AStart, ASweep: Double); overload; inline;
+    procedure Reset(const AOther: TBLArc); overload; inline;
+
+    function Equals(const AOther: TBLArc): Boolean; inline;
+  end;
+  PBLArc = ^TBLArc;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLArc
+  /// </summary>
+  _TBLArcHelper = record helper for TBLArc
+  public const
+    Empty: TBLArc = (CX: 0; CY: 0; RX: 0; RY: 0; Start: 0; Sweep: 0);
+  end;
+
+function BLArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double): TBLArc; inline;
+
+type
+  /// <summary>
+  ///  Line specified as [X0, Y0, X1, Y1] using `Double` as a storage type.
+  /// </summary>
+  TBLLine = record
+  public
+    X0: Double;
+    Y0: Double;
+    X1: Double;
+    Y1: Double;
+  public
+    constructor Create(const AX0, AY0, AX1, AY1: Double);
+
+    class operator Equal(const ALeft, ARight: TBLLine): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLLine): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1: Double); overload; inline;
+    procedure Reset(const AOther: TBLLine); overload; inline;
+
+    function Equals(const AOther: TBLLine): Boolean; inline;
+  end;
+  PBLLine = ^TBLLine;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLLine
+  /// </summary>
+  _TBLLineHelper = record helper for TBLLine
+  public const
+    Empty: TBLLine = (X0: 0; Y0: 0; X1: 0; Y1: 0);
+  end;
+
+function BLLine(const AX0, AY0, AX1, AY1: Double): TBLLine; inline;
+
+type
+  /// <summary>
+  ///  Triangle data specified as [X0, Y0, X1, Y1, X2, Y2] using `Double` as a
+  ///  storage type.
+  /// </summary>
+  TBLTriangle = record
+  public
+    X0: Double;
+    Y0: Double;
+    X1: Double;
+    Y1: Double;
+    X2: Double;
+    Y2: Double;
+  public
+    constructor Create(const AX0, AY0, AX1, AY1, AX2, AY2: Double);
+
+    class operator Equal(const ALeft, ARight: TBLTriangle): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLTriangle): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1, AX2, AY2: Double); overload; inline;
+    procedure Reset(const AOther: TBLTriangle); overload; inline;
+
+    function Equals(const AOther: TBLTriangle): Boolean; inline;
+  end;
+  PBLTriangle = ^TBLTriangle;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLTriangle
+  /// </summary>
+  _TBLTriangleHelper = record helper for TBLTriangle
+  public const
+    Empty: TBLTriangle = (X0: 0; Y0: 0; X1: 0; Y1: 0; X2: 0; Y2: 0);
+  end;
+
+function BLTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double): TBLTriangle; inline;
+
+{ ============================================================================
+   [Geometries - Transformations]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Transformation matrix operation type.
+  /// </summary>
+  TBLTransformOp = (
+    /// <summary>
+    ///  Reset matrix to identity (argument ignored, should be nil).
+    /// </summary>
+    Reset,
+
+    /// <summary>
+    ///  Assign (copy) the other matrix.
+    /// </summary>
+    Assign,
+
+    /// <summary>
+    ///  Translate the matrix by [X, Y].
+    /// </summary>
+    Translate,
+
+    /// <summary>
+    ///  Scale the matrix by [X, Y].
+    /// </summary>
+    Scale,
+
+    /// <summary>
+    ///  Skew the matrix by [X, Y].
+    /// </summary>
+    Skew,
+
+    /// <summary>
+    ///  Rotate the matrix by the given angle about [0, 0].
+    /// </summary>
+    Rotate,
+
+    /// <summary>
+    ///  Rotate the matrix by the given angle about [X, Y].
+    /// </summary>
+    RotatePoint,
+
+    /// <summary>
+    ///  Transform this matrix by other `TBLMatrix2D`.
+    /// </summary>
+    /// <seealso cref="TBLMatrix2D"/>
+    Transform,
+
+    /// <summary>
+    ///  Post-translate the matrix by [X, Y].
+    /// </summary>
+    PostTranslate,
+
+    /// <summary>
+    ///  Post-scale the matrix by [X, Y].
+    /// </summary>
+    PostScale,
+
+    /// <summary>
+    ///  Post-skew the matrix by [X, Y].
+    /// </summary>
+    PostSkew,
+
+    /// <summary>
+    ///  Post-rotate the matrix about [0, 0].
+    /// </summary>
+    PostRotate,
+
+    /// <summary>
+    ///  Post-rotate the matrix about a reference `TBLPoint`.
+    /// </summary>
+    /// <seealso cref="TBLPoint"/>
+    PostRotatePoint,
+
+    /// <summary>
+    ///  Post-transform this matrix by other `TBLMatrix2D`.
+    /// </summary>
+    /// <seealso cref="TBLMatrix2D"/>
+    PostTransform);
+
+type
+  /// <summary>
+  ///  Transformation matrix type that can be obtained by calling
+  ///  `TBLMatrix2D.Kind`.
+  ///
+  ///  ```
+  ///   Identity  Transl.  Scale     Swap    Affine
+  ///    [1  0]   [1  0]   [.  0]   [0  .]   [.  .]
+  ///    [0  1]   [0  1]   [0  .]   [.  0]   [.  .]
+  ///    [0  0]   [.  .]   [.  .]   [.  .]   [.  .]
+  ///  ```
+  /// </summary>
+  TBLTransformKind = (
+    /// <summary>
+    ///  Identity matrix.
+    /// </summary>
+    Identity,
+
+    /// <summary>
+    ///  Has translation part (the rest is like identity).
+    /// </summary>
+    Translate,
+
+    /// <summary>
+    ///  Has translation and scaling parts.
+    /// </summary>
+    Scale,
+
+    /// <summary>
+    ///  Has translation and scaling parts, however scaling swaps X/Y.
+    /// </summary>
+    Swap,
+
+    /// <summary>
+    ///  Generic affine matrix.
+    /// </summary>
+    Affine,
+
+    /// <summary>
+    ///  Invalid/degenerate matrix not useful for transformations.
+    /// </summary>
+    Invalid);
+
+type
+  /// <summary>
+  ///  2D matrix represents an affine transformation matrix that can be used to
+  ///  transform geometry and images.
+  /// </summary>
+  TBLMatrix2D = record
+  {$REGION 'Internal Declarations'}
+  private
+    function GetKind: TBLTransformKind; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    M: array [0..5] of Double;
+  public
+    constructor Create(const AM00, AM01, AM10, AM11, AM20, AM21: Double);
+
+    class operator Equal(const ALeft, ARight: TBLMatrix2D): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLMatrix2D): Boolean; inline; static;
+
+    function Equals(const AOther: TBLMatrix2D): Boolean; inline;
+
+    /// <summary>
+    ///  Creates a new matrix initialized to identity.
+    /// </summary>
+    class function MakeIdentity: TBLMatrix2D; inline; static;
+
+    /// <summary>
+    ///  Creates a new matrix initialized to translation.
+    /// </summary>
+    class function MakeTranslation(const AX, AY: Double): TBLMatrix2D; overload; inline; static;
+    class function MakeTranslation(const AP: TBLPoint): TBLMatrix2D; overload; inline; static;
+    class function MakeTranslation(const AP: TBLPointI): TBLMatrix2D; overload; inline; static;
+
+    /// <summary>
+    ///  Creates a new matrix initialized to scaling.
+    /// </summary>
+    class function MakeScaling(const AXY: Double): TBLMatrix2D; overload; inline; static;
+    class function MakeScaling(const AX, AY: Double): TBLMatrix2D; overload; inline; static;
+    class function MakeScaling(const AP: TBLPoint): TBLMatrix2D; overload; inline; static;
+    class function MakeScaling(const AP: TBLPointI): TBLMatrix2D; overload; inline; static;
+
+    /// <summary>
+    ///  Creates a new matrix initialized to rotation.
+    /// </summary>
+    class function MakeRotation(const AAngle: Double): TBLMatrix2D; overload; inline; static;
+    class function MakeRotation(const AAngle, AX, AY: Double): TBLMatrix2D; overload; inline; static;
+    class function MakeRotation(const AAngle: Double; const AOrigin: TBLPoint): TBLMatrix2D; overload; inline; static;
+
+    /// <summary>
+    ///  Create a new skewing matrix.
+    /// </summary>
+    class function MakeSkewing(const AX, AY: Double): TBLMatrix2D; overload; inline; static;
+    class function MakeSkewing(const AOrigin: TBLPoint): TBLMatrix2D; overload; inline; static;
+
+    class function MakeSinCos(const ASin, ACos: Double; const ATX: Double = 0;
+      const ATY: Double = 0): TBLMatrix2D; overload; inline; static;
+    class function MakeSinCos(const ASin, ACos: Double; const AP: TBLPoint): TBLMatrix2D; overload; inline; static;
+
+    /// <summary>
+    ///  Resets matrix to identity.
+    /// </summary>
+    procedure Reset; overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to `AOther` (copy its content to this matrix).
+    /// </summary>
+    procedure Reset(const AOther: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to `[AM00, AM01, AM10, AM11, AM20, AM21]`.
+    /// </summary>
+    procedure Reset(const AM00, AM01, AM10, AM11, AM20, AM21: Double); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to translation.
+    /// </summary>
+    procedure ResetToTranslation(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to translation.
+    /// </summary>
+    procedure ResetToTranslation(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to translation.
+    /// </summary>
+    procedure ResetToTranslation(const AP: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to scaling.
+    /// </summary>
+    procedure ResetToScaling(const AXY: Double); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to scaling.
+    /// </summary>
+    procedure ResetToScaling(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to scaling.
+    /// </summary>
+    procedure ResetToScaling(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to scaling.
+    /// </summary>
+    procedure ResetToScaling(const AP: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to skewing.
+    /// </summary>
+    procedure ResetToSkewing(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to skewing.
+    /// </summary>
+    procedure ResetToSkewing(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to rotation specified by `ASin` and `ACos` and optional
+    ///  translation `ATX` and `ATY`.
+    /// </summary>
+    procedure ResetToSinCos(const ASin, ACos: Double; const ATX: Double = 0;
+      const ATY: Double = 0); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to rotation specified by `ASin` and `ACos` and
+    ///  translation `AP`.
+    /// </summary>
+    procedure ResetToSinCos(const ASin, ACos: Double; const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to rotation.
+    /// </summary>
+    procedure ResetToRotation(const AAngle: Double); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to rotation around a point `[X, Y]`.
+    /// </summary>
+    procedure ResetToRotation(const AAngle, AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to rotation around a point `p`.
+    /// </summary>
+    procedure ResetToRotation(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Calculates the matrix determinant.
+    /// </summary>
+    function Determinant: Double; inline;
+
+    procedure Translate(const AX, AY: Double); overload; inline;
+    procedure Translate(const AP: TBLPoint); overload; inline;
+    procedure Translate(const AP: TBLPointI); overload; inline;
+
+    procedure Scale(const AXY: Double); overload; inline;
+    procedure Scale(const AX, AY: Double); overload; inline;
+    procedure Scale(const AP: TBLPoint); overload; inline;
+    procedure Scale(const AP: TBLPointI); overload; inline;
+
+    procedure Skew(const AX, AY: Double); overload; inline;
+    procedure Skew(const AP: TBLPoint); overload; inline;
+
+    procedure Rotate(const AAngle: Double); overload; inline;
+    procedure Rotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure Rotate(const AAngle: Double; const AP: TBLPoint); overload; inline;
+    procedure Rotate(const AAngle: Double; const AP: TBLPointI); overload; inline;
+
+    procedure Transform(const AM: TBLMatrix2D); inline;
+
+    procedure PostTranslate(const AX, AY: Double); overload; inline;
+    procedure PostTranslate(const AP: TBLPoint); overload; inline;
+    procedure PostTranslate(const AP: TBLPointI); overload; inline;
+
+    procedure PostScale(const AXY: Double); overload; inline;
+    procedure PostScale(const AX, AY: Double); overload; inline;
+    procedure PostScale(const AP: TBLPoint); overload; inline;
+    procedure PostScale(const AP: TBLPointI); overload; inline;
+
+    procedure PostSkew(const AX, AY: Double); overload; inline;
+    procedure PostSkew(const AP: TBLPoint); overload; inline;
+
+    procedure PostRotate(const AAngle: Double); overload; inline;
+    procedure PostRotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AP: TBLPoint); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AP: TBLPointI); overload; inline;
+
+    procedure PostTransform(const AM: TBLMatrix2D); inline;
+
+    /// <summary>
+    ///  Inverts the matrix.
+    ///  Returns True if the matrix has been inverted successfully.
+    /// </summary>
+    function Invert: Boolean; overload; inline;
+
+    /// <summary>
+    ///  Inverts `ASrc` matrix and stores the result in `ADst`.
+    ///  Returns True if the matrix has been inverted successfully.
+    /// </summary>
+    class function Invert(const ASrc: TBLMatrix2D; out ADst: TBLMatrix2D): Boolean; overload; inline; static;
+
+    function MapPoint(const AX, AY: Double): TBLPoint; overload; inline;
+    function MapPoint(const AP: TBLPoint): TBLPoint; overload; inline;
+
+    function MapVector(const AX, AY: Double): TBLPoint; overload; inline;
+    function MapVector(const AP: TBLPoint): TBLPoint; overload; inline;
+
+    /// <summary>
+    ///  Element [0, 0]. Contains X scaling.
+    /// </summary>
+    property M00: Double read M[0] write M[0];
+
+    /// <summary>
+    ///  Element [0, 1]. Contains rotation and skewing.
+    /// </summary>
+    property M01: Double read M[1] write M[1];
+
+    /// <summary>
+    ///  Element [1, 0]. Contains rotation and skewing.
+    /// </summary>
+    property M10: Double read M[2] write M[2];
+
+    /// <summary>
+    ///  Element [1, 1]. Contains Y scaling.
+    /// </summary>
+    property M11: Double read M[3] write M[3];
+
+    /// <summary>
+    ///  Element [2, 0]. Contains X translation.
+    /// </summary>
+    property M20: Double read M[4] write M[4];
+
+    /// <summary>
+    ///  Element [2, 1]. Contains Y translation.
+    /// </summary>
+    property M21: Double read M[5] write M[5];
+
+    /// <summary>
+    ///  The matrix kind.
+    /// </summary>
+    property Kind: TBLTransformKind read GetKind;
+  end;
+  PBLMatrix2D = ^TBLMatrix2D;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLMatrix2D
+  /// </summary>
+  _TBLMatrix2DHelper = record helper for TBLMatrix2D
+  public const
+    Identity: TBLMatrix2D = (M: (1, 0, 0, 1, 0, 0));
+  end;
+
+{ ============================================================================
+   [Geometries - Path Operations]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Mode that specifies how to construct offset curves.
+  /// </summary>
+  TBLOffsetMode = (
+    /// <summary>
+    ///  Use default mode (decided by Blend2D).
+    /// </summary>
+    Default,
+
+    /// <summary>
+    ///  Iterative offset construction.
+    /// </summary>
+    Iterative);
+
+type
+  /// <summary>
+  ///  Mode that specifies how curves are approximated to line segments.
+  /// </summary>
+  TBLFlattenMode = (
+    /// <summary>
+    ///  Use default mode (decided by Blend2D).
+    /// </summary>
+    Default,
+
+    /// <summary>
+    ///  Recursive subdivision flattening.
+    /// </summary>
+    Recursive);
+
+type
+  /// <summary>
+  ///  A presentation attribute defining the shape to be used at the end of open
+  ///  sub-paths.
+  /// </summary>
+  TBLStrokeCap = (
+    /// <summary>
+    ///  Butt cap [default].
+    /// </summary>
+    Butt,
+
+    /// <summary>
+    ///  Square cap.
+    /// </summary>
+    Square,
+
+    /// <summary>
+    ///  Round cap.
+    /// </summary>
+    Round,
+
+    /// <summary>
+    ///  Round cap reversed.
+    /// </summary>
+    RoundRev,
+
+    /// <summary>
+    ///  Triangle cap.
+    /// </summary>
+    Triangle,
+
+    /// <summary>
+    ///  Triangle cap reversed.
+    /// </summary>
+    TriangleRev);
+
+type
+  /// <summary>
+  ///  Position of a stroke-cap.
+  /// </summary>
+  TBLStrokeCapPosition = (
+    /// <summary>
+    ///  Start of the path.
+    /// </summary>
+    StartOfPath,
+
+    /// <summary>
+    ///  End of the path.
+    /// </summary>
+    EndOfPath);
+
+type
+  /// <summary>
+  ///  Stroke join type.
+  /// </summary>
+  TBLStrokeJoin = (
+    /// <summary>
+    ///  Miter-join possibly clipped at `MiterLimit` [default].
+    /// </summary>
+    MiterClip,
+
+    /// <summary>
+    ///  Miter-join or bevel-join depending on miterLimit condition.
+    /// </summary>
+    MiterBevel,
+
+    /// <summary>
+    ///  Miter-join or round-join depending on miterLimit condition.
+    /// </summary>
+    MiterRound,
+
+    /// <summary>
+    ///  Bevel-join.
+    /// </summary>
+    Bevel,
+
+    /// <summary>
+    ///  Round-join.
+    /// </summary>
+    Round);
+
+type
+  /// <summary>
+  ///  Stroke transform order.
+  /// </summary>
+  TBLStrokeTransformOrder = (
+    /// <summary>
+    ///  Transform after stroke  => `Transform(Stroke(Input))` [default].
+    /// </summary>
+    After,
+
+    /// <summary>
+    ///  Transform before stroke => `Stroke(Transform(Input))`.
+    /// </summary>
+    Before);
+
+type
+  /// <summary>
+  ///  Stroke options.
+  /// </summary>
+  TBLStrokeOptions = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TValues = packed record
+    case Byte of
+      0: (StartCap: UInt8;
+          EndCap: UInt8;
+          Join: UInt8;
+          TransformOrder: UInt8;
+          Reserved: array [0..3] of UInt8);
+      1: (Caps: array [TBLStrokeCapPosition] of UInt8);
+      2: (Hints: UInt64);
+    end;
+  private
+    FValues: TValues;
+    FWidth: Double;
+    FMiterLimit: Double;
+    FDashOffset: Double;
+    FDashArray: TBLArray<Double>;
+    function GetStartCap: TBLStrokeCap; inline;
+    procedure SetStartCap(const AValue: TBLStrokeCap); inline;
+    function GetEndCap: TBLStrokeCap; inline;
+    procedure SetEndCap(const AValue: TBLStrokeCap); inline;
+    function GetCap(const AIndex: TBLStrokeCapPosition): TBLStrokeCap; inline;
+    procedure SetCap(const AIndex: TBLStrokeCapPosition;
+      const AValue: TBLStrokeCap); inline;
+    function GetJoin: TBLStrokeJoin; inline;
+    procedure SetJoin(const AValue: TBLStrokeJoin); inline;
+    function GetTransformOrder: TBLStrokeTransformOrder; inline;
+    procedure SetTransformOrder(const AValue: TBLStrokeTransformOrder); inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default constructed stroke options object.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLStrokeOptions);
+
+    /// <summary>
+    ///  Destroys the stroke options object.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLStrokeOptions);
+
+    /// <summary>
+    ///  Copy constructor.
+    ///
+    ///  Creates a weak-copy of the `ASrc`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLStrokeOptions; const [ref] ASrc: TBLStrokeOptions); inline;
+
+    class operator Equal(const ALeft, ARight: TBLStrokeOptions): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLStrokeOptions): Boolean; inline; static;
+
+    function Equals(const AOther: TBLStrokeOptions): Boolean; inline;
+
+    procedure Reset; inline;
+    procedure SetCaps(const ACap: TBLStrokeCap); inline;
+
+    property StartCap: TBLStrokeCap read GetStartCap write SetStartCap;
+    property EndCap: TBLStrokeCap read GetEndCap write SetEndCap;
+    property Caps[const AIndex: TBLStrokeCapPosition]: TBLStrokeCap read GetCap write SetCap;
+    property Join: TBLStrokeJoin read GetJoin write SetJoin;
+    property TransformOrder: TBLStrokeTransformOrder read GetTransformOrder write SetTransformOrder;
+    property Width: Double read FWidth write FWidth;
+    property MiterLimit: Double read FMiterLimit write FMiterLimit;
+    property DashOffset: Double read FDashOffset write FDashOffset;
+    property DashArray: TBLArray<Double> read FDashArray write FDashArray;
+  end;
+
 { ============================================================================
    [Geometries - Paths]
   ============================================================================ }
+
+type
+  /// <summary>
+  ///  Path command.
+  /// </summary>
+  TBLPathCmd = (
+    /// <summary>
+    ///  Move-to command (starts a new figure).
+    /// </summary>
+    Move,
+
+    /// <summary>
+    ///  On-path command (interpreted as line-to or the end of a curve).
+    /// </summary>
+    OnPath,
+
+    /// <summary>
+    ///  Quad-to control point.
+    /// </summary>
+    Quad,
+
+    /// <summary>
+    ///  Conic-to control point
+    /// </summary>
+    Conic,
+
+    /// <summary>
+    ///  Cubic-to control point (always used as a pair of commands).
+    /// </summary>
+    Cubic,
+
+    /// <summary>
+    ///  Close path.
+    /// </summary>
+    Close,
+
+    /// <summary>
+    ///  Conic weight.
+    /// </summary>
+    /// <remarks>
+    ///  This is not a point. This is a pair of values from which only the first
+    ///  (X) is used to represent weight as used by conic curve. The other value
+    ///  (Y) is always set to NaN by Blend2D, but can be arbitrary as it has
+    ///  no meaning.
+    /// </remarks>
+    Weight,
+
+    /// <summary>
+    ///  Used by `TBLPath.SetVertexAt` to preserve the current command value.
+    /// </summary>
+    /// <remarks>
+    ///  This command is never stored in the path.
+    /// </remarks>
+    Preserve = $FFFFFFFF);
+
+type
+  /// <summary>
+  ///  Path flags.
+  /// </summary>
+  TBLPathFlag = (
+    /// <summary>
+    ///  Path is empty (no commands or close commands only).
+    /// </summary>
+    Empty = 0,
+
+    /// <summary>
+    ///  Path contains multiple figures.
+    /// </summary>
+    Multiple = 1,
+
+    /// <summary>
+    ///  Path contains one or more quad curves.
+    /// </summary>
+    Quads = 2,
+
+    /// <summary>
+    ///  Path contains one or more conic curves.
+    /// </summary>
+    Conics = 3,
+
+    /// <summary>
+    ///  Path contains one or more cubic curves.
+    /// </summary>
+    Cubics = 4,
+
+    /// <summary>
+    ///  Path is invalid.
+    /// </summary>
+    Invalid = 30,
+
+    /// <summary>
+    ///  Flags are dirty (not reflecting the current status).
+    /// </summary>
+    Dirty = 31);
+
+type
+  /// <summary>
+  ///  Path flags.
+  /// </summary>
+  TBLPathFlags = set of TBLPathFlag;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLPathFlags.
+  /// </summary>
+  _TBLPathFlagsHelper = record helper for TBLPathFlags
+  public const
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Path reversal mode.
+  /// </summary>
+  TBLPathReverseMode = (
+    /// <summary>
+    ///  Reverse each figure and their order as well (default).
+    /// </summary>
+    Complete,
+
+    /// <summary>
+    ///  Reverse each figure separately (keeps their order).
+    /// </summary>
+    Separate);
+
+type
+  /// <summary>
+  ///  Options used to describe how geometry is approximated.
+  ///
+  ///  This record cannot be simply zeroed and then passed to functions that
+  ///  accept approximation options. Use `TBLApproximationOptions.Default` to
+  ///  setup defaults and then alter values you want to change.
+  ///
+  ///  Example of using `TBLApproximationOptions`:
+  ///
+  ///  ```
+  ///  // Initialize with defaults first.
+  ///  var Approx := TBLApproximationOptions.Default;
+  ///
+  ///  // Override values you want to change.
+  ///  Ppprox.SimplifyTolerance = 0.02;
+  ///
+  ///  // ... now safely use approximation options in your code ...
+  ///  ```
+  /// </summary>
+  TBLApproximationOptions = packed record
+  {$REGION 'Internal Declarations'}
+  private
+    FFlattenMode: UInt8;
+    FOffsetMode: UInt8;
+    FReservedFlags: array [0..5] of UInt8;
+    FFlattenTolerance: Double;
+    FSimplifyTolerance: Double;
+    FOffsetParameter: Double;
+    function GetFlattenMode: TBLFlattenMode; inline;
+    procedure SetFlattenMode(const AValue: TBLFlattenMode); inline;
+    function GetOffsetMode: TBLOffsetMode; inline;
+    procedure SetOffsetMode(const AValue: TBLOffsetMode); inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Specifies how curves are flattened.
+    /// </summary>
+    property FlattenMode: TBLFlattenMode read GetFlattenMode write SetFlattenMode;
+
+    /// <summary>
+    ///  Specifies how curves are offsetted (used by stroking).
+    /// </summary>
+    property OffsetMode: TBLOffsetMode read GetOffsetMode write SetOffsetMode;
+
+    /// <summary>
+    ///  Tolerance used to flatten curves.
+    /// </summary>
+    property FlattenTolerance: Double read FFlattenTolerance write FFlattenTolerance;
+
+    /// <summary>
+    ///  Tolerance used to approximate cubic curves with quadratic curves.
+    /// </summary>
+    property SimplifyTolerance: Double read FSimplifyTolerance write FSimplifyTolerance;
+
+    /// <summary>
+    ///  Curve offsetting parameter, exact meaning depends on `offsetMode`.
+    /// </summary>
+    property OffsetParameter: Double read FOffsetParameter write FOffsetParameter;
+  end;
+
+type
+  /// <summary>
+  ///  Adds functionality to 2D vector path.
+  /// </summary>
+  _TBLApproximationOptionsHelper = record helper for TBLApproximationOptions
+  public const
+    /// <summary>
+    ///  Default approximation options used by Blend2D.
+    /// </summary>
+    Default: TBLApproximationOptions = (
+      FFlattenMode: 0;
+      FOffsetMode: 0;
+      FFlattenTolerance: 0.2;
+      FSimplifyTolerance: 0.05;
+      FOffsetParameter: 0.414213562);
+  end;
+
+type
+  /// <summary>
+  ///  2D vector path view provides pointers to vertex and command data along
+  ///  with their size.
+  /// </summary>
+  TBLPathView = record
+  {$REGION 'Internal Declarations'}
+  private
+    FCommandData: PByte;
+    FVertexData: PBLPoint;
+    FSize: NativeInt;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; overload; inline;
+    procedure Reset(const ACommandDataIn: PByte; const AVertexDataIn: PBLPoint;
+      const ASizeIn: NativeInt); overload; inline;
+
+    property CommandData: PByte read FCommandData;
+    property VertexData: PBLPoint read FVertexData;
+    property Size: NativeInt read FSize;
+  end;
 
 type
   /// <summary>
@@ -2006,6 +3882,18 @@ type
   {$REGION 'Internal Declarations'}
   private
     FBase: TBLObjectCore;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetCapacity: NativeInt; inline;
+    function GetVertexData: PBLPoint; inline;
+    function GetVertexDataEnd: PBLPoint; inline;
+    function GetCommandData: PByte; inline;
+    function GetCommandDataEnd: PByte; inline;
+    function GetInfoFlags: TBLPathFlags; inline;
+    function GetControlBox: TBLBox; inline;
+    function GetBoundingBox: TBLBox; inline;
+    function GetFigureRange(const AIndex: Integer): TBLRange; inline;
+    function GetLastVertex: TBLPoint; inline;
   {$ENDREGION 'Internal Declarations'}
   public
     /// <summary>
@@ -2032,12 +3920,166 @@ type
     class operator Assign(var ADest: TBLPath; const [ref] ASrc: TBLPath); inline;
 
     /// <summary>
+    ///  Used to compare against `nil` (empty path).
+    /// </summary>
+    class operator Equal(const ALeft: TBLPath; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two paths are equal (have the same contents).
+    /// </summary>
+    /// <seealso cref="Equals"/>
+    class operator Equal(const ALeft, ARight: TBLPath): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty path).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLPath; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two paths are not equal (do not have the same contents).
+    /// </summary>
+    /// <seealso cref="Equals"/>
+    class operator NotEqual(const ALeft, ARight: TBLPath): Boolean; inline; static;
+
+    procedure Reset; inline;
+    procedure Swap(var AOther: TBLPath); inline;
+
+    /// <summary>
+    ///  Returns a read-only path data as `TBLPathView`.
+    /// </summary>
+    function View: TBLPathView; inline;
+
+    /// <summary>
+    ///  Clears the content of the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Clear; inline;
+
+    /// <summary>
+    ///  Shrinks the capacity of the path to fit the current usage.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Shrink; inline;
+
+    /// <summary>
+    ///  Reserves the capacity of the path for at least `AMinCapacity` vertices
+    ///  and commands.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reserve(const AMinCapacity: NativeInt); inline;
+
+    procedure ModifyOp(const AOp: TBLModifyOp; const ASize: NativeInt;
+      out ACmdDataOut: PByte; out AVertexDataOut: PBLPoint); inline;
+
+    procedure AssignDeep(const AOther: TBLPath); inline;
+
+    /// <summary>
+    ///  Sets vertex at `AIndex` to `ACmd` and `APt`.
+    ///
+    ///  Pass `TBLPathCmd.Preserve` in `ACmd` to preserve the current command.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetVertexAt(const AIndex: NativeInt; const ACmd: TBLPathCmd;
+      const APt: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Sets vertex at `AIndex` to `ACmd` and `[AX, AY]`.
+    ///
+    ///  Pass `TBLPathCmd.Preserve` in `ACmd` to preserve the current command.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetVertexAt(const AIndex: NativeInt; const ACmd: TBLPathCmd;
+      const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Moves to `AP0`.
+    ///
+    ///  Appends `TBLPathCmd.Move[AP0]` command to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MoveTo(const AP0: TBLPoint); overload; inline;
+
+    /// <summary>
     ///  Moves to `[AX0, AY0]`.
     ///
     ///  Appends `TBLPathCmd.Move[AX0, AY0]` command to the path.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure MoveTo(const AX0, AY0: Double); inline;
+    procedure MoveTo(const AX0, AY0: Double); overload; inline;
+
+    /// <summary>
+    ///  Adds line to `AP1`.
+    ///
+    ///  Appends `TBLPathCmd.OnPath[AP1]` command to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure LineTo(const AP1: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds line to `[AX1, AY1]`.
+    ///
+    ///  Appends `TBLPathCmd.OnPath[AX1, AY1]` command to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure LineTo(const AX1, AY1: Double); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline (LineTo) of the given `APoly` array of size `ACount`.
+    ///
+    ///  Appends multiple `TBLPathCmd.OnPath[AX[I], AY[I]]` commands to the path
+    ///  depending on `ACount` parameter.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure PolyTo(const APoly: PBLPoint; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline (LineTo) of the given `APoly` array.
+    ///
+    ///  Appends multiple `TBLPathCmd.OnPath[AX[I], AY[I]]` commands to the path
+    ///  depending on the length of the `APoly` array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure PolyTo(const APoly: TArray<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Adds a quadratic curve to `AP1` and `AP2`.
+    ///
+    ///  Appends the following commands to the path:
+    ///    - `TBLPathCmd.Quad[AP1]`
+    ///    - `TBLPathCmd.OnPath[AP2]`
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataQuadraticBezierCommands">SVG 'Q' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure QuadTo(const AP1, AP2: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds a quadratic curve to `[AX1, AY1]` and `[AX2, AY2]`.
+    ///
+    ///  Appends the following commands to the path:
+    ///    - `TBLPathCmd.Quad[AX1, AY1]`
+    ///    - `TBLPathCmd.OnPath[AX2, AY2]`
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataQuadraticBezierCommands">SVG 'Q' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure QuadTo(const AX1, AY1, AX2, AY2: Double); overload; inline;
+
+    procedure ConicTo(const AP1, AP2: TBLPoint; const AWeight: Double); overload; inline;
+    procedure ConicTo(const AX1, AY1, AX2, AY2, AWeight: Double); overload; inline;
+
+    /// <summary>
+    ///  Adds a cubic curve to `AP1`, `AP2`, and `AP3`.
+    ///
+    ///  Appends the following commands to the path:
+    ///    - `TBLPathCmd.Cubic[AP1]`
+    ///    - `TBLPathCmd.Cubic[AP2]`
+    ///    - `TBLPathCmd.On[AP3]`
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataCubicBezierCommands">SVG 'C' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure CubicTo(const AP1, AP2, AP3: TBLPoint); overload; inline;
 
     /// <summary>
     ///  Adds a cubic curve to `[AX1, AY1]`, `[AX2, AY2]`, and `[AX3, AY3]`.
@@ -2049,7 +4091,944 @@ type
     ///
     ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataCubicBezierCommands">SVG 'C' path command</see>.
     /// </summary>
-    procedure CubicTo(const AX1, AY1, AX2, AY2, AX3, AY3: Double); inline;
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure CubicTo(const AX1, AY1, AX2, AY2, AX3, AY3: Double); overload; inline;
+
+    /// <summary>
+    ///  Adds a smooth quadratic curve to `AP2`, calculating `AP1` from last
+    ///  points.
+    ///
+    ///  Appends the following commands to the path:
+    ///    - `TBLPathCmd.Quad[Calculated]`
+    ///    - `TBLPathCmd.OnPath[AP2]`
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataQuadraticBezierCommands">SVG 'T' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SmoothQuadTo(const AP2: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds a smooth quadratic curve to `[AX2, AY2]`, calculating `[AX1, AY1]`
+    ///  from last points.
+    ///
+    ///  Appends the following commands to the path:
+    ///    - `TBLPathCmd.Quad[Calculated]`
+    ///    - `TBLPathCmd.OnPath[AX2, AY2]`
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataQuadraticBezierCommands">SVG 'T' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SmoothQuadTo(const AX2, AY2: Double); overload; inline;
+
+    /// <summary>
+    ///  Adds a smooth cubic curve to `AP2` and `AP3`, calculating `AP1` from
+    ///  last points.
+    ///
+    ///  Appends the following commands to the path:
+    ///    - `TBLPathCmd.Cubic[Calculated]`
+    ///    - `TBLPathCmd.Cubic[AP2]`
+    ///    - `TBLPathCmd.OnPath[AP3]`
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataCubicBezierCommands">SVG 'S' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SmoothCubicTo(const AP2, AP3: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds a smooth cubic curve to `[AX2, AY2]` and `[AX3, AY3]`, calculating
+    ///  `[AX1, AY1]` from last points.
+    ///
+    ///  Appends the following commands to the path:
+    ///    - `TBLPathCmd.Cubic[Calculated]`
+    ///    - `TBLPathCmd.Cubic[AX2, AY2]`
+    ///    - `TBLPathCmd.OnPath[AX3, AY3]`
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataCubicBezierCommands">SVG 'S' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SmoothCubicTo(const AX2, AY2, AX3, AY3: Double); overload; inline;
+
+    /// <summary>
+    ///  Adds an arc to the path.
+    ///
+    ///  The center of the arc is specified by `AC` and radius by `AR`. Both
+    ///  `AStart` and `ASweep` angles are in radians.
+    ///  If the last vertex doesn't match the start of the arc then a `LineTo`
+    ///  would be emitted before adding the arc.
+    ///  Pass `True` in `AForceMoveTo` to always emit `MoveTo` at the beginning
+    ///  of the arc, which starts a new figure.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ArcTo(const AC, AR: TBLPoint; const AStart, ASweep: Double;
+      const AForceMoveTo: Boolean = False); overload; inline;
+
+    /// <summary>
+    ///  Adds an arc to the path.
+    ///
+    ///  The center of the arc is specified by `[ACX, ACY]` and radius by
+    ///  `[ARX, ARY]`. Both `AStart` and `ASweep` angles are in radians.
+    ///  If the last vertex doesn't match the start of the arc then a `LineTo`
+    ///  would be emitted before adding the arc.
+    ///  Pass `True` in `AForceMoveTo` to always emit `MoveTo` at the beginning
+    ///  of the arc, which starts a new figure.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ArcTo(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+      const AForceMoveTo: Boolean = False); overload; inline;
+
+    /// <summary>
+    ///  Adds an arc quadrant (90deg) to the path. The first point `AP1`
+    ///  specifies the quadrant corner and the last point `AP2` specifies the
+    ///  end point.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ArcQuadrantTo(const AP1, AP2: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds an arc quadrant (90deg) to the path. The first point `[AX1, AY1]`
+    ///  specifies the quadrant corner and the last point `[AX2, AY2]` specifies
+    ///  the end point.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ArcQuadrantTo(const AX1, AY1, AX2, AY2: Double); overload; inline;
+
+    /// <summary>
+    ///  Adds an elliptic arc to the path that follows the SVG specification.
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands">SVG 'A' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure EllipticArcTo(const ARP: TBLPoint; const AXAxisRotation: Double;
+      const ALargeArcFlag, ASweepFlag: Boolean; const AP1: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds an elliptic arc to the path that follows the SVG specification.
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands">SVG 'A' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure EllipticArcTo(const ARX, ARY, AXAxisRotation: Double;
+      const ALargeArcFlag, ASweepFlag: Boolean; const AX1, AY1: Double); overload; inline;
+
+    /// <summary>
+    ///  Closes the current figure.
+    ///
+    ///  Appends `TBLPathCmd.Close` to the path.
+    ///
+    ///  Matches <see href="https://www.w3.org/TR/SVG/paths.html#PathDataClosePathCommand">SVG 'Z' path command</see>.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Close; inline;
+
+    /// <summary>
+    ///  Adds multiple LineTo segments to the path.
+    ///  Provides high-performance path building in case that the user knows
+    ///  the segments that will be added to the path in advance.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddLineToSegments(const APoints: TArray<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Adds multiple LineTo segments to the path.
+    ///  Provides high-performance path building in case that the user knows
+    ///  the segments that will be added to the path in advance.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddLineToSegments(const APoints: PBLPoint;
+      const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Adds multiple QuadTo segments to the path.
+    ///  Provides high-performance path building in case that the user knows
+    ///  the segments that will be added to the path in advance.
+    /// </summary>
+    /// <remarks>
+    ///  The APoints array contains pairs of points (P0, P1). Thus the length
+    ///  of the array must be even.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddQuadToSegments(const APoints: TArray<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Adds multiple QuadTo segments to the path.
+    ///  Provides high-performance path building in case that the user knows
+    ///  the segments that will be added to the path in advance.
+    /// </summary>
+    /// <remarks>
+    ///  The APoints array contains pairs of points (P0, P1).
+    ///  ASegmentCount contains the number of segments (pairs), *not* the number
+    ///  of points.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddQuadToSegments(const APoints: PBLPoint;
+      const ASegmentCount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Adds multiple CubicTo segments to the path.
+    ///  Provides high-performance path building in case that the user knows
+    ///  the segments that will be added to the path in advance.
+    /// </summary>
+    /// <remarks>
+    ///  The APoints array contains triples of points (P0, P1, P2). Thus the
+    ///  length of the array must be a multiple of 3.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddCubicToSegments(const APoints: TArray<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Adds multiple CubicTo segments to the path.
+    ///  Provides high-performance path building in case that the user knows
+    ///  the segments that will be added to the path in advance.
+    /// </summary>
+    /// <remarks>
+    ///  The APoints array contains triples of points (P0, P1, P2).
+    ///  ASegmentCount contains the number of segments (triples), *not* the
+    ///  number of points.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddCubicToSegments(const APoints: PBLPoint;
+      const ASegmentCount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rectangle to the path specified by `ABox`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBox(const ABox: TBLBoxI;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rectangle to the path specified by `ABox`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBox(const ABox: TBLBox;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rectangle to the path specified by `[AX0, AY0, AX1, AY1]`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBox(const AX0, AY0, AX1, AY1: Double;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rectangle to the path specified by `ARect`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRect(const ARect: TBLRectI;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rectangle to the path specified by `ARect`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRect(const ARect: TBLRect;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rectangle to the path specified by `[AX, AY, AW, AH]`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRect(const AX, AY, AW, AH: Double;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a geometry to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddGeometry(const AGeometryType: TBLGeometryType;
+      const AGeometryData: Pointer;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a geometry to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddGeometry(const AGeometryType: TBLGeometryType;
+      const AGeometryData: Pointer; const AMatrix: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed circle to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddCircle(const ACircle: TBLCircle;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed circle to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddCircle(const ACircle: TBLCircle; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed ellipse to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddEllipse(const AEllipse: TBLEllipse;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed ellipse to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddEllipse(const AEllipse: TBLEllipse; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rounded rectangle to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRoundRect(const ARR: TBLRoundRect;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed rounded rectangle to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRoundRect(const ARR: TBLRoundRect; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an unclosed arc to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddArc(const AArc: TBLArc;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an unclosed arc to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddArc(const AArc: TBLArc; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed chord to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddChord(const AChord: TBLArc;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed chord to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddChord(const AChord: TBLArc; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed pie to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPie(const APie: TBLArc;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed pie to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPie(const APie: TBLArc; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an unclosed line to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddLine(const ALine: TBLLine;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an unclosed line to the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddLine(const ALine: TBLLine; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed triangle.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddTriangle(const ATriangle: TBLTriangle;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a closed triangle.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddTriangle(const ATriangle: TBLTriangle; const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TBLArrayView<TBLPointI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TBLArrayView<TBLPointI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TArray<TBLPointI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TArray<TBLPointI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: PBLPointI; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: PBLPointI; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TBLArrayView<TBLPoint>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TBLArrayView<TBLPoint>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TArray<TBLPoint>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: TArray<TBLPoint>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: PBLPoint; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polyline.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolyline(const APoly: PBLPoint; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TBLArrayView<TBLPointI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TBLArrayView<TBLPointI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TArray<TBLPointI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TArray<TBLPointI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: PBLPointI; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: PBLPointI; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TBLArrayView<TBLPoint>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TBLArrayView<TBLPoint>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TArray<TBLPoint>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: TArray<TBLPoint>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: PBLPoint; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds a polygon.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPolygon(const APoly: PBLPoint; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TArray<TBLBoxI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TArray<TBLBoxI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TBLArrayView<TBLBox>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TBLArrayView<TBLBox>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TArray<TBLBox>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: TArray<TBLBox>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed boxes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TBLArrayView<TBLRectI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TBLArrayView<TBLRectI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TArray<TBLRectI>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TArray<TBLRectI>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TBLArrayView<TBLRect>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TBLArrayView<TBLRect>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TArray<TBLRect>;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: TArray<TBLRect>;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: PBLRect; const ACount: NativeInt;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds an array of closed rectangles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddRectArray(const AArray: PBLRect; const ACount: NativeInt;
+      const ATransform: TBLMatrix2D;
+      const ADir: TBLGeometryDirection = TBLGeometryDirection.CW); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath` to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPath(const APath: TBLPath); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath` sliced by the given `ARange` to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPath(const APath: TBLPath; const ARange: TBLRange); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath` translated by `AP` to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPath(const APath: TBLPath; const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath` translated by `AP` and sliced by the given `ARange`
+    ///  to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPath(const APath: TBLPath; const ARange: TBLRange;
+      const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath` transformed by `ATransform` to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPath(const APath: TBLPath; const ATransform: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath` transformed by `ATransform` and sliced by the given
+    ///  `ARange` to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddPath(const APath: TBLPath; const ARange: TBLRange;
+      const ATransform: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath`, but reversed.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddReversedPath(const APath: TBLPath;
+      const AReverseMode: TBLPathReverseMode); overload; inline;
+
+    /// <summary>
+    ///  Adds other `APath`, but reversed.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddReversedPath(const APath: TBLPath; const ARange: TBLRange;
+      const AReverseMode: TBLPathReverseMode); overload; inline;
+
+    /// <summary>
+    ///  Adds a stroke of `APath` to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddStrokedPath(const APath: TBLPath;
+      const AStrokeOptions: TBLStrokeOptions;
+      const AApproximationOptions: TBLApproximationOptions); overload; inline;
+
+    /// <summary>
+    ///  Adds a stroke of `APath` to this path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddStrokedPath(const APath: TBLPath; const ARange: TBLRange;
+      const AStrokeOptions: TBLStrokeOptions;
+      const AApproximationOptions: TBLApproximationOptions); overload; inline;
+
+    procedure RemoveRange(const ARange: TBLRange); inline;
+
+    /// <summary>
+    ///  Translates the whole path by `AP`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Translate(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Translates a part of the path specified by the given `ARange` by `AP`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Translate(const ARange: TBLRange;
+      const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Transforms the whole path by matrix `AM`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Transform(const AM: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Transforms a part of the path specified by the given `ARange` by
+    ///  matrix `AM`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Transform(const ARange: TBLRange;
+      const AM: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Fits the whole path into the given `ARect`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FitTo(const ARect: TBLRect); overload; inline;
+
+    /// <summary>
+    ///  Fits a part of the path specified by the given `ARange` into the given
+    ///  `ARect`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FitTo(const ARange: TBLRange;
+      const ARect: TBLRect); overload; inline;
+
+    /// <summary>
+    ///  Tests whether this path and the `AOther` path are equal.
+    ///
+    ///  The equality check is deep. The data of both paths is examined and
+    ///  binary compared (thus a slight difference like -0 and +0 would make the
+    ///  equality check to fail).
+    /// </summary>
+    function Equals(const AOther: TBLPath): Boolean; inline;
+
+    function GetClosestVertex(const AP: TBLPoint;
+      const AMaxDistance: Double): NativeInt; overload; inline;
+
+    function GetClosestVertex(const AP: TBLPoint; const AMaxDistance: Double;
+      out ADistanceOut: Double): NativeInt; overload; inline;
+
+    /// <summary>
+    ///  Hit tests the given point `AP` by respecting the given `AFillRule`.
+    /// </summary>
+    function HitTest(const AP: TBLPoint; const AFillRule: TBLFillRule): TBLHitTest; inline;
+
+    /// <summary>
+    ///  Whether the path is empty, which means its size equals to zero.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  Path size (number of vertices used).
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  Path capacity (number of allocated vertices).
+    /// </summary>
+    property Capacity: NativeInt read GetCapacity;
+
+    /// <summary>
+    ///  Path's vertex data (read-only).
+    /// </summary>
+    property VertexData: PBLPoint read GetVertexData;
+
+    /// <summary>
+    ///  The end of path's vertex data (read-only).
+    /// </summary>
+    property VertexDataEnd: PBLPoint read GetVertexDataEnd;
+
+    /// <summary>
+    ///  Path's command data (read-only).
+    /// </summary>
+    property CommandData: PByte read GetCommandData;
+
+    /// <summary>
+    ///  The end of path's command data (read-only).
+    /// </summary>
+    property CommandDataEnd: PByte read GetCommandDataEnd;
+
+    /// <summary>
+    ///  Update a path information if necessary.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property InfoFlags: TBLPathFlags read GetInfoFlags;
+
+    /// <summary>
+    ///  Bounding box of all vertices and control points to.
+    ///
+    ///  Control box is simply bounds of all vertices the path has without
+    ///  further processing. It contains both on-path and off-path points.
+    ///  Consider using `BoundingBox` if you need a visual bounding box.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="BoundingBox"/>
+    property ControlBox: TBLBox read GetControlBox;
+
+    /// <summary>
+    ///  Bounding box of all on-path vertices and curve extrema.
+    ///
+    ///  The bounding box could be smaller than a bounding box obtained by
+    ///  `ControlBox` as it's calculated by merging only start/end points and
+    ///  curves at their extrema (not control points). The resulting bounding
+    ///  box represents a visual bounds of the path.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="ControlBox"/>
+    property BoundingBox: TBLBox read GetBoundingBox;
+
+    /// <summary>
+    ///  The ranges describing a figure at the given `AIndex`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property FigureRanges[const AIndex: Integer]: TBLRange read GetFigureRange;
+
+    /// <summary>
+    ///  The last vertex of the path. If the very last command of the path is
+    ///  `TBLPathCmd.Close` then the path will be iterated in reverse order to
+    ///  match the initial vertex of the last figure.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property LastVertex: TBLPoint read GetLastVertex;
   end;
 
 {$ENDREGION 'Geometries'}
@@ -2786,11 +5765,2341 @@ end;
 
 {$REGION 'Geometries'}
 
+function BLPoint(const AX, AY: Double): TBLPoint; inline;
+begin
+  Result.Reset(AX, AY);
+end;
+
+function BLAbs(const AValue: TBLPoint): TBLPoint; overload; inline;
+begin
+  Result.Reset(Abs(AValue.X), Abs(AValue.Y));
+end;
+
+function BLMin(const AA, AB: TBLPoint): TBLPoint; overload; inline;
+begin
+  Result.Reset(Min(AA.X, AB.X), Min(AA.Y, AB.Y));
+end;
+
+function BLMin(const AA: TBLPoint; const AB: Double): TBLPoint; overload; inline;
+begin
+  Result.Reset(Min(AA.X, AB), Min(AA.Y, AB));
+end;
+
+function BLMin(const AA: Double; const AB: TBLPoint): TBLPoint; overload; inline;
+begin
+  Result.Reset(Min(AA, AB.X), Min(AA, AB.Y));
+end;
+
+function BLMax(const AA, AB: TBLPoint): TBLPoint; overload; inline;
+begin
+  Result.Reset(Max(AA.X, AB.X), Max(AA.Y, AB.Y));
+end;
+
+function BLMax(const AA: TBLPoint; const AB: Double): TBLPoint; overload; inline;
+begin
+  Result.Reset(Max(AA.X, AB), Max(AA.Y, AB));
+end;
+
+function BLMax(const AA: Double; const AB: TBLPoint): TBLPoint; overload; inline;
+begin
+  Result.Reset(Max(AA, AB.X), Max(AA, AB.Y));
+end;
+
+function BLClamp(const AA: TBLPoint; const AB, AC: Double): TBLPoint; inline;
+begin
+  Result := BLMin(AC, BLMax(AB, AA));
+end;
+
+function BLPointI(const AX, AY: Integer): TBLPointI; inline;
+begin
+  Result.Reset(AX, AY);
+end;
+
+function BLSize(const AW, AH: Double): TBLSize; inline;
+begin
+  Result.Reset(AW, AH);
+end;
+
+function BLAbs(const AValue: TBLSize): TBLSize; overload; inline;
+begin
+  Result.Reset(Abs(AValue.W), Abs(AValue.H));
+end;
+
+function BLMin(const AA, AB: TBLSize): TBLSize; overload; inline;
+begin
+  Result.Reset(Min(AA.W, AB.W), Min(AA.H, AB.H));
+end;
+
+function BLMax(const AA, AB: TBLSize): TBLSize; overload; inline;
+begin
+  Result.Reset(Max(AA.W, AB.W), Max(AA.H, AB.H));
+end;
+
+function BLSizeI(const AW, AH: Integer): TBLSizeI; inline;
+begin
+  Result.Reset(AW, AH);
+end;
+
+function BLBox(const AX0, AY0, AX1, AY1: Double): TBLBox; inline;
+begin
+  Result.Reset(AX0, AY0, AX1, AY1);
+end;
+
+function BLBoxI(const AX0, AY0, AX1, AY1: Integer): TBLBoxI; inline;
+begin
+  Result.Reset(AX0, AY0, AX1, AY1);
+end;
+
+function BLRect(const AX, AY, AW, AH: Double): TBLRect; inline;
+begin
+  Result.Reset(AX, AY, AW, AH);
+end;
+
+function BLRectI(const AX, AY, AW, AH: Integer): TBLRectI; inline;
+begin
+  Result.Reset(AX, AY, AW, AH);
+end;
+
+function BLRoundRect(const ARect: TBLRect; const AR: Double): TBLRoundRect; overload; inline;
+begin
+  Result.Reset(ARect, AR);
+end;
+
+function BLRoundRect(const ARect: TBLRect; const ARX, ARY: Double): TBLRoundRect; overload; inline;
+begin
+  Result.Reset(ARect, ARX, ARY);
+end;
+
+function BLRoundRect(const AX, AY, AW, AH, AR: Double): TBLRoundRect; overload; inline;
+begin
+  Result.Reset(AX, AY, AW, AH, AR);
+end;
+
+function BLRoundRect(const AX, AY, AW, AH, ARX, ARY: Double): TBLRoundRect; overload; inline;
+begin
+  Result.Reset(AX, AY, AW, AH, ARX, ARY);
+end;
+
+function BLCircle(const ACX, ACY, AR: Double): TBLCircle; overload; inline;
+begin
+  Result.Reset(ACX, ACY, AR);
+end;
+
+function BLEllipse(const ACX, ACY, AR: Double): TBLEllipse; overload; inline;
+begin
+  Result.Reset(ACX, ACY, AR);
+end;
+
+function BLEllipse(const ACX, ACY, ARX, ARY: Double): TBLEllipse; overload; inline;
+begin
+  Result.Reset(ACX, ACY, ARX, ARY);
+end;
+
+function BLArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double): TBLArc; inline;
+begin
+  Result.Reset(ACX, ACY, ARX, ARY, AStart, ASweep);
+end;
+
+function BLLine(const AX0, AY0, AX1, AY1: Double): TBLLine; inline;
+begin
+  Result.Reset(AX0, AY0, AX1, AY1);
+end;
+
+function BLTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double): TBLTriangle; inline;
+begin
+  Result.Reset(AX0, AY0, AX1, AY1, AX2, AY2);
+end;
+
+{ TBLPoint }
+
+class operator TBLPoint.Add(const ALeft, ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft.X + ARight.X, ALeft.Y + ARight.Y);
+end;
+
+class operator TBLPoint.Add(const ALeft: Double;
+  const ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft + ARight.X, ALeft + ARight.Y);
+end;
+
+class operator TBLPoint.Add(const ALeft: TBLPoint;
+  const ARight: Double): TBLPoint;
+begin
+  Result.Reset(ALeft.X + ARight, ALeft.Y + ARight);
+end;
+
+constructor TBLPoint.Create(const AX, AY: Double);
+begin
+  X := AX;
+  Y := AY;
+end;
+
+class operator TBLPoint.Divide(const ALeft: TBLPoint;
+  const ARight: Double): TBLPoint;
+begin
+  Result.Reset(ALeft.X / ARight, ALeft.Y / ARight);
+end;
+
+class operator TBLPoint.Divide(const ALeft: Double;
+  const ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft / ARight.X, ALeft / ARight.Y);
+end;
+
+class operator TBLPoint.Divide(const ALeft, ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft.X / ARight.X, ALeft.Y / ARight.Y);
+end;
+
+class operator TBLPoint.Equal(const ALeft, ARight: TBLPoint): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLPoint.Equals(const AOther: TBLPoint): Boolean;
+begin
+  Result := (X = AOther.X) and (Y = AOther.Y);
+end;
+
+class operator TBLPoint.Multiply(const ALeft, ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft.X * ARight.X, ALeft.Y * ARight.Y);
+end;
+
+class operator TBLPoint.Multiply(const ALeft: Double;
+  const ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft * ARight.X, ALeft * ARight.Y);
+end;
+
+class operator TBLPoint.Multiply(const ALeft: TBLPoint;
+  const ARight: Double): TBLPoint;
+begin
+  Result.Reset(ALeft.X * ARight, ALeft.Y * ARight);
+end;
+
+class operator TBLPoint.Negative(const AValue: TBLPoint): TBLPoint;
+begin
+  Result.Reset(-AValue.X, -AValue.Y);
+end;
+
+class operator TBLPoint.NotEqual(const ALeft, ARight: TBLPoint): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLPoint.Reset(const AOther: TBLPoint);
+begin
+  Self := AOther;
+end;
+
+class operator TBLPoint.Subtract(const ALeft: TBLPoint;
+  const ARight: Double): TBLPoint;
+begin
+  Result.Reset(ALeft.X - ARight, ALeft.Y - ARight);
+end;
+
+class operator TBLPoint.Subtract(const ALeft: Double;
+  const ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft - ARight.X, ALeft - ARight.Y);
+end;
+
+class operator TBLPoint.Subtract(const ALeft, ARight: TBLPoint): TBLPoint;
+begin
+  Result.Reset(ALeft.X - ARight.X, ALeft.Y - ARight.Y);
+end;
+
+procedure TBLPoint.Reset(const AX, AY: Double);
+begin
+  X := AX;
+  Y := AY;
+end;
+
+procedure TBLPoint.Reset;
+begin
+  X := 0;
+  Y := 0;
+end;
+
+{ TBLPointI }
+
+class operator TBLPointI.Add(const ALeft: TBLPointI;
+  const ARight: Integer): TBLPointI;
+begin
+  Result.Reset(ALeft.X + ARight, ALeft.Y + ARight);
+end;
+
+class operator TBLPointI.Add(const ALeft: Integer;
+  const ARight: TBLPointI): TBLPointI;
+begin
+  Result.Reset(ALeft + ARight.X, ALeft + ARight.Y);
+end;
+
+class operator TBLPointI.Add(const ALeft, ARight: TBLPointI): TBLPointI;
+begin
+  Result.Reset(ALeft.X + ARight.X, ALeft.X + ARight.Y);
+end;
+
+constructor TBLPointI.Create(const AX, AY: Integer);
+begin
+  X := AX;
+  Y := AY;
+end;
+
+class operator TBLPointI.Equal(const ALeft, ARight: TBLPointI): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLPointI.Equals(const AOther: TBLPointI): Boolean;
+begin
+  Result := (X = AOther.X) and (Y = AOther.Y);
+end;
+
+class operator TBLPointI.Multiply(const ALeft: Integer;
+  const ARight: TBLPointI): TBLPointI;
+begin
+  Result.Reset(ALeft * ARight.X, ALeft * ARight.Y);
+end;
+
+class operator TBLPointI.Multiply(const ALeft: TBLPointI;
+  const ARight: Integer): TBLPointI;
+begin
+  Result.Reset(ALeft.X * ARight, ALeft.Y * ARight);
+end;
+
+class operator TBLPointI.Negative(const AValue: TBLPointI): TBLPointI;
+begin
+  Result.Reset(-AValue.X, -AValue.Y);
+end;
+
+class operator TBLPointI.NotEqual(const ALeft, ARight: TBLPointI): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLPointI.Reset(const AOther: TBLPointI);
+begin
+  Self := AOther;
+end;
+
+class operator TBLPointI.Subtract(const ALeft, ARight: TBLPointI): TBLPointI;
+begin
+  Result.Reset(ALeft.X - ARight.X, ALeft.X - ARight.Y);
+end;
+
+class operator TBLPointI.Subtract(const ALeft: Integer;
+  const ARight: TBLPointI): TBLPointI;
+begin
+  Result.Reset(ALeft - ARight.X, ALeft - ARight.Y);
+end;
+
+class operator TBLPointI.Subtract(const ALeft: TBLPointI;
+  const ARight: Integer): TBLPointI;
+begin
+  Result.Reset(ALeft.X - ARight, ALeft.Y - ARight);
+end;
+
+procedure TBLPointI.Reset(const AX, AY: Integer);
+begin
+  X := AX;
+  Y := AY;
+end;
+
+procedure TBLPointI.Reset;
+begin
+  X := 0;
+  Y := 0;
+end;
+
+class operator TBLPointI.Multiply(const ALeft, ARight: TBLPointI): TBLPointI;
+begin
+  Result.Reset(ALeft.X * ARight.X, ALeft.X * ARight.Y);
+end;
+
+{ TBLSize }
+
+constructor TBLSize.Create(const AW, AH: Double);
+begin
+  W := AW;
+  H := AH;
+end;
+
+class operator TBLSize.Equal(const ALeft, ARight: TBLSize): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLSize.Equals(const AOther: TBLSize): Boolean;
+begin
+  Result := (W = AOther.W) and (H = AOther.H);
+end;
+
+class operator TBLSize.NotEqual(const ALeft, ARight: TBLSize): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLSize.Reset(const AOther: TBLSize);
+begin
+  Self := AOther;
+end;
+
+procedure TBLSize.Reset(const AW, AH: Double);
+begin
+  W := AW;
+  H := AH;
+end;
+
+procedure TBLSize.Reset;
+begin
+  W := 0;
+  H := 0;
+end;
+
+{ TBLSizeI }
+
+constructor TBLSizeI.Create(const AW, AH: Integer);
+begin
+  W := AW;
+  H := AH;
+end;
+
+class operator TBLSizeI.Equal(const ALeft, ARight: TBLSizeI): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLSizeI.Equals(const AOther: TBLSizeI): Boolean;
+begin
+  Result := (W = AOther.W) and (H = AOther.H);
+end;
+
+class operator TBLSizeI.NotEqual(const ALeft, ARight: TBLSizeI): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLSizeI.Reset(const AOther: TBLSizeI);
+begin
+  Self := AOther;
+end;
+
+procedure TBLSizeI.Reset(const AW, AH: Integer);
+begin
+  W := AW;
+  H := AH;
+end;
+
+procedure TBLSizeI.Reset;
+begin
+  W := 0;
+  H := 0;
+end;
+
+{ TBLBox }
+
+function TBLBox.Contains(const AX, AY: Double): Boolean;
+begin
+  Result := (AX >= X0) and (AY >= Y0) and (AX < X1) and (AY < Y1);
+end;
+
+class operator TBLBox.Add(const ALeft: TBLPoint; const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft.X + ARight.X0, ALeft.Y + ARight.Y0, ALeft.X + ARight.X1, ALeft.Y + ARight.Y1);
+end;
+
+class operator TBLBox.Add(const ALeft: TBLBox; const ARight: TBLPoint): TBLBox;
+begin
+  Result.Reset(ALeft.X0 + ARight.X, ALeft.Y0 + ARight.Y, ALeft.X1 + ARight.X, ALeft.Y1 + ARight.Y);
+end;
+
+class operator TBLBox.Add(const ALeft: Double; const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft + ARight.X0, ALeft + ARight.Y0, ALeft + ARight.X1, ALeft + ARight.Y1);
+end;
+
+class operator TBLBox.Add(const ALeft: TBLBox; const ARight: Double): TBLBox;
+begin
+  Result.Reset(ALeft.X0 + ARight, ALeft.Y0 + ARight, ALeft.X1 + ARight, ALeft.Y1 + ARight);
+end;
+
+function TBLBox.Contains(const APoint: TBLPoint): Boolean;
+begin
+  Result := Contains(APoint.X, APoint.Y);
+end;
+
+constructor TBLBox.Create(const AX0, AY0, AX1, AY1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+class operator TBLBox.Divide(const ALeft: TBLPoint;
+  const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft.X / ARight.X0, ALeft.Y / ARight.Y0, ALeft.X / ARight.X1, ALeft.Y / ARight.Y1);
+end;
+
+class operator TBLBox.Divide(const ALeft: TBLBox;
+  const ARight: TBLPoint): TBLBox;
+begin
+  Result.Reset(ALeft.X0 / ARight.X, ALeft.Y0 / ARight.Y, ALeft.X1 / ARight.X, ALeft.Y1 / ARight.Y);
+end;
+
+class operator TBLBox.Divide(const ALeft: Double; const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft / ARight.X0, ALeft / ARight.Y0, ALeft / ARight.X1, ALeft / ARight.Y1);
+end;
+
+class operator TBLBox.Divide(const ALeft: TBLBox; const ARight: Double): TBLBox;
+begin
+  Result.Reset(ALeft.X0 / ARight, ALeft.Y0 / ARight, ALeft.X1 / ARight, ALeft.Y1 / ARight);
+end;
+
+class operator TBLBox.Equal(const ALeft, ARight: TBLBox): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLBox.Equals(const AOther: TBLBox): Boolean;
+begin
+  Result := (X0 = AOther.X0) and (Y0 = AOther.Y0)
+        and (X1 = AOther.X1) and (Y1 = AOther.Y1);
+end;
+
+class operator TBLBox.Multiply(const ALeft: TBLPoint;
+  const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft.X * ARight.X0, ALeft.Y * ARight.Y0, ALeft.X * ARight.X1, ALeft.Y * ARight.Y1);
+end;
+
+class operator TBLBox.Multiply(const ALeft: TBLBox;
+  const ARight: TBLPoint): TBLBox;
+begin
+  Result.Reset(ALeft.X0 * ARight.X, ALeft.Y0 * ARight.Y, ALeft.X1 * ARight.X, ALeft.Y1 * ARight.Y);
+end;
+
+class operator TBLBox.Multiply(const ALeft: Double;
+  const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft * ARight.X0, ALeft * ARight.Y0, ALeft * ARight.X1, ALeft * ARight.Y1);
+end;
+
+class operator TBLBox.Multiply(const ALeft: TBLBox;
+  const ARight: Double): TBLBox;
+begin
+  Result.Reset(ALeft.X0 * ARight, ALeft.Y0 * ARight, ALeft.X1 * ARight, ALeft.Y1 * ARight);
+end;
+
+class operator TBLBox.NotEqual(const ALeft, ARight: TBLBox): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLBox.Reset(const AOther: TBLBox);
+begin
+  Self := AOther;
+end;
+
+class operator TBLBox.Subtract(const ALeft: TBLPoint;
+  const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft.X - ARight.X0, ALeft.Y - ARight.Y0, ALeft.X - ARight.X1, ALeft.Y - ARight.Y1);
+end;
+
+class operator TBLBox.Subtract(const ALeft: TBLBox;
+  const ARight: TBLPoint): TBLBox;
+begin
+  Result.Reset(ALeft.X0 - ARight.X, ALeft.Y0 - ARight.Y, ALeft.X1 - ARight.X, ALeft.Y1 - ARight.Y);
+end;
+
+class operator TBLBox.Subtract(const ALeft: Double;
+  const ARight: TBLBox): TBLBox;
+begin
+  Result.Reset(ALeft - ARight.X0, ALeft - ARight.Y0, ALeft - ARight.X1, ALeft - ARight.Y1);
+end;
+
+class operator TBLBox.Subtract(const ALeft: TBLBox;
+  const ARight: Double): TBLBox;
+begin
+  Result.Reset(ALeft.X0 - ARight, ALeft.Y0 - ARight, ALeft.X1 - ARight, ALeft.Y1 - ARight);
+end;
+
+procedure TBLBox.Reset(const AX0, AY0, AX1, AY1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+procedure TBLBox.Reset;
+begin
+  X0 := 0;
+  Y0 := 0;
+  X1 := 0;
+  Y1 := 0;
+end;
+
+{ TBLBoxI }
+
+function TBLBoxI.Contains(const AX, AY: Integer): Boolean;
+begin
+  Result := (AX >= X0) and (AY >= Y0) and (AX < X1) and (AY < Y1);
+end;
+
+function TBLBoxI.Contains(const APoint: TBLPointI): Boolean;
+begin
+  Result := Contains(APoint.X, APoint.Y);
+end;
+
+constructor TBLBoxI.Create(const AX0, AY0, AX1, AY1: Integer);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+class operator TBLBoxI.Equal(const ALeft, ARight: TBLBoxI): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLBoxI.Equals(const AOther: TBLBoxI): Boolean;
+begin
+  Result := (X0 = AOther.X0) and (Y0 = AOther.Y0)
+        and (X1 = AOther.X1) and (Y1 = AOther.Y1);
+end;
+
+class operator TBLBoxI.NotEqual(const ALeft, ARight: TBLBoxI): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLBoxI.Reset(const AOther: TBLBoxI);
+begin
+  Self := AOther;
+end;
+
+procedure TBLBoxI.Reset(const AX0, AY0, AX1, AY1: Integer);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+procedure TBLBoxI.Reset;
+begin
+  X0 := 0;
+  Y0 := 0;
+  X1 := 0;
+  Y1 := 0;
+end;
+
+{ TBLRect }
+
+constructor TBLRect.Create(const AX, AY, AW, AH: Double);
+begin
+  X := AX;
+  Y := AY;
+  W := AW;
+  H := AH;
+end;
+
+class operator TBLRect.Equal(const ALeft, ARight: TBLRect): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLRect.Equals(const AOther: TBLRect): Boolean;
+begin
+  Result := (X = AOther.X) and (Y = AOther.Y)
+        and (W = AOther.W) and (H = AOther.H);
+end;
+
+class operator TBLRect.NotEqual(const ALeft, ARight: TBLRect): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLRect.Reset(const AOther: TBLRect);
+begin
+  Self := AOther;
+end;
+
+procedure TBLRect.Reset(const AX, AY, AW, AH: Double);
+begin
+  X := AX;
+  Y := AY;
+  W := AW;
+  H := AH;
+end;
+
+procedure TBLRect.Reset;
+begin
+  X := 0;
+  Y := 0;
+  W := 0;
+  H := 0;
+end;
+
+{ TBLRectI }
+
+constructor TBLRectI.Create(const AX, AY, AW, AH: Integer);
+begin
+  X := AX;
+  Y := AY;
+  W := AW;
+  H := AH;
+end;
+
+class operator TBLRectI.Equal(const ALeft, ARight: TBLRectI): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLRectI.Equals(const AOther: TBLRectI): Boolean;
+begin
+  Result := (X = AOther.X) and (Y = AOther.Y)
+        and (W = AOther.W) and (H = AOther.H);
+end;
+
+class operator TBLRectI.NotEqual(const ALeft, ARight: TBLRectI): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLRectI.Reset(const AOther: TBLRectI);
+begin
+  Self := AOther;
+end;
+
+procedure TBLRectI.Reset(const AX, AY, AW, AH: Integer);
+begin
+  X := AX;
+  Y := AY;
+  W := AW;
+  H := AH;
+end;
+
+procedure TBLRectI.Reset;
+begin
+  X := 0;
+  Y := 0;
+  W := 0;
+  H := 0;
+end;
+
+{ TBLRoundRect }
+
+constructor TBLRoundRect.Create(const ARect: TBLRect; const AR: Double);
+begin
+  Reset(ARect, AR);
+end;
+
+constructor TBLRoundRect.Create(const ARect: TBLRect; const ARX, ARY: Double);
+begin
+  Reset(ARect, ARX, ARY);
+end;
+
+constructor TBLRoundRect.Create(const AX, AY, AW, AH, ARX, ARY: Double);
+begin
+  Reset(AX, AY, AW, AH, ARX, ARY);
+end;
+
+constructor TBLRoundRect.Create(const AX, AY, AW, AH, AR: Double);
+begin
+  Reset(AX, AY, AW, AH, AR);
+end;
+
+class operator TBLRoundRect.Equal(const ALeft, ARight: TBLRoundRect): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLRoundRect.Equals(const AOther: TBLRoundRect): Boolean;
+begin
+  Result := (X = AOther.X) and (Y = AOther.Y)
+        and (W = AOther.W) and (H = AOther.H)
+        and (RX = AOther.RX) and (RY = AOther.RY);
+end;
+
+class operator TBLRoundRect.NotEqual(const ALeft,
+  ARight: TBLRoundRect): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLRoundRect.Reset;
+begin
+  X := 0;
+  Y := 0;
+  W := 0;
+  H := 0;
+  RX := 0;
+  RY := 0;
+end;
+
+procedure TBLRoundRect.Reset(const ARect: TBLRect; const AR: Double);
+begin
+  X := ARect.X;
+  Y := ARect.Y;
+  W := ARect.W;
+  H := ARect.H;
+  RX := AR;
+  RY := AR;
+end;
+
+procedure TBLRoundRect.Reset(const ARect: TBLRect; const ARX, ARY: Double);
+begin
+  X := ARect.X;
+  Y := ARect.Y;
+  W := ARect.W;
+  H := ARect.H;
+  RX := ARX;
+  RY := ARY;
+end;
+
+procedure TBLRoundRect.Reset(const AOther: TBLRoundRect);
+begin
+  Self := AOther;
+end;
+
+procedure TBLRoundRect.Reset(const AX, AY, AW, AH, ARX, ARY: Double);
+begin
+  X := AX;
+  Y := AY;
+  W := AW;
+  H := AH;
+  RX := ARX;
+  RY := ARY;
+end;
+
+procedure TBLRoundRect.Reset(const AX, AY, AW, AH, AR: Double);
+begin
+  X := AX;
+  Y := AY;
+  W := AW;
+  H := AH;
+  RX := AR;
+  RY := AR;
+end;
+
+{ TBLCircle }
+
+constructor TBLCircle.Create(const ACX, ACY, AR: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  R := AR;
+end;
+
+class operator TBLCircle.Equal(const ALeft, ARight: TBLCircle): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLCircle.Equals(const AOther: TBLCircle): Boolean;
+begin
+  Result := (CX = AOther.CX) and (CY = AOther.CY) and (R = AOther.R);
+end;
+
+class operator TBLCircle.NotEqual(const ALeft, ARight: TBLCircle): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLCircle.Reset(const AOther: TBLCircle);
+begin
+  Self := AOther;
+end;
+
+procedure TBLCircle.Reset(const ACX, ACY, AR: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  R := AR;
+end;
+
+procedure TBLCircle.Reset;
+begin
+  CX := 0;
+  CY := 0;
+  R := 0;
+end;
+
+{ TBLEllipse }
+
+constructor TBLEllipse.Create(const ACX, ACY, AR: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  RX := AR;
+  RY := AR;
+end;
+
+constructor TBLEllipse.Create(const ACX, ACY, ARX, ARY: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  RX := ARX;
+  RY := ARY;
+end;
+
+class operator TBLEllipse.Equal(const ALeft, ARight: TBLEllipse): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLEllipse.Equals(const AOther: TBLEllipse): Boolean;
+begin
+  Result := (CX = AOther.CX) and (CY = AOther.CY)
+        and (RX = AOther.RX) and (RY = AOther.RY);
+end;
+
+class operator TBLEllipse.NotEqual(const ALeft, ARight: TBLEllipse): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLEllipse.Reset(const AOther: TBLEllipse);
+begin
+  Self := AOther;
+end;
+
+procedure TBLEllipse.Reset(const ACX, ACY, ARX, ARY: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  RX := ARX;
+  RY := ARY;
+end;
+
+procedure TBLEllipse.Reset(const ACX, ACY, AR: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  RX := AR;
+  RY := AR;
+end;
+
+procedure TBLEllipse.Reset;
+begin
+  CX := 0;
+  CY := 0;
+  RX := 0;
+  RY := 0;
+end;
+
+{ TBLArc }
+
+constructor TBLArc.Create(const ACX, ACY, ARX, ARY, AStart, ASweep: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  RX := ARX;
+  RY := ARY;
+  Start := AStart;
+  Sweep := ASweep;
+end;
+
+class operator TBLArc.Equal(const ALeft, ARight: TBLArc): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLArc.Equals(const AOther: TBLArc): Boolean;
+begin
+  Result := (CX = AOther.CX) and (CY = AOther.CY)
+        and (RX = AOther.RX) and (RY = AOther.RY)
+        and (Start = AOther.Start) and (Sweep = AOther.Sweep);
+end;
+
+class operator TBLArc.NotEqual(const ALeft, ARight: TBLArc): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLArc.Reset(const AOther: TBLArc);
+begin
+  Self := AOther;
+end;
+
+procedure TBLArc.Reset(const ACX, ACY, ARX, ARY, AStart, ASweep: Double);
+begin
+  CX := ACX;
+  CY := ACY;
+  RX := ARX;
+  RY := ARY;
+  Start := AStart;
+  Sweep := ASweep;
+end;
+
+procedure TBLArc.Reset;
+begin
+  CX := 0;
+  CY := 0;
+  RX := 0;
+  RY := 0;
+  Start := 0;
+  Sweep := 0;
+end;
+
+{ TBLLine }
+
+constructor TBLLine.Create(const AX0, AY0, AX1, AY1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+class operator TBLLine.Equal(const ALeft, ARight: TBLLine): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLLine.Equals(const AOther: TBLLine): Boolean;
+begin
+  Result := (X0 = AOther.X0) and (Y0 = AOther.Y0)
+        and (X1 = AOther.X1) and (Y1 = AOther.Y1);
+end;
+
+class operator TBLLine.NotEqual(const ALeft, ARight: TBLLine): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLLine.Reset(const AOther: TBLLine);
+begin
+  Self := AOther;
+end;
+
+procedure TBLLine.Reset(const AX0, AY0, AX1, AY1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+procedure TBLLine.Reset;
+begin
+  X0 := 0;
+  Y0 := 0;
+  X1 := 0;
+  Y1 := 0;
+end;
+
+{ TBLTriangle }
+
+constructor TBLTriangle.Create(const AX0, AY0, AX1, AY1, AX2, AY2: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+  X2 := AX2;
+  Y2 := AY2;
+end;
+
+class operator TBLTriangle.Equal(const ALeft, ARight: TBLTriangle): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLTriangle.Equals(const AOther: TBLTriangle): Boolean;
+begin
+  Result := (X0 = AOther.X0) and (Y0 = AOther.Y0)
+        and (X1 = AOther.X1) and (Y1 = AOther.Y1)
+        and (X2 = AOther.X2) and (Y2 = AOther.Y2);
+end;
+
+class operator TBLTriangle.NotEqual(const ALeft, ARight: TBLTriangle): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLTriangle.Reset(const AOther: TBLTriangle);
+begin
+  Self := AOther;
+end;
+
+procedure TBLTriangle.Reset(const AX0, AY0, AX1, AY1, AX2, AY2: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+  X2 := AX2;
+  Y2 := AY2;
+end;
+
+procedure TBLTriangle.Reset;
+begin
+  X0 := 0;
+  Y0 := 0;
+  X1 := 0;
+  Y1 := 0;
+  X2 := 0;
+  Y2 := 0;
+end;
+
+{ TBLMatrix2D }
+
+constructor TBLMatrix2D.Create(const AM00, AM01, AM10, AM11, AM20,
+  AM21: Double);
+begin
+  Reset(AM00, AM01, AM10, AM11, AM20, AM21);
+end;
+
+function TBLMatrix2D.Determinant: Double;
+begin
+  Result := (M00 * M11) - (M01 * M10);
+end;
+
+class operator TBLMatrix2D.Equal(const ALeft, ARight: TBLMatrix2D): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLMatrix2D.Equals(const AOther: TBLMatrix2D): Boolean;
+begin
+  Result := (M[0] = AOther.M[0]) and (M[1] = AOther.M[1])
+        and (M[2] = AOther.M[2]) and (M[3] = AOther.M[3])
+        and (M[4] = AOther.M[4]) and (M[5] = AOther.M[5]);
+end;
+
+function TBLMatrix2D.GetKind: TBLTransformKind;
+begin
+  Result := TBLTransformKind(_blMatrix2DGetType(@Self));
+end;
+
+class function TBLMatrix2D.Invert(const ASrc: TBLMatrix2D;
+  out ADst: TBLMatrix2D): Boolean;
+begin
+  Result := (_blMatrix2DInvert(@ADst, @ASrc) = 0);
+end;
+
+function TBLMatrix2D.Invert: Boolean;
+begin
+  Result := (_blMatrix2DInvert(@Self, @Self) = 0);
+end;
+
+class function TBLMatrix2D.MakeIdentity: TBLMatrix2D;
+begin
+  Result := Identity;
+end;
+
+class function TBLMatrix2D.MakeRotation(const AAngle: Double): TBLMatrix2D;
+begin
+  Result.ResetToRotation(AAngle, 0, 0);
+end;
+
+class function TBLMatrix2D.MakeRotation(const AAngle, AX,
+  AY: Double): TBLMatrix2D;
+begin
+  Result.ResetToRotation(AAngle, AX, AY);
+end;
+
+class function TBLMatrix2D.MakeRotation(const AAngle: Double;
+  const AOrigin: TBLPoint): TBLMatrix2D;
+begin
+  Result.ResetToRotation(AAngle, AOrigin.X, AOrigin.Y);
+end;
+
+class function TBLMatrix2D.MakeScaling(const AXY: Double): TBLMatrix2D;
+begin
+  Result.Reset(AXY, 0, 0, AXY, 0, 0);
+end;
+
+class function TBLMatrix2D.MakeScaling(const AX, AY: Double): TBLMatrix2D;
+begin
+  Result.Reset(AX, 0, 0, AY, 0, 0);
+end;
+
+class function TBLMatrix2D.MakeScaling(const AP: TBLPoint): TBLMatrix2D;
+begin
+  Result.Reset(AP.X, 0, 0, AP.Y, 0, 0);
+end;
+
+class function TBLMatrix2D.MakeScaling(const AP: TBLPointI): TBLMatrix2D;
+begin
+  Result.Reset(AP.X, 0, 0, AP.Y, 0, 0);
+end;
+
+class function TBLMatrix2D.MakeSinCos(const ASin, ACos: Double;
+  const AP: TBLPoint): TBLMatrix2D;
+begin
+  Result.Reset(ACos, ASin, -ASin, ACos, AP.X, AP.Y);
+end;
+
+class function TBLMatrix2D.MakeSinCos(const ASin, ACos, ATX,
+  ATY: Double): TBLMatrix2D;
+begin
+  Result.Reset(ACos, ASin, -ASin, ACos, ATX, ATY);
+end;
+
+class function TBLMatrix2D.MakeSkewing(const AOrigin: TBLPoint): TBLMatrix2D;
+begin
+  Result.ResetToSkewing(AOrigin.X, AOrigin.Y);
+end;
+
+class function TBLMatrix2D.MakeSkewing(const AX, AY: Double): TBLMatrix2D;
+begin
+  Result.ResetToSkewing(AX, AY);
+end;
+
+class function TBLMatrix2D.MakeTranslation(const AX, AY: Double): TBLMatrix2D;
+begin
+  Result.Reset(1, 0, 0, 1, AX, AY);
+end;
+
+class function TBLMatrix2D.MakeTranslation(const AP: TBLPoint): TBLMatrix2D;
+begin
+  Result.Reset(1, 0, 0, 1, AP.X, AP.Y);
+end;
+
+class function TBLMatrix2D.MakeTranslation(const AP: TBLPointI): TBLMatrix2D;
+begin
+  Result.Reset(1, 0, 0, 1, AP.X, AP.Y);
+end;
+
+function TBLMatrix2D.MapPoint(const AP: TBLPoint): TBLPoint;
+begin
+  Result := MapPoint(AP.X, AP.Y);
+end;
+
+function TBLMatrix2D.MapPoint(const AX, AY: Double): TBLPoint;
+begin
+  Result.X := (AX * M00) + (AY * M10) + M20;
+  Result.Y := (AX * M01) + (AY * M11) + M21;
+end;
+
+function TBLMatrix2D.MapVector(const AP: TBLPoint): TBLPoint;
+begin
+  Result := MapVector(AP.X, AP.Y);
+end;
+
+function TBLMatrix2D.MapVector(const AX, AY: Double): TBLPoint;
+begin
+  Result.X := (AX * M00) + (AY * M10);
+  Result.Y := (AX * M01) + (AY * M11);
+end;
+
+class operator TBLMatrix2D.NotEqual(const ALeft, ARight: TBLMatrix2D): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLMatrix2D.PostTranslate(const AX, AY: Double);
+begin
+  M20 := M20 + AX;
+  M21 := M21 + AY;
+end;
+
+procedure TBLMatrix2D.PostTranslate(const AP: TBLPoint);
+begin
+  M20 := M20 + AP.X;
+  M21 := M21 + AP.Y;
+end;
+
+procedure TBLMatrix2D.PostScale(const AXY: Double);
+begin
+  PostScale(AXY, AXY);
+end;
+
+procedure TBLMatrix2D.PostScale(const AX, AY: Double);
+begin
+  M00 := M00 * AX;
+  M01 := M01 * AY;
+  M10 := M10 * AX;
+  M11 := M11 * AY;
+  M20 := M20 * AX;
+  M21 := M21 * AY;
+end;
+
+procedure TBLMatrix2D.PostScale(const AP: TBLPoint);
+begin
+  PostScale(AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.PostRotate(const AAngle: Double);
+begin
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.PostRotate), @AAngle);
+end;
+
+procedure TBLMatrix2D.PostRotate(const AAngle, AX, AY: Double);
+var
+  OpData: array [0..2] of Double;
+begin
+  OpData[0] := AAngle;
+  OpData[1] := AX;
+  OpData[2] := AY;
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @OpData);
+end;
+
+procedure TBLMatrix2D.PostRotate(const AAngle: Double; const AP: TBLPoint);
+var
+  OpData: array [0..2] of Double;
+begin
+  OpData[0] := AAngle;
+  OpData[1] := AP.X;
+  OpData[2] := AP.Y;
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @OpData);
+end;
+
+procedure TBLMatrix2D.PostRotate(const AAngle: Double; const AP: TBLPointI);
+var
+  OpData: array [0..2] of Double;
+begin
+  OpData[0] := AAngle;
+  OpData[1] := AP.X;
+  OpData[2] := AP.Y;
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @OpData);
+end;
+
+procedure TBLMatrix2D.PostScale(const AP: TBLPointI);
+begin
+  PostScale(AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.PostSkew(const AP: TBLPoint);
+begin
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.PostSkew), @AP);
+end;
+
+procedure TBLMatrix2D.PostSkew(const AX, AY: Double);
+begin
+  var P: TBLPoint;
+  P.Reset(AX, AY);
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.PostSkew), @P);
+end;
+
+procedure TBLMatrix2D.PostTransform(const AM: TBLMatrix2D);
+begin
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.PostTransform), @AM);
+end;
+
+procedure TBLMatrix2D.PostTranslate(const AP: TBLPointI);
+begin
+  M20 := M20 + AP.X;
+  M21 := M21 + AP.Y;
+end;
+
+procedure TBLMatrix2D.Reset;
+begin
+  M[0] := 1;
+  M[1] := 0;
+  M[2] := 0;
+  M[3] := 1;
+  M[4] := 0;
+  M[5] := 0;
+end;
+
+procedure TBLMatrix2D.Reset(const AM00, AM01, AM10, AM11, AM20, AM21: Double);
+begin
+  M[0] := AM00;
+  M[1] := AM01;
+  M[2] := AM10;
+  M[3] := AM11;
+  M[4] := AM20;
+  M[5] := AM21;
+end;
+
+procedure TBLMatrix2D.Reset(const AOther: TBLMatrix2D);
+begin
+  Self := AOther;
+end;
+
+procedure TBLMatrix2D.ResetToRotation(const AAngle: Double);
+begin
+  _blMatrix2DSetRotation(@Self, AAngle, 0, 0);
+end;
+
+procedure TBLMatrix2D.ResetToRotation(const AAngle, AX, AY: Double);
+begin
+  _blMatrix2DSetRotation(@Self, AAngle, AX, AY);
+end;
+
+procedure TBLMatrix2D.ResetToRotation(const AAngle: Double;
+  const AOrigin: TBLPoint);
+begin
+  _blMatrix2DSetRotation(@Self, AAngle, AOrigin.X, AOrigin.Y);
+end;
+
+procedure TBLMatrix2D.ResetToScaling(const AXY: Double);
+begin
+  Reset(AXY, 0, 0, AXY, 0, 0);
+end;
+
+procedure TBLMatrix2D.ResetToScaling(const AX, AY: Double);
+begin
+  Reset(AX, 0, 0, AY, 0, 0);
+end;
+
+procedure TBLMatrix2D.ResetToScaling(const AP: TBLPoint);
+begin
+  Reset(AP.X, 0, 0, AP.Y, 0, 0);
+end;
+
+procedure TBLMatrix2D.ResetToScaling(const AP: TBLPointI);
+begin
+  Reset(AP.X, 0, 0, AP.Y, 0, 0);
+end;
+
+procedure TBLMatrix2D.ResetToSinCos(const ASin, ACos: Double;
+  const AP: TBLPoint);
+begin
+  Reset(ACos, ASin, -ASin, ACos, AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.ResetToSinCos(const ASin, ACos, ATX, ATY: Double);
+begin
+  Reset(ACos, ASin, -ASin, ACos, ATX, ATY);
+end;
+
+procedure TBLMatrix2D.ResetToSkewing(const AP: TBLPoint);
+begin
+  _blMatrix2DSetSkewing(@Self, AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.ResetToSkewing(const AX, AY: Double);
+begin
+  _blMatrix2DSetSkewing(@Self, AX, AY);
+end;
+
+procedure TBLMatrix2D.ResetToTranslation(const AX, AY: Double);
+begin
+  Reset(1, 0, 0, 1, AX, AY);
+end;
+
+procedure TBLMatrix2D.ResetToTranslation(const AP: TBLPoint);
+begin
+  Reset(1, 0, 0, 1, AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.ResetToTranslation(const AP: TBLPointI);
+begin
+  Reset(1, 0, 0, 1, AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.Rotate(const AAngle: Double);
+begin
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.Rotate), @AAngle);
+end;
+
+procedure TBLMatrix2D.Rotate(const AAngle, AX, AY: Double);
+var
+  OpData: array [0..2] of Double;
+begin
+  OpData[0] := AAngle;
+  OpData[1] := AX;
+  OpData[2] := AY;
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.RotatePoint), @OpData);
+end;
+
+procedure TBLMatrix2D.Rotate(const AAngle: Double; const AP: TBLPoint);
+var
+  OpData: array [0..2] of Double;
+begin
+  OpData[0] := AAngle;
+  OpData[1] := AP.X;
+  OpData[2] := AP.Y;
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.RotatePoint), @OpData);
+end;
+
+procedure TBLMatrix2D.Rotate(const AAngle: Double; const AP: TBLPointI);
+var
+  OpData: array [0..2] of Double;
+begin
+  OpData[0] := AAngle;
+  OpData[1] := AP.X;
+  OpData[2] := AP.Y;
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.RotatePoint), @OpData);
+end;
+
+procedure TBLMatrix2D.Scale(const AXY: Double);
+begin
+  Scale(AXY, AXY);
+end;
+
+procedure TBLMatrix2D.Scale(const AX, AY: Double);
+begin
+  M00 := M00 * AX;
+  M01 := M01 * AX;
+  M10 := M10 * AY;
+  M11 := M11 * AY;
+end;
+
+procedure TBLMatrix2D.Scale(const AP: TBLPoint);
+begin
+  Scale(AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.Scale(const AP: TBLPointI);
+begin
+  Scale(AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.Skew(const AP: TBLPoint);
+begin
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.Skew), @AP);
+end;
+
+procedure TBLMatrix2D.Skew(const AX, AY: Double);
+begin
+  var P: TBLPoint;
+  P.Reset(AX, AY);
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.Skew), @P);
+end;
+
+procedure TBLMatrix2D.Transform(const AM: TBLMatrix2D);
+begin
+  _blMatrix2DApplyOp(@Self, Ord(TBLTransformOp.Transform), @AM);
+end;
+
+procedure TBLMatrix2D.Translate(const AX, AY: Double);
+begin
+  M20 := M20 + (AX * M00) + (AY * M10);
+  M21 := M21 + (AX * M01) + (AY * M11);
+end;
+
+procedure TBLMatrix2D.Translate(const AP: TBLPoint);
+begin
+  Translate(AP.X, AP.Y);
+end;
+
+procedure TBLMatrix2D.Translate(const AP: TBLPointI);
+begin
+  Translate(AP.X, AP.Y);
+end;
+
+{ TBLStrokeOptions }
+
+class operator TBLStrokeOptions.Assign(var ADest: TBLStrokeOptions;
+  const [ref] ASrc: TBLStrokeOptions);
+begin
+  _BLCheck(_blStrokeOptionsInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLStrokeOptions.Equal(const ALeft,
+  ARight: TBLStrokeOptions): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLStrokeOptions.Equals(const AOther: TBLStrokeOptions): Boolean;
+begin
+  Result := _blStrokeOptionsEquals(@Self, @AOther);
+end;
+
+class operator TBLStrokeOptions.Finalize(var ADest: TBLStrokeOptions);
+begin
+  _BLCheck(_blStrokeOptionsDestroy(@ADest));
+end;
+
+function TBLStrokeOptions.GetCap(
+  const AIndex: TBLStrokeCapPosition): TBLStrokeCap;
+begin
+  Result := TBLStrokeCap(FValues.Caps[AIndex]);
+end;
+
+function TBLStrokeOptions.GetEndCap: TBLStrokeCap;
+begin
+  Result := TBLStrokeCap(FValues.EndCap);
+end;
+
+function TBLStrokeOptions.GetJoin: TBLStrokeJoin;
+begin
+  Result := TBLStrokeJoin(FValues.Join);
+end;
+
+function TBLStrokeOptions.GetStartCap: TBLStrokeCap;
+begin
+  Result := TBLStrokeCap(FValues.StartCap);
+end;
+
+function TBLStrokeOptions.GetTransformOrder: TBLStrokeTransformOrder;
+begin
+  Result := TBLStrokeTransformOrder(FValues.TransformOrder);
+end;
+
+class operator TBLStrokeOptions.Initialize(out ADest: TBLStrokeOptions);
+begin
+  _BLCheck(_blStrokeOptionsInit(@ADest));
+end;
+
+class operator TBLStrokeOptions.NotEqual(const ALeft,
+  ARight: TBLStrokeOptions): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLStrokeOptions.Reset;
+begin
+  _BLCheck(_blStrokeOptionsReset(@Self));
+end;
+
+procedure TBLStrokeOptions.SetCap(const AIndex: TBLStrokeCapPosition;
+  const AValue: TBLStrokeCap);
+begin
+  FValues.Caps[AIndex] := Ord(AValue);
+end;
+
+procedure TBLStrokeOptions.SetCaps(const ACap: TBLStrokeCap);
+begin
+  FValues.StartCap := Ord(ACap);
+  FValues.EndCap := Ord(ACap);
+end;
+
+procedure TBLStrokeOptions.SetEndCap(const AValue: TBLStrokeCap);
+begin
+  FValues.EndCap := Ord(AValue);
+end;
+
+procedure TBLStrokeOptions.SetJoin(const AValue: TBLStrokeJoin);
+begin
+  FValues.Join := Ord(AValue);
+end;
+
+procedure TBLStrokeOptions.SetStartCap(const AValue: TBLStrokeCap);
+begin
+  FValues.StartCap := Ord(AValue);
+end;
+
+procedure TBLStrokeOptions.SetTransformOrder(
+  const AValue: TBLStrokeTransformOrder);
+begin
+  FValues.TransformOrder := Ord(AValue);
+end;
+
+{ TBLApproximationOptions }
+
+function TBLApproximationOptions.GetFlattenMode: TBLFlattenMode;
+begin
+  Result := TBLFlattenMode(FFlattenMode);
+end;
+
+function TBLApproximationOptions.GetOffsetMode: TBLOffsetMode;
+begin
+  Result := TBLOffsetMode(FOffsetMode);
+end;
+
+procedure TBLApproximationOptions.SetFlattenMode(const AValue: TBLFlattenMode);
+begin
+  FFlattenMode := Ord(AValue);
+end;
+
+procedure TBLApproximationOptions.SetOffsetMode(const AValue: TBLOffsetMode);
+begin
+  FOffsetMode := Ord(AValue);
+end;
+
+{ TBLPathView }
+
+procedure TBLPathView.Reset(const ACommandDataIn: PByte;
+  const AVertexDataIn: PBLPoint; const ASizeIn: NativeInt);
+begin
+  FCommandData := ACommandDataIn;
+  FVertexData := AVertexDataIn;
+  FSize := ASizeIn;
+end;
+
+procedure TBLPathView.Reset;
+begin
+  FCommandData := nil;
+  FVertexData := nil;
+  FSize := 0;
+end;
+
 { TBLPath }
+
+procedure TBLPath.AddBox(const ABox: TBLBoxI; const ADir: TBLGeometryDirection);
+begin
+  _BLCheck(_blPathAddBoxI(@Self, @ABox, Ord(ADir)));
+end;
+
+procedure TBLPath.AddBox(const ABox: TBLBox; const ADir: TBLGeometryDirection);
+begin
+  _BLCheck(_blPathAddBoxD(@Self, @ABox, Ord(ADir)));
+end;
+
+procedure TBLPath.AddArc(const AArc: TBLArc; const ATransform: TBLMatrix2D;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Arc, @AArc, ATransform, ADir);
+end;
+
+procedure TBLPath.AddArc(const AArc: TBLArc; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Arc, @AArc, ADir);
+end;
+
+procedure TBLPath.AddBox(const AX0, AY0, AX1, AY1: Double;
+  const ADir: TBLGeometryDirection);
+begin
+  var Box: TBLBox;
+  Box.Reset(AX0, AY0, AX1, AY1);
+  _BLCheck(_blPathAddBoxD(@Self, @Box, Ord(ADir)));
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TArray<TBLBoxI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBoxI>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddBoxArray(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBoxI>;
+  View.Reset(Pointer(AArray), ACount);
+  AddBoxArray(View, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBoxI>;
+  View.Reset(Pointer(AArray), ACount);
+  AddBoxArray(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewBoxI, @AArray, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewBoxI, @AArray, ATransform, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TArray<TBLBoxI>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBoxI>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddBoxArray(View, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TArray<TBLBox>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBox>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddBoxArray(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBox>;
+  View.Reset(Pointer(AArray), ACount);
+  AddBoxArray(View, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBox>;
+  View.Reset(Pointer(AArray), ACount);
+  AddBoxArray(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewBoxD, @AArray, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewBoxD, @AArray, ATransform, ADir);
+end;
+
+procedure TBLPath.AddBoxArray(const AArray: TArray<TBLBox>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLBox>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddBoxArray(View, ADir);
+end;
+
+procedure TBLPath.AddChord(const AChord: TBLArc; const ATransform: TBLMatrix2D;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Chord, @AChord, ATransform, ADir);
+end;
+
+procedure TBLPath.AddChord(const AChord: TBLArc;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Chord, @AChord, ADir);
+end;
+
+procedure TBLPath.AddCircle(const ACircle: TBLCircle;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Circle, @ACircle, ATransform, ADir);
+end;
+
+procedure TBLPath.AddCircle(const ACircle: TBLCircle;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Circle, @ACircle, ADir);
+end;
+
+procedure TBLPath.AddCubicToSegments(const APoints: PBLPoint;
+  const ASegmentCount: NativeInt);
+begin
+  var CmdPtr: PByte;
+  var VtxPtr: PBLPoint;
+  var PointCount: NativeInt := ASegmentCount * 3;
+  _BLCheck(_blPathModifyOp(@Self, Ord(TBLModifyOp.AppendGrow), PointCount, @CmdPtr, @VtxPtr));
+
+  for var I := 0 to ASegmentCount - 1 do
+  begin
+    CmdPtr^ := Ord(TBLPathCmd.Cubic);
+    Inc(CmdPtr);
+    CmdPtr^ := Ord(TBLPathCmd.Cubic);
+    Inc(CmdPtr);
+    CmdPtr^ := Ord(TBLPathCmd.OnPath);
+    Inc(CmdPtr);
+  end;
+
+  Move(APoints^, VtxPtr^, PointCount * SizeOf(TBLPoint));
+end;
+
+procedure TBLPath.AddEllipse(const AEllipse: TBLEllipse;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Ellipse, @AEllipse, ATransform, ADir);
+end;
+
+procedure TBLPath.AddEllipse(const AEllipse: TBLEllipse;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Ellipse, @AEllipse, ADir);
+end;
+
+procedure TBLPath.AddGeometry(const AGeometryType: TBLGeometryType;
+  const AGeometryData: Pointer; const AMatrix: TBLMatrix2D;
+  const ADir: TBLGeometryDirection);
+begin
+  _BLCheck(_blPathAddGeometry(@Self, Ord(AGeometryType), AGeometryData, @AMatrix, Ord(ADir)));
+end;
+
+procedure TBLPath.AddGeometry(const AGeometryType: TBLGeometryType;
+  const AGeometryData: Pointer; const ADir: TBLGeometryDirection);
+begin
+  _BLCheck(_blPathAddGeometry(@Self, Ord(AGeometryType), AGeometryData, nil, Ord(ADir)));
+end;
+
+procedure TBLPath.AddCubicToSegments(const APoints: TArray<TBLPoint>);
+begin
+  Assert((Length(APoints) mod 3) = 0);
+  AddCubicToSegments(Pointer(APoints), Length(APoints) div 3);
+end;
+
+procedure TBLPath.AddLine(const ALine: TBLLine; const ATransform: TBLMatrix2D;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Line, @ALine, ATransform, ADir);
+end;
+
+procedure TBLPath.AddLine(const ALine: TBLLine;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Line, @ALine, ADir);
+end;
+
+procedure TBLPath.AddLineToSegments(const APoints: PBLPoint;
+  const ACount: NativeInt);
+begin
+  var CmdPtr: PByte;
+  var VtxPtr: PBLPoint;
+  _BLCheck(_blPathModifyOp(@Self, Ord(TBLModifyOp.AppendGrow), ACount, @CmdPtr, @VtxPtr));
+  FillChar(CmdPtr^, ACount, Ord(TBLPathCmd.OnPath));
+  Move(APoints^, VtxPtr^, ACount * SizeOf(TBLPoint));
+end;
+
+procedure TBLPath.AddPath(const APath: TBLPath; const AP: TBLPoint);
+begin
+  _BLCheck(_blPathAddTranslatedPath(@Self, @APath, nil, @AP));
+end;
+
+procedure TBLPath.AddPath(const APath: TBLPath; const ARange: TBLRange);
+begin
+  _BLCheck(_blPathAddPath(@Self, @APath, @ARange));
+end;
+
+procedure TBLPath.AddPath(const APath: TBLPath);
+begin
+  _BLCheck(_blPathAddPath(@Self, @APath, nil));
+end;
+
+procedure TBLPath.AddPath(const APath: TBLPath; const ARange: TBLRange;
+  const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPathAddTransformedPath(@Self, @APath, @ARange, @ATransform));
+end;
+
+procedure TBLPath.AddPath(const APath: TBLPath; const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPathAddTransformedPath(@Self, @APath, nil, @ATransform));
+end;
+
+procedure TBLPath.AddPath(const APath: TBLPath; const ARange: TBLRange;
+  const AP: TBLPoint);
+begin
+  _BLCheck(_blPathAddTranslatedPath(@Self, @APath, @ARange, @AP));
+end;
+
+procedure TBLPath.AddPie(const APie: TBLArc; const ATransform: TBLMatrix2D;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Pie, @APie, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TArray<TBLPointI>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolygon(View, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolygon(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolygon(View, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TBLArrayView<TBLPointI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolygonI, @APoly, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TBLArrayView<TBLPointI>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolygonI, @APoly, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TArray<TBLPointI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolygon(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TArray<TBLPoint>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolygon(View, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolygon(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolygon(View, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TBLArrayView<TBLPoint>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolygonD, @APoly, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TBLArrayView<TBLPoint>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolygonD, @APoly, ADir);
+end;
+
+procedure TBLPath.AddPolygon(const APoly: TArray<TBLPoint>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolygon(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TArray<TBLPointI>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolyline(View, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolyline(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolyline(View, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TBLArrayView<TBLPointI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolylineI, @APoly, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TBLArrayView<TBLPointI>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolylineI, @APoly, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TArray<TBLPointI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPointI>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolyline(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TArray<TBLPoint>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolyline(View, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolyline(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), ACount);
+  AddPolyline(View, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TBLArrayView<TBLPoint>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolylineD, @APoly, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TBLArrayView<TBLPoint>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.PolylineD, @APoly, ADir);
+end;
+
+procedure TBLPath.AddPolyline(const APoly: TArray<TBLPoint>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLPoint>;
+  View.Reset(Pointer(APoly), Length(APoly));
+  AddPolyline(View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddPie(const APie: TBLArc; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Pie, @APie, ADir);
+end;
+
+procedure TBLPath.AddQuadToSegments(const APoints: PBLPoint;
+  const ASegmentCount: NativeInt);
+begin
+  var CmdPtr: PByte;
+  var VtxPtr: PBLPoint;
+  var PointCount: NativeInt := ASegmentCount shl 1;
+  _BLCheck(_blPathModifyOp(@Self, Ord(TBLModifyOp.AppendGrow), PointCount, @CmdPtr, @VtxPtr));
+
+  for var I := 0 to ASegmentCount - 1 do
+  begin
+    CmdPtr^ := Ord(TBLPathCmd.Quad);
+    Inc(CmdPtr);
+    CmdPtr^ := Ord(TBLPathCmd.OnPath);
+    Inc(CmdPtr);
+  end;
+
+  Move(APoints^, VtxPtr^, PointCount * SizeOf(TBLPoint));
+end;
+
+procedure TBLPath.AddRect(const ARect: TBLRectI;
+  const ADir: TBLGeometryDirection);
+begin
+  _BLCheck(_blPathAddRectI(@Self, @ARect, Ord(ADir)));
+end;
+
+procedure TBLPath.AddRect(const ARect: TBLRect;
+  const ADir: TBLGeometryDirection);
+begin
+  _BLCheck(_blPathAddRectD(@Self, @ARect, Ord(ADir)));
+end;
+
+procedure TBLPath.AddRect(const AX, AY, AW, AH: Double;
+  const ADir: TBLGeometryDirection);
+begin
+  var R: TBLRect;
+  R.Reset(AX, AY, AW, AH);
+  _BLCheck(_blPathAddRectD(@Self, @R, Ord(ADir)));
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TArray<TBLRectI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRectI>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddGeometry(TBLGeometryType.ArrayViewRectI, @View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRectI>;
+  View.Reset(Pointer(AArray), ACount);
+  AddGeometry(TBLGeometryType.ArrayViewRectI, @View, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRectI>;
+  View.Reset(Pointer(AArray), ACount);
+  AddGeometry(TBLGeometryType.ArrayViewRectI, @View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewRectI, @AArray, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewRectI, @AArray, ATransform, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TArray<TBLRectI>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRectI>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddGeometry(TBLGeometryType.ArrayViewRectI, @View, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TArray<TBLRect>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRect>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddGeometry(TBLGeometryType.ArrayViewRectD, @View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRect>;
+  View.Reset(Pointer(AArray), ACount);
+  AddGeometry(TBLGeometryType.ArrayViewRectD, @View, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRect>;
+  View.Reset(Pointer(AArray), ACount);
+  AddGeometry(TBLGeometryType.ArrayViewRectD, @View, ATransform, ADir);
+end;
+
+procedure TBLPath.AddReversedPath(const APath: TBLPath; const ARange: TBLRange;
+  const AReverseMode: TBLPathReverseMode);
+begin
+  _BLCheck(_blPathAddReversedPath(@Self, @APath, @ARange, Ord(AReverseMode)));
+end;
+
+procedure TBLPath.AddReversedPath(const APath: TBLPath;
+  const AReverseMode: TBLPathReverseMode);
+begin
+  _BLCheck(_blPathAddReversedPath(@Self, @APath, nil, Ord(AReverseMode)));
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TBLArrayView<TBLRect>;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewRectD, @AArray, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TBLArrayView<TBLRect>;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.ArrayViewRectD, @AArray, ATransform, ADir);
+end;
+
+procedure TBLPath.AddRectArray(const AArray: TArray<TBLRect>;
+  const ADir: TBLGeometryDirection);
+begin
+  var View: TBLArrayView<TBLRect>;
+  View.Reset(Pointer(AArray), Length(AArray));
+  AddGeometry(TBLGeometryType.ArrayViewRectD, @View, ADir);
+end;
+
+procedure TBLPath.AddRoundRect(const ARR: TBLRoundRect;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.RoundRect, @ARR, ATransform, ADir);
+end;
+
+procedure TBLPath.AddStrokedPath(const APath: TBLPath; const ARange: TBLRange;
+  const AStrokeOptions: TBLStrokeOptions;
+  const AApproximationOptions: TBLApproximationOptions);
+begin
+  _BLCheck(_blPathAddStrokedPath(@Self, @APath, @ARange, @AStrokeOptions, @AApproximationOptions));
+end;
+
+procedure TBLPath.AddStrokedPath(const APath: TBLPath;
+  const AStrokeOptions: TBLStrokeOptions;
+  const AApproximationOptions: TBLApproximationOptions);
+begin
+  _BLCheck(_blPathAddStrokedPath(@Self, @APath, nil, @AStrokeOptions, @AApproximationOptions));
+end;
+
+procedure TBLPath.AddTriangle(const ATriangle: TBLTriangle;
+  const ATransform: TBLMatrix2D; const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Triangle, @ATriangle, ATransform, ADir);
+end;
+
+procedure TBLPath.AddTriangle(const ATriangle: TBLTriangle;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.Triangle, @ATriangle, ADir);
+end;
+
+procedure TBLPath.AddRoundRect(const ARR: TBLRoundRect;
+  const ADir: TBLGeometryDirection);
+begin
+  AddGeometry(TBLGeometryType.RoundRect, @ARR, ADir);
+end;
+
+procedure TBLPath.AddQuadToSegments(const APoints: TArray<TBLPoint>);
+begin
+  Assert((Length(APoints) and 1) = 0);
+  AddQuadToSegments(Pointer(APoints), Length(APoints) shr 1);
+end;
+
+procedure TBLPath.AddLineToSegments(const APoints: TArray<TBLPoint>);
+begin
+  AddLineToSegments(Pointer(APoints), Length(APoints));
+end;
+
+procedure TBLPath.ArcQuadrantTo(const AX1, AY1, AX2, AY2: Double);
+begin
+  _BLCheck(_blPathArcQuadrantTo(@Self, AX1, AY1, AX2, AY2));
+end;
+
+procedure TBLPath.ArcQuadrantTo(const AP1, AP2: TBLPoint);
+begin
+  _BLCheck(_blPathArcQuadrantTo(@Self, AP1.X, AP1.Y, AP2.X, AP2.Y));
+end;
+
+procedure TBLPath.ArcTo(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AForceMoveTo: Boolean);
+begin
+  _BLCheck(_blPathArcTo(@Self, ACX, ACY, ARX, ARY, AStart, ASweep, AForceMoveTo));
+end;
+
+procedure TBLPath.ArcTo(const AC, AR: TBLPoint; const AStart, ASweep: Double;
+  const AForceMoveTo: Boolean);
+begin
+  _BLCheck(_blPathArcTo(@Self, AC.X, AC.Y, AR.X, AR.Y, AStart, ASweep, AForceMoveTo));
+end;
 
 class operator TBLPath.Assign(var ADest: TBLPath; const [ref] ASrc: TBLPath);
 begin
   _BLCheck(_blPathInitWeak(@ADest, @ASrc));
+end;
+
+procedure TBLPath.AssignDeep(const AOther: TBLPath);
+begin
+  _BLCheck(_blPathAssignDeep(@Self, @AOther));
+end;
+
+procedure TBLPath.Clear;
+begin
+  _BLCheck(_blPathClear(@Self));
+end;
+
+procedure TBLPath.Close;
+begin
+  _BLCheck(_blPathClose(@Self));
+end;
+
+procedure TBLPath.ConicTo(const AX1, AY1, AX2, AY2, AWeight: Double);
+begin
+  _BLCheck(_blPathConicTo(@Self, AX1, AY1, AX2, AY2, AWeight));
+end;
+
+procedure TBLPath.ConicTo(const AP1, AP2: TBLPoint; const AWeight: Double);
+begin
+  _BLCheck(_blPathConicTo(@Self, AP1.X, AP1.Y, AP2.X, AP2.Y, AWeight));
+end;
+
+procedure TBLPath.CubicTo(const AP1, AP2, AP3: TBLPoint);
+begin
+  _BLCheck(_blPathCubicTo(@Self, AP1.X, AP1.Y, AP2.X, AP2.Y, AP3.X, AP3.Y));
 end;
 
 procedure TBLPath.CubicTo(const AX1, AY1, AX2, AY2, AX3, AY3: Double);
@@ -2798,9 +8107,134 @@ begin
   _BLCheck(_blPathCubicTo(@Self, AX1, AY1, AX2, AY2, AX3, AY3));
 end;
 
+class operator TBLPath.Equal(const ALeft: TBLPath;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+procedure TBLPath.EllipticArcTo(const ARX, ARY, AXAxisRotation: Double;
+  const ALargeArcFlag, ASweepFlag: Boolean; const AX1, AY1: Double);
+begin
+  _BLCheck(_blPathEllipticArcTo(@Self, ARX, ARY, AXAxisRotation, ALargeArcFlag,
+    ASweepFlag, AX1, AY1));
+end;
+
+procedure TBLPath.EllipticArcTo(const ARP: TBLPoint;
+  const AXAxisRotation: Double; const ALargeArcFlag, ASweepFlag: Boolean;
+  const AP1: TBLPoint);
+begin
+  _BLCheck(_blPathEllipticArcTo(@Self, ARP.X, ARP.Y, AXAxisRotation,
+    ALargeArcFlag, ASweepFlag, AP1.X, AP1.Y));
+end;
+
+class operator TBLPath.Equal(const ALeft, ARight: TBLPath): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLPath.Equals(const AOther: TBLPath): Boolean;
+begin
+  Result := _blPathEquals(@Self, @AOther);
+end;
+
 class operator TBLPath.Finalize(var ADest: TBLPath);
 begin
   _BLCheck(_blPathDestroy(@ADest));
+end;
+
+procedure TBLPath.FitTo(const ARange: TBLRange; const ARect: TBLRect);
+begin
+  _BLCheck(_blPathFitTo(@Self, @ARange, @ARect, 0));
+end;
+
+procedure TBLPath.FitTo(const ARect: TBLRect);
+begin
+  _BLCheck(_blPathFitTo(@Self, nil, @ARect, 0));
+end;
+
+function TBLPath.GetBoundingBox: TBLBox;
+begin
+  _BLCheck(_blPathGetBoundingBox(@Self, @Result));
+end;
+
+function TBLPath.GetCapacity: NativeInt;
+begin
+  Result := _blPathGetCapacity(@Self);
+end;
+
+function TBLPath.GetClosestVertex(const AP: TBLPoint;
+  const AMaxDistance: Double; out ADistanceOut: Double): NativeInt;
+begin
+  _BLCheck(_blPathGetClosestVertex(@Self, @AP, AMaxDistance, @Result, @ADistanceOut));
+end;
+
+function TBLPath.GetClosestVertex(const AP: TBLPoint;
+  const AMaxDistance: Double): NativeInt;
+begin
+  var DistanceOut: Double;
+  _BLCheck(_blPathGetClosestVertex(@Self, @AP, AMaxDistance, @Result, @DistanceOut));
+end;
+
+function TBLPath.GetCommandData: PByte;
+begin
+  Result := _blPathGetCommandData(@Self);
+end;
+
+function TBLPath.GetCommandDataEnd: PByte;
+begin
+  Result := _blPathGetCommandData(@Self);
+  Inc(Result, Size);
+end;
+
+function TBLPath.GetControlBox: TBLBox;
+begin
+  _BLCheck(_blPathGetControlBox(@Self, @Result));
+end;
+
+function TBLPath.GetFigureRange(const AIndex: Integer): TBLRange;
+begin
+  _BLCheck(_blPathGetFigureRange(@Self, AIndex, @Result));
+end;
+
+function TBLPath.GetInfoFlags: TBLPathFlags;
+begin
+  _BLCheck(_blPathGetInfoFlags(@Self, @Result));
+end;
+
+function TBLPath.GetIsEmpty: Boolean;
+begin
+  Result := (Size = 0);
+end;
+
+function TBLPath.GetLastVertex: TBLPoint;
+begin
+  _BLCheck(_blPathGetLastVertex(@Self, @Result));
+end;
+
+function TBLPath.GetSize: NativeInt;
+begin
+  Result := _blPathGetSize(@Self);
+end;
+
+function TBLPath.GetVertexData: PBLPoint;
+begin
+  Result := _blPathGetVertexData(@Self);
+end;
+
+function TBLPath.GetVertexDataEnd: PBLPoint;
+begin
+  Result := _blPathGetVertexData(@Self);
+  Inc(Result, Size);
+end;
+
+function TBLPath.HitTest(const AP: TBLPoint;
+  const AFillRule: TBLFillRule): TBLHitTest;
+begin
+  Result := TBLHitTest(_blPathHitTest(@Self, @AP, Ord(AFillRule)));
 end;
 
 class operator TBLPath.Initialize(out ADest: TBLPath);
@@ -2808,9 +8242,148 @@ begin
   _BLCheck(_blPathInit(@ADest));
 end;
 
+procedure TBLPath.LineTo(const AX1, AY1: Double);
+begin
+  _BLCheck(_blPathLineTo(@Self, AX1, AY1));
+end;
+
+procedure TBLPath.LineTo(const AP1: TBLPoint);
+begin
+  _BLCheck(_blPathLineTo(@Self, AP1.X, AP1.Y));
+end;
+
+procedure TBLPath.ModifyOp(const AOp: TBLModifyOp; const ASize: NativeInt;
+  out ACmdDataOut: PByte; out AVertexDataOut: PBLPoint);
+begin
+  _BLCheck(_blPathModifyOp(@Self, Ord(AOp), ASize, @ACmdDataOut, @AVertexDataOut));
+end;
+
+procedure TBLPath.MoveTo(const AP0: TBLPoint);
+begin
+  _BLCheck(_blPathMoveTo(@Self, AP0.X, AP0.Y));
+end;
+
 procedure TBLPath.MoveTo(const AX0, AY0: Double);
 begin
   _BLCheck(_blPathMoveTo(@Self, AX0, AY0));
+end;
+
+class operator TBLPath.NotEqual(const ALeft: TBLPath;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLPath.NotEqual(const ALeft, ARight: TBLPath): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLPath.PolyTo(const APoly: TArray<TBLPoint>);
+begin
+  _BLCheck(_blPathPolyTo(@Self, Pointer(APoly), Length(APoly)));
+end;
+
+procedure TBLPath.QuadTo(const AX1, AY1, AX2, AY2: Double);
+begin
+  _BLCheck(_blPathQuadTo(@Self, AX1, AY1, AX2, AY2));
+end;
+
+procedure TBLPath.QuadTo(const AP1, AP2: TBLPoint);
+begin
+  _BLCheck(_blPathQuadTo(@Self, AP1.X, AP1.Y, AP2.X, AP2.Y));
+end;
+
+procedure TBLPath.PolyTo(const APoly: PBLPoint; const ACount: NativeInt);
+begin
+  _BLCheck(_blPathPolyTo(@Self, APoly, ACount));
+end;
+
+procedure TBLPath.RemoveRange(const ARange: TBLRange);
+begin
+  _BLCheck(_blPathRemoveRange(@Self, @ARange));
+end;
+
+procedure TBLPath.Reserve(const AMinCapacity: NativeInt);
+begin
+  _BLCheck(_blPathReserve(@Self, AMinCapacity));
+end;
+
+procedure TBLPath.Reset;
+begin
+  _BLCheck(_blPathReset(@Self));
+end;
+
+procedure TBLPath.SetVertexAt(const AIndex: NativeInt; const ACmd: TBLPathCmd;
+  const AX, AY: Double);
+begin
+  _BLCheck(_blPathSetVertexAt(@Self, AIndex, Ord(ACmd), AX, AY));
+end;
+
+procedure TBLPath.SetVertexAt(const AIndex: NativeInt; const ACmd: TBLPathCmd;
+  const APt: TBLPoint);
+begin
+  _BLCheck(_blPathSetVertexAt(@Self, AIndex, Ord(ACmd), APt.X, APt.Y));
+end;
+
+procedure TBLPath.Shrink;
+begin
+  _BLCheck(_blPathShrink(@Self));
+end;
+
+procedure TBLPath.SmoothCubicTo(const AX2, AY2, AX3, AY3: Double);
+begin
+  _BLCheck(_blPathSmoothCubicTo(@Self, AX2, AY2, AX3, AY3));
+end;
+
+procedure TBLPath.SmoothCubicTo(const AP2, AP3: TBLPoint);
+begin
+  _BLCheck(_blPathSmoothCubicTo(@Self, AP2.X, AP2.Y, AP3.X, AP3.Y));
+end;
+
+procedure TBLPath.SmoothQuadTo(const AX2, AY2: Double);
+begin
+  _BLCheck(_blPathSmoothQuadTo(@Self, AX2, AY2));
+end;
+
+procedure TBLPath.SmoothQuadTo(const AP2: TBLPoint);
+begin
+  _BLCheck(_blPathSmoothQuadTo(@Self, AP2.X, AP2.Y));
+end;
+
+procedure TBLPath.Swap(var AOther: TBLPath);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+procedure TBLPath.Transform(const ARange: TBLRange; const AM: TBLMatrix2D);
+begin
+  _BLCheck(_blPathTransform(@Self, @ARange, @AM));
+end;
+
+procedure TBLPath.Transform(const AM: TBLMatrix2D);
+begin
+  _BLCheck(_blPathTransform(@Self, nil, @AM));
+end;
+
+procedure TBLPath.Translate(const ARange: TBLRange; const AP: TBLPoint);
+begin
+  _BLCheck(_blPathTranslate(@Self, @ARange, @AP));
+end;
+
+procedure TBLPath.Translate(const AP: TBLPoint);
+begin
+  _BLCheck(_blPathTranslate(@Self, nil, @AP));
+end;
+
+function TBLPath.View: TBLPathView;
+type
+  PBLPathView = ^TBLPathview;
+begin
+  Result := PBLPathView(FBase.FImpl)^;
 end;
 
 {$ENDREGION 'Geometries'}
@@ -3891,6 +9464,293 @@ begin
   Result.Reset(Pointer(Data), Size);
 end;
 
+{ TBLBitArray }
+
+procedure TBLBitArray.AppendBit(const ABitValue: Boolean);
+begin
+  _BLCheck(_blBitArrayAppendBit(@Self, ABitValue));
+end;
+
+procedure TBLBitArray.AppendWord(const AWordValue: UInt32);
+begin
+  _BLCheck(_blBitArrayAppendWord(@Self, AWordValue));
+end;
+
+procedure TBLBitArray.AppendWords(const AWordData: PUInt32;
+  const AWordCount: Integer);
+begin
+  _BLCheck(_blBitArrayAppendWords(@Self, AWordData, AWordCount));
+end;
+
+procedure TBLBitArray.AppendWords(const AWordData: TArray<UInt32>);
+begin
+  _BLCheck(_blBitArrayAppendWords(@Self, Pointer(AWordData), Length(AWordData)));
+end;
+
+class operator TBLBitArray.Assign(var ADest: TBLBitArray;
+  const [ref] ASrc: TBLBitArray);
+begin
+  _BLCheck(_blBitArrayInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLBitArray.Equal(const ALeft: TBLBitArray;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+procedure TBLBitArray.AssignWords(const AWordData: PUInt32;
+  const AWordCount: Integer);
+begin
+  _BLCheck(_blBitArrayAssignWords(@Self, AWordData, AWordCount));
+end;
+
+procedure TBLBitArray.AssignWords(const AWordData: TArray<UInt32>);
+begin
+  _BLCheck(_blBitArrayAssignWords(@Self, Pointer(AWordData), Length(AWordData)));
+end;
+
+function TBLBitArray.CardinalityInRange(const AStartBit,
+  AEndBit: Integer): Integer;
+begin
+  Result := _blBitArrayGetCardinalityInRange(@Self, AStartBit, AEndBit);
+end;
+
+procedure TBLBitArray.Clear;
+begin
+  _BLCheck(_blBitArrayClear(@Self));
+end;
+
+procedure TBLBitArray.ClearBit(const ABitIndex: Integer);
+begin
+  _BLCheck(_blBitArrayClearBit(@Self, ABitIndex));
+end;
+
+procedure TBLBitArray.ClearRange(const AStartBit, AEndBit: Integer);
+begin
+  _BLCheck(_blBitArrayClearRange(@Self, AStartBit, AEndBit));
+end;
+
+procedure TBLBitArray.ClearWord(const ABitIndex: Integer;
+  const AWordValue: UInt32);
+begin
+  _BLCheck(_blBitArrayClearWord(@Self, ABitIndex, AWordValue));
+end;
+
+procedure TBLBitArray.ClearWords(const ABitIndex: Integer;
+  const AWordData: PUInt32; const AWordCount: UInt32);
+begin
+  _BLCheck(_blBitArrayClearWords(@Self, ABitIndex, AWordData, AWordCount));
+end;
+
+procedure TBLBitArray.ClearWords(const ABitIndex: Integer;
+  const AWordData: TArray<UInt32>);
+begin
+  _BLCheck(_blBitArrayClearWords(@Self, ABitIndex, Pointer(AWordData), Length(AWordData)));
+end;
+
+function TBLBitArray.Compare(const AOther: TBLBitArray): Integer;
+begin
+  Result := _blBitArrayCompare(@Self, @AOther);
+end;
+
+class operator TBLBitArray.Equal(const ALeft, ARight: TBLBitArray): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLBitArray.Equals(const AOther: TBLBitArray): Boolean;
+begin
+  Result := _blBitArrayEquals(@Self, @AOther);
+end;
+
+procedure TBLBitArray.FillRange(const AStartBit, AEndBit: Integer);
+begin
+  _BLCheck(_blBitArrayFillRange(@Self, AStartBit, AEndBit));
+end;
+
+procedure TBLBitArray.FillWords(const ABitIndex: Integer;
+  const AWordData: PUInt32; const AWordCount: UInt32);
+begin
+  _BLCheck(_blBitArrayFillWords(@Self, ABitIndex, AWordData, AWordCount));
+end;
+
+procedure TBLBitArray.FillWords(const ABitIndex: Integer;
+  const AWordData: TArray<UInt32>);
+begin
+  _BLCheck(_blBitArrayFillWords(@Self, ABitIndex, Pointer(AWordData), Length(AWordData)));
+end;
+
+class operator TBLBitArray.Finalize(var ADest: TBLBitArray);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blBitArrayDestroy(@ADest));
+end;
+
+function TBLBitArray.GetBit(const AIndex: Integer): Boolean;
+begin
+  Result := _blBitArrayHasBit(@Self, AIndex);
+end;
+
+function TBLBitArray.GetCapacity: Integer;
+begin
+  Result := _blBitArrayGetCapacity(@Self);
+end;
+
+function TBLBitArray.GetCardinality: Integer;
+begin
+  Result := _blBitArrayGetCardinality(@Self);
+end;
+
+function TBLBitArray.GetData: PUInt32;
+begin
+  Result := _blBitArrayGetData(@Self);
+end;
+
+function TBLBitArray.GetIsEmpty: Boolean;
+begin
+  Result := _blBitArrayIsEmpty(@Self);
+end;
+
+function TBLBitArray.GetSize: Integer;
+begin
+  Result := _blBitArrayGetSize(@Self);
+end;
+
+function TBLBitArray.GetWordCount: Integer;
+begin
+  Result := _blBitArrayGetWordCount(@Self);
+end;
+
+class operator TBLBitArray.GreaterThan(const ALeft,
+  ARight: TBLBitArray): Boolean;
+begin
+  Result := (ALeft.Compare(ARight) > 0);
+end;
+
+class operator TBLBitArray.GreaterThanOrEqual(const ALeft,
+  ARight: TBLBitArray): Boolean;
+begin
+  Result := (ALeft.Compare(ARight) >= 0);
+end;
+
+function TBLBitArray.HasBit(const ABitIndex: Integer): Boolean;
+begin
+  Result := _blBitArrayHasBit(@Self, ABitIndex);
+end;
+
+function TBLBitArray.HasBitsInRange(const AStartBit, AEndBit: Integer): Boolean;
+begin
+  Result := _blBitArrayHasBitsInRange(@Self, AStartBit, AEndBit);
+end;
+
+class operator TBLBitArray.Initialize(out ADest: TBLBitArray);
+begin
+  _BLCheck(_blBitArrayInit(@ADest));
+end;
+
+function TBLBitArray.Intersects(const AOther: TBLBitArray): Boolean;
+begin
+  Result := _blBitArrayIntersects(@Self, @AOther);
+end;
+
+class operator TBLBitArray.LessThan(const ALeft, ARight: TBLBitArray): Boolean;
+begin
+  Result := (ALeft.Compare(ARight) < 0);
+end;
+
+class operator TBLBitArray.LessThanOrEqual(const ALeft,
+  ARight: TBLBitArray): Boolean;
+begin
+  Result := (ALeft.Compare(ARight) <= 0);
+end;
+
+class operator TBLBitArray.NotEqual(const ALeft: TBLBitArray;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLBitArray.NotEqual(const ALeft, ARight: TBLBitArray): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLBitArray.ReplaceBit(const ABitIndex: Integer;
+  const ABitValue: Boolean);
+begin
+  _BLCheck(_blBitArrayReplaceBit(@Self, ABitIndex, ABitValue));
+end;
+
+function TBLBitArray.ReplaceOp(const ANumBits: Integer): PUInt32;
+begin
+  _BLCheck(_blBitArrayReplaceOp(@Self, ANumBits, @Result));
+end;
+
+procedure TBLBitArray.ReplaceWord(const ABitIndex: Integer;
+  const AWordValue: UInt32);
+begin
+  _BLCheck(_blBitArrayReplaceWord(@Self, ABitIndex, AWordValue));
+end;
+
+procedure TBLBitArray.ReplaceWords(const ABitIndex: Integer;
+  const AWordData: PUInt32; const AWordCount: UInt32);
+begin
+  _BLCheck(_blBitArrayReplaceWords(@Self, ABitIndex, AWordData, AWordCount));
+end;
+
+procedure TBLBitArray.ReplaceWords(const ABitIndex: Integer;
+  const AWordData: TArray<UInt32>);
+begin
+  _BLCheck(_blBitArrayReplaceWords(@Self, ABitIndex, Pointer(AWordData), Length(AWordData)));
+end;
+
+procedure TBLBitArray.Reserve(const ANumBits: Integer);
+begin
+  _BLCheck(_blBitArrayReserve(@Self, ANumBits));
+end;
+
+procedure TBLBitArray.Reset;
+begin
+  _BLCheck(_blBitArrayReset(@Self));
+end;
+
+procedure TBLBitArray.Resize(const ANumBits: Integer);
+begin
+  _BLCheck(_blBitArrayResize(@Self, ANumBits));
+end;
+
+procedure TBLBitArray.SetBit(const ABitIndex: Integer);
+begin
+  _BLCheck(_blBitArraySetBit(@Self, ABitIndex));
+end;
+
+procedure TBLBitArray.SetBit(const AIndex: Integer; const AValue: Boolean);
+begin
+  _BLCheck(_blBitArrayReplaceBit(@Self, AIndex, AValue));
+end;
+
+procedure TBLBitArray.Shrink;
+begin
+  _BLCheck(_blBitArrayShrink(@Self));
+end;
+
+function TBLBitArray.Subsumes(const AOther: TBLBitArray): Boolean;
+begin
+  Result := _blBitArraySubsumes(@Self, @AOther);
+end;
+
+procedure TBLBitArray.Swap(var AOther: TBLBitArray);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
 {$ENDREGION 'Containers'}
 
 {$REGION 'Imaging'}
@@ -4191,6 +10051,7 @@ end;
 initialization
   Assert(SizeOf(TBLObjectCore) = 16);
   Assert(SizeOf(TBLImage) = 16);
+  Assert(SizeOf(TBLStrokeOptions.TValues) = 8);
 {$ENDREGION 'Initialization'}
 
 end.

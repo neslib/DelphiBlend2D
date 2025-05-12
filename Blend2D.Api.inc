@@ -20,6 +20,7 @@ const
 type
   PUInt8 = PByte;
   PPUInt8 = ^PByte;
+  PPUInt32 = ^PUInt32;
   PPUTF8Char = ^PUTF8Char;
   {$IF Defined(MACOS)}
   Size_T = LongWord;
@@ -178,6 +179,128 @@ function _blArrayRemoveRange(self: Pointer; rStart: Size_T; rEnd: Size_T): Integ
 function _blArrayEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
   external _LIB_BLEND2D name _PU + 'blArrayEquals';
 {$ENDREGION 'array.h'}
+
+{$REGION 'bitarray.h'}
+function _blBitArrayInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayInit';
+
+function _blBitArrayInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayInitMove';
+
+function _blBitArrayInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayInitWeak';
+
+function _blBitArrayDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayDestroy';
+
+function _blBitArrayReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReset';
+
+function _blBitArrayAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAssignMove';
+
+function _blBitArrayAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAssignWeak';
+
+function _blBitArrayAssignWords(self: Pointer; const wordData: PUInt32; wordCount: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAssignWords';
+
+function _blBitArrayIsEmpty(const self: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayIsEmpty';
+
+function _blBitArrayGetSize(const self: Pointer): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetSize';
+
+function _blBitArrayGetWordCount(const self: Pointer): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetWordCount';
+
+function _blBitArrayGetCapacity(const self: Pointer): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetCapacity';
+
+function _blBitArrayGetData(const self: Pointer): PUInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetData';
+
+function _blBitArrayGetCardinality(const self: Pointer): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetCardinality';
+
+function _blBitArrayGetCardinalityInRange(const self: Pointer; startBit: UInt32; endBit: UInt32): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetCardinalityInRange';
+
+function _blBitArrayHasBit(const self: Pointer; bitIndex: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayHasBit';
+
+function _blBitArrayHasBitsInRange(const self: Pointer; startBit: UInt32; endBit: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayHasBitsInRange';
+
+function _blBitArraySubsumes(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArraySubsumes';
+
+function _blBitArrayIntersects(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayIntersects';
+
+function _blBitArrayGetRange(const self: Pointer; startOut: PUInt32; endOut: PUInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayGetRange';
+
+function _blBitArrayEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayEquals';
+
+function _blBitArrayCompare(const a: Pointer; const b: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayCompare';
+
+function _blBitArrayClear(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClear';
+
+function _blBitArrayResize(self: Pointer; nBits: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayResize';
+
+function _blBitArrayReserve(self: Pointer; nBits: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReserve';
+
+function _blBitArrayShrink(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayShrink';
+
+function _blBitArraySetBit(self: Pointer; bitIndex: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArraySetBit';
+
+function _blBitArrayFillRange(self: Pointer; startBit: UInt32; endBit: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayFillRange';
+
+function _blBitArrayFillWords(self: Pointer; bitIndex: UInt32; const wordData: PUInt32; wordCount: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayFillWords';
+
+function _blBitArrayClearBit(self: Pointer; bitIndex: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearBit';
+
+function _blBitArrayClearRange(self: Pointer; startBit: UInt32; endBit: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearRange';
+
+function _blBitArrayClearWord(self: Pointer; bitIndex: UInt32; wordValue: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearWord';
+
+function _blBitArrayClearWords(self: Pointer; bitIndex: UInt32; const wordData: PUInt32; wordCount: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayClearWords';
+
+function _blBitArrayReplaceOp(self: Pointer; nBits: UInt32; dataOut: PPUInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceOp';
+
+function _blBitArrayReplaceBit(self: Pointer; bitIndex: UInt32; bitValue: Boolean): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceBit';
+
+function _blBitArrayReplaceWord(self: Pointer; bitIndex: UInt32; wordValue: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceWord';
+
+function _blBitArrayReplaceWords(self: Pointer; bitIndex: UInt32; const wordData: PUInt32; wordCount: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayReplaceWords';
+
+function _blBitArrayAppendBit(self: Pointer; bitValue: Boolean): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAppendBit';
+
+function _blBitArrayAppendWord(self: Pointer; wordValue: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAppendWord';
+
+function _blBitArrayAppendWords(self: Pointer; const wordData: PUInt32; wordCount: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blBitArrayAppendWords';
+{$ENDREGION 'bitarray.h'}
 
 {$REGION 'context.h'}
 function _blContextInit(self: Pointer): Integer; cdecl;
@@ -815,6 +938,35 @@ function _blImageWriteToFile(const self: Pointer; const fileName: PUTF8Char; con
 function _blImageWriteToData(const self: Pointer; dst: Pointer; const codec: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blImageWriteToData';
 {$ENDREGION 'image.h'}
+
+{$REGION 'matrix.h'}
+function _blMatrix2DSetIdentity(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetIdentity';
+
+function _blMatrix2DSetTranslation(self: Pointer; x: Double; y: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetTranslation';
+
+function _blMatrix2DSetScaling(self: Pointer; x: Double; y: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetScaling';
+
+function _blMatrix2DSetSkewing(self: Pointer; x: Double; y: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetSkewing';
+
+function _blMatrix2DSetRotation(self: Pointer; angle: Double; cx: Double; cy: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DSetRotation';
+
+function _blMatrix2DApplyOp(self: Pointer; opType: Integer; const opData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DApplyOp';
+
+function _blMatrix2DInvert(dst: Pointer; const src: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DInvert';
+
+function _blMatrix2DGetType(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DGetType';
+
+function _blMatrix2DMapPointDArray(const self: Pointer; dst: Pointer; const src: Pointer; count: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blMatrix2DMapPointDArray';
+{$ENDREGION 'matrix.h'}
 
 {$REGION 'path.h'}
 type
