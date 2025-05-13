@@ -22,12 +22,6 @@ type
   PPUInt8 = ^PByte;
   PPUInt32 = ^PUInt32;
   PPUTF8Char = ^PUTF8Char;
-  {$IF Defined(MACOS)}
-  Size_T = LongWord;
-  {$ELSE}
-  Size_T = NativeUInt;
-  {$ENDIF}
-  PSize_T = ^Size_T;
 
 {$REGION 'object.h'}
 type
@@ -874,6 +868,124 @@ function _blContextBlitScaledImageD(self: Pointer; const rect: Pointer; const im
   external _LIB_BLEND2D name _PU + 'blContextBlitScaledImageD';
 {$ENDREGION 'context.h'}
 
+{$REGION 'format.h'}
+function _blFormatInfoQuery(self: Pointer; format: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFormatInfoQuery';
+
+function _blFormatInfoSanitize(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFormatInfoSanitize';
+{$ENDREGION 'format.h'}
+
+{$REGION 'gradient.h'}
+function _blGradientInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientInit';
+
+function _blGradientInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientInitMove';
+
+function _blGradientInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientInitWeak';
+
+function _blGradientInitAs(self: Pointer; &type: Integer; const values: Pointer; extendMode: Integer; const stops: Pointer; n: Size_T; const transform: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientInitAs';
+
+function _blGradientDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientDestroy';
+
+function _blGradientReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientReset';
+
+function _blGradientAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientAssignMove';
+
+function _blGradientAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientAssignWeak';
+
+function _blGradientCreate(self: Pointer; &type: Integer; const values: Pointer; extendMode: Integer; const stops: Pointer; n: Size_T; const transform: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientCreate';
+
+function _blGradientShrink(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientShrink';
+
+function _blGradientReserve(self: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientReserve';
+
+function _blGradientGetType(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetType';
+
+function _blGradientSetType(self: Pointer; &type: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientSetType';
+
+function _blGradientGetExtendMode(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetExtendMode';
+
+function _blGradientSetExtendMode(self: Pointer; extendMode: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientSetExtendMode';
+
+function _blGradientGetValue(const self: Pointer; index: Size_T): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetValue';
+
+function _blGradientSetValue(self: Pointer; index: Size_T; value: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientSetValue';
+
+function _blGradientSetValues(self: Pointer; index: Size_T; const values: PDouble; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientSetValues';
+
+function _blGradientGetSize(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetSize';
+
+function _blGradientGetCapacity(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetCapacity';
+
+function _blGradientGetStops(const self: Pointer): Pointer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetStops';
+
+function _blGradientResetStops(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientResetStops';
+
+function _blGradientAssignStops(self: Pointer; const stops: Pointer; n: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientAssignStops';
+
+function _blGradientAddStopRgba32(self: Pointer; offset: Double; argb32: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientAddStopRgba32';
+
+function _blGradientAddStopRgba64(self: Pointer; offset: Double; argb64: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientAddStopRgba64';
+
+function _blGradientRemoveStop(self: Pointer; index: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientRemoveStop';
+
+function _blGradientRemoveStopByOffset(self: Pointer; offset: Double; all: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientRemoveStopByOffset';
+
+function _blGradientRemoveStopsByIndex(self: Pointer; rStart: Size_T; rEnd: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientRemoveStopsByIndex';
+
+function _blGradientRemoveStopsByOffset(self: Pointer; offsetMin: Double; offsetMax: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientRemoveStopsByOffset';
+
+function _blGradientReplaceStopRgba32(self: Pointer; index: Size_T; offset: Double; rgba32: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientReplaceStopRgba32';
+
+function _blGradientReplaceStopRgba64(self: Pointer; index: Size_T; offset: Double; rgba64: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientReplaceStopRgba64';
+
+function _blGradientIndexOfStop(const self: Pointer; offset: Double): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientIndexOfStop';
+
+function _blGradientGetTransform(const self: Pointer; transformOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetTransform';
+
+function _blGradientGetTransformType(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientGetTransformType';
+
+function _blGradientApplyTransformOp(self: Pointer; opType: Integer; const opData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientApplyTransformOp';
+
+function _blGradientEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGradientEquals';
+{$ENDREGION 'gradient.h'}
+
 {$REGION 'image.h'}
 function _blImageInit(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blImageInit';
@@ -938,6 +1050,123 @@ function _blImageWriteToFile(const self: Pointer; const fileName: PUTF8Char; con
 function _blImageWriteToData(const self: Pointer; dst: Pointer; const codec: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blImageWriteToData';
 {$ENDREGION 'image.h'}
+
+{$REGION 'imagecodec.h'}
+function _blImageCodecInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInit';
+
+function _blImageCodecInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInitMove';
+
+function _blImageCodecInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInitWeak';
+
+function _blImageCodecInitByName(self: Pointer; const name: PUTF8Char; size: Size_T; const codecs: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInitByName';
+
+function _blImageCodecDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecDestroy';
+
+function _blImageCodecReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecReset';
+
+function _blImageCodecAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecAssignMove';
+
+function _blImageCodecAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecAssignWeak';
+
+function _blImageCodecFindByName(self: Pointer; const name: PUTF8Char; size: Size_T; const codecs: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecFindByName';
+
+function _blImageCodecFindByExtension(self: Pointer; const name: PUTF8Char; size: Size_T; const codecs: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecFindByExtension';
+
+function _blImageCodecFindByData(self: Pointer; const data: Pointer; size: Size_T; const codecs: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecFindByData';
+
+function _blImageCodecInspectData(const self: Pointer; const data: Pointer; size: Size_T): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecInspectData';
+
+function _blImageCodecCreateDecoder(const self: Pointer; dst: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecCreateDecoder';
+
+function _blImageCodecCreateEncoder(const self: Pointer; dst: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecCreateEncoder';
+
+function _blImageCodecArrayInitBuiltInCodecs(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecArrayInitBuiltInCodecs';
+
+function _blImageCodecArrayAssignBuiltInCodecs(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecArrayAssignBuiltInCodecs';
+
+function _blImageCodecAddToBuiltIn(const codec: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecAddToBuiltIn';
+
+function _blImageCodecRemoveFromBuiltIn(const codec: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageCodecRemoveFromBuiltIn';
+{$ENDREGION 'imagecodec.h'}
+
+{$REGION 'imagedecoder.h'}
+function _blImageDecoderInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderInit';
+
+function _blImageDecoderInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderInitMove';
+
+function _blImageDecoderInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderInitWeak';
+
+function _blImageDecoderDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderDestroy';
+
+function _blImageDecoderReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderReset';
+
+function _blImageDecoderAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderAssignMove';
+
+function _blImageDecoderAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderAssignWeak';
+
+function _blImageDecoderRestart(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderRestart';
+
+function _blImageDecoderReadInfo(self: Pointer; infoOut: Pointer; const data: Pointer; size: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderReadInfo';
+
+function _blImageDecoderReadFrame(self: Pointer; imageOut: Pointer; const data: Pointer; size: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageDecoderReadFrame';
+{$ENDREGION 'imagedecoder.h'}
+
+{$REGION 'imageencoder.h'}
+function _blImageEncoderInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderInit';
+
+function _blImageEncoderInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderInitMove';
+
+function _blImageEncoderInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderInitWeak';
+
+function _blImageEncoderDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderDestroy';
+
+function _blImageEncoderReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderReset';
+
+function _blImageEncoderAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderAssignMove';
+
+function _blImageEncoderAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderAssignWeak';
+
+function _blImageEncoderRestart(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderRestart';
+
+function _blImageEncoderWriteFrame(self: Pointer; dst: Pointer; const image: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blImageEncoderWriteFrame';
+{$ENDREGION 'imageencoder.h'}
 
 {$REGION 'matrix.h'}
 function _blMatrix2DSetIdentity(self: Pointer): Integer; cdecl;
@@ -1152,6 +1381,29 @@ function _blStrokeOptionsAssignWeak(self: Pointer; const other: Pointer): Intege
 function _blPathStrokeToSink(const self: Pointer; const range: Pointer; const strokeOptions: Pointer; const approximationOptions: Pointer; a: Pointer; b: Pointer; c: Pointer; sink: _BLPathStrokeSinkFunc; userData: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blPathStrokeToSink';
 {$ENDREGION 'path.h'}
+
+{$ENDREGION 'pixelconverter.h'}
+function _blPixelConverterInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPixelConverterInit';
+
+function _blPixelConverterInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPixelConverterInitWeak';
+
+function _blPixelConverterDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPixelConverterDestroy';
+
+function _blPixelConverterReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPixelConverterReset';
+
+function _blPixelConverterAssign(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPixelConverterAssign';
+
+function _blPixelConverterCreate(self: Pointer; const dstInfo: Pointer; const srcInfo: Pointer; createFlags: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPixelConverterCreate';
+
+function _blPixelConverterConvert(const self: Pointer; dstData: Pointer; dstStride: IntPtr; const srcData: Pointer; srcStride: IntPtr; w: UInt32; h: UInt32; const options: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPixelConverterConvert';
+{$ENDREGION 'pixelconverter.h'}
 
 {$REGION 'string.h'}
 function _blStringInit(self: Pointer): Integer; cdecl;

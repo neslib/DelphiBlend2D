@@ -23,6 +23,16 @@ interface
 uses
   System.SysUtils;
 
+{$REGION 'Common Types'}
+type
+  {$IF Defined(MACOS)}
+  Size_T = LongWord;
+  {$ELSE}
+  Size_T = NativeUInt;
+  {$ENDIF}
+  PSize_T = ^Size_T;
+{$ENDREGION 'Common Types'}
+
 {$REGION 'Error Handling'}
 
 { ============================================================================
@@ -5033,6 +5043,505 @@ type
 
 {$ENDREGION 'Geometries'}
 
+{$REGION 'Styling'}
+
+{ ============================================================================
+   [Styling - Colors]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  32-bit RGBA color (8-bit per component) stored as `$AARRGGBB`.
+  /// </summary>
+  TBLRgba32 = record
+  {$REGION 'Internal Declarations'}
+  private
+    function GetR: Byte; inline;
+    procedure SetR(const AValue: Byte); inline;
+    function GetG: Byte; inline;
+    procedure SetG(const AValue: Byte); inline;
+    function GetB: Byte; inline;
+    procedure SetB(const AValue: Byte); inline;
+    function GetA: Byte; inline;
+    procedure SetA(const AValue: Byte); inline;
+    function GetIsOpaque: Boolean; inline;
+    function GetIsTransparent: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Packed 32-bit RGBA value.
+    /// </summary>
+    Value: UInt32;
+  public
+    class function Create: TBLRgba32; overload; inline; static;
+    constructor Create(const ARgba32: UInt32); overload;
+    constructor Create(const AR, AG, AB: Byte; const AA: Byte = $FF); overload;
+
+    /// <summary>
+    ///  Implicitly converts from a packed 32-bit RGBA value to a TBLRgba32.
+    /// </summary>
+    class operator Implicit(const AValue: UInt32): TBLRgba32; inline; static;
+
+    /// <summary>
+    ///  Implicitly converts from a TBLRgba32 to a packed 32-bit RGBA value.
+    /// </summary>
+    class operator Implicit(const AValue: TBLRgba32): UInt32; inline; static;
+
+    class operator Equal(const ALeft, ARight: TBLRgba32): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRgba32): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const ARgba32: UInt32); overload; inline;
+    procedure Reset(const AR, AG, AB: Byte; const AA: Byte = $FF); overload; inline;
+    function Equals(const AOther: TBLRgba32): Boolean; inline;
+
+    property R: Byte read GetR write SetR;
+    property G: Byte read GetG write SetG;
+    property B: Byte read GetB write SetB;
+    property A: Byte read GetA write SetA;
+
+    /// <summary>
+    ///  Whether the color is fully opaque (alpha equals $FF).
+    /// </summary>
+    property IsOpaque: Boolean read GetIsOpaque;
+
+    /// <summary>
+    ///  Whether the color is fully transparent (alpha equals $00).
+    /// </summary>
+    property IsTransparent: Boolean read GetIsTransparent;
+  end;
+  PBLRgba32 = ^TBLRgba32;
+
+type
+  /// <summary>
+  ///  64-bit RGBA color (8-bit per component) stored as `$AAAARRRRGGGGBBBB`.
+  /// </summary>
+  TBLRgba64 = record
+  {$REGION 'Internal Declarations'}
+  private
+    function GetR: Word; inline;
+    procedure SetR(const AValue: Word); inline;
+    function GetG: Word; inline;
+    procedure SetG(const AValue: Word); inline;
+    function GetB: Word; inline;
+    procedure SetB(const AValue: Word); inline;
+    function GetA: Word; inline;
+    procedure SetA(const AValue: Word); inline;
+    function GetIsOpaque: Boolean; inline;
+    function GetIsTransparent: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Packed 64-bit RGBA value.
+    /// </summary>
+    Value: UInt64;
+  public
+    class function Create: TBLRgba64; overload; inline; static;
+    constructor Create(const ARgba64: UInt64); overload;
+    constructor Create(const ARgba32: TBLRgba32); overload;
+    constructor Create(const AR, AG, AB: Word; const AA: Word = $FFFF); overload;
+
+    /// <summary>
+    ///  Implicitly converts from a packed 64-bit RGBA value to a TBLRgba64.
+    /// </summary>
+    class operator Implicit(const AValue: UInt64): TBLRgba64; inline; static;
+
+    /// <summary>
+    ///  Implicitly converts from a TBLRgba64 to a packed 64-bit RGBA value.
+    /// </summary>
+    class operator Implicit(const AValue: TBLRgba64): UInt64; inline; static;
+
+    class operator Equal(const ALeft, ARight: TBLRgba64): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRgba64): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const ARgba64: UInt64); overload; inline;
+    procedure Reset(const ARgba32: TBLRgba32); overload; inline;
+    procedure Reset(const AR, AG, AB: Word; const AA: Word = $FFFF); overload; inline;
+    function Equals(const AOther: TBLRgba64): Boolean; inline;
+
+    property R: Word read GetR write SetR;
+    property G: Word read GetG write SetG;
+    property B: Word read GetB write SetB;
+    property A: Word read GetA write SetA;
+
+    /// <summary>
+    ///  Whether the color is fully opaque (alpha equals $FFFF).
+    /// </summary>
+    property IsOpaque: Boolean read GetIsOpaque;
+
+    /// <summary>
+    ///  Whether the color is fully transparent (alpha equals $0000).
+    /// </summary>
+    property IsTransparent: Boolean read GetIsTransparent;
+  end;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLRgba32
+  /// </summary>
+  _TBLRgba32Helper = record helper for TBLRgba32
+  public
+    constructor Create(const ARgba64: TBLRgba64); overload;
+    procedure Reset(const ARgba64: TBLRgba64); overload; inline;
+  end;
+
+type
+  /// <summary>
+  ///  128-bit RGBA color stored as 4 32-bit floating point values in [RGBA] order.
+  /// </summary>
+  TBLRgba = record
+  {$REGION 'Internal Declarations'}
+  private
+    function GetIsOpaque: Boolean; inline;
+    function GetIsTransparent: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Red component.
+    /// </summary>
+    R: Single;
+
+    /// <summary>
+    ///  Green component.
+    /// </summary>
+    G: Single;
+
+    /// <summary>
+    ///  Blur component.
+    /// </summary>
+    B: Single;
+
+    /// <summary>
+    ///  Alpha component.
+    /// </summary>
+    A: Single;
+  public
+    class function Create: TBLRgba; overload; inline; static;
+    constructor Create(const AR, AG, AB: Single; const AA: Single = 1); overload;
+    constructor Create(const ARgba32: TBLRgba32); overload;
+    constructor Create(const ARgba64: TBLRgba64); overload;
+
+    class operator Equal(const ALeft, ARight: TBLRgba): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRgba): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const ARgba32: TBLRgba32); overload; inline;
+    procedure Reset(const ARgba64: TBLRgba64); overload; inline;
+    procedure Reset(const AR, AG, AB: Single; const AA: Single = 1); overload; inline;
+
+    function Equals(const AOther: TBLRgba): Boolean; overload; inline;
+    function Equals(const AOther: TBLRgba32): Boolean; overload; inline;
+    function Equals(const AOther: TBLRgba64): Boolean; overload; inline;
+    function Equals(const AR, AG, AB: Single; const AA: Single = 1): Boolean; overload; inline;
+
+    function ToRgba32: TBLRgba32; inline;
+    function ToRgba64: TBLRgba64; inline;
+
+    /// <summary>
+    ///  Whether the color is fully opaque (alpha equals 1.0).
+    /// </summary>
+    property IsOpaque: Boolean read GetIsOpaque;
+
+    /// <summary>
+    ///  Whether the color is fully transparent (alpha equals 0.0).
+    /// </summary>
+    property IsTransparent: Boolean read GetIsTransparent;
+  end;
+
+function BLRgba32: TBLRgba32; overload; inline;
+function BLRgba32(const ARgba32: UInt32): TBLRgba32; overload; inline;
+function BLRgba32(const ARgba64: TBLRgba64): TBLRgba32; overload; inline;
+function BLRgba32(const AR, AG, AB: Byte; const AA: Byte = $FF): TBLRgba32; overload; inline;
+
+function BLRgba64: TBLRgba64; overload; inline;
+function BLRgba64(const ARgba64: UInt64): TBLRgba64; overload; inline;
+function BLRgba64(const ARgba32: TBLRgba32): TBLRgba64; overload; inline;
+function BLRgba64(const AR, AG, AB: Word; const AA: Word = $FFFF): TBLRgba64; overload; inline;
+
+function BLRgba: TBLRgba; overload; inline;
+function BLRgba(const ARgba32: TBLRgba32): TBLRgba; overload; inline;
+function BLRgba(const ARgba64: TBLRgba64): TBLRgba; overload; inline;
+function BLRgba(const AR, AG, AB: Single; const AA: Single = 1): TBLRgba; overload; inline;
+
+function BLMin(const AA, AB: TBLRgba32): TBLRgba32; overload; inline;
+function BLMax(const AA, AB: TBLRgba32): TBLRgba32; overload; inline;
+function BLMin(const AA, AB: TBLRgba64): TBLRgba64; overload; inline;
+function BLMax(const AA, AB: TBLRgba64): TBLRgba64; overload; inline;
+function BLMin(const AA, AB: TBLRgba): TBLRgba; overload; inline;
+function BLMax(const AA, AB: TBLRgba): TBLRgba; overload; inline;
+
+{ ============================================================================
+   [Styling - Gradients]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Gradient type.
+  /// </summary>
+  TBLGradientType = (
+    /// <summary>
+    ///  Linear gradient type.
+    /// </summary>
+    Linear,
+
+    /// <summary>
+    ///  Radial gradient type.
+    /// </summary>
+    Radial,
+
+    /// <summary>
+    ///  Conic gradient type.
+    /// </summary>
+    Conic);
+
+type
+  /// <summary>
+  ///  Gradient data index.
+  /// </summary>
+  TBLGradientValue = (
+    /// <summary>
+    ///  X0 - start 'X' for a Linear gradient and `X` center for both Radial and
+    ///  Conic gradients.
+    /// </summary>
+    CommonX0,
+
+    /// <summary>
+    ///  Y0 - start 'Y' for a Linear gradient and `Y` center for both Radial and
+    ///  Conic gradients.
+    /// </summary>
+    CommonY0,
+
+    /// <summary>
+    ///  X1 - end 'X' for a Linear gradient and focal point `X` for a Radial
+    ///  gradient.
+    /// </summary>
+    CommonX1,
+
+    /// <summary>
+    ///  Y1 - end 'Y' for a Linear/gradient and focal point `Y` for a Radial
+    ///  gradient.
+    /// </summary>
+    CommonY1,
+
+    /// <summary>
+    ///  Radial gradient center radius.
+    /// </summary>
+    RadialR0,
+
+    /// <summary>
+    ///  Radial gradient focal radius.
+    /// </summary>
+    RadialR1,
+
+    /// <summary>
+    ///  Conic gradient angle.
+    /// </summary>
+    ConicAngle = 2,
+
+    /// <summary>
+    ///  Conic gradient angle.
+    /// </summary>
+    ConicRepeat = 3);
+
+type
+  /// <summary>
+  ///  Gradient rendering quality.
+  /// </summary>
+  TBLGradientQuality = (
+    /// <summary>
+    ///  Nearest neighbor.
+    /// </summary>
+    Nearest,
+
+    /// <summary>
+    ///  Use smoothing, if available (currently never available).
+    /// </summary>
+    Smooth,
+
+    /// <summary>
+    ///  The renderer will use an implementation-specific dithering algorithm to
+    ///  prevent banding.
+    /// </summary>
+    Dither);
+
+type
+  /// <summary>
+  ///  Defines an `Offset` and `Rgba` color that is used by `TBLGradient` to
+  ///  define a linear transition between colors.
+  /// </summary>
+  /// <seealso cref="TBLGradient"/>
+  TBLGradientStop = record
+  public
+    Offset: Double;
+    Rgba: TBLRgba64;
+  public
+    class function Create: TBLGradientStop; overload; inline; static;
+    constructor Create(const AOffset: Double; const ARgba32: TBLRgba32); overload;
+    constructor Create(const AOffset: Double; const ARgba64: TBLRgba64); overload;
+
+    class operator Equal(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AOffset: Double; const ARgba32: TBLRgba32); overload; inline;
+    procedure Reset(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
+
+    function Equals(const AOther: TBLGradientStop): Boolean; inline;
+  end;
+  PBLGradientStop = ^TBLGradientStop;
+
+function BLGradientStop: TBLGradientStop; overload; inline;
+function BLGradientStop(const AOffset: Double; const ARgba32: TBLRgba32): TBLGradientStop; overload; inline;
+function BLGradientStop(const AOffset: Double; const ARgba64: TBLRgba64): TBLGradientStop; overload; inline;
+
+type
+  /// <summary>
+  ///  Linear gradient values packed into a structure.
+  /// </summary>
+  TBLLinearGradientValues = record
+  public
+    X0: Double;
+    Y0: Double;
+    X1: Double;
+    Y1: Double;
+  public
+    class function Create: TBLLinearGradientValues; overload; inline; static;
+    constructor Create(const AX0, AY0, AX1, AY1: Double); overload;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1: Double); overload; inline;
+  end;
+
+function BLLinearGradientValues: TBLLinearGradientValues; overload; inline;
+function BLLinearGradientValues(const AX0, AY0, AX1, AY1: Double): TBLLinearGradientValues; overload; inline;
+
+type
+  /// <summary>
+  ///  Radial gradient values packed into a structure.
+  /// </summary>
+  TBLRadialGradientValues = record
+  public
+    X0: Double;
+    Y0: Double;
+    X1: Double;
+    Y1: Double;
+    R0: Double;
+    R1: Double;
+  public
+    class function Create: TBLRadialGradientValues; overload; inline; static;
+    constructor Create(const AX0, AY0, AX1, AY1, AR0: Double;
+      const AR1: Double = 0); overload;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1, AR0: Double;
+      const AR1: Double = 0); overload; inline;
+  end;
+
+function BLRadialGradientValues: TBLRadialGradientValues; overload; inline;
+function BLRadialGradientValues(const AX0, AY0, AX1, AY1, AR0: Double;
+  const AR1: Double = 0): TBLRadialGradientValues; overload; inline;
+
+type
+  /// <summary>
+  ///  Conic gradient values packed into a structure.
+  /// </summary>
+  TBLConicGradientValues = record
+  public
+    X0: Double;
+    Y0: Double;
+    Angle: Double;
+    Repetition: Double;
+  public
+    class function Create: TBLConicGradientValues; overload; inline; static;
+    constructor Create(const AX0, AY0, AAngle: Double;
+      const ARepeat: Double = 1); overload;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AAngle: Double;
+      const ARepeat: Double = 1); overload; inline;
+  end;
+
+function BLConicGradientValues: TBLConicGradientValues; overload; inline;
+function BLConicGradientValues(const AX0, AY0, AAngle: Double;
+  const ARepeat: Double = 1): TBLConicGradientValues; overload; inline;
+
+type
+  /// <summary>
+  ///  Gradient.
+  /// </summary>
+  TBLGradient = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Stops: PBLGradientStop;
+      Size: Size_T;
+      Capacity: Size_T;
+      Transform: TBLMatrix2D;
+      case Byte of
+        0: (Values: array [TBLGradientValue] of Double);
+        1: (Linear: TBLLinearGradientValues);
+        2: (Radial: TBLRadialGradientValues);
+        3: (Conic: TBLConicGradientValues);
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsEmpty: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default constructed gradient.
+    ///
+    ///  A default constructed gradient has `TBLGradientType.Linear` type, all
+    ///  values set to zero, and has no color stops.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLGradient);
+
+    /// <summary>
+    ///  Destroys the gradient.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLGradient);
+
+    /// <summary>
+    ///  Copy constructor creates a weak copy of `other`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLGradient; const [ref] ASrc: TBLGradient); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator Equal(const ALeft: TBLGradient; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Equality operator, performs the same operation as `ALeft.Equals(ARight)`.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLGradient): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLGradient; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Equality operator, performs the same operation as `not ALeft.Equals(ARight)`.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLGradient): Boolean; inline; static;
+
+    /// <summary>
+    ///  Whether the gradient is empty.
+    ///
+    ///  Empty gradient is considered any gradient that has no stops.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+  end;
+
+{$ENDREGION 'Styling'}
+
 {$REGION 'Imaging'}
 
 { ============================================================================
@@ -5064,21 +5573,896 @@ type
     /// </summary>
     A8);
 
+type
+  /// <summary>
+  ///  Pixel format flags.
+  /// </summary>
+  TBLFormatFlag = (
+    /// <summary>
+    ///  Pixel format provides RGB components.
+    /// </summary>
+    Rgb = 0,
+
+    /// <summary>
+    ///  Pixel format provides only alpha component.
+    /// </summary>
+    Alpha = 1,
+
+    /// <summary>
+    ///  Pixel format provides LUM component (and not RGB components).
+    /// </summary>
+    Lum = 2,
+
+    /// <summary>
+    ///  Indexed pixel format the requires a palette (I/O only).
+    /// </summary>
+    Indexed = 4,
+
+    /// <summary>
+    ///  RGB components are premultiplied by alpha component.
+    /// </summary>
+    Premultiplied = 8,
+
+    /// <summary>
+    ///  Pixel format doesn't use native byte-order (I/O only).
+    /// </summary>
+    ByteSwap = 9,
+
+    // The following flags are only informative. They are part of `TBLFormatInfo`,
+    // but don't have to be passed to `TBLPixelConverter` as they will always be
+    // calculated automatically.
+
+    /// <summary>
+    ///  Pixel components are byte aligned (all 8bpp).
+    /// </summary>
+    ByteAligned = 16,
+
+    /// <summary>
+    ///  Pixel has some undefined bits that represent no information.
+    ///
+    ///  For example a 32-bit XRGB pixel has 8 undefined bits that are usually
+    ///  set to all ones so the format can be interpreted as premultiplied RGB
+    ///  as well. There are other formats like 16_0555 where the bit has no
+    ///  information and is usually set to zero. Blend2D doesn't rely on the
+    ///  content of such bits.
+    /// </summary>
+    UndefinedBits = 17);
+
+type
+  /// <summary>
+  ///  Pixel format flags.
+  /// </summary>
+  TBLFormatFlags = set of TBLFormatFlag;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLFormatFlags.
+  /// </summary>
+  _TBLFormatFlagsHelper = record helper for TBLFormatFlags
+  public const
+    /// <summary>
+    ///  No flags
+    /// </summary>
+    None = [];
+
+    /// <summary>
+    ///  A combination of `Rgb` and `Alpha`.
+    /// </summary>
+    Rgba = [TBLFormatFlag.Rgb, TBLFormatFlag.Alpha];
+
+    /// <summary>
+    ///  A combination of `Lum` and `Alpha`.
+    /// </summary>
+    Luma = [TBLFormatFlag.Lum, TBLFormatFlag.Alpha];
+  end;
+
+type
+  TBLFourBytes = array [0..3] of Byte;
+
+type
+  /// <summary>
+  ///  Provides a detailed information about a pixel format.
+  ///  Use `Query` for information of Blend2D native pixel formats.
+  /// </summary>
+  TBLFormatInfo = packed record
+  {$REGION 'Internal Declarations'}
+  private
+    FDepth: Int32;
+    FFlags: TBLFormatFlags;
+    FSizes: TBLFourBytes;
+    FShifts: TBLFourBytes;
+    function GetShift(const AIndex: Integer): Byte; inline;
+    function GetSize(const AIndex: Integer): Byte; inline;
+    function GetPalette: PBLRgba32; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    class operator Equal(const ALeft, ARight: TBLFormatInfo): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLFormatInfo): Boolean; inline; static;
+
+    procedure Reset; inline;
+
+    procedure Init(const ADepth: Integer; const AFlags: TBLFormatFlags;
+      const ASizes, AShifts: TBLFourBytes); inline;
+    procedure SetSizes(const AR, AG, AB, AA: Byte); inline;
+    procedure SetShifts(const AR, AG, AB, AA: Byte); inline;
+
+    function HasFlag(const AFlag: TBLFormatFlag): Boolean; inline;
+    procedure AddFlags(const AFlags: TBLFormatFlags); inline;
+    procedure ClearFlags(const AFlags: TBLFormatFlags); inline;
+
+    /// <summary>
+    ///  Query Blend2D `AFormat` and copy it to this format info.
+    /// </summary>
+    /// <remarks>
+    ///  `TBLFormat.None` is considered invalid format, thus if it's passed to
+    ///  `Query` it will raise an error.
+    /// <.remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Query(const AFormat: TBLFormat); inline;
+
+    /// <summary>
+    ///  Sanitize this `TBLFormatInfo`.
+    ///
+    ///  Sanitizer verifies whether the format is valid and updates the format
+    ///  information about flags to values that Blend2D expects. For example
+    ///  format flags are properly examined and simplified if possible,
+    ///  byte-swap is implicitly performed for formats where a single component
+    ///  matches one byte, etc...
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Sanitize; inline;
+
+    property Depth: Integer read FDepth;
+    property Flags: TBLFormatFlags read FFlags;
+    property Sizes[const AIndex: Integer]: Byte read GetSize;
+    property Shifts[const AIndex: Integer]: Byte read GetShift;
+    property RSize: Byte read FSizes[0];
+    property GSize: Byte read FSizes[1];
+    property BSize: Byte read FSizes[2];
+    property ASize: Byte read FSizes[3];
+    property RShift: Byte read FShifts[0];
+    property GShift: Byte read FShifts[1];
+    property BShift: Byte read FShifts[2];
+    property AShift: Byte read FShifts[3];
+    property Palette: PBLRgba32 read GetPalette;
+  end;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLFormat.
+  /// </summary>
+  _TBLFormatHelper = record helper for TBLFormat
+  public
+    /// <summary>
+    ///  Get information about this format.
+    /// </summary>
+    /// <remarks>
+    ///  `TBLFormat.None` is considered invalid format, thus if it's passed to
+    ///  `Query` it will raise an error.
+    /// <.remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function Info: TBLFormatInfo; inline;
+  end;
+
+{ ============================================================================
+   [Imaging - Pixel Conversion]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Flags used by `TBLPixelConverter.Make` function.
+  /// </summary>
+  /// <seealso cref="TBLPixelConverter"/>
+  TBLPixelConverterCreateFlag = (
+    /// <summary>
+    ///  Specifies that the source palette in `TBLFormatInfo` doesn't have to by
+    ///  copied by `TBLPixelConverter`. The caller must ensure that the palette
+    ///  would stay valid until the pixel converter is destroyed.
+    /// </summary>
+    /// <seealso cref="TBLFormatInfo"/>
+    /// <seealso cref="TBLPixelConverter"/>
+    DontCopyPalette = 0,
+
+    /// <summary>
+    ///  Specifies that the source palette in `TBLFormatInfo` is alterable and
+    ///  the pixel converter can modify it when preparing the conversion. The
+    ///  modification can be irreversible so only use this flag when you are
+    ///  sure that the palette passed to `TBLPixelConverter.Make` won't be
+    ///  needed outside of pixel conversion.
+    /// </summary>
+    /// <remarks>
+    ///  The flag `DontCopyPalette` must be set as well, otherwise this flag
+    ///  would be ignored.
+    /// </remarks>
+    /// <seealso cref="TBLFormatInfo"/>
+    /// <seealso cref="TBLPixelConverter"/>
+    AlterablePalette = 1,
+
+    /// <summary>
+    ///  When there is no built-in conversion between the given pixel formats
+    ///  it's possible to use an intermediate format that is used during
+    ///  conversion. In such case the base pixel converter creates two more
+    ///  converters that are then used internally.
+    ///
+    ///  This option disables such feature - creating a pixel converter would
+    ///  fail if direct conversion is not possible.
+    /// </summary>
+    NoMultiStep = 2);
+
+type
+  /// <summary>
+  ///  Flags used by `TBLPixelConverter.Make` function.
+  /// </summary>
+  TBLPixelConverterCreateFlags = set of TBLPixelConverterCreateFlag;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLPixelConverterCreateFlags.
+  /// </summary>
+  _TBLPixelConverterCreateFlagsHelper = record helper for TBLPixelConverterCreateFlags
+  public const
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Pixel conversion options.
+  /// </summary>
+  TBLPixelConverterOptions = record
+  public
+    Origin: TBLPointI;
+    Gap: NativeInt;
+  end;
+
+type
+  /// <summary>
+  ///  Pixel converter.
+  ///
+  ///  Provides an interface to convert pixels between various pixel formats.
+  ///  The primary purpose of this record is to allow efficient conversion
+  ///  between pixel formats used natively by Blend2D and pixel formats used
+  ///  elsewhere, for example image codecs or native framebuffers.
+  /// </summary>
+  /// <remarks>
+  ///  A default-initialized converter has a valid conversion function that
+  ///  would return fail if invoked. Use `IsInitialized` to test whether the
+  ///  pixel converter was properly initialized.
+  /// </remarks>
+  TBLPixelConverter = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TCore = record
+    case Byte of
+      0: (ConvertFunc: Pointer;
+          InternalFlags: Byte);
+      1: (Data: array [0..79] of Byte);
+    end;
+  private
+    FCore: TCore;
+    function GetIsInitialized: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a new default-initialized pixel converter.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLPixelConverter);
+
+    /// <summary>
+    ///  Destroys the pixel-converter and releases all resources allocated by it.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLPixelConverter);
+
+    /// <summary>
+    ///  Creates a copy of the `AOther` converter.
+    ///
+    ///  If the `AOther` converter has dynamically allocated resources they will
+    ///  be properly managed (reference counting). Only very specific converters
+    ///  require such resources so this operation should be considered very
+    ///  cheap.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLPixelConverter; const [ref] ASrc: TBLPixelConverter); inline;
+
+    /// <summary>
+    ///  Reset the pixel converter.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Creates a new pixel converter that will convert pixels described by
+    //   `ASrcInfo` into pixels described by `ADstInfo`.
+    ///
+    ///  Use `ACreateFlags` to further specify the parameters of the conversion.
+    /// </summary>
+    /// <remarks>
+    ///  Destination and source format informattion must be valid, otherwise
+    ///  this method will fail.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Make(const ADstInfo, ASrcInfo: TBLFormatInfo;
+      const ACreateFlags: TBLPixelConverterCreateFlags = []); inline;
+
+    /// <summary>
+    ///  Converts a single span of pixels of `AWidth`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ConvertSpan(const ADstData, ASrcData: Pointer;
+      const AWidth: Integer); overload; inline;
+
+    /// <summary>
+    ///  Converts a single span of pixels of `AWidth`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ConvertSpan(const ADstData, ASrcData: Pointer;
+      const AWidth: Integer; const AOptions: TBLPixelConverterOptions); overload; inline;
+
+    /// <summary>
+    ///  Converts a rectangular area of pixels from source format to destination.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ConvertRect(const ADstData: Pointer; const ADstStride: NativeInt;
+      const ASrcData: Pointer; const ASrcStride: NativeInt;
+      const AWidth, AHeight: Integer); overload; inline;
+
+    /// <summary>
+    ///  Converts a rectangular area of pixels from source format to destination.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ConvertRect(const ADstData: Pointer; const ADstStride: NativeInt;
+      const ASrcData: Pointer; const ASrcStride: NativeInt; const AWidth,
+      AHeight: Integer; const AOptions: TBLPixelConverterOptions); overload; inline;
+
+    /// <summary>
+    ///  Whether if the converter is initialized.
+    /// </summary>
+    property IsInitialized: Boolean read GetIsInitialized;
+  end;
+
 { ============================================================================
    [Imaging - Image Codecs]
   ============================================================================ }
 
 type
-  TBLImageCodec = record
+  /// <summary>
+  ///  Flags used by `TBLImageInfo`.
+  /// </summary>
+  TBLImageInfoFlag = (
+    /// <summary>
+    ///  Progressive mode.
+    /// </summary>
+    Progressive = 0);
+
+type
+  /// <summary>
+  ///  Flags used by `TBLImageInfo`.
+  /// </summary>
+  TBLImageInfoFlags = set of TBLImageInfoFlag;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLImageInfoFlags
+  /// </summary>
+  _TBLImageInfoFlagsHelper = record helper for TBLImageInfoFlags
+  public const
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Image information provided by image codecs.
+  /// </summary>
+  TBLImageInfo = record
   {$REGION 'Internal Declarations'}
   private
-    FBase: TBLObjectCore;
+    FSize: TBLSizeI;
+    FDensity: TBLSize;
+    FFlags: UInt32;
+    FDepth: Int16;
+    FPlaneCount: Int16;
+    FFrameCount: Int64;
+    FRepeatCount: Int32;
+    FReserved: array [0..2] of UInt32;
+    FFormat: array [0..15] of UTF8Char;
+    FCompression: array [0..15] of UTF8Char;
+    function GetFlags: TBLImageInfoFlags; inline;
+    function GetFormat: String; inline;
+    function GetCompression: String; inline;
   {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Image size.
+    /// </summary>
+    property Size: TBLSizeI read FSize;
+
+    /// <summary>
+    ///  Pixel density per one meter, can contain fractions.
+    /// </summary>
+    property Density: TBLSize read FDensity;
+
+    /// <summary>
+    ///  Image flags.
+    /// </summary>
+    property Flags: TBLImageInfoFlags read GetFlags;
+
+    /// <summary>
+    ///  Image depth.
+    /// </summary>
+    property Depth: Smallint read FDepth;
+
+    /// <summary>
+    ///  Number of planes.
+    /// </summary>
+    property PlaneCount: Smallint read FPlaneCount;
+
+    /// <summary>
+    ///  Number of frames (0 = unknown/unspecified).
+    /// </summary>
+    property FrameCount: Int64 read FFrameCount;
+
+    /// <summary>
+    ///  Number of animation repeats (0 = infinite).
+    /// </summary>
+    property RepeatCount: Integer read FRepeatCount;
+
+    /// <summary>
+    ///  Image format (as understood by codec).
+    /// </summary>
+    property Format: String read GetFormat;
+
+    /// <summary>
+    ///  Image compression (as understood by codec).
+    /// </summary>
+    property Compression: String read GetCompression;
+  public
+    procedure Reset; inline;
+  end;
+
+type
+  /// <summary>
+  ///  Image codec feature bits.
+  /// </summary>
+  TBLImageCodecFeature = (
+    /// <summary>
+    ///  Image codec supports reading images (can create TBLImageDecoder).
+    /// </summary>
+    Read = 0,
+
+    /// <summary>
+    ///  Image codec supports writing images (can create TBLImageEncoder).
+    /// </summary>
+    Write = 1,
+
+    /// <summary>
+    ///  Image codec supports lossless compression.
+    /// </summary>
+    Lossless = 2,
+
+    /// <summary>
+    ///  Image codec supports lossy compression.
+    /// </summary>
+    Lossy = 3,
+
+    /// <summary>
+    ///  Image codec supports writing multiple frames (GIF).
+    /// </summary>
+    MultiFrame = 4,
+
+    /// <summary>
+    ///  Image codec supports IPTC metadata.
+    /// </summary>
+    Iptc = 28,
+
+    /// <summary>
+    ///  Image codec supports EXIF metadata.
+    /// </summary>
+    Exif = 29,
+
+    /// <summary>
+    ///  Image codec supports XMP metadata.
+    /// </summary>
+    Xmp = 30);
+
+type
+  /// <summary>
+  ///  Image codec feature bits.
+  /// </summary>
+  TBLImageCodecFeatures = set of TBLImageCodecFeature;
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLImageCodecFeatures.
+  /// </summary>
+  _TBLImageCodecFeaturesHelper = record helper for TBLImageCodecFeatures
+  public const
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Image decoder.
+  /// </summary>
+  TBLImageDecoder = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Virt: Pointer;
+      Codec: TBLObjectCore;
+      LastResult: Integer;
+      Handle: Pointer;
+      FrameIndex: Int64;
+      BufferIndex: NativeInt;
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsValid: Boolean; inline;
+    function GetLastResult: TBLResult; inline;
+    function GetFrameIndex: Int64; inline;
+    function GetBufferIndex: NativeInt; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a new default-initialized image decoder.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLImageDecoder);
+
+    /// <summary>
+    ///  Destroys the image decoder and releases all resources allocated by it.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLImageDecoder);
+
+    /// <summary>
+    ///  Creates a copy of the `AOther` image decoder.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLImageDecoder; const [ref] ASrc: TBLImageDecoder); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator Equal(const ALeft: TBLImageDecoder; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two image decoders are equal.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLImageDecoder): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLImageDecoder; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two image decoders are not equal.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLImageDecoder): Boolean; inline; static;
+
+    function Equals(const AOther: TBLImageDecoder): Boolean; inline;
+    procedure Reset; inline;
+    procedure Swap(var AOther: TBLImageDecoder); inline;
+
+    procedure Restart; inline;
+
+    procedure ReadInfo(out ADst: TBLImageInfo; const ABuffer: TBLArray<Byte>); overload; inline;
+    procedure ReadInfo(out ADst: TBLImageInfo; const ABuffer: TBytes); overload; inline;
+    procedure ReadInfo(out ADst: TBLImageInfo; const AView: TBLArrayView<Byte>); overload; inline;
+    procedure ReadInfo(out ADst: TBLImageInfo; const AData: Pointer;
+      const ASize: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Tests whether the image decoder is not a built-in null instance.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  The last decoding result.
+    /// </summary>
+    property LastResult: TBLResult read GetLastResult;
+
+    /// <summary>
+    ///  The current frame index (to be decoded).
+    /// </summary>
+    property FrameIndex: Int64 read GetFrameIndex;
+
+    /// <summary>
+    ///  The position in source buffer.
+    /// </summary>
+    property BufferIndex: NativeInt read GetBufferIndex;
+  end;
+
+type
+  /// <summary>
+  ///  Image encoder.
+  /// </summary>
+  TBLImageEncoder = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Virt: Pointer;
+      Codec: TBLObjectCore;
+      LastResult: Integer;
+      Handle: Pointer;
+      FrameIndex: Int64;
+      BufferIndex: NativeInt;
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsValid: Boolean; inline;
+    function GetLastResult: TBLResult; inline;
+    function GetFrameIndex: Int64; inline;
+    function GetBufferIndex: NativeInt; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a new default-initialized image encoder.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLImageEncoder);
+
+    /// <summary>
+    ///  Destroys the image encoder and releases all resources allocated by it.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLImageEncoder);
+
+    /// <summary>
+    ///  Creates a copy of the `AOther` image encoder.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLImageEncoder; const [ref] ASrc: TBLImageEncoder); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator Equal(const ALeft: TBLImageEncoder; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two image encoders are equal.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLImageEncoder): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLImageEncoder; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two image encoders are not equal.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLImageEncoder): Boolean; inline; static;
+
+    function Equals(const AOther: TBLImageEncoder): Boolean; inline;
+    procedure Reset; inline;
+    procedure Swap(var AOther: TBLImageEncoder); inline;
+
+    procedure Restart; inline;
+
+    /// <summary>
+    ///  Tests whether the image encoder is not a built-in null instance.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  The last encoding result.
+    /// </summary>
+    property LastResult: TBLResult read GetLastResult;
+
+    /// <summary>
+    ///  The current frame index (yet to be written).
+    /// </summary>
+    property FrameIndex: Int64 read GetFrameIndex;
+
+    /// <summary>
+    ///  The position in destination buffer.
+    /// </summary>
+    property BufferIndex: NativeInt read GetBufferIndex;
+  end;
+
+type
+  /// <summary>
+  ///  Image codec.
+  ///
+  ///  Provides a unified interface for inspecting image data and creating image
+  ///  decoders & encoders.
+  /// </summary>
+  TBLImageCodec = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Virt: Pointer;
+      Name: TBLObjectCore;
+      Vendor: TBLObjectCore;
+      MimeType: TBLObjectCore;
+      Extensions: TBLObjectCore;
+      Features: UInt32;
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsValid: Boolean; inline;
+    function GetName: TBLString; inline;
+    function GetVendor: TBLString; inline;
+    function GetMimeType: TBLString; inline;
+    function GetExtensions: TBLString; inline;
+    function GetFeatures: TBLImageCodecFeatures; inline;
+    class function GetBuiltInCodecs: TBLArray<TBLImageCodec>; inline; static;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a new default-initialized image codec.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLImageCodec);
+
+    /// <summary>
+    ///  Destroys the image codec and releases all resources allocated by it.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLImageCodec);
+
+    /// <summary>
+    ///  Creates a copy of the `AOther` image codec.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLImageCodec; const [ref] ASrc: TBLImageCodec); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator Equal(const ALeft: TBLImageCodec; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two image codecs are equal.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLImageCodec): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLImageCodec; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two image codecs are not equal.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLImageCodec): Boolean; inline; static;
+
+    function Equals(const AOther: TBLImageCodec): Boolean; inline;
+    procedure Reset; inline;
+    procedure Swap(var AOther: TBLImageCodec); inline;
+
+    /// <summary>
+    ///  Tests whether the image codec has the given feature.
+    /// </summary>
+    function HasFeature(const AFeature: TBLImageCodecFeature): Boolean; inline;
+
+    procedure FindByName(const AName: String); overload; inline;
+    procedure FindByName(const AName: String;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+    procedure FindByName(const AName: TBLStringView); overload; inline;
+    procedure FindByName(const AName: TBLStringView;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+
+    procedure FindByExtension(const AExt: String); overload; inline;
+    procedure FindByExtension(const AExt: String;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+    procedure FindByExtension(const AExt: TBLStringView); overload; inline;
+    procedure FindByExtension(const AExt: TBLStringView;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+
+    procedure FindByData(const AData: Pointer; const ASize: NativeInt); overload; inline;
+    procedure FindByData(const AData: Pointer; const ASize: NativeInt;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+    procedure FindByData(const AView: TBLArrayView<Byte>); overload; inline;
+    procedure FindByData(const AView: TBLArrayView<Byte>;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+    procedure FindByData(const ABuffer: TBLArray<Byte>); overload; inline;
+    procedure FindByData(const ABuffer: TBLArray<Byte>;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+    procedure FindByData(const ABuffer: TBytes); overload; inline;
+    procedure FindByData(const ABuffer: TBytes;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+
+    function InspectData(const ABuffer: TBLArray<Byte>): Cardinal; overload; inline;
+    function InspectData(const ABuffer: TBytes): Cardinal; overload; inline;
+    function InspectData(const AView: TBLArrayView<Byte>): Cardinal; overload; inline;
+    function InspectData(const AData: Pointer; const ASize: NativeInt): Cardinal; overload; inline;
+
+    function CreateDecoder: TBLImageDecoder; inline;
+    function CreateEncoder: TBLImageEncoder; inline;
+
+    /// <summary>
+    ///  Adds a codec to a global built-in codecs registry.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class procedure AddToBuiltIn(const ACodec: TBLImageCodec); inline; static;
+
+    /// <summary>
+    ///  Removes a codec from a global built-in codecs registry.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class procedure RemoveFromBuiltIn(const ACodec: TBLImageCodec); inline; static;
+
+    /// <summary>
+    ///  Tests whether the image codec is not a built-in null instance.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  Image codec name (i.e, "PNG", "JPEG", etc...).
+    /// </summary>
+    property Name: TBLString read GetName;
+
+    /// <summary>
+    ///  The image codec vendor (i.e. "Blend2D" for all built-in codecs).
+    /// </summary>
+    property Vendor: TBLString read GetVendor;
+
+    /// <summary>
+    ///  A mime-type associated with the image codec's format.
+    /// </summary>
+    property MimeType: TBLString read GetMimeType;
+
+    /// <summary>
+    ///  A list of file extensions used to store image of this codec,
+    ///  separated by '|' character.
+    /// </summary>
+    property Extensions: TBLString read GetExtensions;
+
+    /// <summary>
+    ///  Image codec flags.
+    /// </summary>
+    property Features: TBLImageCodecFeatures read GetFeatures;
+
+    /// <summary>
+    ///  Built-in codecs, which are present in a global registry.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class property BuiltInCodecs: TBLArray<TBLImageCodec> read GetBuiltInCodecs;
   end;
 
 { ============================================================================
    [Imaging - Images]
   ============================================================================ }
+
+type
+  /// <summary>
+  ///  Filter type used by `TBLImage.Scale`.
+  /// </summary>
+  /// <seealso cref="TBLImage"/>
+  TBLImageScaleFilter = (
+    /// <summary>
+    ///  No filter or uninitialized.
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///  Nearest neighbor filter (radius 1.0).
+    /// </summary>
+    Nearest,
+
+    /// <summary>
+    ///  Bilinear filter (radius 1.0).
+    /// </summary>
+    Bilinear,
+
+    /// <summary>
+    ///  Bicubic filter (radius 2.0).
+    /// </summary>
+    Bicubic,
+
+    /// <summary>
+    ///  Lanczos filter (radius 2.0).
+    /// </summary>
+    Lanczos);
 
 type
   /// <summary>
@@ -5346,20 +6730,102 @@ type
     ///  passed in will be considered.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-//    procedure ReadFromFile(const AFilename: String;
-//      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+    procedure ReadFromFile(const AFilename: String;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
 
     /// <summary>
-    ///  Reads an image from a file specified by `AFileName` by using image
-    ///  codecs passed via `ACodecs` parameter.
+    ///  Reads an image from an existing byte-array starting at `AData` and
+    ///  having `ASize` bytes.
+    ///
+    ///  Image reader will automatically detect the image format by checking
+    ///  whether it's supported by available image codecs, which can be
+    ///  retrieved by `TBLImageCodec.BuiltInCodecs`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="TBLImageCodec.BuiltInCodecs"/>
+    procedure ReadFromData(const AData: Pointer; const ASize: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Reads an image from an existing byte-array starting at `AData` and
+    ///  having `ASize` bytes by using image codecs passed via `ACodecs`
+    ///  parameter.
     ///
     ///  Image reader will automatically detect the image format by checking
     ///  whether it's supported by the passed image `ACodecs` - only codecs
     ///  passed in will be considered.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-//    procedure ReadFromFile(const AFilename: String;
-//      const ACodecs: TArray<TBLImageCodec>); overload; inline;
+    procedure ReadFromData(const AData: Pointer; const ASize: NativeInt;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+
+    /// <summary>
+    ///  Reads an image from an existing byte-buffer passed via `AArray`.
+    ///
+    ///  Image reader will automatically detect the image format by checking
+    ///  whether it's supported by available image codecs, which can be
+    ///  retrieved by `TBLImageCodec.BuiltInCodecs`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="TBLImageCodec.BuiltInCodecs"/>
+    procedure ReadFromData(const AArray: TBLArray<Byte>); overload; inline;
+
+    /// <summary>
+    ///  Reads an image from an existing byte-buffer passed via `AArray` by
+    ///  using image codecs passed via `ACodecs` parameter.
+    ///
+    ///  Image reader will automatically detect the image format by checking
+    ///  whether it's supported by the passed image `ACodecs` - only codecs
+    ///  passed in will be considered.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ReadFromData(const AArray: TBLArray<Byte>;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+
+    /// <summary>
+    ///  Reads an image from an existing byte-buffer passed via `AArray`.
+    ///
+    ///  Image reader will automatically detect the image format by checking
+    ///  whether it's supported by available image codecs, which can be
+    ///  retrieved by `TBLImageCodec.BuiltInCodecs`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="TBLImageCodec.BuiltInCodecs"/>
+    procedure ReadFromData(const AArray: TBytes); overload; inline;
+
+    /// <summary>
+    ///  Reads an image from an existing byte-buffer passed via `AArray` by
+    ///  using image codecs passed via `ACodecs` parameter.
+    ///
+    ///  Image reader will automatically detect the image format by checking
+    ///  whether it's supported by the passed image `ACodecs` - only codecs
+    ///  passed in will be considered.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ReadFromData(const AArray: TBytes;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
+
+    /// <summary>
+    ///  Reads an image from an existing byte-view passed via `AView`.
+    ///
+    ///  Image reader will automatically detect the image format by checking
+    ///  whether it's supported by available image codecs, which can be
+    ///  retrieved by `TBLImageCodec.BuiltInCodecs`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="TBLImageCodec.BuiltInCodecs"/>
+    procedure ReadFromData(const AView: TBLArrayView<Byte>); overload; inline;
+
+    /// <summary>
+    ///  Reads an image from an existing byte-view passed via `AView` by using
+    ///  image codecs passed via `ACodecs` parameter.
+    ///
+    ///  Image reader will automatically detect the image format by checking
+    ///  whether it's supported by the passed image `ACodecs` - only codecs
+    ///  passed in will be considered.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ReadFromData(const AView: TBLArrayView<Byte>;
+      const ACodecs: TBLArray<TBLImageCodec>); overload; inline;
 
     /// <summary>
     ///  Writes an encoded image to a file specified by `AFilename`.
@@ -5367,7 +6833,42 @@ type
     ///  Image writer detects the image codec by inspecting the extension of a
     ///  file passed via `AFilename`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure WriteToFile(const AFilename: String); overload; inline;
+
+    /// <summary>
+    ///  Writes an encoded image to a file specified by `AFileName` using the
+    ///  specified image `ACodec` to encode the image.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure WriteToFile(const AFilename: String;
+      const ACodec: TBLImageCodec); overload; inline;
+
+    /// <summary>
+    ///  Writes an encoded image to a buffer `ADst` using the specified image
+    ///  `ACodec` to encode the image.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure WriteToData(const ADst: TBLArray<Byte>;
+      const ACodec: TBLImageCodec); overload; inline;
+
+    /// <summary>
+    ///  Encodes the image using the specified image `ACodec` and returns the
+    ///  encoded data.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function WriteToData(const ACodec: TBLImageCodec): TBytes; overload; inline;
+
+    /// <summary>
+    ///  Scales the `ASrc` image to the specified `ASize` by using `AFilter` and
+    ///  writes the scaled image to `ADst`.
+    ///
+    ///  If the destination image `ADst` doesn't match `ASize` and the source
+    ///  pixel format the underlying image data will be re-created.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class procedure Scale(const ADst, ASrc: TBLImage; const ASize: TBLSizeI;
+      const AFilter: TBLImageScaleFilter); inline; static;
 
     /// <summary>
     ///  Whether the image is empty (such image has no size and a pixel format
@@ -5407,31 +6908,52 @@ type
     /// </summary>
     property Depth: Integer read GetDepth;
   end;
-{$ENDREGION 'Imaging'}
-
-{$REGION 'Styling'}
-
-{ ============================================================================
-   [Styling - Colors]
-  ============================================================================ }
 
 type
   /// <summary>
-  ///  32-bit RGBA color (8-bit per component) stored as `$AARRGGBB`.
+  ///  Adds functionality to TBLImageDecoder
   /// </summary>
-  TBLRgba32 = record
+  _TBLImageDecoderHelper = record helper for TBLImageDecoder
+  {$REGION 'Internal Declarations'}
+  private
+    function GetCodec: TBLImageCodec; inline;
+  {$ENDREGION 'Internal Declarations'}
   public
-    /// <summary>
-    ///  Packed 32-bit RGBA value.
-    /// </summary>
-    Value: UInt32;
-  public
-    /// <summary>
-    ///  Implicitly converts from a packed 32-bit RGBA value to a TBLRgba32;
-    /// </summary>
-    class operator Implicit(const AValue: UInt32): TBLRgba32; inline; static;
+    procedure ReadFrame(out ADst: TBLImage; const ABuffer: TBLArray<Byte>); overload; inline;
+    procedure ReadFrame(out ADst: TBLImage; const ABuffer: TBytes); overload; inline;
+    procedure ReadFrame(out ADst: TBLImage; const AView: TBLArrayView<Byte>); overload; inline;
+    procedure ReadFrame(out ADst: TBLImage; const AData: Pointer;
+      const ASize: NativeInt); overload; inline;
+
+    property Codec: TBLImageCodec read GetCodec;
   end;
-{$ENDREGION 'Styling'}
+
+type
+  /// <summary>
+  ///  Adds functionality to TBLImageEncoder
+  /// </summary>
+  _TBLImageEncoderHelper = record helper for TBLImageEncoder
+  {$REGION 'Internal Declarations'}
+  private
+    function GetCodec: TBLImageCodec; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    /// Encodes the given `AImage` and writes the encoded data to the
+    /// destination buffer `ADst`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure WriteFrame(const ADst: TBLArray<Byte>; const AImage: TBLImage); overload; inline;
+
+    /// <summary>
+    /// Encodes the given `AImage` and returns the encoded data.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function WriteFrame(const AImage: TBLImage): TBytes; overload; inline;
+
+    property Codec: TBLImageCodec read GetCodec;
+  end;
+{$ENDREGION 'Imaging'}
 
 {$REGION 'Rendering'}
 type
@@ -5560,6 +7082,9 @@ type
 {$INCLUDE 'Blend2D.Api.inc'}
 
 implementation
+
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
 
 uses
   System.Math,
@@ -9753,7 +11278,1381 @@ end;
 
 {$ENDREGION 'Containers'}
 
+{$REGION 'Styling'}
+
+{ TBLRgba32 }
+
+function BLRgba32: TBLRgba32; overload; inline;
+begin
+  Result.Reset;
+end;
+
+function BLRgba32(const ARgba32: UInt32): TBLRgba32; overload; inline;
+begin
+  Result.Reset(ARgba32);
+end;
+
+function BLRgba32(const ARgba64: TBLRgba64): TBLRgba32; overload; inline;
+begin
+  Result.Reset(ARgba64);
+end;
+
+function BLRgba32(const AR, AG, AB: Byte; const AA: Byte = $FF): TBLRgba32; overload; inline;
+begin
+  Result.Reset(AR, AG, AB, AA);
+end;
+
+function BLMin(const AA, AB: TBLRgba32): TBLRgba32; overload; inline;
+begin
+  Result.Reset(Min(AA.R, AB.R), Min(AA.G, AB.G), Min(AA.B, AB.B), Min(AA.A, AB.A));
+end;
+
+function BLMax(const AA, AB: TBLRgba32): TBLRgba32; overload; inline;
+begin
+  Result.Reset(Max(AA.R, AB.R), Max(AA.G, AB.G), Max(AA.B, AB.B), Max(AA.A, AB.A));
+end;
+
+constructor TBLRgba32.Create(const ARgba32: UInt32);
+begin
+  Value := ARgba32;
+end;
+
+constructor TBLRgba32.Create(const AR, AG, AB, AA: Byte);
+begin
+  Value := (AA shl 24) or (AR shl 16) or (AG shl 8) or AB;
+end;
+
+class function TBLRgba32.Create: TBLRgba32;
+begin
+  Result.Value := 0;
+end;
+
+class operator TBLRgba32.Equal(const ALeft, ARight: TBLRgba32): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLRgba32.Equals(const AOther: TBLRgba32): Boolean;
+begin
+  Result := (Value = AOther.Value);
+end;
+
+function TBLRgba32.GetA: Byte;
+begin
+  Result := Value shr 24;
+end;
+
+function TBLRgba32.GetB: Byte;
+begin
+  Result := Value;
+end;
+
+function TBLRgba32.GetG: Byte;
+begin
+  Result := Value shr 8;
+end;
+
+function TBLRgba32.GetIsOpaque: Boolean;
+begin
+  Result := (Value >= $FF000000);
+end;
+
+function TBLRgba32.GetIsTransparent: Boolean;
+begin
+  Result := (Value <= $00FFFFFF);
+end;
+
+function TBLRgba32.GetR: Byte;
+begin
+  Result := Value shr 16;
+end;
+
+class operator TBLRgba32.Implicit(const AValue: TBLRgba32): UInt32;
+begin
+  Result := AValue.Value;
+end;
+
+class operator TBLRgba32.Implicit(const AValue: UInt32): TBLRgba32;
+begin
+  Result.Value := AValue;
+end;
+
+class operator TBLRgba32.NotEqual(const ALeft, ARight: TBLRgba32): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLRgba32.Reset;
+begin
+  Value := 0;
+end;
+
+procedure TBLRgba32.Reset(const AR, AG, AB, AA: Byte);
+begin
+  Value := (AA shl 24) or (AR shl 16) or (AG shl 8) or AB;
+end;
+
+procedure TBLRgba32.Reset(const ARgba32: UInt32);
+begin
+  Value := ARgba32;
+end;
+
+procedure TBLRgba32.SetA(const AValue: Byte);
+begin
+  Value := (Value and $00FFFFFF) or (AValue shl 24);
+end;
+
+procedure TBLRgba32.SetB(const AValue: Byte);
+begin
+  Value := (Value and $FFFFFF00) or AValue;
+end;
+
+procedure TBLRgba32.SetG(const AValue: Byte);
+begin
+  Value := (Value and $FFFF00FF) or (AValue shl 8);
+end;
+
+procedure TBLRgba32.SetR(const AValue: Byte);
+begin
+  Value := (Value and $FF00FFFF) or (AValue shl 16);
+end;
+
+{ _TBLRgba32Helper }
+
+constructor _TBLRgba32Helper.Create(const ARgba64: TBLRgba64);
+begin
+  Reset(ARgba64);
+end;
+
+procedure _TBLRgba32Helper.Reset(const ARgba64: TBLRgba64);
+begin
+  Reset(ARgba64.Value shr 40,
+        ARgba64.Value shr 24,
+        ARgba64.Value shr  8,
+        ARgba64.Value shr 56);
+end;
+
+{ TBLRgba64 }
+
+function BLRgba64: TBLRgba64; overload; inline;
+begin
+  Result.Reset;
+end;
+
+function BLRgba64(const ARgba64: UInt64): TBLRgba64; overload; inline;
+begin
+  Result.Reset(ARgba64);
+end;
+
+function BLRgba64(const ARgba32: TBLRgba32): TBLRgba64; overload; inline;
+begin
+  Result.Reset(ARgba32);
+end;
+
+function BLRgba64(const AR, AG, AB: Word; const AA: Word = $FFFF): TBLRgba64; overload; inline;
+begin
+  Result.Reset(AR, AG, AB, AA);
+end;
+
+function BLMin(const AA, AB: TBLRgba64): TBLRgba64; overload; inline;
+begin
+  Result.Reset(Min(AA.R, AB.R), Min(AA.G, AB.G), Min(AA.B, AB.B), Min(AA.A, AB.A));
+end;
+
+function BLMax(const AA, AB: TBLRgba64): TBLRgba64; overload; inline;
+begin
+  Result.Reset(Max(AA.R, AB.R), Max(AA.G, AB.G), Max(AA.B, AB.B), Max(AA.A, AB.A));
+end;
+
+constructor TBLRgba64.Create(const ARgba64: UInt64);
+begin
+  Value := ARgba64;
+end;
+
+constructor TBLRgba64.Create(const ARgba32: TBLRgba32);
+begin
+  Reset(ARgba32);
+end;
+
+constructor TBLRgba64.Create(const AR, AG, AB, AA: Word);
+begin
+  Value := (UInt64(AA) shl 48) or (AR shl 32) or (AG shl 16) or AB;
+end;
+
+class function TBLRgba64.Create: TBLRgba64;
+begin
+  Result.Value := 0;
+end;
+
+class operator TBLRgba64.Equal(const ALeft, ARight: TBLRgba64): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLRgba64.Equals(const AOther: TBLRgba64): Boolean;
+begin
+  Result := (Value = AOther.Value);
+end;
+
+function TBLRgba64.GetA: Word;
+begin
+  Result := Value shr 48;
+end;
+
+function TBLRgba64.GetB: Word;
+begin
+  Result := Value;
+end;
+
+function TBLRgba64.GetG: Word;
+begin
+  Result := Value shr 16;
+end;
+
+function TBLRgba64.GetIsOpaque: Boolean;
+begin
+  Result := (Value >= $FFFF000000000000);
+end;
+
+function TBLRgba64.GetIsTransparent: Boolean;
+begin
+  Result := (Value <= $0000FFFFFFFFFFFF);
+end;
+
+function TBLRgba64.GetR: Word;
+begin
+  Result := Value shr 32;
+end;
+
+class operator TBLRgba64.Implicit(const AValue: TBLRgba64): UInt64;
+begin
+  Result := AValue.Value;
+end;
+
+class operator TBLRgba64.Implicit(const AValue: UInt64): TBLRgba64;
+begin
+  Result.Value := AValue;
+end;
+
+class operator TBLRgba64.NotEqual(const ALeft, ARight: TBLRgba64): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLRgba64.Reset(const AR, AG, AB, AA: Word);
+begin
+  Value := (UInt64(AA) shl 48) or (AR shl 32) or (AG shl 16) or AB;
+end;
+
+procedure TBLRgba64.Reset(const ARgba32: TBLRgba32);
+begin
+  Value := (UInt64(ARgba32.A) shl 48) or (ARgba32.R shl 32) or (ARgba32.G shl 16) or ARgba32.B;
+  Value := Value * $0101;
+end;
+
+procedure TBLRgba64.Reset(const ARgba64: UInt64);
+begin
+  Value := ARgba64;
+end;
+
+procedure TBLRgba64.Reset;
+begin
+  Value := 0;
+end;
+
+procedure TBLRgba64.SetA(const AValue: Word);
+begin
+  Value := (Value and $0000FFFFFFFFFFFF) or (UInt64(AValue) shl 48);
+end;
+
+procedure TBLRgba64.SetB(const AValue: Word);
+begin
+  Value := (Value and $FFFFFFFFFFFF0000) or AValue;
+end;
+
+procedure TBLRgba64.SetG(const AValue: Word);
+begin
+  Value := (Value and $FFFFFFFF0000FFFF) or (AValue shl 16);
+end;
+
+procedure TBLRgba64.SetR(const AValue: Word);
+begin
+  Value := (Value and $FFFF0000FFFFFFFF) or (AValue shl 32);
+end;
+
+{ TBLRgba }
+
+function BLRgba: TBLRgba; overload; inline;
+begin
+  Result.Reset;
+end;
+
+function BLRgba(const ARgba32: TBLRgba32): TBLRgba; overload; inline;
+begin
+  Result.Reset(ARgba32);
+end;
+
+function BLRgba(const ARgba64: TBLRgba64): TBLRgba; overload; inline;
+begin
+  Result.Reset(ARgba64);
+end;
+
+function BLRgba(const AR, AG, AB: Single; const AA: Single = 1): TBLRgba; overload; inline;
+begin
+  Result.Reset(AR, AG, AB, AA);
+end;
+
+function BLMin(const AA, AB: TBLRgba): TBLRgba; overload; inline;
+begin
+  Result.Reset(Min(AA.R, AB.R), Min(AA.G, AB.G), Min(AA.B, AB.B), Min(AA.A, AB.A));
+end;
+
+function BLMax(const AA, AB: TBLRgba): TBLRgba; overload; inline;
+begin
+  Result.Reset(Max(AA.R, AB.R), Max(AA.G, AB.G), Max(AA.B, AB.B), Max(AA.A, AB.A));
+end;
+
+class function TBLRgba.Create: TBLRgba;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+end;
+
+constructor TBLRgba.Create(const AR, AG, AB, AA: Single);
+begin
+  R := AR;
+  G := AG;
+  B := AB;
+  A := AA;
+end;
+
+constructor TBLRgba.Create(const ARgba32: TBLRgba32);
+begin
+  Reset(ARgba32);
+end;
+
+constructor TBLRgba.Create(const ARgba64: TBLRgba64);
+begin
+  Reset(ARgba64);
+end;
+
+class operator TBLRgba.Equal(const ALeft, ARight: TBLRgba): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLRgba.Equals(const AOther: TBLRgba32): Boolean;
+begin
+  var Other: TBLRgba;
+  Other.Reset(AOther);
+  Result := Equals(Other);
+end;
+
+function TBLRgba.Equals(const AOther: TBLRgba64): Boolean;
+begin
+  var Other: TBLRgba;
+  Other.Reset(AOther);
+  Result := Equals(Other);
+end;
+
+function TBLRgba.Equals(const AR, AG, AB, AA: Single): Boolean;
+begin
+  Result := (R = AR) and (G = AG) and (B = AB) and (A = AA);
+end;
+
+function TBLRgba.GetIsOpaque: Boolean;
+begin
+  Result := (A >= 1);
+end;
+
+function TBLRgba.GetIsTransparent: Boolean;
+begin
+  Result := (A <= 0);
+end;
+
+function TBLRgba.Equals(const AOther: TBLRgba): Boolean;
+begin
+  Result := (R = AOther.R) and (G = AOther.G) and (B = AOther.B) and (A = AOther.A);
+end;
+
+class operator TBLRgba.NotEqual(const ALeft, ARight: TBLRgba): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLRgba.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+procedure TBLRgba.Reset(const ARgba32: TBLRgba32);
+const
+  FACTOR: Single = 1 / $FF;
+begin
+  R := ARgba32.R * FACTOR;
+  G := ARgba32.G * FACTOR;
+  B := ARgba32.B * FACTOR;
+  A := ARgba32.A * FACTOR;
+end;
+
+procedure TBLRgba.Reset(const ARgba64: TBLRgba64);
+const
+  FACTOR: Single = 1 / $FFFF;
+begin
+  R := ARgba64.R * FACTOR;
+  G := ARgba64.G * FACTOR;
+  B := ARgba64.B * FACTOR;
+  A := ARgba64.A * FACTOR;
+end;
+
+procedure TBLRgba.Reset(const AR, AG, AB, AA: Single);
+begin
+  R := AR;
+  G := AG;
+  B := AB;
+  A := AA;
+end;
+
+function TBLRgba.ToRgba32: TBLRgba32;
+begin
+  Result.Reset(Trunc(EnsureRange(R, 0, 1) * $FF + 0.5),
+               Trunc(EnsureRange(G, 0, 1) * $FF + 0.5),
+               Trunc(EnsureRange(B, 0, 1) * $FF + 0.5),
+               Trunc(EnsureRange(A, 0, 1) * $FF + 0.5));
+end;
+
+function TBLRgba.ToRgba64: TBLRgba64;
+begin
+  Result.Reset(Trunc(EnsureRange(R, 0, 1) * $FFFF + 0.5),
+               Trunc(EnsureRange(G, 0, 1) * $FFFF + 0.5),
+               Trunc(EnsureRange(B, 0, 1) * $FFFF + 0.5),
+               Trunc(EnsureRange(A, 0, 1) * $FFFF + 0.5));
+end;
+
+{ TBLGradientStop }
+
+function BLGradientStop: TBLGradientStop; overload; inline;
+begin
+  Result.Reset;
+end;
+
+function BLGradientStop(const AOffset: Double; const ARgba32: TBLRgba32): TBLGradientStop; overload; inline;
+begin
+  Result.Reset(AOffset, ARgba32);
+end;
+
+function BLGradientStop(const AOffset: Double; const ARgba64: TBLRgba64): TBLGradientStop; overload; inline;
+begin
+  Result.Reset(AOffset, ARgba64);
+end;
+
+class function TBLGradientStop.Create: TBLGradientStop;
+begin
+  Result.Offset := 0;
+  Result.Rgba := 0;
+end;
+
+constructor TBLGradientStop.Create(const AOffset: Double;
+  const ARgba32: TBLRgba32);
+begin
+  Offset := AOffset;
+  Rgba.Reset(ARgba32);
+end;
+
+constructor TBLGradientStop.Create(const AOffset: Double;
+  const ARgba64: TBLRgba64);
+begin
+  Offset := AOffset;
+  Rgba := ARgba64;
+end;
+
+class operator TBLGradientStop.Equal(const ALeft,
+  ARight: TBLGradientStop): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLGradientStop.Equals(const AOther: TBLGradientStop): Boolean;
+begin
+  Result := (Offset = AOther.Offset) and (Rgba = AOther.Rgba);
+end;
+
+class operator TBLGradientStop.NotEqual(const ALeft,
+  ARight: TBLGradientStop): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLGradientStop.Reset;
+begin
+  Offset := 0;
+  Rgba := 0;
+end;
+
+procedure TBLGradientStop.Reset(const AOffset: Double;
+  const ARgba32: TBLRgba32);
+begin
+  Offset := AOffset;
+  Rgba.Reset(ARgba32);
+end;
+
+procedure TBLGradientStop.Reset(const AOffset: Double;
+  const ARgba64: TBLRgba64);
+begin
+  Offset := AOffset;
+  Rgba := ARgba64;
+end;
+
+{ TBLLinearGradientValues }
+
+function BLLinearGradientValues: TBLLinearGradientValues; overload; inline;
+begin
+  Result.Reset;
+end;
+
+function BLLinearGradientValues(const AX0, AY0, AX1, AY1: Double): TBLLinearGradientValues; overload; inline;
+begin
+  Result.Reset(AX0, AY0, AX1, AY1);
+end;
+
+class function TBLLinearGradientValues.Create: TBLLinearGradientValues;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+end;
+
+constructor TBLLinearGradientValues.Create(const AX0, AY0, AX1, AY1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+procedure TBLLinearGradientValues.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+procedure TBLLinearGradientValues.Reset(const AX0, AY0, AX1, AY1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+end;
+
+{ TBLRadialGradientValues }
+
+function BLRadialGradientValues: TBLRadialGradientValues; overload; inline;
+begin
+  Result.Reset;
+end;
+
+function BLRadialGradientValues(const AX0, AY0, AX1, AY1, AR0: Double;
+  const AR1: Double = 0): TBLRadialGradientValues; overload; inline;
+begin
+  Result.Reset(AX0, AY0, AX1, AY1, AR0, AR1);
+end;
+
+class function TBLRadialGradientValues.Create: TBLRadialGradientValues;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+end;
+
+constructor TBLRadialGradientValues.Create(const AX0, AY0, AX1, AY1, AR0,
+  AR1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+  R0 := AR0;
+  R1 := AR1;
+end;
+
+procedure TBLRadialGradientValues.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+procedure TBLRadialGradientValues.Reset(const AX0, AY0, AX1, AY1, AR0,
+  AR1: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  X1 := AX1;
+  Y1 := AY1;
+  R0 := AR0;
+  R1 := AR1;
+end;
+
+{ TBLConicGradientValues }
+
+function BLConicGradientValues: TBLConicGradientValues; overload; inline;
+begin
+  Result.Reset;
+end;
+
+function BLConicGradientValues(const AX0, AY0, AAngle: Double;
+  const ARepeat: Double = 1): TBLConicGradientValues; overload; inline;
+begin
+  Result.Reset(AX0, AY0, AAngle, ARepeat);
+end;
+
+class function TBLConicGradientValues.Create: TBLConicGradientValues;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+end;
+
+constructor TBLConicGradientValues.Create(const AX0, AY0, AAngle,
+  ARepeat: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  Angle := AAngle;
+  Repetition := ARepeat;
+end;
+
+procedure TBLConicGradientValues.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+procedure TBLConicGradientValues.Reset(const AX0, AY0, AAngle, ARepeat: Double);
+begin
+  X0 := AX0;
+  Y0 := AY0;
+  Angle := AAngle;
+  Repetition := ARepeat;
+end;
+
+{ TBLGradient }
+
+class operator TBLGradient.Assign(var ADest: TBLGradient;
+  const [ref] ASrc: TBLGradient);
+begin
+  _BLCheck(_blGradientInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLGradient.Equal(const ALeft: TBLGradient;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class operator TBLGradient.Equal(const ALeft, ARight: TBLGradient): Boolean;
+begin
+  Result := _blGradientEquals(@ALeft, @ARight);
+end;
+
+class operator TBLGradient.Finalize(var ADest: TBLGradient);
+begin
+  _BLCheck(_blGradientDestroy(@ADest));
+end;
+
+function TBLGradient.GetIsEmpty: Boolean;
+begin
+  Result := (PImpl(FBase.FImpl).Size = 0);
+end;
+
+class operator TBLGradient.Initialize(out ADest: TBLGradient);
+begin
+  _BLCheck(_blGradientInit(@ADest));
+end;
+
+class operator TBLGradient.NotEqual(const ALeft: TBLGradient;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLGradient.NotEqual(const ALeft, ARight: TBLGradient): Boolean;
+begin
+  Result := not _blGradientEquals(@ALeft, @ARight);
+end;
+
+{$ENDREGION 'Styling'}
+
 {$REGION 'Imaging'}
+
+{ TBLFormatInfo }
+
+procedure TBLFormatInfo.AddFlags(const AFlags: TBLFormatFlags);
+begin
+  FFlags := FFlags + AFlags;
+end;
+
+procedure TBLFormatInfo.ClearFlags(const AFlags: TBLFormatFlags);
+begin
+  FFlags := FFlags - AFlags;
+end;
+
+class operator TBLFormatInfo.Equal(const ALeft, ARight: TBLFormatInfo): Boolean;
+begin
+  Result := CompareMem(@ALeft, @ARight, SizeOf(TBLFormatInfo));
+end;
+
+function TBLFormatInfo.GetPalette: PBLRgba32;
+type
+  PPBLRgba32 = ^PBLRgba32;
+begin
+  var P := PPBLRgba32(@FSizes);
+  Result := P^;
+end;
+
+function TBLFormatInfo.GetShift(const AIndex: Integer): Byte;
+begin
+  Assert(Cardinal(AIndex) < 4);
+  Result := FSizes[AIndex];
+end;
+
+function TBLFormatInfo.GetSize(const AIndex: Integer): Byte;
+begin
+  Assert(Cardinal(AIndex) < 4);
+  Result := FSizes[AIndex];
+end;
+
+function TBLFormatInfo.HasFlag(const AFlag: TBLFormatFlag): Boolean;
+begin
+  Result := (AFlag in FFlags);
+end;
+
+procedure TBLFormatInfo.Init(const ADepth: Integer;
+  const AFlags: TBLFormatFlags; const ASizes, AShifts: TBLFourBytes);
+begin
+  FDepth := ADepth;
+  FFlags := AFlags;
+  FSizes := ASizes;
+  FShifts := AShifts;
+end;
+
+class operator TBLFormatInfo.NotEqual(const ALeft,
+  ARight: TBLFormatInfo): Boolean;
+begin
+  Result := not CompareMem(@ALeft, @ARight, SizeOf(TBLFormatInfo));
+end;
+
+procedure TBLFormatInfo.Query(const AFormat: TBLFormat);
+begin
+  _BLCheck(_blFormatInfoQuery(@Self, Ord(AFormat)));
+end;
+
+procedure TBLFormatInfo.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+procedure TBLFormatInfo.Sanitize;
+begin
+  _BLCheck(_blFormatInfoSanitize(@Self));
+end;
+
+procedure TBLFormatInfo.SetShifts(const AR, AG, AB, AA: Byte);
+begin
+  FShifts[0] := AR;
+  FShifts[1] := AG;
+  FShifts[2] := AB;
+  FShifts[3] := AA;
+end;
+
+procedure TBLFormatInfo.SetSizes(const AR, AG, AB, AA: Byte);
+begin
+  FSizes[0] := AR;
+  FSizes[1] := AG;
+  FSizes[2] := AB;
+  FSizes[3] := AA;
+end;
+
+{ _TBLFormatHelper }
+
+function _TBLFormatHelper.Info: TBLFormatInfo;
+begin
+  _BLCheck(_blFormatInfoQuery(@Result, Ord(Self)));
+end;
+
+{ TBLPixelConverter }
+
+class operator TBLPixelConverter.Assign(var ADest: TBLPixelConverter;
+  const [ref] ASrc: TBLPixelConverter);
+begin
+  _BLCheck(_blPixelConverterInitWeak(@ADest, @ASrc));
+end;
+
+procedure TBLPixelConverter.ConvertRect(const ADstData: Pointer;
+  const ADstStride: NativeInt; const ASrcData: Pointer;
+  const ASrcStride: NativeInt; const AWidth, AHeight: Integer;
+  const AOptions: TBLPixelConverterOptions);
+begin
+  _BLCheck(_blPixelConverterConvert(@Self, ADstData, ADstStride, ASrcData,
+    ASrcStride, AWidth, AHeight, @AOptions));
+end;
+
+procedure TBLPixelConverter.ConvertRect(const ADstData: Pointer;
+  const ADstStride: NativeInt; const ASrcData: Pointer;
+  const ASrcStride: NativeInt; const AWidth, AHeight: Integer);
+begin
+  _BLCheck(_blPixelConverterConvert(@Self, ADstData, ADstStride, ASrcData,
+    ASrcStride, AWidth, AHeight, nil));
+end;
+
+procedure TBLPixelConverter.ConvertSpan(const ADstData, ASrcData: Pointer;
+  const AWidth: Integer; const AOptions: TBLPixelConverterOptions);
+begin
+  _BLCheck(_blPixelConverterConvert(@Self, ADstData, 0, ASrcData, 0, AWidth, 1, @AOptions));
+end;
+
+procedure TBLPixelConverter.ConvertSpan(const ADstData, ASrcData: Pointer;
+  const AWidth: Integer);
+begin
+  _BLCheck(_blPixelConverterConvert(@Self, ADstData, 0, ASrcData, 0, AWidth, 1, nil));
+end;
+
+class operator TBLPixelConverter.Finalize(var ADest: TBLPixelConverter);
+begin
+  _BLCheck(_blPixelConverterDestroy(@ADest));
+end;
+
+function TBLPixelConverter.GetIsInitialized: Boolean;
+begin
+  Result := (FCore.InternalFlags <> 0);
+end;
+
+class operator TBLPixelConverter.Initialize(out ADest: TBLPixelConverter);
+begin
+  _BLCheck(_blPixelConverterInit(@ADest));
+end;
+
+procedure TBLPixelConverter.Make(const ADstInfo, ASrcInfo: TBLFormatInfo;
+  const ACreateFlags: TBLPixelConverterCreateFlags);
+begin
+  _BLCheck(_blPixelConverterCreate(@Self, @ADstInfo, @ASrcInfo, Byte(ACreateFlags)));
+end;
+
+procedure TBLPixelConverter.Reset;
+begin
+  _BLCheck(_blPixelConverterReset(@Self));
+end;
+
+{ TBLImageInfo }
+
+function TBLImageInfo.GetCompression: String;
+begin
+  Result := String(UTF8String(PUTF8Char(@FCompression)));
+end;
+
+function TBLImageInfo.GetFlags: TBLImageInfoFlags;
+begin
+  Byte(Result) := FFlags;
+end;
+
+function TBLImageInfo.GetFormat: String;
+begin
+  Result := String(UTF8String(PUTF8Char(@FFormat)));
+end;
+
+procedure TBLImageInfo.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLImageDecoder }
+
+class operator TBLImageDecoder.Assign(var ADest: TBLImageDecoder;
+  const [ref] ASrc: TBLImageDecoder);
+begin
+  _BLCheck(_blImageDecoderInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLImageDecoder.Equal(const ALeft: TBLImageDecoder;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLImageDecoder.Equal(const ALeft,
+  ARight: TBLImageDecoder): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLImageDecoder.Equals(const AOther: TBLImageDecoder): Boolean;
+begin
+  Result := (FBase.FImpl = AOther.FBase.FImpl);
+end;
+
+class operator TBLImageDecoder.Finalize(var ADest: TBLImageDecoder);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blImageDecoderDestroy(@ADest));
+end;
+
+function TBLImageDecoder.GetBufferIndex: NativeInt;
+begin
+  Result := PImpl(FBase.FImpl).BufferIndex;
+end;
+
+function TBLImageDecoder.GetFrameIndex: Int64;
+begin
+  Result := PImpl(FBase.FImpl).FrameIndex;
+end;
+
+function TBLImageDecoder.GetIsValid: Boolean;
+begin
+  Result := (LastResult <> TBLResult.NotInitialized);
+end;
+
+function TBLImageDecoder.GetLastResult: TBLResult;
+begin
+  Result := TBLResult(PImpl(FBase.FImpl).LastResult);
+end;
+
+class operator TBLImageDecoder.Initialize(out ADest: TBLImageDecoder);
+begin
+  _BLCheck(_blImageDecoderInit(@ADest));
+end;
+
+class operator TBLImageDecoder.NotEqual(const ALeft: TBLImageDecoder;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class operator TBLImageDecoder.NotEqual(const ALeft,
+  ARight: TBLImageDecoder): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo;
+  const ABuffer: TBLArray<Byte>);
+begin
+  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, ABuffer.Data, ABuffer.Size));
+end;
+
+procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo;
+  const ABuffer: TBytes);
+begin
+  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, ABuffer, Length(ABuffer)));
+end;
+
+procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo;
+  const AView: TBLArrayView<Byte>);
+begin
+  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, AView.FData, AView.FSize));
+end;
+
+procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo; const AData: Pointer;
+  const ASize: NativeInt);
+begin
+  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, AData, ASize));
+end;
+
+procedure TBLImageDecoder.Reset;
+begin
+  _BLCheck(_blImageDecoderReset(@Self));
+end;
+
+procedure TBLImageDecoder.Restart;
+begin
+  _BLCheck(_blImageDecoderRestart(@Self));
+end;
+
+procedure TBLImageDecoder.Swap(var AOther: TBLImageDecoder);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+{ _TBLImageDecoderHelper }
+
+function _TBLImageDecoderHelper.GetCodec: TBLImageCodec;
+begin
+  Result.FBase := PImpl(FBase.FImpl).Codec;
+end;
+
+procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
+  const ABuffer: TBLArray<Byte>);
+begin
+  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, ABuffer.Data, ABuffer.Size));
+end;
+
+procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
+  const ABuffer: TBytes);
+begin
+  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, ABuffer, Length(ABuffer)));
+end;
+
+procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
+  const AView: TBLArrayView<Byte>);
+begin
+  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, AView.FData, AView.FSize));
+end;
+
+procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
+  const AData: Pointer; const ASize: NativeInt);
+begin
+  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, AData, ASize));
+end;
+
+{ TBLImageEncoder }
+
+class operator TBLImageEncoder.Assign(var ADest: TBLImageEncoder;
+  const [ref] ASrc: TBLImageEncoder);
+begin
+  _BLCheck(_blImageEncoderInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLImageEncoder.Equal(const ALeft: TBLImageEncoder;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLImageEncoder.Equal(const ALeft,
+  ARight: TBLImageEncoder): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLImageEncoder.Equals(const AOther: TBLImageEncoder): Boolean;
+begin
+  Result := (FBase.FImpl = AOther.FBase.FImpl);
+end;
+
+class operator TBLImageEncoder.Finalize(var ADest: TBLImageEncoder);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blImageEncoderDestroy(@ADest));
+end;
+
+function TBLImageEncoder.GetBufferIndex: NativeInt;
+begin
+  Result := PImpl(FBase.FImpl).BufferIndex;
+end;
+
+function TBLImageEncoder.GetFrameIndex: Int64;
+begin
+  Result := PImpl(FBase.FImpl).FrameIndex;
+end;
+
+function TBLImageEncoder.GetIsValid: Boolean;
+begin
+  Result := (LastResult <> TBLResult.NotInitialized);
+end;
+
+function TBLImageEncoder.GetLastResult: TBLResult;
+begin
+  Result := TBLResult(PImpl(FBase.FImpl).LastResult);
+end;
+
+class operator TBLImageEncoder.Initialize(out ADest: TBLImageEncoder);
+begin
+  _BLCheck(_blImageEncoderInit(@ADest));
+end;
+
+class operator TBLImageEncoder.NotEqual(const ALeft: TBLImageEncoder;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class operator TBLImageEncoder.NotEqual(const ALeft,
+  ARight: TBLImageEncoder): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLImageEncoder.Reset;
+begin
+  _BLCheck(_blImageEncoderReset(@Self));
+end;
+
+procedure TBLImageEncoder.Restart;
+begin
+  _BLCheck(_blImageEncoderRestart(@Self));
+end;
+
+procedure TBLImageEncoder.Swap(var AOther: TBLImageEncoder);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+{ _TBLImageEncoderHelper }
+
+function _TBLImageEncoderHelper.GetCodec: TBLImageCodec;
+begin
+  Result.FBase := PImpl(FBase.FImpl).Codec;
+end;
+
+procedure _TBLImageEncoderHelper.WriteFrame(const ADst: TBLArray<Byte>;
+  const AImage: TBLImage);
+begin
+  _BLCheck(_blImageEncoderWriteFrame(@Self, @ADst, @AImage));
+end;
+
+function _TBLImageEncoderHelper.WriteFrame(const AImage: TBLImage): TBytes;
+begin
+  var Dst: TBLArray<Byte>;
+  _BLCheck(_blImageEncoderWriteFrame(@Self, @Dst, @AImage));
+  SetLength(Result, Dst.Size);
+  Move(Dst.Data^, Result[0], Dst.Size);
+end;
+
+{ TBLImageCodec }
+
+class procedure TBLImageCodec.AddToBuiltIn(const ACodec: TBLImageCodec);
+begin
+  _BLCheck(_blImageCodecAddToBuiltIn(@ACodec));
+end;
+
+class operator TBLImageCodec.Assign(var ADest: TBLImageCodec;
+  const [ref] ASrc: TBLImageCodec);
+begin
+  _BLCheck(_blImageCodecInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLImageCodec.Equal(const ALeft: TBLImageCodec;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+function TBLImageCodec.CreateDecoder: TBLImageDecoder;
+begin
+  _BLCheck(_blImageCodecCreateDecoder(@Self, @Result));
+end;
+
+function TBLImageCodec.CreateEncoder: TBLImageEncoder;
+begin
+  _BLCheck(_blImageCodecCreateEncoder(@Self, @Result));
+end;
+
+class operator TBLImageCodec.Equal(const ALeft, ARight: TBLImageCodec): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLImageCodec.Equals(const AOther: TBLImageCodec): Boolean;
+begin
+  Result := (FBase.FImpl = AOther.FBase.FImpl);
+end;
+
+class operator TBLImageCodec.Finalize(var ADest: TBLImageCodec);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blImageCodecDestroy(@ADest));
+end;
+
+procedure TBLImageCodec.FindByData(const AView: TBLArrayView<Byte>;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, AView.FData, AView.FSize, @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByData(const AView: TBLArrayView<Byte>);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, AView.FData, AView.FSize, nil));
+end;
+
+procedure TBLImageCodec.FindByData(const AData: Pointer; const ASize: NativeInt;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, AData, ASize, @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByData(const AData: Pointer;
+  const ASize: NativeInt);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, AData, ASize, nil));
+end;
+
+procedure TBLImageCodec.FindByData(const ABuffer: TBytes;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, Pointer(ABuffer), Length(ABuffer), @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByData(const ABuffer: TBytes);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, Pointer(ABuffer), Length(ABuffer), nil));
+end;
+
+procedure TBLImageCodec.FindByData(const ABuffer: TBLArray<Byte>;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, ABuffer.Data, ABuffer.Size, @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByData(const ABuffer: TBLArray<Byte>);
+begin
+  _BLCheck(_blImageCodecFindByData(@Self, ABuffer.Data, ABuffer.Size, nil));
+end;
+
+procedure TBLImageCodec.FindByExtension(const AExt: String;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  var Name := UTF8String(AExt);
+  _BLCheck(_blImageCodecFindByExtension(@Self, PUTF8Char(Name), Length(Name), @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByExtension(const AExt: String);
+begin
+  var Name := UTF8String(AExt);
+  _BLCheck(_blImageCodecFindByExtension(@Self, PUTF8Char(Name), Length(Name), nil));
+end;
+
+procedure TBLImageCodec.FindByExtension(const AExt: TBLStringView;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageCodecFindByExtension(@Self, Pointer(AExt.FData), AExt.FSize, @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByExtension(const AExt: TBLStringView);
+begin
+  _BLCheck(_blImageCodecFindByExtension(@Self, Pointer(AExt.FData), AExt.FSize, nil));
+end;
+
+procedure TBLImageCodec.FindByName(const AName: String;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  var Name := UTF8String(AName);
+  _BLCheck(_blImageCodecFindByName(@Self, PUTF8Char(Name), Length(Name), @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByName(const AName: String);
+begin
+  var Name := UTF8String(AName);
+  _BLCheck(_blImageCodecFindByName(@Self, PUTF8Char(Name), Length(Name), nil));
+end;
+
+procedure TBLImageCodec.FindByName(const AName: TBLStringView;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageCodecFindByName(@Self, Pointer(AName.FData), AName.FSize, @ACodecs));
+end;
+
+procedure TBLImageCodec.FindByName(const AName: TBLStringView);
+begin
+  _BLCheck(_blImageCodecFindByName(@Self, Pointer(AName.FData), AName.FSize, nil));
+end;
+
+class function TBLImageCodec.GetBuiltInCodecs: TBLArray<TBLImageCodec>;
+begin
+  _BLCheck(_blImageCodecArrayInitBuiltInCodecs(@Result));
+end;
+
+function TBLImageCodec.GetExtensions: TBLString;
+begin
+  Result.FBase := PImpl(FBase.FImpl).Extensions;
+end;
+
+function TBLImageCodec.GetFeatures: TBLImageCodecFeatures;
+begin
+  Cardinal(Result) := PImpl(FBase.FImpl).Features;
+end;
+
+function TBLImageCodec.GetIsValid: Boolean;
+begin
+  var Features := TBLImageCodecFeatures(PImpl(FBase.FImpl).Features);
+  Result := ((Features * [TBLImageCodecFeature.Read, TBLImageCodecFeature.Write]) <> []);
+end;
+
+function TBLImageCodec.GetMimeType: TBLString;
+begin
+  Result.FBase := PImpl(FBase.FImpl).MimeType;
+end;
+
+function TBLImageCodec.GetName: TBLString;
+begin
+  Result.FBase := PImpl(FBase.FImpl).Name;
+end;
+
+function TBLImageCodec.GetVendor: TBLString;
+begin
+  Result.FBase := PImpl(FBase.FImpl).Vendor;
+end;
+
+function TBLImageCodec.HasFeature(
+  const AFeature: TBLImageCodecFeature): Boolean;
+begin
+  var Features := TBLImageCodecFeatures(PImpl(FBase.FImpl).Features);
+  Result := (AFeature in Features);
+end;
+
+class operator TBLImageCodec.Initialize(out ADest: TBLImageCodec);
+begin
+  _BLCheck(_blImageCodecInit(@ADest));
+end;
+
+function TBLImageCodec.InspectData(const ABuffer: TBLArray<Byte>): Cardinal;
+begin
+  Result := _blImageCodecInspectData(@Self, ABuffer.Data, ABuffer.Size);
+end;
+
+function TBLImageCodec.InspectData(const ABuffer: TBytes): Cardinal;
+begin
+  Result := _blImageCodecInspectData(@Self, ABuffer, Length(ABuffer));
+end;
+
+function TBLImageCodec.InspectData(const AView: TBLArrayView<Byte>): Cardinal;
+begin
+  Result := _blImageCodecInspectData(@Self, AView.FData, AView.FSize);
+end;
+
+function TBLImageCodec.InspectData(const AData: Pointer;
+  const ASize: NativeInt): Cardinal;
+begin
+  Result := _blImageCodecInspectData(@Self, AData, ASize);
+end;
+
+class operator TBLImageCodec.NotEqual(const ALeft,
+  ARight: TBLImageCodec): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class procedure TBLImageCodec.RemoveFromBuiltIn(const ACodec: TBLImageCodec);
+begin
+  _BLCheck(_blImageCodecRemoveFromBuiltIn(@ACodec));
+end;
+
+procedure TBLImageCodec.Reset;
+begin
+  _BLCheck(_blImageCodecReset(@Self));
+end;
+
+procedure TBLImageCodec.Swap(var AOther: TBLImageCodec);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+class operator TBLImageCodec.NotEqual(const ALeft: TBLImageCodec;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
 
 { TBLImageData }
 
@@ -9880,9 +12779,59 @@ begin
   Result := not ALeft.Equals(ARight);
 end;
 
+procedure TBLImage.ReadFromData(const AArray: TBLArray<Byte>;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AArray.Data, AArray.Size, @ACodecs));
+end;
+
+procedure TBLImage.ReadFromData(const AArray: TBLArray<Byte>);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AArray.Data, AArray.Size, nil));
+end;
+
+procedure TBLImage.ReadFromData(const AData: Pointer; const ASize: NativeInt;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AData, ASize, @ACodecs));
+end;
+
+procedure TBLImage.ReadFromData(const AData: Pointer; const ASize: NativeInt);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AData, ASize, nil));
+end;
+
+procedure TBLImage.ReadFromData(const AView: TBLArrayView<Byte>;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AView.FData, AView.FSize, @ACodecs));
+end;
+
+procedure TBLImage.ReadFromData(const AView: TBLArrayView<Byte>);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AView.FData, AView.FSize, nil));
+end;
+
+procedure TBLImage.ReadFromData(const AArray: TBytes;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AArray, Length(AArray), @ACodecs));
+end;
+
+procedure TBLImage.ReadFromData(const AArray: TBytes);
+begin
+  _BLCheck(_blImageReadFromData(@Self, AArray, Length(AArray), nil));
+end;
+
 procedure TBLImage.ReadFromFile(const AFilename: String);
 begin
   _BLCheck(_blImageReadFromFile(@Self, PUTF8Char(UTF8String(AFilename)), nil));
+end;
+
+procedure TBLImage.ReadFromFile(const AFilename: String;
+  const ACodecs: TBLArray<TBLImageCodec>);
+begin
+  _BLCheck(_blImageReadFromFile(@Self, PUTF8Char(UTF8String(AFilename)), @ACodecs));
 end;
 
 procedure TBLImage.Reset;
@@ -9890,9 +12839,35 @@ begin
   _BLCheck(_blImageReset(@Self));
 end;
 
+class procedure TBLImage.Scale(const ADst, ASrc: TBLImage;
+  const ASize: TBLSizeI; const AFilter: TBLImageScaleFilter);
+begin
+  _BLCheck(_blImageScale(@ADst, @ASrc, @ASize, Ord(AFilter)));
+end;
+
 procedure TBLImage.Swap(var AOther: TBLImage);
 begin
   FBase.Swap(AOther.FBase);
+end;
+
+function TBLImage.WriteToData(const ACodec: TBLImageCodec): TBytes;
+begin
+  var Dst: TBLArray<Byte>;
+  _BLCheck(_blImageWriteToData(@Self, @Dst, @ACodec));
+  SetLength(Result, Dst.Size);
+  Move(Dst.Data^, Result[0], Dst.Size);
+end;
+
+procedure TBLImage.WriteToData(const ADst: TBLArray<Byte>;
+  const ACodec: TBLImageCodec);
+begin
+  _BLCheck(_blImageWriteToData(@Self, @ADst, @ACodec));
+end;
+
+procedure TBLImage.WriteToFile(const AFilename: String;
+  const ACodec: TBLImageCodec);
+begin
+  _BLCheck(_blImageWriteToFile(@Self, PUTF8Char(UTF8String(AFilename)), @ACodec));
 end;
 
 procedure TBLImage.WriteToFile(const AFilename: String);
@@ -9910,16 +12885,6 @@ begin
 end;
 
 {$ENDREGION 'Imaging'}
-
-{$REGION 'Styling'}
-
-{ TBLRgba32 }
-
-class operator TBLRgba32.Implicit(const AValue: UInt32): TBLRgba32;
-begin
-  Result.Value := AValue;
-end;
-{$ENDREGION 'Styling'}
 
 {$REGION 'Rendering'}
 
