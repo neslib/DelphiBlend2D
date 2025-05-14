@@ -1023,6 +1023,7 @@ type
 
     function Equals(const AOther: TBLRange): Boolean; inline;
   end;
+  PBLRange = ^TBLRange;
 
 type
   /// <summary>
@@ -2512,7 +2513,7 @@ type
     /// <summary>
     ///  Hit test failed (invalid argument, NaNs, etc).
     /// </summary>
-    Invalid = $FFFFFFFF);
+    Invalid = Integer($FFFFFFFF));
 
 { ============================================================================
    [Geometries - Lightweight Geometries and Structs]
@@ -3655,6 +3656,7 @@ type
     property DashOffset: Double read FDashOffset write FDashOffset;
     property DashArray: TBLArray<Double> read FDashArray write FDashArray;
   end;
+  PBLStrokeOptions = ^TBLStrokeOptions;
 
 { ============================================================================
    [Geometries - Paths]
@@ -3712,7 +3714,7 @@ type
     /// <remarks>
     ///  This command is never stored in the path.
     /// </remarks>
-    Preserve = $FFFFFFFF);
+    Preserve = Integer($FFFFFFFF));
 
 type
   /// <summary>
@@ -3844,6 +3846,7 @@ type
     /// </summary>
     property OffsetParameter: Double read FOffsetParameter write FOffsetParameter;
   end;
+  PBLApproximationOptions = ^TBLApproximationOptions;
 
 type
   /// <summary>
@@ -5175,6 +5178,7 @@ type
     /// </summary>
     property IsTransparent: Boolean read GetIsTransparent;
   end;
+  PBLRgba64 = ^TBLRgba64;
 
 type
   /// <summary>
@@ -5248,6 +5252,7 @@ type
     /// </summary>
     property IsTransparent: Boolean read GetIsTransparent;
   end;
+  PBLRgba = ^TBLRgba;
 
 function BLRgba32: TBLRgba32; overload; inline;
 function BLRgba32(const ARgba32: UInt32): TBLRgba32; overload; inline;
@@ -5272,6 +5277,75 @@ function BLMin(const AA, AB: TBLRgba): TBLRgba; overload; inline;
 function BLMax(const AA, AB: TBLRgba): TBLRgba; overload; inline;
 
 { ============================================================================
+   [Styling - Patterns]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Extend mode.
+  /// </summary>
+  TBLExtendMode = (
+    /// <summary>
+    ///  Pad extend [default].
+    /// </summary>
+    Pad,
+
+    /// <summary>
+    ///  Repeat extend.
+    /// </summary>
+    Repeating,
+
+    /// <summary>
+    ///  Reflect extend.
+    /// </summary>
+    Reflect,
+
+    /// <summary>
+    ///  Alias of `Pad`.
+    /// </summary>
+    PadXPadY = Pad,
+
+    /// <summary>
+    ///  Pad X and repeat Y.
+    /// </summary>
+    PadXRepeatY = 3,
+
+    /// <summary>
+    ///  Pad X and reflect Y.
+    /// </summary>
+    PadXReflectY,
+
+    /// <summary>
+    ///  Alias of `Repeating`.
+    /// </summary>
+    RepeatXRepeat = Repeating,
+
+    /// <summary>
+    ///  Repeat X and pad Y.
+    /// </summary>
+    RepeatXPadY = 5,
+
+    /// <summary>
+    ///  Repeat X and reflect Y.
+    /// </summary>
+    RepeatXReflectY,
+
+    /// <summary>
+    ///  Alias of `Reflect`.
+    /// </summary>
+    ReflectXReflectY = Reflect,
+
+    /// <summary>
+    ///  Reflect X and pad Y.
+    /// </summary>
+    ReflectXPadY = 7,
+
+    /// <summary>
+    ///  Reflect X and repeat Y.
+    /// </summary>
+    ReflectXRepeatY);
+
+{ ============================================================================
    [Styling - Gradients]
   ============================================================================ }
 
@@ -5279,7 +5353,7 @@ type
   /// <summary>
   ///  Gradient type.
   /// </summary>
-  TBLGradientType = (
+  TBLGradientKind = (
     /// <summary>
     ///  Linear gradient type.
     /// </summary>
@@ -5389,7 +5463,9 @@ type
 
     function Equals(const AOther: TBLGradientStop): Boolean; inline;
   end;
+  {$POINTERMATH ON}
   PBLGradientStop = ^TBLGradientStop;
+  {$POINTERMATH OFF}
 
 function BLGradientStop: TBLGradientStop; overload; inline;
 function BLGradientStop(const AOffset: Double; const ARgba32: TBLRgba32): TBLGradientStop; overload; inline;
@@ -5412,6 +5488,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AX0, AY0, AX1, AY1: Double); overload; inline;
   end;
+  PBLLinearGradientValues = ^TBLLinearGradientValues;
 
 function BLLinearGradientValues: TBLLinearGradientValues; overload; inline;
 function BLLinearGradientValues(const AX0, AY0, AX1, AY1: Double): TBLLinearGradientValues; overload; inline;
@@ -5437,6 +5514,7 @@ type
     procedure Reset(const AX0, AY0, AX1, AY1, AR0: Double;
       const AR1: Double = 0); overload; inline;
   end;
+  PBLRadialGradientValues = ^TBLRadialGradientValues;
 
 function BLRadialGradientValues: TBLRadialGradientValues; overload; inline;
 function BLRadialGradientValues(const AX0, AY0, AX1, AY1, AR0: Double;
@@ -5461,6 +5539,7 @@ type
     procedure Reset(const AX0, AY0, AAngle: Double;
       const ARepeat: Double = 1); overload; inline;
   end;
+  PBLConicGradientValues = ^TBLConicGradientValues;
 
 function BLConicGradientValues: TBLConicGradientValues; overload; inline;
 function BLConicGradientValues(const AX0, AY0, AAngle: Double;
@@ -5488,13 +5567,51 @@ type
     PImpl = ^TImpl;
   private
     FBase: TBLObjectCore;
+    function GetKind: TBLGradientKind; inline;
+    procedure SetKind(const AValue: TBLGradientKind); inline;
+    function GetExtendMode: TBLExtendMode; inline;
+    procedure SetExtendMode(const AValue: TBLExtendMode); inline;
+    function GetValue(const AIndex: NativeInt): Double; inline;
+    procedure SetValue(const AIndex: NativeInt; const AValue: Double); inline;
+    function GetLinear: TBLLinearGradientValues; inline;
+    procedure SetLinear(const AValue: TBLLinearGradientValues); inline;
+    function GetRadial: TBLRadialGradientValues; inline;
+    procedure SetRadial(const AValue: TBLRadialGradientValues); inline;
+    function GetConic: TBLConicGradientValues; inline;
+    procedure SetConic(const AValue: TBLConicGradientValues); inline;
+    function GetX0: Double; inline;
+    procedure SetX0(const AValue: Double); inline;
+    function GetY0: Double; inline;
+    procedure SetY0(const AValue: Double); inline;
+    function GetX1: Double; inline;
+    procedure SetX1(const AValue: Double); inline;
+    function GetY1: Double; inline;
+    procedure SetY1(const AValue: Double); inline;
+    function GetR0: Double; inline;
+    procedure SetR0(const AValue: Double); inline;
+    function GetR1: Double; inline;
+    procedure SetR1(const AValue: Double); inline;
+    function GetAngle: Double; inline;
+    procedure SetAngle(const AValue: Double); inline;
+    function GetConicAngle: Double; inline;
+    procedure SetConicAngle(const AValue: Double); inline;
+    function GetConicRepeat: Double; inline;
+    procedure SetConicRepeat(const AValue: Double); inline;
     function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetCapacity: NativeInt; inline;
+    function GetStopData: PBLGradientStop; inline;
+    function GetStop(const AIndex: NativeInt): TBLGradientStop; inline;
+    function GetTransform: TBLMatrix2D; inline;
+    procedure SetTransform(const AValue: TBLMatrix2D); inline;
+    function GetTransformKind: TBLTransformKind; inline;
+    function GetHasTransform: Boolean; inline;
   {$ENDREGION 'Internal Declarations'}
   public
     /// <summary>
     ///  Creates a default constructed gradient.
     ///
-    ///  A default constructed gradient has `TBLGradientType.Linear` type, all
+    ///  A default constructed gradient has `TBLGradientKind.Linear` type, all
     ///  values set to zero, and has no color stops.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
@@ -5532,12 +5649,337 @@ type
     /// </summary>
     class operator NotEqual(const ALeft, ARight: TBLGradient): Boolean; inline; static;
 
+    constructor Create(const AKind: TBLGradientKind;
+      const AValues: TArray<Double>); overload;
+    constructor Create(const AKind: TBLGradientKind;
+      const AValues: PDouble = nil); overload;
+
+    constructor Create(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
+    constructor Create(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
+    constructor Create(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
+
+    constructor Create(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
+    constructor Create(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
+    constructor Create(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
+
+    constructor Create(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload;
+    constructor Create(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload;
+    constructor Create(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload;
+
+    /// <summary>
+    ///  Resets the gradient to its construction state.
+    /// </summary>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Swaps this gradient with `AOther`.
+    /// </summary>
+    procedure Swap(var AOther: TBLGradient); inline;
+
+    procedure Make(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
+    procedure Make(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
+    procedure Make(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
+
+    procedure Make(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
+    procedure Make(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
+    procedure Make(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
+
+    procedure Make(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload; inline;
+    procedure Make(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload; inline;
+    procedure Make(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Resets the gradient extend mode to `TBLExtendMode.Pad`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="TBLExtendMode"/>
+    procedure ResetExtendMode; inline;
+
+    procedure SetValues(const AIndex: NativeInt; const AValues: TArray<Double>); overload; inline;
+    procedure SetValues(const AIndex: NativeInt; const AValues: PDouble;
+      const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Reserves the capacity of gradient for at least `AMinCapacity` stops.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reserve(const AMinCapacity: NativeInt); inline;
+
+    /// <summary>
+    ///  Shrinks the capacity of gradient stops to fit the current use.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Shrink; inline;
+
+    /// <summary>
+    ///  Returns gradient stops and their count as `TBLArrayView<TBLGradientStop>`.
+    /// </summary>
+    function StopsView: TBLArrayView<TBLGradientStop>; inline;
+
+    /// <summary>
+    ///  Resets all stops of the gradient.
+    ///
+    ///  After the operation the gradient will have no color stops.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ResetStops; inline;
+
+    /// <summary>
+    ///  Assigns colors stops of the gradient to `AStops`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignStops(const AStops: TArray<TBLGradientStop>); overload; inline;
+
+    /// <summary>
+    ///  Assigns colors stops of the gradient to `AStops` of size `ACount`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignStops(const AStops: PBLGradientStop; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Assigns colors stops of the gradient to `AStops`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignStops(const AStops: TBLArrayView<TBLGradientStop>); overload; inline;
+
+    /// <summary>
+    ///  Adds a color stop described as a 32-bit color `ARgba32` at the given
+    ///  `AOffset`.
+    /// </summary>
+    /// <remarks>
+    ///  The offset value must be in `[0, 1]` range.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddStop(const AOffset: Double; const ARgba32: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Adds a color stop described as a 64-bit color `ARgba64` at the given
+    ///  `AOffset`.
+    /// </summary>
+    /// <remarks>
+    ///  The offset value must be in `[0, 1]` range.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddStop(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Removes stop at the given `AIndex`.
+    /// </summary>
+    /// <remarks>
+    ///  This method should be used together with `IndexOfStop`, which returns
+    ///  index to the stop array.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="IndexOfStop"/>
+    procedure RemoveStop(const AIndex: NativeInt); inline;
+
+    /// <summary>
+    ///  Removes stop at the given `AOffset`, which should be in `[0, 1]` range.
+    ///
+    ///  The `AAll` parameter specifies whether all stops at the given offset
+    ///  should be removed as there are cases in which two stops can occupy the
+    ///  same offset to create sharp transitions. If `AAll` is False and there
+    ///  is a sharp transition only the first stop would be removed. If `AAll`
+    ///  is True both stops will be removed.
+    /// </summary>
+    /// <remarks>
+    ///  There are never 3 stops occupying the same `AOffset`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveStopByOffset(const AOffset: Double;
+      const AAll: Boolean = True); inline;
+
+    /// <summary>
+    ///  Removes all stops in the given range, which describes indexes in the
+    ///  stop array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveStops(const ARange: TBLRange); inline;
+
+    /// <summary>
+    ///  Removes all stops in the given interval `[AOffsetMin, AOffsetMax]`,
+    ///  which specifies stop offsets, which are between [0, 1].
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveStopsByOffset(const AOffsetMin, AOffsetMax: Double); inline;
+
+    /// <summary>
+    ///  Replaces stop at the given `AIndex` with a new color stop described by
+    ///  `AOffset` and `ARgba32`.
+    ///
+    ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
+    ///  by `AddStop(AOffset, Rgba32)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="RemoveStop"/>
+    /// <seealso cref="AddStop"/>
+    procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
+      const ARgba32: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Replaces stop at the given `AIndex` with a new color stop described by
+    ///  `AOffset` and `ARgba64`.
+    ///
+    ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
+    ///  by `AddStop(AOffset, Rgba64)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="RemoveStop"/>
+    /// <seealso cref="AddStop"/>
+    procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
+      const ARgba64: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Returns the index of a color stop in Stops array of the given `AOffset`.
+    /// </summary>
+    /// <remarks>
+    ///  If there is no such offset, `-1` is returned.
+    /// </remarks>
+    function IndexOfStop(const AOffset: Double): NativeInt; inline;
+
+    /// <summary>
+    ///  Tests whether the gradient equals `AOther`.
+    /// </summary>
+    /// <remarks>
+    ///  The equality check returns True if both gradients are the same value-wise.
+    /// </remarks>
+    function Equals(const AOther: TBLGradient): Boolean; inline;
+
+    procedure ResetTransform; inline;
+
+    procedure Translate(const AX, AY: Double); overload; inline;
+    procedure Translate(const AP: TBLPoint); overload; inline;
+    procedure Translate(const AP: TBLPointI); overload; inline;
+
+    procedure Scale(const AXY: Double); overload; inline;
+    procedure Scale(const AX, AY: Double); overload; inline;
+    procedure Scale(const AP: TBLPoint); overload; inline;
+    procedure Scale(const AP: TBLPointI); overload; inline;
+
+    procedure Skew(const AX, AY: Double); overload; inline;
+    procedure Skew(const AP: TBLPoint); overload; inline;
+
+    procedure Rotate(const AAngle: Double); overload; inline;
+    procedure Rotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    procedure ApplyTransform(const ATransform: TBLMatrix2D); inline;
+
+    procedure PostTranslate(const AX, AY: Double); overload; inline;
+    procedure PostTranslate(const AP: TBLPoint); overload; inline;
+    procedure PostTranslate(const AP: TBLPointI); overload; inline;
+
+    procedure PostScale(const AXY: Double); overload; inline;
+    procedure PostScale(const AX, AY: Double); overload; inline;
+    procedure PostScale(const AP: TBLPoint); overload; inline;
+    procedure PostScale(const AP: TBLPointI); overload; inline;
+
+    procedure PostSkew(const AX, AY: Double); overload; inline;
+    procedure PostSkew(const AP: TBLPoint); overload; inline;
+
+    procedure PostRotate(const AAngle: Double); overload; inline;
+    procedure PostRotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    procedure PostTransform(const ATransform: TBLMatrix2D); inline;
+
+    /// <summary>
+    ///  The type of the gradient.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Kind: TBLGradientKind read GetKind write SetKind;
+
+    /// <summary>
+    ///  The gradient extend mode.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property ExtendMode: TBLExtendMode read GetExtendMode write SetExtendMode;
+
+    property Values[const AIndex: NativeInt]: Double read GetValue write SetValue;
+
+    property Linear: TBLLinearGradientValues read GetLinear write SetLinear;
+    property Radial: TBLRadialGradientValues read GetRadial write SetRadial;
+    property Conic: TBLConicGradientValues read GetConic write SetConic;
+
+    property X0: Double read GetX0 write SetX0;
+    property Y0: Double read GetY0 write SetY0;
+    property X1: Double read GetX1 write SetX1;
+    property Y1: Double read GetY1 write SetY1;
+    property R0: Double read GetR0 write SetR0;
+    property R1: Double read GetR1 write SetR1;
+    property Angle: Double read GetAngle write SetAngle;
+    property ConicAngle: Double read GetConicAngle write SetConicAngle;
+    property ConicRepeat: Double read GetConicRepeat write SetConicRepeat;
+
     /// <summary>
     ///  Whether the gradient is empty.
     ///
     ///  Empty gradient is considered any gradient that has no stops.
     /// </summary>
     property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  The number of stops the gradient has.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  The gradient capacity [in stops].
+    /// </summary>
+    property Capacity: NativeInt read GetCapacity;
+
+    /// <summary>
+    ///  The gradient stop data.
+    /// </summary>
+    property StopData: PBLGradientStop read GetStopData;
+
+    /// <summary>
+    ///  Gradient stop at `AIndex`.
+    /// </summary>
+    property Stops[const AIndex: NativeInt]: TBLGradientStop read GetStop;
+
+    /// <summary>
+    ///  The transformation matrix applied to the gradient.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Transform: TBLMatrix2D read GetTransform write SetTransform;
+
+    /// <summary>
+    ///  Returns the type of the transformation matrix returned by `Transform`.
+    /// </summary>
+    /// <seealso cref="Transform"/>
+    property TransformKind: TBLTransformKind read GetTransformKind;
+
+    /// <summary>
+    ///  Tests whether the gradient has a non-identity transformation matrix.
+    /// </summary>
+    property HasTransform: Boolean read GetHasTransform;
   end;
 
 {$ENDREGION 'Styling'}
@@ -5726,6 +6168,7 @@ type
     property AShift: Byte read FShifts[3];
     property Palette: PBLRgba32 read GetPalette;
   end;
+  PBLFormatInfo = ^TBLFormatInfo;
 
 type
   /// <summary>
@@ -5813,6 +6256,7 @@ type
     Origin: TBLPointI;
     Gap: NativeInt;
   end;
+  PBLPixelConverterOptions = ^TBLPixelConverterOptions;
 
 type
   /// <summary>
@@ -6019,6 +6463,7 @@ type
   public
     procedure Reset; inline;
   end;
+  PBLImageInfo = ^TBLImageInfo;
 
 type
   /// <summary>
@@ -6502,6 +6947,7 @@ type
     /// </summary>
     procedure Reset; inline;
   end;
+  PBLImageData = ^TBLImageData;
 
 type
   /// <summary>
@@ -11927,6 +12373,21 @@ end;
 
 { TBLGradient }
 
+procedure TBLGradient.AddStop(const AOffset: Double; const ARgba64: TBLRgba64);
+begin
+  _BLCheck(_blGradientAddStopRgba64(@Self, AOffset, ARgba64.Value));
+end;
+
+procedure TBLGradient.ApplyTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Transform), @ATransform));
+end;
+
+procedure TBLGradient.AddStop(const AOffset: Double; const ARgba32: TBLRgba32);
+begin
+  _BLCheck(_blGradientAddStopRgba32(@Self, AOffset, ARgba32.Value));
+end;
+
 class operator TBLGradient.Assign(var ADest: TBLGradient;
   const [ref] ASrc: TBLGradient);
 begin
@@ -11942,9 +12403,110 @@ begin
     Result := (ARight <> nil);
 end;
 
+constructor TBLGradient.Create(const AValues: TBLConicGradientValues;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Conic), @AValues,
+    Ord(AExtendMode), nil, 0, nil));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLRadialGradientValues;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Radial), @AValues,
+    Ord(AExtendMode), nil, 0, nil));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLLinearGradientValues;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Linear), @AValues,
+    Ord(AExtendMode), nil, 0, nil));
+end;
+
+constructor TBLGradient.Create(const AKind: TBLGradientKind;
+  const AValues: TArray<Double>);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(AKind), AValues, Ord(TBLExtendMode.Pad),
+    nil, 0, nil));
+end;
+
+constructor TBLGradient.Create(const AKind: TBLGradientKind;
+  const AValues: PDouble);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(AKind), AValues, Ord(TBLExtendMode.Pad),
+    nil, 0, nil));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLLinearGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Linear), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), nil));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLConicGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Conic), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), nil));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLRadialGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Radial), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), nil));
+end;
+
+procedure TBLGradient.AssignStops(const AStops: PBLGradientStop;
+  const ACount: NativeInt);
+begin
+  _BLCheck(_blGradientAssignStops(@Self, AStops, ACount));
+end;
+
+procedure TBLGradient.AssignStops(const AStops: TArray<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientAssignStops(@Self, AStops, Length(AStops)));
+end;
+
+procedure TBLGradient.AssignStops(const AStops: TBLArrayView<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientAssignStops(@Self, AStops.FData, AStops.FSize));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLConicGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+  const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Conic), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), @ATransform));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLRadialGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+  const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Radial), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), @ATransform));
+end;
+
+constructor TBLGradient.Create(const AValues: TBLLinearGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+  const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientInitAs(@Self, Ord(TBLGradientKind.Linear), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), @ATransform));
+end;
+
 class operator TBLGradient.Equal(const ALeft, ARight: TBLGradient): Boolean;
 begin
   Result := _blGradientEquals(@ALeft, @ARight);
+end;
+
+function TBLGradient.Equals(const AOther: TBLGradient): Boolean;
+begin
+  Result := _blGradientEquals(@Self, @AOther);
 end;
 
 class operator TBLGradient.Finalize(var ADest: TBLGradient);
@@ -11952,14 +12514,197 @@ begin
   _BLCheck(_blGradientDestroy(@ADest));
 end;
 
+function TBLGradient.GetAngle: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.ConicAngle];
+end;
+
+function TBLGradient.GetCapacity: NativeInt;
+begin
+  Result := PImpl(FBase.FImpl).Capacity;
+end;
+
+function TBLGradient.GetConic: TBLConicGradientValues;
+begin
+  Result := PImpl(FBase.FImpl).Conic;
+end;
+
+function TBLGradient.GetConicAngle: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.ConicAngle];
+end;
+
+function TBLGradient.GetConicRepeat: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.ConicRepeat];
+end;
+
+function TBLGradient.GetExtendMode: TBLExtendMode;
+begin
+  Result := TBLExtendMode(_blGradientGetExtendMode(@Self));
+end;
+
+function TBLGradient.GetHasTransform: Boolean;
+begin
+  Result := (GetTransformKind <> TBLTransformKind.Identity);
+end;
+
 function TBLGradient.GetIsEmpty: Boolean;
 begin
   Result := (PImpl(FBase.FImpl).Size = 0);
 end;
 
+function TBLGradient.GetKind: TBLGradientKind;
+begin
+  Result := TBLGradientKind(_blGradientGetType(@Self));
+end;
+
+function TBLGradient.GetLinear: TBLLinearGradientValues;
+begin
+  Result := PImpl(FBase.FImpl).Linear;
+end;
+
+function TBLGradient.GetR0: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.RadialR0];
+end;
+
+function TBLGradient.GetR1: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.RadialR1];
+end;
+
+function TBLGradient.GetRadial: TBLRadialGradientValues;
+begin
+  Result := PImpl(FBase.FImpl).Radial;
+end;
+
+function TBLGradient.GetSize: NativeInt;
+begin
+  Result := PImpl(FBase.FImpl).Size;
+end;
+
+function TBLGradient.GetStop(const AIndex: NativeInt): TBLGradientStop;
+begin
+  Assert(NativeUInt(AIndex) < NativeUInt(GetSize));
+  Result := PImpl(FBase.FImpl).Stops[AIndex];
+end;
+
+function TBLGradient.GetStopData: PBLGradientStop;
+begin
+  Result := PImpl(FBase.FImpl).Stops;
+end;
+
+function TBLGradient.GetTransform: TBLMatrix2D;
+begin
+  Result := PImpl(FBase.FImpl).Transform;
+end;
+
+function TBLGradient.GetTransformKind: TBLTransformKind;
+begin
+  Result := TBLTransformKind(_blGradientGetTransformType(@Self));
+end;
+
+function TBLGradient.GetValue(const AIndex: NativeInt): Double;
+begin
+  Assert(NativeUInt(AIndex) <= Ord(High(TBLGradientValue)));
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue(AIndex)];
+end;
+
+function TBLGradient.GetX0: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.CommonX0];
+end;
+
+function TBLGradient.GetX1: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.CommonX1];
+end;
+
+function TBLGradient.GetY0: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.CommonY0];
+end;
+
+function TBLGradient.GetY1: Double;
+begin
+  Result := PImpl(FBase.FImpl).Values[TBLGradientValue.CommonY1];
+end;
+
+function TBLGradient.IndexOfStop(const AOffset: Double): NativeInt;
+begin
+  Result := _blGradientIndexOfStop(@Self, AOffset);
+end;
+
 class operator TBLGradient.Initialize(out ADest: TBLGradient);
 begin
   _BLCheck(_blGradientInit(@ADest));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLConicGradientValues;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Conic), @AValues,
+    Ord(AExtendMode), nil, 0, nil));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLRadialGradientValues;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Radial), @AValues,
+    Ord(AExtendMode), nil, 0, nil));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLLinearGradientValues;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Linear), @AValues,
+    Ord(AExtendMode), nil, 0, nil));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLLinearGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Linear), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), nil));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLRadialGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Radial), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), nil));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLConicGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Conic), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), nil));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLConicGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+  const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Conic), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), @ATransform));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLRadialGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+  const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Radial), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), @ATransform));
+end;
+
+procedure TBLGradient.Make(const AValues: TBLLinearGradientValues;
+  const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+  const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientCreate(@Self, Ord(TBLGradientKind.Linear), @AValues,
+    Ord(AExtendMode), AStops, Length(AStops), @ATransform));
 end;
 
 class operator TBLGradient.NotEqual(const ALeft: TBLGradient;
@@ -11974,6 +12719,351 @@ end;
 class operator TBLGradient.NotEqual(const ALeft, ARight: TBLGradient): Boolean;
 begin
   Result := not _blGradientEquals(@ALeft, @ARight);
+end;
+
+procedure TBLGradient.PostTranslate(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @P));
+end;
+
+procedure TBLGradient.PostTranslate(const AP: TBLPoint);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @AP));
+end;
+
+procedure TBLGradient.PostScale(const AXY: Double);
+begin
+  var P := BLPoint(AXY, AXY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLGradient.PostScale(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLGradient.PostScale(const AP: TBLPoint);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @AP));
+end;
+
+procedure TBLGradient.PostRotate(const AAngle: Double);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotate), @AAngle));
+end;
+
+procedure TBLGradient.PostRotate(const AAngle, AX, AY: Double);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AX;
+  Values[2] := AY;
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLGradient.PostRotate(const AAngle: Double; const AOrigin: TBLPoint);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLGradient.PostRotate(const AAngle: Double;
+  const AOrigin: TBLPointI);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLGradient.PostScale(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLGradient.PostSkew(const AP: TBLPoint);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostSkew), @AP));
+end;
+
+procedure TBLGradient.PostSkew(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostSkew), @P));
+end;
+
+procedure TBLGradient.PostTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostTransform), @ATransform));
+end;
+
+procedure TBLGradient.PostTranslate(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @P));
+end;
+
+procedure TBLGradient.RemoveStop(const AIndex: NativeInt);
+begin
+  _BLCheck(_blGradientRemoveStop(@Self, AIndex));
+end;
+
+procedure TBLGradient.RemoveStopByOffset(const AOffset: Double;
+  const AAll: Boolean);
+begin
+  _BLCheck(_blGradientRemoveStopByOffset(@Self, AOffset, Ord(AAll)));
+end;
+
+procedure TBLGradient.RemoveStops(const ARange: TBLRange);
+begin
+  _BLCheck(_blGradientRemoveStopsByIndex(@Self, ARange.Start, ARange.Stop));
+end;
+
+procedure TBLGradient.RemoveStopsByOffset(const AOffsetMin, AOffsetMax: Double);
+begin
+  _BLCheck(_blGradientRemoveStopsByOffset(@Self, AOffsetMin, AOffsetMax));
+end;
+
+procedure TBLGradient.ReplaceStop(const AIndex: NativeInt;
+  const AOffset: Double; const ARgba64: TBLRgba64);
+begin
+  _BLCheck(_blGradientReplaceStopRgba64(@Self, AIndex, AOffset, ARgba64.Value));
+end;
+
+procedure TBLGradient.ReplaceStop(const AIndex: NativeInt;
+  const AOffset: Double; const ARgba32: TBLRgba32);
+begin
+  _BLCheck(_blGradientReplaceStopRgba32(@Self, AIndex, AOffset, ARgba32.Value));
+end;
+
+procedure TBLGradient.Reserve(const AMinCapacity: NativeInt);
+begin
+  _BLCheck(_blGradientReserve(@Self, AMinCapacity));
+end;
+
+procedure TBLGradient.Reset;
+begin
+  _BLCheck(_blGradientReset(@Self));
+end;
+
+procedure TBLGradient.ResetExtendMode;
+begin
+  _BLCheck(_blGradientSetExtendMode(@Self, Ord(TBLExtendMode.Pad)));
+end;
+
+procedure TBLGradient.ResetStops;
+begin
+  _BLCheck(_blGradientResetStops(@Self));
+end;
+
+procedure TBLGradient.ResetTransform;
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Reset), nil));
+end;
+
+procedure TBLGradient.Rotate(const AAngle: Double);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Rotate), @AAngle));
+end;
+
+procedure TBLGradient.Rotate(const AAngle, AX, AY: Double);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AX;
+  Values[2] := AY;
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLGradient.Rotate(const AAngle: Double; const AOrigin: TBLPoint);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLGradient.Rotate(const AAngle: Double; const AOrigin: TBLPointI);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLGradient.Scale(const AXY: Double);
+begin
+  var P := BLPoint(AXY, AXY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLGradient.Scale(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLGradient.Scale(const AP: TBLPoint);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @AP));
+end;
+
+procedure TBLGradient.Scale(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLGradient.SetAngle(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.ConicAngle), AValue));
+end;
+
+procedure TBLGradient.SetConic(const AValue: TBLConicGradientValues);
+begin
+  SetValues(0, @AValue, SizeOf(AValue) div SizeOf(Double));
+end;
+
+procedure TBLGradient.SetConicAngle(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.ConicAngle), AValue));
+end;
+
+procedure TBLGradient.SetConicRepeat(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.ConicRepeat), AValue));
+end;
+
+procedure TBLGradient.SetExtendMode(const AValue: TBLExtendMode);
+begin
+  _BLCheck(_blGradientSetExtendMode(@Self, Ord(AValue)));
+end;
+
+procedure TBLGradient.SetKind(const AValue: TBLGradientKind);
+begin
+  _BLCheck(_blGradientSetType(@Self, Ord(AValue)));
+end;
+
+procedure TBLGradient.SetLinear(const AValue: TBLLinearGradientValues);
+begin
+  SetValues(0, @AValue, SizeOf(AValue) div SizeOf(Double));
+end;
+
+procedure TBLGradient.SetR0(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.RadialR0), AValue));
+end;
+
+procedure TBLGradient.SetR1(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.RadialR1), AValue));
+end;
+
+procedure TBLGradient.SetRadial(const AValue: TBLRadialGradientValues);
+begin
+  SetValues(0, @AValue, SizeOf(AValue) div SizeOf(Double));
+end;
+
+procedure TBLGradient.SetTransform(const AValue: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Assign), @AValue));
+end;
+
+procedure TBLGradient.SetValue(const AIndex: NativeInt; const AValue: Double);
+begin
+  Assert(NativeUInt(AIndex) <= Ord(High(TBLGradientValue)));
+  _BLCheck(_blGradientSetValue(@Self, AIndex, AValue));
+end;
+
+procedure TBLGradient.SetValues(const AIndex: NativeInt; const AValues: PDouble;
+  const ACount: NativeInt);
+begin
+  _BLCheck(_blGradientSetValues(@Self, AIndex, AValues, ACount));
+end;
+
+procedure TBLGradient.SetX0(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.CommonX0), AValue));
+end;
+
+procedure TBLGradient.SetX1(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.CommonX1), AValue));
+end;
+
+procedure TBLGradient.SetY0(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.CommonY0), AValue));
+end;
+
+procedure TBLGradient.SetY1(const AValue: Double);
+begin
+  _BLCheck(_blGradientSetValue(@Self, Ord(TBLGradientValue.CommonY1), AValue));
+end;
+
+procedure TBLGradient.Shrink;
+begin
+  _BLCheck(_blGradientShrink(@Self));
+end;
+
+procedure TBLGradient.Skew(const AP: TBLPoint);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Skew), @AP));
+end;
+
+procedure TBLGradient.Skew(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Skew), @P));
+end;
+
+function TBLGradient.StopsView: TBLArrayView<TBLGradientStop>;
+begin
+  var Impl := PImpl(FBase.FImpl);
+  Result.Reset(Pointer(Impl.Stops), Impl.Size);
+end;
+
+procedure TBLGradient.SetValues(const AIndex: NativeInt;
+  const AValues: TArray<Double>);
+begin
+  _BLCheck(_blGradientSetValues(@Self, AIndex, PDouble(AValues), Length(AValues)));
+end;
+
+procedure TBLGradient.Swap(var AOther: TBLGradient);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+procedure TBLGradient.Translate(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @P));
+end;
+
+procedure TBLGradient.Translate(const AP: TBLPoint);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @AP));
+end;
+
+procedure TBLGradient.Translate(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @P));
 end;
 
 {$ENDREGION 'Styling'}
