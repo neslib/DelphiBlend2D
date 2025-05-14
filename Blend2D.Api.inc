@@ -868,6 +868,107 @@ function _blContextBlitScaledImageD(self: Pointer; const rect: Pointer; const im
   external _LIB_BLEND2D name _PU + 'blContextBlitScaledImageD';
 {$ENDREGION 'context.h'}
 
+{$REGION 'font.h'}
+function _blFontInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontInit';
+
+function _blFontInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontInitMove';
+
+function _blFontInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontInitWeak';
+
+function _blFontDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDestroy';
+
+function _blFontReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontReset';
+
+function _blFontAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontAssignMove';
+
+function _blFontAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontAssignWeak';
+
+function _blFontEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontEquals';
+
+function _blFontCreateFromFace(self: Pointer; const face: Pointer; size: Single): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontCreateFromFace';
+
+function _blFontCreateFromFaceWithSettings(self: Pointer; const face: Pointer; size: Single; const featureSettings: Pointer; const variationSettings: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontCreateFromFaceWithSettings';
+
+function _blFontGetFace(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetFace';
+
+function _blFontGetSize(const self: Pointer): Single; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetSize';
+
+function _blFontSetSize(self: Pointer; size: Single): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontSetSize';
+
+function _blFontGetMetrics(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetMetrics';
+
+function _blFontGetMatrix(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetMatrix';
+
+function _blFontGetDesignMetrics(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetDesignMetrics';
+
+function _blFontGetFeatureSettings(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetFeatureSettings';
+
+function _blFontSetFeatureSettings(self: Pointer; const featureSettings: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontSetFeatureSettings';
+
+function _blFontResetFeatureSettings(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontResetFeatureSettings';
+
+function _blFontGetVariationSettings(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetVariationSettings';
+
+function _blFontSetVariationSettings(self: Pointer; const variationSettings: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontSetVariationSettings';
+
+function _blFontResetVariationSettings(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontResetVariationSettings';
+
+function _blFontShape(const self: Pointer; gb: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontShape';
+
+function _blFontMapTextToGlyphs(const self: Pointer; gb: Pointer; stateOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontMapTextToGlyphs';
+
+function _blFontPositionGlyphs(const self: Pointer; gb: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontPositionGlyphs';
+
+function _blFontApplyKerning(const self: Pointer; gb: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontApplyKerning';
+
+function _blFontApplyGSub(const self: Pointer; gb: Pointer; const lookups: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontApplyGSub';
+
+function _blFontApplyGPos(const self: Pointer; gb: Pointer; const lookups: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontApplyGPos';
+
+function _blFontGetTextMetrics(const self: Pointer; gb: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetTextMetrics';
+
+function _blFontGetGlyphBounds(const self: Pointer; const glyphData: PUInt32; glyphAdvance: IntPtr; &out: Pointer; count: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphBounds';
+
+function _blFontGetGlyphAdvances(const self: Pointer; const glyphData: PUInt32; glyphAdvance: IntPtr; &out: Pointer; count: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphAdvances';
+
+function _blFontGetGlyphOutlines(const self: Pointer; glyphId: TBLGlyphId; const userTransform: Pointer; &out: Pointer; sink: TBLPathSinkFunc; userData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphOutlines';
+
+function _blFontGetGlyphRunOutlines(const self: Pointer; const glyphRun: Pointer; const userTransform: Pointer; &out: Pointer; sink: TBLPathSinkFunc; userData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontGetGlyphRunOutlines';
+{$ENDREGION 'font.h'}
+
 {$REGION 'format.h'}
 function _blFormatInfoQuery(self: Pointer; format: Integer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blFormatInfoQuery';

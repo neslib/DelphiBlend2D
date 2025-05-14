@@ -5044,6 +5044,12 @@ type
     property LastVertex: TBLPoint read GetLastVertex;
   end;
 
+type
+  /// <summary>
+  ///  Optional callback that can be used to consume a path data.
+  /// </summary>
+  TBLPathSinkFunc = function (const APath: TBLPath; const AInfo,
+    AUserData: Pointer): TBLResult; cdecl;
 {$ENDREGION 'Geometries'}
 
 {$REGION 'Colors'}
@@ -8099,6 +8105,309 @@ type
     /// </summary>
     property HasInvalidFontData: Boolean read GetHasInvalidFontData;
   end;
+
+type
+  /// <summary>
+  ///  Character to glyph mapping state.
+  /// </summary>
+  TBLGlyphMappingState = record
+  {$REGION 'Internal Declarations'}
+  private
+    FGlyphCount: Size_T;
+    FUndefinedFirst: Size_T;
+    FUndefinedCount: Size_T;
+    function GetGlyphCount: NativeInt; inline;
+    function GetUndefinedFirst: NativeInt; inline;
+    function GetUndefinedCount: NativeInt; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Number of glyphs or glyph-items on output.
+    /// </summary>
+    property GlyphCount: NativeInt read GetGlyphCount;
+
+    /// <summary>
+    ///  Index of the first undefined glyph (-1 if none).
+    /// </summary>
+    property UndefinedFirst: NativeInt read GetUndefinedFirst;
+
+    /// <summary>
+    ///  Undefined glyph count (chars that have no mapping).
+    /// </summary>
+    property UndefinedCount: NativeInt read GetUndefinedCount;
+  end;
+  PBLGlyphMappingState = ^TBLGlyphMappingState;
+
+{ ============================================================================
+   [Text - Fonts]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Font stretch.
+  /// </summary>
+  TBLFontStretch = (
+    /// <summary>
+    ///  Ultra condensed stretch.
+    /// </summary>
+    UltraCondensed = 1,
+
+    /// <summary>
+    ///  Extra condensed stretch.
+    /// </summary>
+    ExtraCondensed,
+
+    /// <summary>
+    ///  Condensed stretch.
+    /// </summary>
+    Condensed,
+
+    /// <summary>
+    ///  Semi condensed stretch.
+    /// </summary>
+    SemiCondensed,
+
+    /// <summary>
+    ///  Normal stretch.
+    /// </summary>
+    Normal,
+
+    /// <summary>
+    ///  Semi expanded stretch.
+    /// </summary>
+    SemiExpanded,
+
+    /// <summary>
+    ///  Expanded stretch.
+    /// </summary>
+    Expanded,
+
+    /// <summary>
+    ///  Extra expanded stretch.
+    /// </summary>
+    ExtraExpanded,
+
+    /// <summary>
+    ///  Ultra expanded stretch.
+    /// </summary>
+    UltraExpanded);
+
+type
+  /// <summary>
+  ///  Font style.
+  /// </summary>
+  TBLFontStyle = (
+    /// <summary>
+    ///  Normal style.
+    /// </summary>
+    Normal,
+
+    /// <summary>
+    ///  Oblique.
+    /// </summary>
+    Oblique,
+
+    /// <summary>
+    ///  Italic.
+    /// </summary>
+    Italic);
+
+type
+  /// <summary>
+  ///  Font weight.
+  /// </summary>
+  TBLFontWeight = (
+    /// <summary>
+    ///  Thin weight (100).
+    /// </summary>
+    Thin = 100,
+
+    /// <summary>
+    ///  Extra light weight (200).
+    /// </summary>
+    ExtraLight = 200,
+
+    /// <summary>
+    ///  Light weight (300).
+    /// </summary>
+    Light = 300,
+
+    /// <summary>
+    ///  Semi light weight (350).
+    /// </summary>
+    SemiLight = 350,
+
+    /// <summary>
+    ///  Normal weight (400).
+    /// </summary>
+    Normal = 400,
+
+    /// <summary>
+    ///  Medium weight (500).
+    /// </summary>
+    Medium = 500,
+
+    /// <summary>
+    ///  Semi bold weight (600).
+    /// </summary>
+    SemiBold = 600,
+
+    /// <summary>
+    ///  Bold weight (700).
+    /// </summary>
+    Bold  = 700,
+
+    /// <summary>
+    ///  Extra bold weight (800).
+    /// </summary>
+    ExtraBold = 800,
+
+    /// <summary>
+    ///  Black weight (900).
+    /// </summary>
+    Black = 900,
+
+    /// <summary>
+    ///  Extra black weight (950).
+    /// </summary>
+    ExtraBlack = 950);
+
+type
+  /// <summary>
+  ///  2x2 transformation matrix used by `TBLFont`. It's similar to
+  ///  `TBLMatrix2D`, however, it doesn't provide a translation part as it's
+  ///  assumed to be zero.
+  /// </summary>
+  /// <seealso cref="TBLFont"/>
+  /// <seealso cref="TBLMatrix2D"/>
+  TBLFontMatrix = record
+  public
+    M: array [0..3] of Double;
+  public
+    class function Create: TBLFontMatrix; overload; inline; static;
+    constructor Create(const AM00, AM01, AM10, AM11: Double); overload;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AM00, AM01, AM10, AM11: Double); overload; inline;
+
+    property M00: Double read M[0];
+    property M01: Double read M[1];
+    property M10: Double read M[2];
+    property M11: Double read M[3];
+  end;
+  PBLFontMatrix = ^TBLFontMatrix;
+
+type
+  /// <summary>
+  ///  Scaled `TBLFontDesignMetrics` based on font size and other properties.
+  /// </summary>
+  /// <seealso cref="TBLFontDesignMetrics"/>
+  TBLFontMetrics = record
+  {$REGION 'Internal Declarations'}
+  private
+    FSize: Single;
+    FAscent: Single;
+    FVAscent: Single;
+    FDescent: Single;
+    FVDescent: Single;
+    FLineGap: Single;
+    FXHeight: Single;
+    FCapHeight: Single;
+    FXMin: Single;
+    FYMin: Single;
+    FXMax: Single;
+    FYMax: Single;
+    FUnderlinePosition: Single;
+    FUnderlineThickness: Single;
+    FStrikethroughPosition: Single;
+    FStrikethroughThickness: Single;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Font size.
+    /// </summary>
+    property Size: Single read FSize;
+
+    /// <summary>
+    ///  Font ascent (horizontal orientation).
+    /// </summary>
+    property Ascent: Single read FAscent;
+
+    /// <summary>
+    ///  Font ascent (vertical orientation).
+    /// </summary>
+    property VAscent: Single read FVAscent;
+
+    /// <summary>
+    ///  Font descent (horizontal orientation).
+    /// </summary>
+    property Descent: Single read FDescent;
+
+    /// <summary>
+    ///  Font descent (vertical orientation).
+    /// </summary>
+    property VDescent: Single read FVDescent;
+
+    /// <summary>
+    ///  Line gap.
+    /// </summary>
+    property LineGap: Single read FLineGap;
+
+    /// <summary>
+    ///  Distance between the baseline and the mean line of lower-case letters.
+    /// </summary>
+    property XHeight: Single read FXHeight;
+
+    /// <summary>
+    ///  Maximum height of a capital letter above the baseline.
+    /// </summary>
+    property CapHeight: Single read FCapHeight;
+
+    /// <summary>
+    ///  Minimum X, reported by the font.
+    /// </summary>
+    property XMin: Single read FXMin;
+
+    /// <summary>
+    ///  Minimum Y, reported by the font.
+    /// </summary>
+    property YMin: Single read FYMin;
+
+    /// <summary>
+    ///  Maximum X, reported by the font.
+    /// </summary>
+    property XMax: Single read FXMax;
+
+    /// <summary>
+    ///  Maximum Y, reported by the font.
+    /// </summary>
+    property YMax: Single read FYMax;
+
+    /// <summary>
+    ///  Text underline position.
+    /// </summary>
+    property UnderlinePosition: Single read FUnderlinePosition;
+
+    /// <summary>
+    ///  Text underline thickness.
+    /// </summary>
+    property UnderlineThickness: Single read FUnderlineThickness;
+
+    /// <summary>
+    ///  Text strikethrough position.
+    /// </summary>
+    property StrikethroughPosition: Single read FStrikethroughPosition;
+
+    /// <summary>
+    ///  Text strikethrough thickness.
+    /// </summary>
+    property StrikethroughThickness: Single read FStrikethroughThickness;
+  end;
+  PBLFontMetrics = ^TBLFontMetrics;
 {$ENDREGION 'Text'}
 
 {$REGION 'Rendering'}
@@ -14475,6 +14784,71 @@ procedure TBLGlyphBuffer.SetUtf8Text(const AText: PUTF8Char;
   const ALength: NativeInt);
 begin
   _BLCheck(_blGlyphBufferSetText(@Self, AText, ConvertSize(ALength), Ord(TBLTextEncoding.Utf8)));
+end;
+
+{ TBLGlyphMappingState }
+
+function TBLGlyphMappingState.GetGlyphCount: NativeInt;
+begin
+  Result := FGlyphCount;
+end;
+
+function TBLGlyphMappingState.GetUndefinedCount: NativeInt;
+begin
+  Result := FUndefinedCount;
+end;
+
+function TBLGlyphMappingState.GetUndefinedFirst: NativeInt;
+begin
+  if (FUndefinedFirst = Size_T.MaxValue) then
+    Result := -1
+  else
+    Result := FUndefinedFirst;
+end;
+
+procedure TBLGlyphMappingState.Reset;
+begin
+  FGlyphCount := 0;
+  FUndefinedFirst := 0;
+  FUndefinedCount := 0;
+end;
+
+{ TBLFontMatrix }
+
+class function TBLFontMatrix.Create: TBLFontMatrix;
+begin
+  Result.Reset;
+end;
+
+constructor TBLFontMatrix.Create(const AM00, AM01, AM10, AM11: Double);
+begin
+  M[0] := AM00;
+  M[1] := AM01;
+  M[2] := AM10;
+  M[3] := AM11;
+end;
+
+procedure TBLFontMatrix.Reset;
+begin
+  M[0] := 1;
+  M[1] := 0;
+  M[2] := 0;
+  M[3] := 1;
+end;
+
+procedure TBLFontMatrix.Reset(const AM00, AM01, AM10, AM11: Double);
+begin
+  M[0] := AM00;
+  M[1] := AM01;
+  M[2] := AM10;
+  M[3] := AM11;
+end;
+
+{ TBLFontMetrics }
+
+procedure TBLFontMetrics.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
 end;
 
 {$ENDREGION 'Text'}
