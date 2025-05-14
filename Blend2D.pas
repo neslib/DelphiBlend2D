@@ -5046,7 +5046,7 @@ type
 
 {$ENDREGION 'Geometries'}
 
-{$REGION 'Styling'}
+{$REGION 'Colors'}
 
 { ============================================================================
    [Styling - Colors]
@@ -5275,714 +5275,7 @@ function BLMin(const AA, AB: TBLRgba64): TBLRgba64; overload; inline;
 function BLMax(const AA, AB: TBLRgba64): TBLRgba64; overload; inline;
 function BLMin(const AA, AB: TBLRgba): TBLRgba; overload; inline;
 function BLMax(const AA, AB: TBLRgba): TBLRgba; overload; inline;
-
-{ ============================================================================
-   [Styling - Patterns]
-  ============================================================================ }
-
-type
-  /// <summary>
-  ///  Extend mode.
-  /// </summary>
-  TBLExtendMode = (
-    /// <summary>
-    ///  Pad extend [default].
-    /// </summary>
-    Pad,
-
-    /// <summary>
-    ///  Repeat extend.
-    /// </summary>
-    Repeating,
-
-    /// <summary>
-    ///  Reflect extend.
-    /// </summary>
-    Reflect,
-
-    /// <summary>
-    ///  Alias of `Pad`.
-    /// </summary>
-    PadXPadY = Pad,
-
-    /// <summary>
-    ///  Pad X and repeat Y.
-    /// </summary>
-    PadXRepeatY = 3,
-
-    /// <summary>
-    ///  Pad X and reflect Y.
-    /// </summary>
-    PadXReflectY,
-
-    /// <summary>
-    ///  Alias of `Repeating`.
-    /// </summary>
-    RepeatXRepeat = Repeating,
-
-    /// <summary>
-    ///  Repeat X and pad Y.
-    /// </summary>
-    RepeatXPadY = 5,
-
-    /// <summary>
-    ///  Repeat X and reflect Y.
-    /// </summary>
-    RepeatXReflectY,
-
-    /// <summary>
-    ///  Alias of `Reflect`.
-    /// </summary>
-    ReflectXReflectY = Reflect,
-
-    /// <summary>
-    ///  Reflect X and pad Y.
-    /// </summary>
-    ReflectXPadY = 7,
-
-    /// <summary>
-    ///  Reflect X and repeat Y.
-    /// </summary>
-    ReflectXRepeatY);
-
-{ ============================================================================
-   [Styling - Gradients]
-  ============================================================================ }
-
-type
-  /// <summary>
-  ///  Gradient type.
-  /// </summary>
-  TBLGradientKind = (
-    /// <summary>
-    ///  Linear gradient type.
-    /// </summary>
-    Linear,
-
-    /// <summary>
-    ///  Radial gradient type.
-    /// </summary>
-    Radial,
-
-    /// <summary>
-    ///  Conic gradient type.
-    /// </summary>
-    Conic);
-
-type
-  /// <summary>
-  ///  Gradient data index.
-  /// </summary>
-  TBLGradientValue = (
-    /// <summary>
-    ///  X0 - start 'X' for a Linear gradient and `X` center for both Radial and
-    ///  Conic gradients.
-    /// </summary>
-    CommonX0,
-
-    /// <summary>
-    ///  Y0 - start 'Y' for a Linear gradient and `Y` center for both Radial and
-    ///  Conic gradients.
-    /// </summary>
-    CommonY0,
-
-    /// <summary>
-    ///  X1 - end 'X' for a Linear gradient and focal point `X` for a Radial
-    ///  gradient.
-    /// </summary>
-    CommonX1,
-
-    /// <summary>
-    ///  Y1 - end 'Y' for a Linear/gradient and focal point `Y` for a Radial
-    ///  gradient.
-    /// </summary>
-    CommonY1,
-
-    /// <summary>
-    ///  Radial gradient center radius.
-    /// </summary>
-    RadialR0,
-
-    /// <summary>
-    ///  Radial gradient focal radius.
-    /// </summary>
-    RadialR1,
-
-    /// <summary>
-    ///  Conic gradient angle.
-    /// </summary>
-    ConicAngle = 2,
-
-    /// <summary>
-    ///  Conic gradient angle.
-    /// </summary>
-    ConicRepeat = 3);
-
-type
-  /// <summary>
-  ///  Gradient rendering quality.
-  /// </summary>
-  TBLGradientQuality = (
-    /// <summary>
-    ///  Nearest neighbor.
-    /// </summary>
-    Nearest,
-
-    /// <summary>
-    ///  Use smoothing, if available (currently never available).
-    /// </summary>
-    Smooth,
-
-    /// <summary>
-    ///  The renderer will use an implementation-specific dithering algorithm to
-    ///  prevent banding.
-    /// </summary>
-    Dither);
-
-type
-  /// <summary>
-  ///  Defines an `Offset` and `Rgba` color that is used by `TBLGradient` to
-  ///  define a linear transition between colors.
-  /// </summary>
-  /// <seealso cref="TBLGradient"/>
-  TBLGradientStop = record
-  public
-    Offset: Double;
-    Rgba: TBLRgba64;
-  public
-    class function Create: TBLGradientStop; overload; inline; static;
-    constructor Create(const AOffset: Double; const ARgba32: TBLRgba32); overload;
-    constructor Create(const AOffset: Double; const ARgba64: TBLRgba64); overload;
-
-    class operator Equal(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
-    class operator NotEqual(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
-
-    procedure Reset; overload; inline;
-    procedure Reset(const AOffset: Double; const ARgba32: TBLRgba32); overload; inline;
-    procedure Reset(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
-
-    function Equals(const AOther: TBLGradientStop): Boolean; inline;
-  end;
-  {$POINTERMATH ON}
-  PBLGradientStop = ^TBLGradientStop;
-  {$POINTERMATH OFF}
-
-function BLGradientStop: TBLGradientStop; overload; inline;
-function BLGradientStop(const AOffset: Double; const ARgba32: TBLRgba32): TBLGradientStop; overload; inline;
-function BLGradientStop(const AOffset: Double; const ARgba64: TBLRgba64): TBLGradientStop; overload; inline;
-
-type
-  /// <summary>
-  ///  Linear gradient values packed into a structure.
-  /// </summary>
-  TBLLinearGradientValues = record
-  public
-    X0: Double;
-    Y0: Double;
-    X1: Double;
-    Y1: Double;
-  public
-    class function Create: TBLLinearGradientValues; overload; inline; static;
-    constructor Create(const AX0, AY0, AX1, AY1: Double); overload;
-
-    procedure Reset; overload; inline;
-    procedure Reset(const AX0, AY0, AX1, AY1: Double); overload; inline;
-  end;
-  PBLLinearGradientValues = ^TBLLinearGradientValues;
-
-function BLLinearGradientValues: TBLLinearGradientValues; overload; inline;
-function BLLinearGradientValues(const AX0, AY0, AX1, AY1: Double): TBLLinearGradientValues; overload; inline;
-
-type
-  /// <summary>
-  ///  Radial gradient values packed into a structure.
-  /// </summary>
-  TBLRadialGradientValues = record
-  public
-    X0: Double;
-    Y0: Double;
-    X1: Double;
-    Y1: Double;
-    R0: Double;
-    R1: Double;
-  public
-    class function Create: TBLRadialGradientValues; overload; inline; static;
-    constructor Create(const AX0, AY0, AX1, AY1, AR0: Double;
-      const AR1: Double = 0); overload;
-
-    procedure Reset; overload; inline;
-    procedure Reset(const AX0, AY0, AX1, AY1, AR0: Double;
-      const AR1: Double = 0); overload; inline;
-  end;
-  PBLRadialGradientValues = ^TBLRadialGradientValues;
-
-function BLRadialGradientValues: TBLRadialGradientValues; overload; inline;
-function BLRadialGradientValues(const AX0, AY0, AX1, AY1, AR0: Double;
-  const AR1: Double = 0): TBLRadialGradientValues; overload; inline;
-
-type
-  /// <summary>
-  ///  Conic gradient values packed into a structure.
-  /// </summary>
-  TBLConicGradientValues = record
-  public
-    X0: Double;
-    Y0: Double;
-    Angle: Double;
-    Repetition: Double;
-  public
-    class function Create: TBLConicGradientValues; overload; inline; static;
-    constructor Create(const AX0, AY0, AAngle: Double;
-      const ARepeat: Double = 1); overload;
-
-    procedure Reset; overload; inline;
-    procedure Reset(const AX0, AY0, AAngle: Double;
-      const ARepeat: Double = 1); overload; inline;
-  end;
-  PBLConicGradientValues = ^TBLConicGradientValues;
-
-function BLConicGradientValues: TBLConicGradientValues; overload; inline;
-function BLConicGradientValues(const AX0, AY0, AAngle: Double;
-  const ARepeat: Double = 1): TBLConicGradientValues; overload; inline;
-
-type
-  /// <summary>
-  ///  Gradient.
-  /// </summary>
-  TBLGradient = record
-  {$REGION 'Internal Declarations'}
-  private type
-    TImpl = record
-    public
-      Stops: PBLGradientStop;
-      Size: Size_T;
-      Capacity: Size_T;
-      Transform: TBLMatrix2D;
-      case Byte of
-        0: (Values: array [TBLGradientValue] of Double);
-        1: (Linear: TBLLinearGradientValues);
-        2: (Radial: TBLRadialGradientValues);
-        3: (Conic: TBLConicGradientValues);
-    end;
-    PImpl = ^TImpl;
-  private
-    FBase: TBLObjectCore;
-    function GetKind: TBLGradientKind; inline;
-    procedure SetKind(const AValue: TBLGradientKind); inline;
-    function GetExtendMode: TBLExtendMode; inline;
-    procedure SetExtendMode(const AValue: TBLExtendMode); inline;
-    function GetValue(const AIndex: NativeInt): Double; inline;
-    procedure SetValue(const AIndex: NativeInt; const AValue: Double); inline;
-    function GetLinear: TBLLinearGradientValues; inline;
-    procedure SetLinear(const AValue: TBLLinearGradientValues); inline;
-    function GetRadial: TBLRadialGradientValues; inline;
-    procedure SetRadial(const AValue: TBLRadialGradientValues); inline;
-    function GetConic: TBLConicGradientValues; inline;
-    procedure SetConic(const AValue: TBLConicGradientValues); inline;
-    function GetX0: Double; inline;
-    procedure SetX0(const AValue: Double); inline;
-    function GetY0: Double; inline;
-    procedure SetY0(const AValue: Double); inline;
-    function GetX1: Double; inline;
-    procedure SetX1(const AValue: Double); inline;
-    function GetY1: Double; inline;
-    procedure SetY1(const AValue: Double); inline;
-    function GetR0: Double; inline;
-    procedure SetR0(const AValue: Double); inline;
-    function GetR1: Double; inline;
-    procedure SetR1(const AValue: Double); inline;
-    function GetAngle: Double; inline;
-    procedure SetAngle(const AValue: Double); inline;
-    function GetConicAngle: Double; inline;
-    procedure SetConicAngle(const AValue: Double); inline;
-    function GetConicRepeat: Double; inline;
-    procedure SetConicRepeat(const AValue: Double); inline;
-    function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
-    function GetCapacity: NativeInt; inline;
-    function GetStopData: PBLGradientStop; inline;
-    function GetStop(const AIndex: NativeInt): TBLGradientStop; inline;
-    function GetTransform: TBLMatrix2D; inline;
-    procedure SetTransform(const AValue: TBLMatrix2D); inline;
-    function GetTransformKind: TBLTransformKind; inline;
-    function GetHasTransform: Boolean; inline;
-  {$ENDREGION 'Internal Declarations'}
-  public
-    /// <summary>
-    ///  Creates a default constructed gradient.
-    ///
-    ///  A default constructed gradient has `TBLGradientKind.Linear` type, all
-    ///  values set to zero, and has no color stops.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    class operator Initialize(out ADest: TBLGradient);
-
-    /// <summary>
-    ///  Destroys the gradient.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    class operator Finalize(var ADest: TBLGradient);
-
-    /// <summary>
-    ///  Copy constructor creates a weak copy of `other`.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    class operator Assign(var ADest: TBLGradient; const [ref] ASrc: TBLGradient); inline;
-
-    /// <summary>
-    ///  Used to compare against `nil`.
-    /// </summary>
-    class operator Equal(const ALeft: TBLGradient; const ARight: Pointer): Boolean; inline; static;
-
-    /// <summary>
-    ///  Equality operator, performs the same operation as `ALeft.Equals(ARight)`.
-    /// </summary>
-    class operator Equal(const ALeft, ARight: TBLGradient): Boolean; inline; static;
-
-    /// <summary>
-    ///  Used to compare against `nil`.
-    /// </summary>
-    class operator NotEqual(const ALeft: TBLGradient; const ARight: Pointer): Boolean; inline; static;
-
-    /// <summary>
-    ///  Equality operator, performs the same operation as `not ALeft.Equals(ARight)`.
-    /// </summary>
-    class operator NotEqual(const ALeft, ARight: TBLGradient): Boolean; inline; static;
-
-    constructor Create(const AKind: TBLGradientKind;
-      const AValues: TArray<Double>); overload;
-    constructor Create(const AKind: TBLGradientKind;
-      const AValues: PDouble = nil); overload;
-
-    constructor Create(const AValues: TBLLinearGradientValues;
-      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
-    constructor Create(const AValues: TBLRadialGradientValues;
-      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
-    constructor Create(const AValues: TBLConicGradientValues;
-      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
-
-    constructor Create(const AValues: TBLLinearGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
-    constructor Create(const AValues: TBLRadialGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
-    constructor Create(const AValues: TBLConicGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
-
-    constructor Create(const AValues: TBLLinearGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
-      const ATransform: TBLMatrix2D); overload;
-    constructor Create(const AValues: TBLRadialGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
-      const ATransform: TBLMatrix2D); overload;
-    constructor Create(const AValues: TBLConicGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
-      const ATransform: TBLMatrix2D); overload;
-
-    /// <summary>
-    ///  Resets the gradient to its construction state.
-    /// </summary>
-    procedure Reset; inline;
-
-    /// <summary>
-    ///  Swaps this gradient with `AOther`.
-    /// </summary>
-    procedure Swap(var AOther: TBLGradient); inline;
-
-    procedure Make(const AValues: TBLLinearGradientValues;
-      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
-    procedure Make(const AValues: TBLRadialGradientValues;
-      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
-    procedure Make(const AValues: TBLConicGradientValues;
-      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
-
-    procedure Make(const AValues: TBLLinearGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
-    procedure Make(const AValues: TBLRadialGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
-    procedure Make(const AValues: TBLConicGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
-
-    procedure Make(const AValues: TBLLinearGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
-      const ATransform: TBLMatrix2D); overload; inline;
-    procedure Make(const AValues: TBLRadialGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
-      const ATransform: TBLMatrix2D); overload; inline;
-    procedure Make(const AValues: TBLConicGradientValues;
-      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
-      const ATransform: TBLMatrix2D); overload; inline;
-
-    /// <summary>
-    ///  Resets the gradient extend mode to `TBLExtendMode.Pad`.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    /// <seealso cref="TBLExtendMode"/>
-    procedure ResetExtendMode; inline;
-
-    procedure SetValues(const AIndex: NativeInt; const AValues: TArray<Double>); overload; inline;
-    procedure SetValues(const AIndex: NativeInt; const AValues: PDouble;
-      const ACount: NativeInt); overload; inline;
-
-    /// <summary>
-    ///  Reserves the capacity of gradient for at least `AMinCapacity` stops.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure Reserve(const AMinCapacity: NativeInt); inline;
-
-    /// <summary>
-    ///  Shrinks the capacity of gradient stops to fit the current use.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure Shrink; inline;
-
-    /// <summary>
-    ///  Returns gradient stops and their count as `TBLArrayView<TBLGradientStop>`.
-    /// </summary>
-    function StopsView: TBLArrayView<TBLGradientStop>; inline;
-
-    /// <summary>
-    ///  Resets all stops of the gradient.
-    ///
-    ///  After the operation the gradient will have no color stops.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure ResetStops; inline;
-
-    /// <summary>
-    ///  Assigns colors stops of the gradient to `AStops`.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AssignStops(const AStops: TArray<TBLGradientStop>); overload; inline;
-
-    /// <summary>
-    ///  Assigns colors stops of the gradient to `AStops` of size `ACount`.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AssignStops(const AStops: PBLGradientStop; const ACount: NativeInt); overload; inline;
-
-    /// <summary>
-    ///  Assigns colors stops of the gradient to `AStops`.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AssignStops(const AStops: TBLArrayView<TBLGradientStop>); overload; inline;
-
-    /// <summary>
-    ///  Adds a color stop described as a 32-bit color `ARgba32` at the given
-    ///  `AOffset`.
-    /// </summary>
-    /// <remarks>
-    ///  The offset value must be in `[0, 1]` range.
-    /// </remarks>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AddStop(const AOffset: Double; const ARgba32: TBLRgba32); overload; inline;
-
-    /// <summary>
-    ///  Adds a color stop described as a 64-bit color `ARgba64` at the given
-    ///  `AOffset`.
-    /// </summary>
-    /// <remarks>
-    ///  The offset value must be in `[0, 1]` range.
-    /// </remarks>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AddStop(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
-
-    /// <summary>
-    ///  Removes stop at the given `AIndex`.
-    /// </summary>
-    /// <remarks>
-    ///  This method should be used together with `IndexOfStop`, which returns
-    ///  index to the stop array.
-    /// </remarks>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    /// <seealso cref="IndexOfStop"/>
-    procedure RemoveStop(const AIndex: NativeInt); inline;
-
-    /// <summary>
-    ///  Removes stop at the given `AOffset`, which should be in `[0, 1]` range.
-    ///
-    ///  The `AAll` parameter specifies whether all stops at the given offset
-    ///  should be removed as there are cases in which two stops can occupy the
-    ///  same offset to create sharp transitions. If `AAll` is False and there
-    ///  is a sharp transition only the first stop would be removed. If `AAll`
-    ///  is True both stops will be removed.
-    /// </summary>
-    /// <remarks>
-    ///  There are never 3 stops occupying the same `AOffset`.
-    /// </remarks>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure RemoveStopByOffset(const AOffset: Double;
-      const AAll: Boolean = True); inline;
-
-    /// <summary>
-    ///  Removes all stops in the given range, which describes indexes in the
-    ///  stop array.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure RemoveStops(const ARange: TBLRange); inline;
-
-    /// <summary>
-    ///  Removes all stops in the given interval `[AOffsetMin, AOffsetMax]`,
-    ///  which specifies stop offsets, which are between [0, 1].
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure RemoveStopsByOffset(const AOffsetMin, AOffsetMax: Double); inline;
-
-    /// <summary>
-    ///  Replaces stop at the given `AIndex` with a new color stop described by
-    ///  `AOffset` and `ARgba32`.
-    ///
-    ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
-    ///  by `AddStop(AOffset, Rgba32)`.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    /// <seealso cref="RemoveStop"/>
-    /// <seealso cref="AddStop"/>
-    procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
-      const ARgba32: TBLRgba32); overload; inline;
-
-    /// <summary>
-    ///  Replaces stop at the given `AIndex` with a new color stop described by
-    ///  `AOffset` and `ARgba64`.
-    ///
-    ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
-    ///  by `AddStop(AOffset, Rgba64)`.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    /// <seealso cref="RemoveStop"/>
-    /// <seealso cref="AddStop"/>
-    procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
-      const ARgba64: TBLRgba64); overload; inline;
-
-    /// <summary>
-    ///  Returns the index of a color stop in Stops array of the given `AOffset`.
-    /// </summary>
-    /// <remarks>
-    ///  If there is no such offset, `-1` is returned.
-    /// </remarks>
-    function IndexOfStop(const AOffset: Double): NativeInt; inline;
-
-    /// <summary>
-    ///  Tests whether the gradient equals `AOther`.
-    /// </summary>
-    /// <remarks>
-    ///  The equality check returns True if both gradients are the same value-wise.
-    /// </remarks>
-    function Equals(const AOther: TBLGradient): Boolean; inline;
-
-    procedure ResetTransform; inline;
-
-    procedure Translate(const AX, AY: Double); overload; inline;
-    procedure Translate(const AP: TBLPoint); overload; inline;
-    procedure Translate(const AP: TBLPointI); overload; inline;
-
-    procedure Scale(const AXY: Double); overload; inline;
-    procedure Scale(const AX, AY: Double); overload; inline;
-    procedure Scale(const AP: TBLPoint); overload; inline;
-    procedure Scale(const AP: TBLPointI); overload; inline;
-
-    procedure Skew(const AX, AY: Double); overload; inline;
-    procedure Skew(const AP: TBLPoint); overload; inline;
-
-    procedure Rotate(const AAngle: Double); overload; inline;
-    procedure Rotate(const AAngle, AX, AY: Double); overload; inline;
-    procedure Rotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
-    procedure Rotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
-
-    procedure ApplyTransform(const ATransform: TBLMatrix2D); inline;
-
-    procedure PostTranslate(const AX, AY: Double); overload; inline;
-    procedure PostTranslate(const AP: TBLPoint); overload; inline;
-    procedure PostTranslate(const AP: TBLPointI); overload; inline;
-
-    procedure PostScale(const AXY: Double); overload; inline;
-    procedure PostScale(const AX, AY: Double); overload; inline;
-    procedure PostScale(const AP: TBLPoint); overload; inline;
-    procedure PostScale(const AP: TBLPointI); overload; inline;
-
-    procedure PostSkew(const AX, AY: Double); overload; inline;
-    procedure PostSkew(const AP: TBLPoint); overload; inline;
-
-    procedure PostRotate(const AAngle: Double); overload; inline;
-    procedure PostRotate(const AAngle, AX, AY: Double); overload; inline;
-    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
-    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
-
-    procedure PostTransform(const ATransform: TBLMatrix2D); inline;
-
-    /// <summary>
-    ///  The type of the gradient.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    property Kind: TBLGradientKind read GetKind write SetKind;
-
-    /// <summary>
-    ///  The gradient extend mode.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    property ExtendMode: TBLExtendMode read GetExtendMode write SetExtendMode;
-
-    property Values[const AIndex: NativeInt]: Double read GetValue write SetValue;
-
-    property Linear: TBLLinearGradientValues read GetLinear write SetLinear;
-    property Radial: TBLRadialGradientValues read GetRadial write SetRadial;
-    property Conic: TBLConicGradientValues read GetConic write SetConic;
-
-    property X0: Double read GetX0 write SetX0;
-    property Y0: Double read GetY0 write SetY0;
-    property X1: Double read GetX1 write SetX1;
-    property Y1: Double read GetY1 write SetY1;
-    property R0: Double read GetR0 write SetR0;
-    property R1: Double read GetR1 write SetR1;
-    property Angle: Double read GetAngle write SetAngle;
-    property ConicAngle: Double read GetConicAngle write SetConicAngle;
-    property ConicRepeat: Double read GetConicRepeat write SetConicRepeat;
-
-    /// <summary>
-    ///  Whether the gradient is empty.
-    ///
-    ///  Empty gradient is considered any gradient that has no stops.
-    /// </summary>
-    property IsEmpty: Boolean read GetIsEmpty;
-
-    /// <summary>
-    ///  The number of stops the gradient has.
-    /// </summary>
-    property Size: NativeInt read GetSize;
-
-    /// <summary>
-    ///  The gradient capacity [in stops].
-    /// </summary>
-    property Capacity: NativeInt read GetCapacity;
-
-    /// <summary>
-    ///  The gradient stop data.
-    /// </summary>
-    property StopData: PBLGradientStop read GetStopData;
-
-    /// <summary>
-    ///  Gradient stop at `AIndex`.
-    /// </summary>
-    property Stops[const AIndex: NativeInt]: TBLGradientStop read GetStop;
-
-    /// <summary>
-    ///  The transformation matrix applied to the gradient.
-    /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
-    property Transform: TBLMatrix2D read GetTransform write SetTransform;
-
-    /// <summary>
-    ///  Returns the type of the transformation matrix returned by `Transform`.
-    /// </summary>
-    /// <seealso cref="Transform"/>
-    property TransformKind: TBLTransformKind read GetTransformKind;
-
-    /// <summary>
-    ///  Tests whether the gradient has a non-identity transformation matrix.
-    /// </summary>
-    property HasTransform: Boolean read GetHasTransform;
-  end;
-
-{$ENDREGION 'Styling'}
+{$ENDREGION 'Colors'}
 
 {$REGION 'Imaging'}
 
@@ -7400,6 +6693,1413 @@ type
     property Codec: TBLImageCodec read GetCodec;
   end;
 {$ENDREGION 'Imaging'}
+
+{$REGION 'Styling'}
+
+{ ============================================================================
+   [Styling - Patterns]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Extend mode.
+  /// </summary>
+  TBLExtendMode = (
+    /// <summary>
+    ///  Pad extend [default].
+    /// </summary>
+    Pad,
+
+    /// <summary>
+    ///  Repeat extend.
+    /// </summary>
+    Repeating,
+
+    /// <summary>
+    ///  Reflect extend.
+    /// </summary>
+    Reflect,
+
+    /// <summary>
+    ///  Alias of `Pad`.
+    /// </summary>
+    PadXPadY = Pad,
+
+    /// <summary>
+    ///  Pad X and repeat Y.
+    /// </summary>
+    PadXRepeatY = 3,
+
+    /// <summary>
+    ///  Pad X and reflect Y.
+    /// </summary>
+    PadXReflectY,
+
+    /// <summary>
+    ///  Alias of `Repeating`.
+    /// </summary>
+    RepeatXRepeat = Repeating,
+
+    /// <summary>
+    ///  Repeat X and pad Y.
+    /// </summary>
+    RepeatXPadY = 5,
+
+    /// <summary>
+    ///  Repeat X and reflect Y.
+    /// </summary>
+    RepeatXReflectY,
+
+    /// <summary>
+    ///  Alias of `Reflect`.
+    /// </summary>
+    ReflectXReflectY = Reflect,
+
+    /// <summary>
+    ///  Reflect X and pad Y.
+    /// </summary>
+    ReflectXPadY = 7,
+
+    /// <summary>
+    ///  Reflect X and repeat Y.
+    /// </summary>
+    ReflectXRepeatY);
+
+type
+  /// <summary>
+  ///  Pattern quality.
+  /// </summary>
+  TBLPatternQuality = (
+    /// <summary>
+    ///  Nearest neighbor interpolation.
+    /// </summary>
+    Nearest,
+
+    /// <summary>
+    ///  Bilinear interpolation.
+    /// </summary>
+    Bilinear);
+
+type
+  /// <summary>
+  ///  Pattern.
+  /// </summary>
+  TBLPattern = record
+  {$REGION 'Internal Declarations'}
+  private
+    FBase: TBLObjectCore;
+    function GetImage: TBLImage; inline;
+    procedure SetImage(const AValue: TBLImage); overload; inline;
+    function GetArea: TBLRectI; inline;
+    procedure SetArea(const AValue: TBLRectI); inline;
+    function GetExtendMode: TBLExtendMode; inline;
+    procedure SetExtendMode(const AValue: TBLExtendMode); inline;
+    function GetTransform: TBLMatrix2D; inline;
+    procedure SetTransform(const AValue: TBLMatrix2D); inline;
+    function GetTransformKind: TBLTransformKind; inline;
+    function GetHasTransform: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default constructed pattern.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLPattern);
+
+    /// <summary>
+    ///  Destroys the pattern.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLPattern);
+
+    /// <summary>
+    ///  Copy constructor creates a weak copy of `ASrc`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLPattern; const [ref] ASrc: TBLPattern); inline;
+
+    /// <summary>
+    ///  Equality operator, performs the same operation as `ALeft.Equals(ARight)`.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLPattern): Boolean; inline; static;
+
+    /// <summary>
+    ///  Equality operator, performs the same operation as `not ALeft.Equals(ARight)`.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLPattern): Boolean; inline; static;
+
+    constructor Create(const AImage: TBLImage;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Repeating); overload;
+    constructor Create(const AImage: TBLImage; const AExtendMode: TBLExtendMode;
+      const ATransform: TBLMatrix2D); overload;
+    constructor Create(const AImage: TBLImage; const AArea: TBLRectI;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Repeating); overload;
+    constructor Create(const AImage: TBLImage; const AArea: TBLRectI;
+      const AExtendMode: TBLExtendMode; const ATransform: TBLMatrix2D); overload;
+
+    procedure Reset; inline;
+    procedure Swap(var AOther: TBLPattern); inline;
+    function Equals(const AOther: TBLPattern): Boolean; inline;
+
+    procedure Make(const AImage: TBLImage;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Repeating); overload; inline;
+    procedure Make(const AImage: TBLImage; const AExtendMode: TBLExtendMode;
+      const ATransform: TBLMatrix2D); overload; inline;
+    procedure Make(const AImage: TBLImage; const AArea: TBLRectI;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Repeating); overload; inline;
+    procedure Make(const AImage: TBLImage; const AArea: TBLRectI;
+      const AExtendMode: TBLExtendMode; const ATransform: TBLMatrix2D); overload; inline;
+
+    procedure SetImage(const AValue: TBLImage; const AArea: TBLRectI); overload; inline;
+
+    /// <summary>
+    ///  Resets pattern image to empty image and clears pattern area rectangle
+    ///  to [0, 0, 0, 0].
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ResetImage; inline;
+
+    /// <summary>
+    ///  Updates the pattern area rectangle to [0, 0, Image.Width, Image.Height].
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ResetArea; inline;
+
+    procedure ResetExtendMode; inline;
+
+    procedure ResetTransform; inline;
+
+    procedure Translate(const AX, AY: Double); overload; inline;
+    procedure Translate(const AP: TBLPoint); overload; inline;
+    procedure Translate(const AP: TBLPointI); overload; inline;
+
+    procedure Scale(const AXY: Double); overload; inline;
+    procedure Scale(const AX, AY: Double); overload; inline;
+    procedure Scale(const AP: TBLPoint); overload; inline;
+    procedure Scale(const AP: TBLPointI); overload; inline;
+
+    procedure Skew(const AX, AY: Double); overload; inline;
+    procedure Skew(const AP: TBLPoint); overload; inline;
+
+    procedure Rotate(const AAngle: Double); overload; inline;
+    procedure Rotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    procedure ApplyTransform(const ATransform: TBLMatrix2D); inline;
+
+    procedure PostTranslate(const AX, AY: Double); overload; inline;
+    procedure PostTranslate(const AP: TBLPoint); overload; inline;
+    procedure PostTranslate(const AP: TBLPointI); overload; inline;
+
+    procedure PostScale(const AXY: Double); overload; inline;
+    procedure PostScale(const AX, AY: Double); overload; inline;
+    procedure PostScale(const AP: TBLPoint); overload; inline;
+    procedure PostScale(const AP: TBLPointI); overload; inline;
+
+    procedure PostSkew(const AX, AY: Double); overload; inline;
+    procedure PostSkew(const AP: TBLPoint); overload; inline;
+
+    procedure PostRotate(const AAngle: Double); overload; inline;
+    procedure PostRotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    procedure PostTransform(const ATransform: TBLMatrix2D); inline;
+
+    property Image: TBLImage read GetImage write SetImage;
+    property Area: TBLRectI read GetArea write SetArea;
+    property ExtendMode: TBLExtendMode read GetExtendMode write SetExtendMode;
+    property Transform: TBLMatrix2D read GetTransform write SetTransform;
+    property TransformKind: TBLTransformKind read GetTransformKind;
+    property HasTransform: Boolean read GetHasTransform;
+  end;
+
+{ ============================================================================
+   [Styling - Gradients]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Gradient type.
+  /// </summary>
+  TBLGradientKind = (
+    /// <summary>
+    ///  Linear gradient type.
+    /// </summary>
+    Linear,
+
+    /// <summary>
+    ///  Radial gradient type.
+    /// </summary>
+    Radial,
+
+    /// <summary>
+    ///  Conic gradient type.
+    /// </summary>
+    Conic);
+
+type
+  /// <summary>
+  ///  Gradient data index.
+  /// </summary>
+  TBLGradientValue = (
+    /// <summary>
+    ///  X0 - start 'X' for a Linear gradient and `X` center for both Radial and
+    ///  Conic gradients.
+    /// </summary>
+    CommonX0,
+
+    /// <summary>
+    ///  Y0 - start 'Y' for a Linear gradient and `Y` center for both Radial and
+    ///  Conic gradients.
+    /// </summary>
+    CommonY0,
+
+    /// <summary>
+    ///  X1 - end 'X' for a Linear gradient and focal point `X` for a Radial
+    ///  gradient.
+    /// </summary>
+    CommonX1,
+
+    /// <summary>
+    ///  Y1 - end 'Y' for a Linear/gradient and focal point `Y` for a Radial
+    ///  gradient.
+    /// </summary>
+    CommonY1,
+
+    /// <summary>
+    ///  Radial gradient center radius.
+    /// </summary>
+    RadialR0,
+
+    /// <summary>
+    ///  Radial gradient focal radius.
+    /// </summary>
+    RadialR1,
+
+    /// <summary>
+    ///  Conic gradient angle.
+    /// </summary>
+    ConicAngle = 2,
+
+    /// <summary>
+    ///  Conic gradient angle.
+    /// </summary>
+    ConicRepeat = 3);
+
+type
+  /// <summary>
+  ///  Gradient rendering quality.
+  /// </summary>
+  TBLGradientQuality = (
+    /// <summary>
+    ///  Nearest neighbor.
+    /// </summary>
+    Nearest,
+
+    /// <summary>
+    ///  Use smoothing, if available (currently never available).
+    /// </summary>
+    Smooth,
+
+    /// <summary>
+    ///  The renderer will use an implementation-specific dithering algorithm to
+    ///  prevent banding.
+    /// </summary>
+    Dither);
+
+type
+  /// <summary>
+  ///  Defines an `Offset` and `Rgba` color that is used by `TBLGradient` to
+  ///  define a linear transition between colors.
+  /// </summary>
+  /// <seealso cref="TBLGradient"/>
+  TBLGradientStop = record
+  public
+    Offset: Double;
+    Rgba: TBLRgba64;
+  public
+    class function Create: TBLGradientStop; overload; inline; static;
+    constructor Create(const AOffset: Double; const ARgba32: TBLRgba32); overload;
+    constructor Create(const AOffset: Double; const ARgba64: TBLRgba64); overload;
+
+    class operator Equal(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AOffset: Double; const ARgba32: TBLRgba32); overload; inline;
+    procedure Reset(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
+
+    function Equals(const AOther: TBLGradientStop): Boolean; inline;
+  end;
+  {$POINTERMATH ON}
+  PBLGradientStop = ^TBLGradientStop;
+  {$POINTERMATH OFF}
+
+function BLGradientStop: TBLGradientStop; overload; inline;
+function BLGradientStop(const AOffset: Double; const ARgba32: TBLRgba32): TBLGradientStop; overload; inline;
+function BLGradientStop(const AOffset: Double; const ARgba64: TBLRgba64): TBLGradientStop; overload; inline;
+
+type
+  /// <summary>
+  ///  Linear gradient values packed into a structure.
+  /// </summary>
+  TBLLinearGradientValues = record
+  public
+    X0: Double;
+    Y0: Double;
+    X1: Double;
+    Y1: Double;
+  public
+    class function Create: TBLLinearGradientValues; overload; inline; static;
+    constructor Create(const AX0, AY0, AX1, AY1: Double); overload;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1: Double); overload; inline;
+  end;
+  PBLLinearGradientValues = ^TBLLinearGradientValues;
+
+function BLLinearGradientValues: TBLLinearGradientValues; overload; inline;
+function BLLinearGradientValues(const AX0, AY0, AX1, AY1: Double): TBLLinearGradientValues; overload; inline;
+
+type
+  /// <summary>
+  ///  Radial gradient values packed into a structure.
+  /// </summary>
+  TBLRadialGradientValues = record
+  public
+    X0: Double;
+    Y0: Double;
+    X1: Double;
+    Y1: Double;
+    R0: Double;
+    R1: Double;
+  public
+    class function Create: TBLRadialGradientValues; overload; inline; static;
+    constructor Create(const AX0, AY0, AX1, AY1, AR0: Double;
+      const AR1: Double = 0); overload;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AX1, AY1, AR0: Double;
+      const AR1: Double = 0); overload; inline;
+  end;
+  PBLRadialGradientValues = ^TBLRadialGradientValues;
+
+function BLRadialGradientValues: TBLRadialGradientValues; overload; inline;
+function BLRadialGradientValues(const AX0, AY0, AX1, AY1, AR0: Double;
+  const AR1: Double = 0): TBLRadialGradientValues; overload; inline;
+
+type
+  /// <summary>
+  ///  Conic gradient values packed into a structure.
+  /// </summary>
+  TBLConicGradientValues = record
+  public
+    X0: Double;
+    Y0: Double;
+    Angle: Double;
+    Repetition: Double;
+  public
+    class function Create: TBLConicGradientValues; overload; inline; static;
+    constructor Create(const AX0, AY0, AAngle: Double;
+      const ARepeat: Double = 1); overload;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AX0, AY0, AAngle: Double;
+      const ARepeat: Double = 1); overload; inline;
+  end;
+  PBLConicGradientValues = ^TBLConicGradientValues;
+
+function BLConicGradientValues: TBLConicGradientValues; overload; inline;
+function BLConicGradientValues(const AX0, AY0, AAngle: Double;
+  const ARepeat: Double = 1): TBLConicGradientValues; overload; inline;
+
+type
+  /// <summary>
+  ///  Gradient.
+  /// </summary>
+  TBLGradient = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Stops: PBLGradientStop;
+      Size: Size_T;
+      Capacity: Size_T;
+      Transform: TBLMatrix2D;
+      case Byte of
+        0: (Values: array [TBLGradientValue] of Double);
+        1: (Linear: TBLLinearGradientValues);
+        2: (Radial: TBLRadialGradientValues);
+        3: (Conic: TBLConicGradientValues);
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetKind: TBLGradientKind; inline;
+    procedure SetKind(const AValue: TBLGradientKind); inline;
+    function GetExtendMode: TBLExtendMode; inline;
+    procedure SetExtendMode(const AValue: TBLExtendMode); inline;
+    function GetValue(const AIndex: NativeInt): Double; inline;
+    procedure SetValue(const AIndex: NativeInt; const AValue: Double); inline;
+    function GetLinear: TBLLinearGradientValues; inline;
+    procedure SetLinear(const AValue: TBLLinearGradientValues); inline;
+    function GetRadial: TBLRadialGradientValues; inline;
+    procedure SetRadial(const AValue: TBLRadialGradientValues); inline;
+    function GetConic: TBLConicGradientValues; inline;
+    procedure SetConic(const AValue: TBLConicGradientValues); inline;
+    function GetX0: Double; inline;
+    procedure SetX0(const AValue: Double); inline;
+    function GetY0: Double; inline;
+    procedure SetY0(const AValue: Double); inline;
+    function GetX1: Double; inline;
+    procedure SetX1(const AValue: Double); inline;
+    function GetY1: Double; inline;
+    procedure SetY1(const AValue: Double); inline;
+    function GetR0: Double; inline;
+    procedure SetR0(const AValue: Double); inline;
+    function GetR1: Double; inline;
+    procedure SetR1(const AValue: Double); inline;
+    function GetAngle: Double; inline;
+    procedure SetAngle(const AValue: Double); inline;
+    function GetConicAngle: Double; inline;
+    procedure SetConicAngle(const AValue: Double); inline;
+    function GetConicRepeat: Double; inline;
+    procedure SetConicRepeat(const AValue: Double); inline;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetCapacity: NativeInt; inline;
+    function GetStopData: PBLGradientStop; inline;
+    function GetStop(const AIndex: NativeInt): TBLGradientStop; inline;
+    function GetTransform: TBLMatrix2D; inline;
+    procedure SetTransform(const AValue: TBLMatrix2D); inline;
+    function GetTransformKind: TBLTransformKind; inline;
+    function GetHasTransform: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default constructed gradient.
+    ///
+    ///  A default constructed gradient has `TBLGradientKind.Linear` type, all
+    ///  values set to zero, and has no color stops.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLGradient);
+
+    /// <summary>
+    ///  Destroys the gradient.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLGradient);
+
+    /// <summary>
+    ///  Copy constructor creates a weak copy of `ASrc`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLGradient; const [ref] ASrc: TBLGradient); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator Equal(const ALeft: TBLGradient; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Equality operator, performs the same operation as `ALeft.Equals(ARight)`.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLGradient): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLGradient; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Equality operator, performs the same operation as `not ALeft.Equals(ARight)`.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLGradient): Boolean; inline; static;
+
+    constructor Create(const AKind: TBLGradientKind;
+      const AValues: TArray<Double>); overload;
+    constructor Create(const AKind: TBLGradientKind;
+      const AValues: PDouble = nil); overload;
+
+    constructor Create(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
+    constructor Create(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
+    constructor Create(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload;
+
+    constructor Create(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
+    constructor Create(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
+    constructor Create(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload;
+
+    constructor Create(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload;
+    constructor Create(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload;
+    constructor Create(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload;
+
+    /// <summary>
+    ///  Resets the gradient to its construction state.
+    /// </summary>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Swaps this gradient with `AOther`.
+    /// </summary>
+    procedure Swap(var AOther: TBLGradient); inline;
+
+    procedure Make(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
+    procedure Make(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
+    procedure Make(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode = TBLExtendMode.Pad); overload; inline;
+
+    procedure Make(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
+    procedure Make(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
+    procedure Make(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>); overload; inline;
+
+    procedure Make(const AValues: TBLLinearGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload; inline;
+    procedure Make(const AValues: TBLRadialGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload; inline;
+    procedure Make(const AValues: TBLConicGradientValues;
+      const AExtendMode: TBLExtendMode; const AStops: TArray<TBLGradientStop>;
+      const ATransform: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Resets the gradient extend mode to `TBLExtendMode.Pad`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="TBLExtendMode"/>
+    procedure ResetExtendMode; inline;
+
+    procedure SetValues(const AIndex: NativeInt; const AValues: TArray<Double>); overload; inline;
+    procedure SetValues(const AIndex: NativeInt; const AValues: PDouble;
+      const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Reserves the capacity of gradient for at least `AMinCapacity` stops.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reserve(const AMinCapacity: NativeInt); inline;
+
+    /// <summary>
+    ///  Shrinks the capacity of gradient stops to fit the current use.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Shrink; inline;
+
+    /// <summary>
+    ///  Returns gradient stops and their count as `TBLArrayView<TBLGradientStop>`.
+    /// </summary>
+    function StopsView: TBLArrayView<TBLGradientStop>; inline;
+
+    /// <summary>
+    ///  Resets all stops of the gradient.
+    ///
+    ///  After the operation the gradient will have no color stops.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ResetStops; inline;
+
+    /// <summary>
+    ///  Assigns colors stops of the gradient to `AStops`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignStops(const AStops: TArray<TBLGradientStop>); overload; inline;
+
+    /// <summary>
+    ///  Assigns colors stops of the gradient to `AStops` of size `ACount`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignStops(const AStops: PBLGradientStop; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Assigns colors stops of the gradient to `AStops`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AssignStops(const AStops: TBLArrayView<TBLGradientStop>); overload; inline;
+
+    /// <summary>
+    ///  Adds a color stop described as a 32-bit color `ARgba32` at the given
+    ///  `AOffset`.
+    /// </summary>
+    /// <remarks>
+    ///  The offset value must be in `[0, 1]` range.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddStop(const AOffset: Double; const ARgba32: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Adds a color stop described as a 64-bit color `ARgba64` at the given
+    ///  `AOffset`.
+    /// </summary>
+    /// <remarks>
+    ///  The offset value must be in `[0, 1]` range.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddStop(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Removes stop at the given `AIndex`.
+    /// </summary>
+    /// <remarks>
+    ///  This method should be used together with `IndexOfStop`, which returns
+    ///  index to the stop array.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="IndexOfStop"/>
+    procedure RemoveStop(const AIndex: NativeInt); inline;
+
+    /// <summary>
+    ///  Removes stop at the given `AOffset`, which should be in `[0, 1]` range.
+    ///
+    ///  The `AAll` parameter specifies whether all stops at the given offset
+    ///  should be removed as there are cases in which two stops can occupy the
+    ///  same offset to create sharp transitions. If `AAll` is False and there
+    ///  is a sharp transition only the first stop would be removed. If `AAll`
+    ///  is True both stops will be removed.
+    /// </summary>
+    /// <remarks>
+    ///  There are never 3 stops occupying the same `AOffset`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveStopByOffset(const AOffset: Double;
+      const AAll: Boolean = True); inline;
+
+    /// <summary>
+    ///  Removes all stops in the given range, which describes indexes in the
+    ///  stop array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveStops(const ARange: TBLRange); inline;
+
+    /// <summary>
+    ///  Removes all stops in the given interval `[AOffsetMin, AOffsetMax]`,
+    ///  which specifies stop offsets, which are between [0, 1].
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveStopsByOffset(const AOffsetMin, AOffsetMax: Double); inline;
+
+    /// <summary>
+    ///  Replaces stop at the given `AIndex` with a new color stop described by
+    ///  `AOffset` and `ARgba32`.
+    ///
+    ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
+    ///  by `AddStop(AOffset, Rgba32)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="RemoveStop"/>
+    /// <seealso cref="AddStop"/>
+    procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
+      const ARgba32: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Replaces stop at the given `AIndex` with a new color stop described by
+    ///  `AOffset` and `ARgba64`.
+    ///
+    ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
+    ///  by `AddStop(AOffset, Rgba64)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="RemoveStop"/>
+    /// <seealso cref="AddStop"/>
+    procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
+      const ARgba64: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Returns the index of a color stop in Stops array of the given `AOffset`.
+    /// </summary>
+    /// <remarks>
+    ///  If there is no such offset, `-1` is returned.
+    /// </remarks>
+    function IndexOfStop(const AOffset: Double): NativeInt; inline;
+
+    /// <summary>
+    ///  Tests whether the gradient equals `AOther`.
+    /// </summary>
+    /// <remarks>
+    ///  The equality check returns True if both gradients are the same value-wise.
+    /// </remarks>
+    function Equals(const AOther: TBLGradient): Boolean; inline;
+
+    procedure ResetTransform; inline;
+
+    procedure Translate(const AX, AY: Double); overload; inline;
+    procedure Translate(const AP: TBLPoint); overload; inline;
+    procedure Translate(const AP: TBLPointI); overload; inline;
+
+    procedure Scale(const AXY: Double); overload; inline;
+    procedure Scale(const AX, AY: Double); overload; inline;
+    procedure Scale(const AP: TBLPoint); overload; inline;
+    procedure Scale(const AP: TBLPointI); overload; inline;
+
+    procedure Skew(const AX, AY: Double); overload; inline;
+    procedure Skew(const AP: TBLPoint); overload; inline;
+
+    procedure Rotate(const AAngle: Double); overload; inline;
+    procedure Rotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    procedure ApplyTransform(const ATransform: TBLMatrix2D); inline;
+
+    procedure PostTranslate(const AX, AY: Double); overload; inline;
+    procedure PostTranslate(const AP: TBLPoint); overload; inline;
+    procedure PostTranslate(const AP: TBLPointI); overload; inline;
+
+    procedure PostScale(const AXY: Double); overload; inline;
+    procedure PostScale(const AX, AY: Double); overload; inline;
+    procedure PostScale(const AP: TBLPoint); overload; inline;
+    procedure PostScale(const AP: TBLPointI); overload; inline;
+
+    procedure PostSkew(const AX, AY: Double); overload; inline;
+    procedure PostSkew(const AP: TBLPoint); overload; inline;
+
+    procedure PostRotate(const AAngle: Double); overload; inline;
+    procedure PostRotate(const AAngle, AX, AY: Double); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    procedure PostTransform(const ATransform: TBLMatrix2D); inline;
+
+    /// <summary>
+    ///  The type of the gradient.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Kind: TBLGradientKind read GetKind write SetKind;
+
+    /// <summary>
+    ///  The gradient extend mode.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property ExtendMode: TBLExtendMode read GetExtendMode write SetExtendMode;
+
+    property Values[const AIndex: NativeInt]: Double read GetValue write SetValue;
+
+    property Linear: TBLLinearGradientValues read GetLinear write SetLinear;
+    property Radial: TBLRadialGradientValues read GetRadial write SetRadial;
+    property Conic: TBLConicGradientValues read GetConic write SetConic;
+
+    property X0: Double read GetX0 write SetX0;
+    property Y0: Double read GetY0 write SetY0;
+    property X1: Double read GetX1 write SetX1;
+    property Y1: Double read GetY1 write SetY1;
+    property R0: Double read GetR0 write SetR0;
+    property R1: Double read GetR1 write SetR1;
+    property Angle: Double read GetAngle write SetAngle;
+    property ConicAngle: Double read GetConicAngle write SetConicAngle;
+    property ConicRepeat: Double read GetConicRepeat write SetConicRepeat;
+
+    /// <summary>
+    ///  Whether the gradient is empty.
+    ///
+    ///  Empty gradient is considered any gradient that has no stops.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  The number of stops the gradient has.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  The gradient capacity [in stops].
+    /// </summary>
+    property Capacity: NativeInt read GetCapacity;
+
+    /// <summary>
+    ///  The gradient stop data.
+    /// </summary>
+    property StopData: PBLGradientStop read GetStopData;
+
+    /// <summary>
+    ///  Gradient stop at `AIndex`.
+    /// </summary>
+    property Stops[const AIndex: NativeInt]: TBLGradientStop read GetStop;
+
+    /// <summary>
+    ///  The transformation matrix applied to the gradient.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Transform: TBLMatrix2D read GetTransform write SetTransform;
+
+    /// <summary>
+    ///  Returns the type of the transformation matrix returned by `Transform`.
+    /// </summary>
+    /// <seealso cref="Transform"/>
+    property TransformKind: TBLTransformKind read GetTransformKind;
+
+    /// <summary>
+    ///  Tests whether the gradient has a non-identity transformation matrix.
+    /// </summary>
+    property HasTransform: Boolean read GetHasTransform;
+  end;
+
+{$ENDREGION 'Styling'}
+
+{$REGION 'Text'}
+
+{ ============================================================================
+   [Text - Text]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Text encoding.
+  /// </summary>
+  TBLTextEncoding = (
+    /// <summary>
+    ///  UTF-8 encoding.
+    /// </summary>
+    Utf8,
+
+    /// <summary>
+    ///  UTF-16 encoding.
+    /// </summary>
+    Utf16,
+
+    /// <summary>
+    ///  UTF-32 encoding.
+    /// </summary>
+    Utf32,
+
+    /// <summary>
+    ///  LATIN1 encoding (one byte per character).
+    /// </summary>
+    Latin1);
+
+{ ============================================================================
+   [Text - Glyph Containers & Processing]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Flags used by `TBLGlyphRun`.
+  /// </summary>
+  /// <seealso cref="TBLGlyphRun"/>
+  TBLGlyphRunFlag = (
+    _Reserved = 0,
+
+    /// <summary>
+    ///  Glyph-run contains UCS-4 string and not glyphs (glyph-buffer only).
+    /// </summary>
+    Ucs4Content = 28,
+
+    /// <summary>
+    ///  Glyph-run was created from text that was not a valid unicode.
+    /// </summary>
+    InvalidText = 29,
+
+    /// <summary>
+    ///  Not the whole text was mapped to glyphs (contains undefined glyphs).
+    /// </summary>
+    UndefinedGlyphs = 30,
+
+    /// <summary>
+    ///  Encountered invalid font data during text / glyph processing.
+    /// </summary>
+    InvalidFontData = 31);
+
+  /// <summary>
+  ///  Flags used by `TBLGlyphRun`.
+  /// </summary>
+  /// <seealso cref="TBLGlyphRun"/>
+  TBLGlyphRunFlags = set of TBLGlyphRunFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLGlyphRunFlags`.
+  /// </summary>
+  _TBLGlyphRunFlagsHelper = record helper for TBLGlyphRunFlags
+  public const
+    /// <summary>
+    ///  No flags.
+    /// </summary>
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Placement of glyphs stored in a `TBLGlyphRun`.
+  /// </summary>
+  /// <seealso cref="TBLGlyphRun"/>
+  TBLGlyphPlacementType = (
+    /// <summary>
+    ///  No placement (custom handling by `TBLPathSinkFunc`).
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///  Each glyph has a TBLGlyphPlacement (advance + offset).
+    /// </summary>
+    AdvanceOffset,
+
+    /// <summary>
+    ///  Each glyph has a TBLPoint offset in design-space units.
+    /// </summary>
+    DesignUnits,
+
+    /// <summary>
+    ///  Each glyph has a TBLPoint offset in user-space units.
+    /// </summary>
+    UserUnits,
+
+    /// <summary>
+    ///  Each glyph has a TBLPoint offset in absolute units.
+    /// </summary>
+    AbsoluteUnits);
+
+type
+  /// <summary>
+  ///  Glyph id - a 32-bit unsigned integer.
+  /// </summary>
+  TBLGlyphId = UInt32;
+
+  {$POINTERMATH ON}
+  PBLGlyphId = ^TBLGlyphId;
+  {$POINTERMATH OFF}
+
+type
+  /// <summary>
+  ///  Glyph placement.
+  ///
+  ///  Provides information about glyph offset (X/Y) and advance (X/Y).
+  /// </summary>
+  TBLGlyphPlacement = record
+  public
+    Placement: TBLPointI;
+    Advance: TBLPointI;
+  public
+    procedure Reset; inline;
+  end;
+  PBLGlyphPlacement = ^TBLGlyphPlacement;
+
+type
+  /// <summary>
+  ///  TBLGlyphRun describes a set of consecutive glyphs and their placements.
+  ///
+  ///  TBLGlyphRun should only be used to pass glyph IDs and their placements to
+  ///  the rendering context. The purpose of TBLGlyphRun is to allow rendering
+  ///  glyphs, which could be shaped by various shaping engines (Blend2D,
+  ///  Harfbuzz, etc).
+  ///
+  ///  TBLGlyphRun allows to render glyphs that are stored as UInt32[] array or
+  ///  part of a bigger structure (for example `hb_glyph_info_t` used by
+  ///  HarfBuzz). Glyph placements at the moment use Blend2D's
+  ///  `TBLGlyphPlacement` or `TBLPoint`, but it's possible to extend the data
+  ///  type in the future.
+  /// </summary>
+  /// <seealso cref="TBLGlyphPlacement"/>
+  /// <seealso cref="TBLPoint"/>
+  TBLGlyphRun = record
+  {$REGION 'Internal Declarations'}
+  private
+    FGlyphData: Pointer;
+    FPlacementData: Pointer;
+    FSize: Size_T;
+    FReserved: UInt8;
+    FPlacementType: UInt8;
+    FGlyphAdvance: Int8;
+    FPlacementAdvance: Int8;
+    FFlags: UInt32;
+    function GetGlyphDataAsGlyphIds: PBLGlyphId; inline;
+    function GetPlacementDataAsGlyphPlacements: PBLGlyphPlacement; inline;
+    function GetPlacementDataAsPoints: PBLPoint; inline;
+    function GetFlags: TBLGlyphRunFlags; inline;
+    function GetPlacementType: TBLGlyphPlacementType; inline;
+    function GetSize: NativeInt; inline;
+    function GetIsEmpty: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    procedure SetGlyphData(const AGlyphData: PBLGlyphId); overload; inline;
+    procedure SetGlyphData(const AData: Pointer; const AAdvance: ShortInt); overload; inline;
+    procedure ResetGlyphIdData; inline;
+
+    procedure SetPlacementData(const AData: PBLGlyphPlacement); overload; inline;
+    procedure SetPlacementData(const AData: PBLPoint); overload; inline;
+    procedure SetPlacementData(const AData: Pointer; const AAdvance: ShortInt); overload; inline;
+    procedure ResetPlacementData; inline;
+
+    /// <summary>
+    ///  Glyph id data (abstract, incremented by `GlyphAdvance`).
+    /// </summary>
+    property GlyphData: Pointer read FGlyphData;
+
+    property GlyphDataAsGlyphIds: PBLGlyphId read GetGlyphDataAsGlyphIds;
+
+    /// <summary>
+    ///  Glyph placement data (abstract, incremented by `PlacementAdvance`).
+    /// </summary>
+    property PlacementData: Pointer read FPlacementData;
+
+    property PlacementDataAsGlyphPlacements: PBLGlyphPlacement read GetPlacementDataAsGlyphPlacements;
+    property PlacementDataAsPoints: PBLPoint read GetPlacementDataAsPoints;
+
+    /// <summary>
+    ///  Size of the glyph-run in glyph units.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  Type of placement.
+    /// </summary>
+    property PlacementType: TBLGlyphPlacementType read GetPlacementType;
+
+    /// <summary>
+    ///  Advance of `GlyphData` array.
+    /// </summary>
+    property GlyphAdvance: ShortInt read FGlyphAdvance;
+
+    /// <summary>
+    ///  Advance of `PlacementData` array.
+    /// </summary>
+    property PlacementAdvance: ShortInt read FPlacementAdvance;
+
+    /// <summary>
+    ///  Glyph-run flags.
+    /// </summary>
+    property Flags: TBLGlyphRunFlags read GetFlags;
+
+    property IsEmpty: Boolean read GetIsEmpty;
+  end;
+  PBLGlyphRun = ^TBLGlyphRun;
+
+type
+  /// <summary>
+  ///  A helper to iterate over a `TBLGlyphRun`.
+  ///
+  ///  Takes into consideration glyph-id advance and glyph-offset advance.
+  ///
+  ///  Example:
+  ///
+  ///  ```Delphi
+  ///  procedure InspectGlyphRun(const AGlyphRun: TBLGlyphRun);
+  ///  begin
+  ///    var It := TBLGlyphRunIterator.Create(AGlyphRun);
+  ///    if (It.HasPlacement) then
+  ///    begin
+  ///      while (not It.AtEnd) do
+  ///      begin
+  ///        var GlyphId := It.GlyphId;
+  ///        var Offset := It.Placement<TBLPoint>;
+  ///
+  ///        // Do something with `GlyphId` and `Offset`.
+  ///
+  ///        It.Advance;
+  ///      end;
+  ///    end
+  ///    else
+  ///    begin
+  ///      while (not It.AtEnd) do
+  ///      begin
+  ///        var GlyphId := It.GlyphId;
+  ///
+  ///        // Do something with `GlyphId`.
+  ///
+  ///        It.Advance;
+  ///      end;
+  ///    end;
+  ///  end;
+  ///  ```
+  /// </summary>
+  TBLGlyphRunIterator = record
+  {$REGION 'Internal Declarations'}
+  private
+    FIndex: NativeInt;
+    FSize: NativeInt;
+    FGlyphData: Pointer;
+    FPlacementData: Pointer;
+    FGlyphAdvance: NativeInt;
+    FPlacementAdvance: NativeInt;
+    function GetIsEmpty: Boolean; inline;
+    function GetHasPlacement: Boolean; inline;
+    function GetGlyphId: TBLGlyphId; inline;
+    function GetPlacementAsPoint: TBLPoint; inline;
+    function GetPlacementAsGlyphPlacement: TBLGlyphPlacement; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    class operator Initialize(out ADest: TBLGlyphRunIterator);
+    constructor Create(const AGlyphRun: TBLGlyphRun);
+
+    procedure Reset; overload;inline;
+    procedure Reset(const AGlyphRun: TBLGlyphRun); overload;inline;
+
+    procedure Advance; inline;
+    function AtEnd: Boolean; inline;
+    function Placement<T: record>: T; inline;
+
+    property IsEmpty: Boolean read GetIsEmpty;
+    property HasPlacement: Boolean read GetHasPlacement;
+    property GlyphId: TBLGlyphId read GetGlyphId;
+    property PlacementAsPoint: TBLPoint read GetPlacementAsPoint;
+    property PlacementAsGlyphPlacement: TBLGlyphPlacement read GetPlacementAsGlyphPlacement;
+  end;
+
+type
+  /// <summary>
+  ///  Contains additional information associated with a glyph used by
+  ///  `TBLGlyphBuffer`.
+  /// </summary>
+  /// <seealso cref="TBLGlyphBuffer"/>
+  TBLGlyphInfo = record
+  {$REGION 'Internal Declarations'}
+  private
+    FCluster: UInt32;
+    FReserved: UInt32;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    property Cluster: UInt32 read FCluster;
+  end;
+  PBLGlyphInfo = ^TBLGlyphInfo;
+
+type
+  /// <summary>
+  ///  Glyph buffer.
+  ///
+  ///  Can hold either text or glyphs and provides basic memory management that
+  ///  is used for text shaping, character to glyph mapping, glyph substitution,
+  ///  and glyph positioning.
+  ///
+  ///  Glyph buffer provides two separate buffers called 'Primary' and
+  ///  'Secondary' that serve different purposes during processing. Primary
+  ///  buffer always holds actual text/glyph array, and secondary buffer is
+  ///  either used as a scratch buffer during glyph substitution or to hold
+  ///  glyph positions after the processing is complete and glyph positions
+  ///  were calculated.
+  /// </summary>
+  TBLGlyphBuffer = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      case Byte of
+        0: (Content: PUInt32;
+            PlacementData: PBLGlyphPlacement;
+            Size: Size_T;
+            Reserved: UInt32;
+            Flags: UInt32);
+        1: (GlyphRun: TBLGlyphRun;
+            InfoData: PBLGlyphInfo);
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetFlags: TBLGlyphRunFlags; inline;
+    function GetContent: PUInt32; inline;
+    function GetInfoData: PBLGlyphInfo; inline;
+    function GetPlacementData: PBLGlyphPlacement; inline;
+    function GetGlyphRun: TBLGlyphRun; inline;
+    function GetHasText: Boolean; inline;
+    function GetHasGlyphs: Boolean; inline;
+    function GetHasInvalidChars: Boolean; inline;
+    function GetHasUndefinedChars: Boolean; inline;
+    function GetHasInvalidFontData: Boolean; inline;
+  private
+    class function ConvertSize(const ASize: NativeInt): Size_T; inline; static;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default constructed glyph buffer.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLGlyphBuffer);
+
+    /// <summary>
+    ///  Destroys the glyph buffer.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLGlyphBuffer);
+
+    /// <summary>
+    ///  Copying a glyph buffer is not allowed. This will raise a
+    ///  `EBlend2DError` exception with result `TBLResult.NotPermitted`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLGlyphBuffer; const [ref] ASrc: TBLGlyphBuffer); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator Equal(const ALeft: TBLGlyphBuffer; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil`.
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLGlyphBuffer; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether the glyph-buffer has `AFlag` set.
+    /// </summary>
+    function HasFlag(const AFlag: TBLGlyphRunFlag): Boolean; inline;
+
+    /// <summary>
+    ///  Resets the `TBLGlyphBuffer` into its default constructed state. The
+    ///  content will be cleared and allocated memory released.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Clears the content of `TBLGlyphBuffer` without releasing internal
+    ///  buffers.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Clear; inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetText(const AText: String); overload; inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetText(const AText: UTF8String); overload; inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetText(const AText: UCS4String); overload; inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetText(const AText: AnsiString); overload; inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer`.
+    ///
+    ///  This is a generic function that accepts a pointer to data, which is
+    ///  specified by `AEncoding`. The `ASize` argument depends on encoding as
+    ///  well. If the encoding specifies byte string (Latin1 or Utf8) then it's
+    ///  bytes, if the encoding specifies Utf16 or Utf32 then it would describe
+    ///  the number of `UInt16` or `UInt32` code points, respectively.
+    ///
+    ///  Null-terminated string can be specified by passing `-1` as `ASize`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetText(const ATextData: Pointer; const ASize: NativeInt;
+      const AEncoding: TBLTextEncoding); overload; inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer` from LATIN1
+    ///  (ISO/IEC 8859-1) string.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetLatin1Text(const AText: PAnsiChar; const ALength: NativeInt = -1); inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer` from UTF-8 encoded
+    ///  string. The `ALength` parameter represents the length of the `AText` in
+    ///  bytes.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetUtf8Text(const AText: PUTF8Char; const ALength: NativeInt = -1); inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer` from UTF-16 encoded
+    ///  string. The `ALength` parameter represents the  length of the `AText`
+    ///  in 16-bit units.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetUtf16Text(const AText: PWideChar; const ALength: NativeInt = -1); inline;
+
+    /// <summary>
+    ///  Assigns a text content of this `TBLGlyphBuffer` from UTF-32 encoded
+    ///  string. The `ALength` parameter represents the length of the `AText` in
+    ///  32-bit units.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetUtf32Text(const AText: PUCS4Char; const ALength: NativeInt = -1); inline;
+
+    /// <summary>
+    ///  Assigns a glyph content of this `TBLGlyphBuffer` from the given
+    ///  `AGlyphData`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetGlyphs(const AGlyphData: TArray<UInt32>); overload; inline;
+
+    /// <summary>
+    ///  Assigns a glyph content of this `TBLGlyphBuffer` from the given
+    ///  `AGlyphData`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetGlyphs(const AGlyphData: PUInt32; const ASize: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Assigns a glyph content of this `TBLGlyphBuffer` from an array of
+    ///  glyphs or from a foreign record that contains glyphs and possibly other
+    ///  members that have to be skipped. The glyph size can be either 16-bit
+    ///  (2) or 32-bit (4). The last parameter `AGlyphAdvance` specifies how
+    ///  many bytes to advance after a glyph value is read.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetGlyphsFromRecord(const AGlyphData: Pointer; const ASize,
+      AGlyphIdSize, AGlyphAdvance: NativeInt); inline;
+
+    property IsEmpty: Boolean read GetIsEmpty;
+    property Size: NativeInt read GetSize;
+    property Flags: TBLGlyphRunFlags read GetFlags;
+    property Content: PUInt32 read GetContent;
+    property InfoData: PBLGlyphInfo read GetInfoData;
+    property PlacementData: PBLGlyphPlacement read GetPlacementData;
+    property GlyphRun: TBLGlyphRun read GetGlyphRun;
+
+    /// <summary>
+    ///  Whether the buffer contains unicode data.
+    /// </summary>
+    property HasText: Boolean read GetHasText;
+
+    /// <summary>
+    ///  Whether the buffer contains glyph-id data.
+    /// </summary>
+    property HasGlyphs: Boolean read GetHasGlyphs;
+
+    /// <summary>
+    ///  Tests whether the input string contained invalid characters (unicode
+    ///  encoding errors).
+    /// </summary>
+    property HasInvalidChars: Boolean read GetHasInvalidChars;
+
+    /// <summary>
+    ///  Whether the input string contained undefined characters that weren't
+    ///  mapped properly to glyphs.
+    /// </summary>
+    property HasUndefinedChars: Boolean read GetHasUndefinedChars;
+
+    /// <summary>
+    ///  Whether one or more operation was terminated before completion because
+    ///  of invalid data in a font.
+    /// </summary>
+    property HasInvalidFontData: Boolean read GetHasInvalidFontData;
+  end;
+{$ENDREGION 'Text'}
 
 {$REGION 'Rendering'}
 type
@@ -12174,6 +12874,354 @@ begin
                Trunc(EnsureRange(A, 0, 1) * $FFFF + 0.5));
 end;
 
+{ TBLPattern }
+
+procedure TBLPattern.ApplyTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Transform), @ATransform));
+end;
+
+class operator TBLPattern.Assign(var ADest: TBLPattern;
+  const [ref] ASrc: TBLPattern);
+begin
+  _BLCheck(_blPatternInitWeak(@ADest, @ASrc));
+end;
+
+constructor TBLPattern.Create(const AImage: TBLImage;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blPatternInitAs(@Self, @AImage, nil, Ord(AExtendMode), nil));
+end;
+
+constructor TBLPattern.Create(const AImage: TBLImage;
+  const AExtendMode: TBLExtendMode; const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPatternInitAs(@Self, @AImage, nil, Ord(AExtendMode), @ATransform));
+end;
+
+constructor TBLPattern.Create(const AImage: TBLImage; const AArea: TBLRectI;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blPatternInitAs(@Self, @AImage, @AArea, Ord(AExtendMode), nil));
+end;
+
+constructor TBLPattern.Create(const AImage: TBLImage; const AArea: TBLRectI;
+  const AExtendMode: TBLExtendMode; const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPatternInitAs(@Self, @AImage, @AArea, Ord(AExtendMode), @ATransform));
+end;
+
+class operator TBLPattern.Equal(const ALeft, ARight: TBLPattern): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLPattern.Equals(const AOther: TBLPattern): Boolean;
+begin
+  Result := _blPatternEquals(@Self, @AOther);
+end;
+
+class operator TBLPattern.Finalize(var ADest: TBLPattern);
+begin
+  _BLCheck(_blPatternDestroy(@ADest));
+end;
+
+function TBLPattern.GetArea: TBLRectI;
+begin
+  _BLCheck(_blPatternGetArea(@Self, @Result));
+end;
+
+function TBLPattern.GetExtendMode: TBLExtendMode;
+begin
+  Result := TBLExtendMode(_blPatternGetExtendMode(@Self));
+end;
+
+function TBLPattern.GetHasTransform: Boolean;
+begin
+  Result := (TransformKind <> TBLTransformKind.Identity);
+end;
+
+function TBLPattern.GetImage: TBLImage;
+begin
+  _BLCheck(_blPatternGetImage(@Self, @Result));
+end;
+
+function TBLPattern.GetTransform: TBLMatrix2D;
+begin
+  _BLCheck(_blPatternGetTransform(@Self, @Result));
+end;
+
+function TBLPattern.GetTransformKind: TBLTransformKind;
+begin
+  Result := TBLTransformKind(_blPatternGetTransformType(@Self));
+end;
+
+class operator TBLPattern.Initialize(out ADest: TBLPattern);
+begin
+  _BLCheck(_blPatternInit(@ADest));
+end;
+
+procedure TBLPattern.Make(const AImage: TBLImage;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blPatternCreate(@Self, @AImage, nil, Ord(AExtendMode), nil));
+end;
+
+procedure TBLPattern.Make(const AImage: TBLImage;
+  const AExtendMode: TBLExtendMode; const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPatternCreate(@Self, @AImage, nil, Ord(AExtendMode), @ATransform));
+end;
+
+procedure TBLPattern.Make(const AImage: TBLImage; const AArea: TBLRectI;
+  const AExtendMode: TBLExtendMode);
+begin
+  _BLCheck(_blPatternCreate(@Self, @AImage, @AArea, Ord(AExtendMode), nil));
+end;
+
+procedure TBLPattern.Make(const AImage: TBLImage; const AArea: TBLRectI;
+  const AExtendMode: TBLExtendMode; const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPatternCreate(@Self, @AImage, @AArea, Ord(AExtendMode), @ATransform));
+end;
+
+class operator TBLPattern.NotEqual(const ALeft, ARight: TBLPattern): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLPattern.PostRotate(const AAngle: Double);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotate), @AAngle));
+end;
+
+procedure TBLPattern.PostRotate(const AAngle, AX, AY: Double);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AX;
+  Values[2] := AY;
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLPattern.PostRotate(const AAngle: Double; const AOrigin: TBLPointI);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLPattern.PostRotate(const AAngle: Double; const AOrigin: TBLPoint);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLPattern.PostScale(const AP: TBLPoint);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @AP));
+end;
+
+procedure TBLPattern.PostScale(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLPattern.PostScale(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLPattern.PostScale(const AXY: Double);
+begin
+  var P := BLPoint(AXY, AXY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLPattern.PostSkew(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostSkew), @P));
+end;
+
+procedure TBLPattern.PostSkew(const AP: TBLPoint);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostSkew), @AP));
+end;
+
+procedure TBLPattern.PostTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostTransform), @ATransform));
+end;
+
+procedure TBLPattern.PostTranslate(const AP: TBLPoint);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @AP));
+end;
+
+procedure TBLPattern.PostTranslate(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @P));
+end;
+
+procedure TBLPattern.PostTranslate(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @P));
+end;
+
+procedure TBLPattern.Reset;
+begin
+  _BLCheck(_blPatternReset(@Self));
+end;
+
+procedure TBLPattern.ResetArea;
+begin
+  _BLCheck(_blPatternResetArea(@Self));
+end;
+
+procedure TBLPattern.ResetExtendMode;
+begin
+  _BLCheck(_blPatternSetExtendMode(@Self, Ord(TBLExtendMode.Repeating)));
+end;
+
+procedure TBLPattern.ResetImage;
+begin
+  _BLCheck(_blPatternResetImage(@Self));
+end;
+
+procedure TBLPattern.ResetTransform;
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Reset), nil));
+end;
+
+procedure TBLPattern.Rotate(const AAngle: Double);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Rotate), @AAngle));
+end;
+
+procedure TBLPattern.Rotate(const AAngle, AX, AY: Double);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AX;
+  Values[2] := AY;
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLPattern.Rotate(const AAngle: Double; const AOrigin: TBLPoint);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLPattern.Rotate(const AAngle: Double; const AOrigin: TBLPointI);
+var
+  Values: array [0..2] of Double;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLPattern.SetImage(const AValue: TBLImage);
+begin
+  _BLCheck(_blPatternSetImage(@Self, @AValue, nil));
+end;
+
+procedure TBLPattern.Scale(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLPattern.Scale(const AXY: Double);
+begin
+  var P := BLPoint(AXY, AXY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLPattern.Scale(const AP: TBLPoint);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @AP));
+end;
+
+procedure TBLPattern.Scale(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLPattern.SetArea(const AValue: TBLRectI);
+begin
+  _BLCheck(_blPatternSetArea(@Self, @AValue));
+end;
+
+procedure TBLPattern.SetExtendMode(const AValue: TBLExtendMode);
+begin
+  _BLCheck(_blPatternSetExtendMode(@Self, Ord(AValue)));
+end;
+
+procedure TBLPattern.SetImage(const AValue: TBLImage; const AArea: TBLRectI);
+begin
+  _BLCheck(_blPatternSetImage(@Self, @AValue, @AArea));
+end;
+
+procedure TBLPattern.SetTransform(const AValue: TBLMatrix2D);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Assign), @AValue));
+end;
+
+procedure TBLPattern.Skew(const AP: TBLPoint);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Skew), @AP));
+end;
+
+procedure TBLPattern.Skew(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Skew), @P));
+end;
+
+procedure TBLPattern.Swap(var AOther: TBLPattern);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+procedure TBLPattern.Translate(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @P));
+end;
+
+procedure TBLPattern.Translate(const AP: TBLPoint);
+begin
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @AP));
+end;
+
+procedure TBLPattern.Translate(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blPatternApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @P));
+end;
+
 { TBLGradientStop }
 
 function BLGradientStop: TBLGradientStop; overload; inline;
@@ -13065,8 +14113,371 @@ begin
   var P := BLPoint(AP.X, AP.Y);
   _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @P));
 end;
-
 {$ENDREGION 'Styling'}
+
+{$REGION 'Text'}
+
+{ TBLGlyphPlacement }
+
+procedure TBLGlyphPlacement.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLGlyphRun }
+
+function TBLGlyphRun.GetFlags: TBLGlyphRunFlags;
+begin
+  Cardinal(Result) := FFlags;
+end;
+
+function TBLGlyphRun.GetGlyphDataAsGlyphIds: PBLGlyphId;
+begin
+  Result := FGlyphData;
+end;
+
+function TBLGlyphRun.GetIsEmpty: Boolean;
+begin
+  Result := (FSize = 0);
+end;
+
+function TBLGlyphRun.GetPlacementDataAsGlyphPlacements: PBLGlyphPlacement;
+begin
+  Result := FPlacementData;
+end;
+
+function TBLGlyphRun.GetPlacementDataAsPoints: PBLPoint;
+begin
+  Result := FPlacementData;
+end;
+
+function TBLGlyphRun.GetPlacementType: TBLGlyphPlacementType;
+begin
+  Result := TBLGlyphPlacementType(FPlacementType);
+end;
+
+function TBLGlyphRun.GetSize: NativeInt;
+begin
+  Result := FSize;
+end;
+
+procedure TBLGlyphRun.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+procedure TBLGlyphRun.ResetGlyphIdData;
+begin
+  FGlyphData := nil;
+  FGlyphAdvance := 0;
+end;
+
+procedure TBLGlyphRun.ResetPlacementData;
+begin
+  FPlacementData := nil;
+  FPlacementAdvance := 0;
+end;
+
+procedure TBLGlyphRun.SetGlyphData(const AData: Pointer;
+  const AAdvance: ShortInt);
+begin
+  FGlyphData := AData;
+  FGlyphAdvance := AAdvance;
+end;
+
+procedure TBLGlyphRun.SetPlacementData(const AData: PBLGlyphPlacement);
+begin
+  FPlacementData := AData;
+  FPlacementAdvance := SizeOf(TBLGlyphPlacement);
+end;
+
+procedure TBLGlyphRun.SetPlacementData(const AData: PBLPoint);
+begin
+  FPlacementData := AData;
+  FPlacementAdvance := SizeOf(TBLPoint);
+end;
+
+procedure TBLGlyphRun.SetPlacementData(const AData: Pointer;
+  const AAdvance: ShortInt);
+begin
+  FPlacementData := AData;
+  FPlacementAdvance := AAdvance;
+end;
+
+procedure TBLGlyphRun.SetGlyphData(const AGlyphData: PBLGlyphId);
+begin
+  FGlyphData := AGlyphData;
+  FGlyphAdvance := SizeOf(UInt32);
+end;
+
+{ TBLGlyphRunIterator }
+
+procedure TBLGlyphRunIterator.Advance;
+begin
+  Assert(not AtEnd);
+  Inc(FIndex);
+  Inc(PByte(FGlyphData), FGlyphAdvance);
+  Inc(PByte(FPlacementData), FPlacementAdvance);
+end;
+
+function TBLGlyphRunIterator.AtEnd: Boolean;
+begin
+  Result := (FIndex = FSize);
+end;
+
+constructor TBLGlyphRunIterator.Create(const AGlyphRun: TBLGlyphRun);
+begin
+  Reset(AGlyphRun);
+end;
+
+function TBLGlyphRunIterator.GetGlyphId: TBLGlyphId;
+begin
+  Result := PBLGlyphId(FGlyphData)^;
+end;
+
+function TBLGlyphRunIterator.GetHasPlacement: Boolean;
+begin
+  Result := (FPlacementData <> nil);
+end;
+
+function TBLGlyphRunIterator.GetIsEmpty: Boolean;
+begin
+  Result := (FSize = 0);
+end;
+
+function TBLGlyphRunIterator.GetPlacementAsGlyphPlacement: TBLGlyphPlacement;
+begin
+  Result := PBLGlyphPlacement(FPlacementData)^;
+end;
+
+function TBLGlyphRunIterator.GetPlacementAsPoint: TBLPoint;
+begin
+  Result := PBLPoint(FPlacementData)^;
+end;
+
+class operator TBLGlyphRunIterator.Initialize(out ADest: TBLGlyphRunIterator);
+begin
+  FillChar(ADest, SizeOf(ADest), 0);
+end;
+
+function TBLGlyphRunIterator.Placement<T>: T;
+type
+  P = ^T;
+begin
+  Result := P(FPlacementData)^;
+end;
+
+procedure TBLGlyphRunIterator.Reset(const AGlyphRun: TBLGlyphRun);
+begin
+  FIndex := 0;
+  FSize := AGlyphRun.FSize;
+  FGlyphData := AGlyphRun.FGlyphData;
+  FPlacementData := AGlyphRun.FPlacementData;
+  FGlyphAdvance := AGlyphRun.FGlyphAdvance;
+  FPlacementAdvance := AGlyphRun.FPlacementAdvance;
+end;
+
+procedure TBLGlyphRunIterator.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLGlyphInfo }
+
+procedure TBLGlyphInfo.Reset;
+begin
+  FCluster := 0;
+  FReserved := 0;
+end;
+
+{ TBLGlyphBuffer }
+
+class operator TBLGlyphBuffer.Assign(var ADest: TBLGlyphBuffer;
+  const [ref] ASrc: TBLGlyphBuffer);
+begin
+  raise EBlend2DError.Create(TBLResult.NotPermitted);
+end;
+
+procedure TBLGlyphBuffer.Clear;
+begin
+  _BLCheck(_blGlyphBufferClear(@Self));
+end;
+
+class function TBLGlyphBuffer.ConvertSize(const ASize: NativeInt): Size_T;
+begin
+  if (ASize < 0) then
+    Result := Size_T.MaxValue
+  else
+    Result := ASize;
+end;
+
+class operator TBLGlyphBuffer.Equal(const ALeft: TBLGlyphBuffer;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class operator TBLGlyphBuffer.Finalize(var ADest: TBLGlyphBuffer);
+begin
+  _BLCheck(_blGlyphBufferDestroy(@ADest));
+end;
+
+function TBLGlyphBuffer.GetContent: PUInt32;
+begin
+  Result := PImpl(FBase.FImpl).Content;
+end;
+
+function TBLGlyphBuffer.GetFlags: TBLGlyphRunFlags;
+begin
+  Cardinal(Result) := PImpl(FBase.FImpl).Flags;
+end;
+
+function TBLGlyphBuffer.GetGlyphRun: TBLGlyphRun;
+begin
+  Result := PImpl(FBase.FImpl).GlyphRun;
+end;
+
+function TBLGlyphBuffer.GetHasGlyphs: Boolean;
+begin
+  Result := not (TBLGlyphRunFlag.Ucs4Content in GetFlags);
+end;
+
+function TBLGlyphBuffer.GetHasInvalidChars: Boolean;
+begin
+  Result := (TBLGlyphRunFlag.InvalidText in GetFlags);
+end;
+
+function TBLGlyphBuffer.GetHasInvalidFontData: Boolean;
+begin
+  Result := (TBLGlyphRunFlag.InvalidFontData in GetFlags);
+end;
+
+function TBLGlyphBuffer.GetHasText: Boolean;
+begin
+  Result := (TBLGlyphRunFlag.Ucs4Content in GetFlags);
+end;
+
+function TBLGlyphBuffer.GetHasUndefinedChars: Boolean;
+begin
+  Result := (TBLGlyphRunFlag.UndefinedGlyphs in GetFlags);
+end;
+
+function TBLGlyphBuffer.GetInfoData: PBLGlyphInfo;
+begin
+  Result := PImpl(FBase.FImpl).InfoData;
+end;
+
+function TBLGlyphBuffer.GetIsEmpty: Boolean;
+begin
+  Result := PImpl(FBase.FImpl).GlyphRun.IsEmpty;
+end;
+
+function TBLGlyphBuffer.GetPlacementData: PBLGlyphPlacement;
+begin
+  Result := PImpl(FBase.FImpl).PlacementData;
+end;
+
+function TBLGlyphBuffer.GetSize: NativeInt;
+begin
+  Result := PImpl(FBase.FImpl).Size;
+end;
+
+function TBLGlyphBuffer.HasFlag(const AFlag: TBLGlyphRunFlag): Boolean;
+begin
+  Result := (AFlag in GetFlags);
+end;
+
+class operator TBLGlyphBuffer.Initialize(out ADest: TBLGlyphBuffer);
+begin
+  _BLCheck(_blGlyphBufferInit(@ADest));
+end;
+
+class operator TBLGlyphBuffer.NotEqual(const ALeft: TBLGlyphBuffer;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+procedure TBLGlyphBuffer.Reset;
+begin
+  _BLCheck(_blGlyphBufferReset(@Self));
+end;
+
+procedure TBLGlyphBuffer.SetGlyphs(const AGlyphData: PUInt32;
+  const ASize: NativeInt);
+begin
+  _BLCheck(_blGlyphBufferSetGlyphs(@Self, AGlyphData, ASize));
+end;
+
+procedure TBLGlyphBuffer.SetGlyphsFromRecord(const AGlyphData: Pointer;
+  const ASize, AGlyphIdSize, AGlyphAdvance: NativeInt);
+begin
+  _BLCheck(_blGlyphBufferSetGlyphsFromStruct(@Self, AGlyphData, ASize,
+    AGlyphIdSize, AGlyphAdvance));
+end;
+
+procedure TBLGlyphBuffer.SetGlyphs(const AGlyphData: TArray<UInt32>);
+begin
+  _BLCheck(_blGlyphBufferSetGlyphs(@Self, Pointer(AGlyphData), Length(AGlyphData)));
+end;
+
+procedure TBLGlyphBuffer.SetLatin1Text(const AText: PAnsiChar;
+  const ALength: NativeInt);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, AText, ConvertSize(ALength), Ord(TBLTextEncoding.Latin1)));
+end;
+
+procedure TBLGlyphBuffer.SetText(const AText: AnsiString);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, Pointer(AText), Length(AText), Ord(TBLTextEncoding.Latin1)));
+end;
+
+procedure TBLGlyphBuffer.SetText(const AText: UTF8String);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, Pointer(AText), Length(AText), Ord(TBLTextEncoding.Utf8)));
+end;
+
+procedure TBLGlyphBuffer.SetText(const AText: String);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, Pointer(AText), Length(AText), Ord(TBLTextEncoding.Utf16)));
+end;
+
+procedure TBLGlyphBuffer.SetText(const ATextData: Pointer;
+  const ASize: NativeInt; const AEncoding: TBLTextEncoding);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, ATextData, ConvertSize(ASize), Ord(AEncoding)));
+end;
+
+procedure TBLGlyphBuffer.SetText(const AText: UCS4String);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, Pointer(AText), Length(AText) - 1, Ord(TBLTextEncoding.Utf32)));
+end;
+
+procedure TBLGlyphBuffer.SetUtf16Text(const AText: PWideChar;
+  const ALength: NativeInt);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, AText, ConvertSize(ALength), Ord(TBLTextEncoding.Utf16)));
+end;
+
+procedure TBLGlyphBuffer.SetUtf32Text(const AText: PUCS4Char;
+  const ALength: NativeInt);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, AText, ConvertSize(ALength), Ord(TBLTextEncoding.Utf32)));
+end;
+
+procedure TBLGlyphBuffer.SetUtf8Text(const AText: PUTF8Char;
+  const ALength: NativeInt);
+begin
+  _BLCheck(_blGlyphBufferSetText(@Self, AText, ConvertSize(ALength), Ord(TBLTextEncoding.Utf8)));
+end;
+
+{$ENDREGION 'Text'}
 
 {$REGION 'Imaging'}
 

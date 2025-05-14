@@ -876,6 +876,56 @@ function _blFormatInfoSanitize(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blFormatInfoSanitize';
 {$ENDREGION 'format.h'}
 
+{$REGION 'glyphbuffer.h'}
+function _blGlyphBufferInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferInit';
+
+function _blGlyphBufferInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferInitMove';
+
+function _blGlyphBufferDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferDestroy';
+
+function _blGlyphBufferReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferReset';
+
+function _blGlyphBufferClear(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferClear';
+
+function _blGlyphBufferGetSize(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetSize';
+
+function _blGlyphBufferGetFlags(const self: Pointer): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetFlags';
+
+function _blGlyphBufferGetGlyphRun(const self: Pointer): Pointer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetGlyphRun';
+
+function _blGlyphBufferGetContent(const self: Pointer): PUInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetContent';
+
+function _blGlyphBufferGetInfoData(const self: Pointer): Pointer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetInfoData';
+
+function _blGlyphBufferGetPlacementData(const self: Pointer): Pointer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferGetPlacementData';
+
+function _blGlyphBufferSetText(self: Pointer; const textData: Pointer; size: Size_T; encoding: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetText';
+
+function _blGlyphBufferSetGlyphs(self: Pointer; const glyphData: PUInt32; size: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetGlyphs';
+
+function _blGlyphBufferSetGlyphsFromStruct(self: Pointer; const glyphData: Pointer; size: Size_T; glyphIdSize: Size_T; glyphIdAdvance: IntPtr): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetGlyphsFromStruct';
+
+//function _blGlyphBufferSetDebugSink(self: Pointer; sink: _BLDebugMessageSinkFunc; userData: Pointer): Integer; cdecl;
+//  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetDebugSink';
+
+function _blGlyphBufferResetDebugSink(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferResetDebugSink';
+{$ENDREGION 'glyphbuffer.h'}
+
 {$REGION 'gradient.h'}
 function _blGradientInit(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blGradientInit';
@@ -1382,7 +1432,75 @@ function _blPathStrokeToSink(const self: Pointer; const range: Pointer; const st
   external _LIB_BLEND2D name _PU + 'blPathStrokeToSink';
 {$ENDREGION 'path.h'}
 
-{$ENDREGION 'pixelconverter.h'}
+{$REGION 'pattern.h'}
+function _blPatternInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternInit';
+
+function _blPatternInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternInitMove';
+
+function _blPatternInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternInitWeak';
+
+function _blPatternInitAs(self: Pointer; const image: Pointer; const area: Pointer; extendMode: Integer; const transform: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternInitAs';
+
+function _blPatternDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternDestroy';
+
+function _blPatternReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternReset';
+
+function _blPatternAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternAssignMove';
+
+function _blPatternAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternAssignWeak';
+
+function _blPatternAssignDeep(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternAssignDeep';
+
+function _blPatternCreate(self: Pointer; const image: Pointer; const area: Pointer; extendMode: Integer; const transform: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternCreate';
+
+function _blPatternGetImage(const self: Pointer; image: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternGetImage';
+
+function _blPatternSetImage(self: Pointer; const image: Pointer; const area: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternSetImage';
+
+function _blPatternResetImage(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternResetImage';
+
+function _blPatternGetArea(const self: Pointer; areaOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternGetArea';
+
+function _blPatternSetArea(self: Pointer; const area: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternSetArea';
+
+function _blPatternResetArea(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternResetArea';
+
+function _blPatternGetExtendMode(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternGetExtendMode';
+
+function _blPatternSetExtendMode(self: Pointer; extendMode: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternSetExtendMode';
+
+function _blPatternGetTransform(const self: Pointer; transformOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternGetTransform';
+
+function _blPatternGetTransformType(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternGetTransformType';
+
+function _blPatternApplyTransformOp(self: Pointer; opType: Integer; const opData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternApplyTransformOp';
+
+function _blPatternEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blPatternEquals';
+{$ENDREGION 'pattern.h'}
+
+{$REGION 'pixelconverter.h'}
 function _blPixelConverterInit(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blPixelConverterInit';
 
