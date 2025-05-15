@@ -434,6 +434,42 @@ type
   TBLTag = type UInt32;
 
 type
+  /// <summary>
+  ///  Adds functionality to `TBLTag`.
+  /// </summary>
+  _TBLTagHelper = record helper for TBLTag
+  public
+    /// <summary>
+    ///  Creates a 32-bit tag from the given `A`, `B`, `C`, and `D` values.
+    /// </summary>
+    constructor Create(const AA, AB, AC, AD: Byte); overload;
+
+    /// <summary>
+    ///  Creates a 32-bit tag from the given `A`, `B`, `C`, and `D` values.
+    /// </summary>
+    constructor Create(const AA, AB, AC, AD: AnsiChar); overload;
+
+    /// <summary>
+    ///  Creates a 32-bit tag from the given four-character string AFourCC.
+    /// </summary>
+    /// <remarks>
+    ///  The string must contain at least 4 characters. Any additional
+    ///  characters are ignored.
+    /// </remarks>
+    constructor Create(const AFourCC: AnsiString); overload;
+
+    /// <summary>
+    ///  Implicitly converts a four-character string to a 32-bit tag.
+    /// </summary>
+    /// <remarks>
+    ///  The string must contain at least 4 characters. Any additional
+    ///  characters are ignored.
+    /// </remarks>
+    class operator Implicit(const AFourCC: AnsiString): TBLTag; inline; static;
+  end;
+
+type
+  /// <summary>
   ///  Unique identifier that can be used for caching purposes.
   ///
   ///  Some objects such as TBLImage and TBLFontFace have assigned an unique
@@ -1138,6 +1174,11 @@ type
     ///  Swaps the content of this array with the `AOther` array.
     /// </summary>
     procedure Swap(var AOther: TBLArray<T>); inline;
+
+    /// <summary>
+    ///  Converts this array to a Delphi `TArray<T>`.
+    /// </summary>
+    function ToArray: TArray<T>;
 
     /// <summary>
     ///  Returns a reference to the first item.
@@ -1943,6 +1984,11 @@ type
     function LastIndexOf(const AChar: UTF8Char; const AFromIndex: NativeInt): NativeInt; overload; inline;
 
     /// <summary>
+    ///  Converts to a Delphi string
+    /// </summary>
+    function ToString: String; inline;
+
+    /// <summary>
     ///  Whether the string is empty.
     /// </summary>
     property IsEmpty: Boolean read GetIsEmpty;
@@ -2325,6 +2371,51 @@ type
   end;
 
 {$ENDREGION 'Containers'}
+
+{$REGION 'File System'}
+type
+  /// <summary>
+  ///  File read flags used by `TBLFileSystem.ReadFile`.
+  /// </summary>
+  /// <seealso cref="TBLFileSystem.ReadFile"/>
+  TBLFileReadFlag = (
+    /// <summary>
+    ///  Use memory mapping to read the content of the file.
+    ///
+    ///  The destination buffer `TBLArray<>` would be configured to use the
+    ///  memory mapped buffer instead of allocating its own.
+    /// </summary>
+    MmapEnabled = 0,
+
+    /// <summary>
+    ///  Avoid memory mapping of small files.
+    ///
+    ///  The size of small file is determined by Blend2D, however, you should
+    ///  expect it to be 16kB or 64kB depending on host operating system.
+    /// </summary>
+    MmapAvoidSmall = 1,
+
+    /// <summary>
+    ///  Do not fallback to regular read if memory mapping fails. It's worth
+    ///  noting that memory mapping would fail for files stored on filesystem
+    ///  that is not local (like a mounted network filesystem, etc...).
+    /// </summary>
+    MmapNoFallback = 3);
+
+  /// <summary>
+  ///  File read flags used by `TBLFileSystem.ReadFile`.
+  /// </summary>
+  /// <seealso cref="TBLFileSystem.ReadFile"/>
+  TBLFileReadFlags = set of TBLFileReadFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLFileReadFlags`.
+  /// </summary>
+  _TBLFileReadFlagsHelper = record helper for TBLFileReadFlags
+  public const
+    None = [];
+  end;
+{$ENDREGION 'File System'}
 
 {$REGION 'Geometries'}
 
@@ -7568,6 +7659,36 @@ type
 
 type
   /// <summary>
+  ///  Orientation.
+  /// </summary>
+  TBLOrientation = (
+    /// <summary>
+    ///  Horizontal orientation.
+    /// </summary>
+    Horizontal,
+
+    /// <summary>
+    ///  Vertical orientation.
+    /// </summary>
+    Vertical);
+
+type
+  /// <summary>
+  ///  Text direction.
+  /// </summary>
+  TBLTextDirection = (
+    /// <summary>
+    ///  Left-to-right direction.
+    /// </summary>
+    LeftToRight,
+
+    /// <summary>
+    ///  Right-to-left direction.
+    /// </summary>
+    RightToLeft);
+
+type
+  /// <summary>
   ///  Text encoding.
   /// </summary>
   TBLTextEncoding = (
@@ -7590,6 +7711,28 @@ type
     ///  LATIN1 encoding (one byte per character).
     /// </summary>
     Latin1);
+
+type
+  /// <summary>
+  ///  Text metrics.
+  /// </summary>
+  TBLTextMetrics = record
+  {$REGION 'Internal Declarations'}
+  private
+    FAdvance: TBLPoint;
+    FLeadingBearing: TBLPoint;
+    FTrailingBearing: TBLPoint;
+    FBoundingBox: TBLBox;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    property Advance: TBLPoint read FAdvance;
+    property LeadingBearing: TBLPoint read FLeadingBearing;
+    property TrailingBearing: TBLPoint read FTrailingBearing;
+    property BoundingBox: TBLBox read FBoundingBox;
+  end;
+  PBLTextMetrics = ^TBLTextMetrics;
 
 { ============================================================================
    [Text - Glyph Containers & Processing]
@@ -8146,6 +8289,222 @@ type
 
 type
   /// <summary>
+  ///  Flags used by `TBLFontFace`
+  /// </summary>
+  /// <seealso cref="TBLFontFace"/>
+  TBLFontFaceFlag = (
+    /// <summary>
+    ///  Font uses typographic family and subfamily names.
+    /// </summary>
+    TypographicNames = 0,
+
+    /// <summary>
+    ///  Font uses typographic metrics.
+    /// </summary>
+    TypographicMetrics = 1,
+
+    /// <summary>
+    ///  Character to glyph mapping is available.
+    /// </summary>
+    CharToGlyphMapping = 2,
+
+    /// <summary>
+    ///  Horizontal glyph metrics (advances, side bearings) is available.
+    /// </summary>
+    HorizontalMetrics = 4,
+
+    /// <summary>
+    ///  Vertical glyph metrics (advances, side bearings) is available.
+    /// </summary>
+    VerticalMetrics = 5,
+
+    /// <summary>
+    ///  Legacy horizontal kerning feature ('kern' table with horizontal kerning data).
+    /// </summary>
+    HorizontalKerning = 6,
+
+    /// <summary>
+    ///  Legacy vertical kerning feature ('kern' table with vertical kerning data).
+    /// </summary>
+    VerticalKerning = 7,
+
+    /// <summary>
+    ///  OpenType features (GDEF, GPOS, GSUB) are available.
+    /// </summary>
+    OpenTypeFeatures = 8,
+
+    /// <summary>
+    ///  Panose classification is available.
+    /// </summary>
+    PanoseData = 9,
+
+    /// <summary>
+    ///  Unicode coverage information is available.
+    /// </summary>
+    UnicodeCoverage = 10,
+
+    /// <summary>
+    ///  Baseline for font at `Y` equals 0.
+    /// </summary>
+    BaselineYEquals0 = 12,
+
+    /// <summary>
+    ///  Left sidebearing point at `X = 0` (TT only).
+    /// </summary>
+    LsbPointXEquals0 = 13,
+
+    /// <summary>
+    ///  Unicode variation sequences feature is available.
+    /// </summary>
+    VariationSequences = 28,
+
+    /// <summary>
+    ///  OpenType Font Variations feature is available.
+    /// </summary>
+    OpenTypeVariations = 29,
+
+    /// <summary>
+    ///  This is a symbol font.
+    /// </summary>
+    SymbolFont = 30,
+
+    /// <summary>
+    ///  This is a last resort font.
+    /// </summary>
+    LastResortFont = 31);
+
+  /// <summary>
+  ///  Flags used by `TBLFontFace`
+  /// </summary>
+  /// <seealso cref="TBLFontFace"/>
+  TBLFontFaceFlags = set of TBLFontFaceFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLFontFaceFlags`.
+  /// </summary>
+  _TBLFontFaceFlagsHelper = record helper for TBLFontFaceFlags
+  public const
+    None = [];
+  end;
+
+  /// <summary>
+  ///  Diagnostic flags offered by `TBLFontFace`.
+  /// </summary>
+  /// <seealso cref="TBLFontFace"/>
+  TBLFontFaceDiagFlag = (
+    /// <summary>
+    ///  Wrong data in 'name' table.
+    /// </summary>
+    WrongNameData = 0,
+
+    /// <summary>
+    ///  Fixed data read from 'name' table and possibly fixed font
+    ///  family/subfamily name.
+    /// </summary>
+    FixedNameData = 1,
+
+    /// <summary>
+    ///  Wrong data in 'kern' table [kerning disabled].
+    /// </summary>
+    WrongKernData = 2,
+
+    /// <summary>
+    ///  Fixed data read from 'kern' table so it can be used.
+    /// </summary>
+    FixedKernData = 3,
+
+    /// <summary>
+    ///  Wrong data in 'cmap' table.
+    /// </summary>
+    WrongCmapData = 4,
+
+    /// <summary>
+    ///  Wrong format in 'cmap' (sub)table.
+    /// </summary>
+    WrongCmapFormat = 5);
+
+  /// <summary>
+  ///  Diagnostic flags offered by `TBLFontFace`.
+  /// </summary>
+  /// <seealso cref="TBLFontFace"/>
+  TBLFontFaceDiagFlags = set of TBLFontFaceDiagFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLFontFaceDiagFlags`.
+  /// </summary>
+  _TBLFontFaceDiagFlagsHelper = record helper for TBLFontFaceDiagFlags
+  public const
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Format of an outline stored in a font.
+  /// </summary>
+  TBLFontOutlineType = (
+    /// <summary>
+    ///  None.
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///  Truetype outlines.
+    /// </summary>
+    Truetype,
+
+    /// <summary>
+    ///  OpenType (CFF) outlines.
+    /// </summary>
+    Cff,
+
+    /// <summary>
+    ///  OpenType (CFF2) outlines with font variations support.
+    /// </summary>
+    Cff2);
+
+type
+  /// <summary>
+  ///  Type of a font or font face, see `TBLFontFace`.
+  /// </summary>
+  /// <seealso cref="TBLFontFace"/>
+  TBLFontFaceType = (
+    /// <summary>
+    ///  None or unknown font type.
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///  TrueType/OpenType font type (.ttf/.otf files and font collections).
+    /// </summary>
+    OpenType);
+
+type
+  /// <summary>
+  ///  Flags used by `TBLFontData'.
+  /// </summary>
+  /// <seealso cref="TBLFontData"/>
+  TBLFontDataFlag = (
+    /// <summary>
+    ///< Font data references a font-collection.
+    /// </summary>
+    Collection = 0);
+
+  /// <summary>
+  ///  Flags used by `TBLFontData'.
+  /// </summary>
+  /// <seealso cref="TBLFontData"/>
+  TBLFontDataFlags = set of TBLFontDataFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLFontDataFlags`.
+  /// </summary>
+  _TBLFontDataFlagsHelper = record helper for TBLFontDataFlags
+  public const
+    None = [];
+  end;
+
+type
+  /// <summary>
   ///  Font stretch.
   /// </summary>
   TBLFontStretch = (
@@ -8273,6 +8632,991 @@ type
     ///  Extra black weight (950).
     /// </summary>
     ExtraBlack = 950);
+
+type
+  /// <summary>
+  ///  A read only data that represents a font table or its sub-table.
+  /// </summary>
+  TBLFontTable = record
+  {$REGION 'Internal Declarations'}
+  private
+    FData: Pointer;
+    FSize: Size_T;
+    function GetSize: NativeInt; inline;
+    function GetIsEmpty: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; overload; inline;
+    procedure Reset(const AData: Pointer; const ASize: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Pointer to the beginning of the data.
+    /// </summary>
+    property Data: Pointer read FData;
+
+    /// <summary>
+    ///  Size of `Data` in bytes.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  Whether the table is empty (has no content).
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+  end;
+  PBLFontTable = ^TBLFontTable;
+
+type
+  /// <summary>
+  ///  Font data.
+  /// </summary>
+  TBLFontData = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Virt: Pointer;
+      FaceType: UInt8;
+      FaceCount: Int32;
+      Flags: UInt32;
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsValid: Boolean; inline;
+    function GetIsEmpty: Boolean; inline;
+    function GetFaceType: TBLFontFaceType; inline;
+    function GetFaceCount: Integer; inline;
+    function GetFlags: TBLFontDataFlags; inline;
+    function GetIsCollection: Boolean; inline;
+  private
+    class procedure DestroyDynArray(impl, externalData, userData: Pointer); cdecl; static;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default initialized font data.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLFontData);
+
+    /// <summary>
+    ///  Destroys the font data.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLFontData);
+
+    /// <summary>
+    ///  Copy constructor makes a weak copy of the underlying representation of
+    ///  the `ASrc` font data.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLFontData; const [ref] ASrc: TBLFontData); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty font data).
+    /// </summary>
+    class operator Equal(const ALeft: TBLFontData; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font data instances are equal (have the same contents).
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLFontData): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty font data).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLFontData; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font data instances are not equal (do not have the
+    ///  same contents).
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLFontData): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether this and `AOther` font data are equal.
+    /// </summary>
+    function Equals(const AOther: TBLFontData): Boolean; inline;
+
+    procedure Reset; inline;
+    procedure Swap(var AOther: TBLFontData); inline;
+
+    /// <summary>
+    ///  Creates a `TBLFontData` from a file specified by the given `AFilename`.
+    /// </summary>
+    /// <remarks>
+    ///  The `AReadFlags` argument allows to specify flags that will be passed
+    ///  to `TBLFileSystem.ReadFile` to read the content of the file. It's
+    ///  possible to use memory mapping to get its content, which is the
+    ///  recommended way for reading system fonts. The best combination is to
+    ///  use `TBLFileReadFlag.MmapEnabled` flag combined with
+    ///  `TBLFileReadFlag.MmapAvoidSmall`. This combination means to try to use
+    ///  memory mapping only when the size of the font is greater than a minimum
+    ///  value (determined by Blend2D), and would fallback to a regular
+    ///  open/read in case the memory mapping is not possible or failed for some
+    ///  other reason. Please note that not all files can be memory mapped so
+    ///  `TBLFileReadFlag.MmapNoFallback`flag is not recommended.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromFile(const AFilename: String;
+      const AReadFlags: TBLFileReadFlags = []); inline;
+
+    /// <summary>
+    ///  Creates a `TBLFontData` from the given `AData`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromData(const AData: TBytes); overload; inline;
+
+    /// <summary>
+    ///  Creates a `TBLFontData` from the given `AData` stored in
+    ///  `TBLArray<Byte>`.
+    ///
+    ///  The given `AData` would be weak copied on success so the given array
+    ///  can be safely destroyed after the function returns.
+    /// </summary>
+    /// <remarks>
+    ///  The weak copy of the passed `AData` is internal and there is no API to
+    ///  access it after the function returns. The reason for making it internal
+    ///  is that multiple implementations of `TBLFontData` may exist and some
+    ///  can only store data at table level, so Blend2D doesn't expose the
+    ///  detail about how the data is stored.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromData(const AData: TBLArray<Byte>); overload; inline;
+
+    /// <summary>
+    ///  Creates `TBLFontData` from the given `AData` of the given `ASize`.
+    /// </summary>
+    /// <remarks>
+    ///  Optionally an `ADestroyFunc` can be used as a notifier that will be
+    ///  called when the data is no longer needed. Destroy func will be called
+    ///  with `AUserData`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromData(const AData: Pointer; const ASize: NativeInt;
+      const ADestroyFunc: TBLDestroyExternalDataFunc = nil;
+      const AUserData: Pointer = nil); overload; inline;
+
+    /// <summary>
+    ///  Populates `ADst` array with all table tags provided by font face at the
+    ///  given `AFaceIndex`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure GetTableTags(const AFaceIndex: Integer;
+      const ADst: TBLArray<TBLTag>); overload; inline;
+
+    /// <summary>
+    ///  Returns an array with all table tags provided by font face at the
+    ///  given `AFaceIndex`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function GetTableTags(const AFaceIndex: Integer): TArray<TBLTag>; overload; inline;
+
+    function GetTable(const AFaceIndex: Integer; const ATag: TBLTag): TBLFontTable; inline;
+    function GetTables(const AFaceIndex: Integer; const ATags: TArray<TBLTag>): TArray<TBLFontTable>; inline;
+
+    /// <summary>
+    ///  Whether the font data is not a built-in null instance.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  Whether the font data is empty, which is the same as `not IsValid`.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  Type of font face that this data describes.
+    ///
+    ///  It doesn't matter if the content is a single font or a collection. In
+    ///  any case the `FaceType` would always return the type of the font face
+    ///  that will be created by `TBLFontFace.CreateFromData`.
+    /// </summary>
+    /// <seealso cref="TBLFontFace.CreateFromData"/>
+    property FaceType: TBLFontFaceType read GetFaceType;
+
+    /// <summary>
+    ///  The number of faces of this font data.
+    ///
+    ///  If the data is not initialized the result would be always zero. If the
+    ///  data is initialized to a single font it would be 1, and if the data is
+    ///  initialized to a font collection then the return would correspond to
+    ///  the number of font faces within that collection.
+    /// </summary>
+    /// <remarks>
+    ///  You should not use `FaceCount` to check whether the font is a
+    ///  collection as it's possible to have a font-collection with just a
+    ///  single font. Using `IsCollection` is more reliable and would always
+    ///  return the right value.
+    /// </remarks>
+    /// <seealso cref="IsCollection"/>
+    property FaceCount: Integer read GetFaceCount;
+
+    /// <summary>
+    ///  Returns font data flags.
+    /// </summary>
+    property Flags: TBLFontDataFlags read GetFlags;
+
+    /// <summary>
+    ///  Whether this font data is a font-collection.
+    /// </summary>
+    property IsCollection: Boolean read GetIsCollection;
+  end;
+
+type
+  /// <summary>
+  ///  Information of `TBLFontFace`.
+  /// </summary>
+  /// <seealso cref="TBLFontFace"/>
+  TBLFontFaceInfo = record
+  {$REGION 'Internal Declarations'}
+  private
+    FFaceType: UInt8;
+    FOutlineType: UInt8;
+    FReserved8: array [0..1] of UInt8;
+    FGlyphCount: Int32;
+    FRevision: UInt32;
+    FFaceIndex: Int32;
+    FFaceFlags: UInt32;
+    FDiagFlags: UInt32;
+    FReserved: array [0..1] of UInt32;
+    function GetFaceType: TBLFontFaceType; inline;
+    function GetOutlineType: TBLFontOutlineType; inline;
+    function GetFaceFlags: TBLFontFaceFlags; inline;
+    function GetDiagFlags: TBLFontFaceDiagFlags; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Font face type.
+    /// </summary>
+    property FaceType: TBLFontFaceType read GetFaceType;
+
+    /// <summary>
+    ///  Type of outlines used by the font face.
+    /// </summary>
+    property OutlineType: TBLFontOutlineType read GetOutlineType;
+
+    /// <summary>
+    ///  Number of glyphs provided by this font face.
+    /// </summary>
+    property GlyphCount: Integer read FGlyphCount;
+
+    /// <summary>
+    ///  Revision (read from 'head' table, represented as 16.16 fixed point).
+    /// </summary>
+    property Revision: Cardinal read FRevision;
+
+    /// <summary>
+    ///  Face face index in a TTF/OTF collection or zero if not part of a collection.
+    /// </summary>
+    property FaceIndex: Integer read FFaceIndex;
+
+    /// <summary>
+    ///  Font face flags.
+    /// </summary>
+    property FaceFlags: TBLFontFaceFlags read GetFaceFlags;
+
+    /// <summary>
+    ///  Font face diagnostic flags.
+    /// </summary>
+    property DiagFlags: TBLFontFaceDiagFlags read GetDiagFlags;
+  end;
+  PBLFontFaceInfo = ^TBLFontFaceInfo;
+
+type
+  /// <summary>
+  ///  Design metrics of a font.
+  ///
+  ///  Design metrics is information that `TBLFontFace` collected directly from
+  ///  the font data. It means that all fields are measured in font design units.
+  ///
+  ///  When a new `TBLFont` instance is created a scaled metrics
+  ///  `TBLFontMetrics` is automatically calculated from `TBLFontDesignMetrics`
+  ///  including other members like transformation, etc...
+  /// </summary>
+  /// <seealso cref="TBLFontFace"/>
+  /// <seealso cref="TBLFont"/>
+  /// <seealso cref="TBLFontMetrics"/>
+  TBLFontDesignMetrics = record
+  {$REGION 'Internal Declarations'}
+  private
+    FUnitsPerEm: Integer;
+    FLowestPpEm: Integer;
+    FLineGap: Integer;
+    FXHeight: Integer;
+    FCapHeight: Integer;
+    FAscent: Integer;
+    FVAscent: Integer;
+    FDescent: Integer;
+    FVDescent: Integer;
+    FHMinLsb: Integer;
+    FVMinLsb: Integer;
+    FHMinTsb: Integer;
+    FVMinTsb: Integer;
+    FHMaxAdvance: Integer;
+    FVMaxAdvance: Integer;
+    FGlyphBoundingBox: TBLBoxI;
+    FUnderlinePosition: Integer;
+    FUnderlineThickness: Integer;
+    FStrikethroughPosition: Integer;
+    FStrikethroughThickness: Integer;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Units per EM square.
+    /// </summary>
+    property UnitsPerEm: Integer read FUnitsPerEm;
+
+    /// <summary>
+    ///  Lowest readable size in pixels.
+    /// </summary>
+    property LowestPpEm: Integer read FLowestPpEm;
+
+    /// <summary>
+    ///  Line gap.
+    /// </summary>
+    property LineGap: Integer read FLineGap;
+
+    /// <summary>
+    ///  Distance between the baseline and the mean line of lower-case letters.
+    /// </summary>
+    property XHeight: Integer read FXHeight;
+
+    /// <summary>
+    ///  Maximum height of a capital letter above the baseline.
+    /// </summary>
+    property CapHeight: Integer read FCapHeight;
+
+    /// <summary>
+    ///  Ascent (horizontal layout).
+    /// </summary>
+    property Ascent: Integer read FAscent;
+
+    /// <summary>
+    ///  Ascent (vertical layout).
+    /// </summary>
+    property VAscent: Integer read FVAscent;
+
+    /// <summary>
+    ///  Descent (horizontal layout).
+    /// </summary>
+    property Descent: Integer read FDescent;
+
+    /// <summary>
+    ///  Descent (vertical layout).
+    /// </summary>
+    property VDescent: Integer read FVDescent;
+
+    /// <summary>
+    ///  Minimum leading-side bearing (horizontal layout).
+    /// </summary>
+    property HMinLsb: Integer read FHMinLsb;
+
+    /// <summary>
+    ///  Minimum leading-side bearing (vertical layout).
+    /// </summary>
+    property VMinLsb: Integer read FVMinLsb;
+
+    /// <summary>
+    ///  Minimum trailing-side bearing (horizontal layout).
+    /// </summary>
+    property HMinTsb: Integer read FHMinTsb;
+
+    /// <summary>
+    ///  Minimum trailing-side bearing (vertical layout).
+    /// </summary>
+    property VMinTsb: Integer read FVMinTsb;
+
+    /// <summary>
+    ///  Maximum advance (horizontal layout).
+    /// </summary>
+    property HMaxAdvance: Integer read FHMaxAdvance;
+
+    /// <summary>
+    ///  Maximum advance (vertical layout).
+    /// </summary>
+    property VMaxAdvance: Integer read FVMaxAdvance;
+
+    /// <summary>
+    ///  Aggregated bounding box of all glyphs in the font.
+    /// </summary>
+    /// <remarks>
+    ///  This value is reported by the font data so it's not granted to be true.
+    /// <remarks>
+    property GlyphBoundingBox: TBLBoxI read FGlyphBoundingBox;
+
+    /// <summary>
+    ///  Text underline position.
+    /// </summary>
+    property UnderlinePosition: Integer read FUnderlinePosition;
+
+    /// <summary>
+    ///  Text underline thickness.
+    /// </summary>
+    property UnderlineThickness: Integer read FUnderlineThickness;
+
+    /// <summary>
+    ///  Text strikethrough position.
+    /// </summary>
+    property StrikethroughPosition: Integer read FStrikethroughPosition;
+
+    /// <summary>
+    ///  Text strikethrough thickness.
+    /// </summary>
+    property StrikethroughThickness: Integer read FStrikethroughThickness;
+  end;
+  PBLFontDesignMetrics = ^TBLFontDesignMetrics;
+
+type
+  /// <summary>
+  ///  Font unicode coverage.
+  ///
+  ///  Unicode coverage describes which unicode characters are provided by a
+  ///  font. Blend2D accesses this information by reading "OS/2" table, if
+  ///  available.
+  /// </summary>
+  TBLFontUnicodeCoverage = record
+  {$REGION 'Internal Declarations'}
+  private
+    FData: array [0..3] of UInt32;
+    function GetIsEmpty: Boolean; inline;
+    procedure SetBitValue(const AIndex: Integer; const AValue: Boolean); inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    class operator Equal(const ALeft, ARight: TBLFontUnicodeCoverage): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLFontUnicodeCoverage): Boolean; inline; static;
+
+    procedure Reset; inline;
+    function HasBit(const AIndex: Integer): Boolean; inline;
+    procedure SetBit(const AIndex: Integer); inline;
+    procedure ClearBit(const AIndex: Integer); inline;
+    function Equals(const AOther: TBLFontUnicodeCoverage): Boolean; inline;
+
+    property IsEmpty: Boolean read GetIsEmpty;
+    property Bits[const AIndex: Integer]: Boolean read HasBit write SetBitValue;
+  end;
+  PBLFontUnicodeCoverage = ^TBLFontUnicodeCoverage;
+
+type
+  /// <summary>
+  ///  Font PANOSE classification.
+  /// </summary>
+  TBLFontPanose = record
+  public type
+    TText = record
+    public
+      FamilyKind: Byte;
+      SerifStyle: Byte;
+      Weight: Byte;
+      Proportion: Byte;
+      Contrast: Byte;
+      StrokeVariation: Byte;
+      ArmStyle: Byte;
+      Letterform: Byte;
+      Midline: Byte;
+      XHeight: Byte;
+    end;
+  public type
+    TScript = record
+    public
+      FamilyKind: Byte;
+      ToolKind: Byte;
+      Weight: Byte;
+      Spacing: Byte;
+      AspectRatio: Byte;
+      Contrast: Byte;
+      Topology: Byte;
+      Form: Byte;
+      Finals: Byte;
+      XAscent: Byte;
+    end;
+  public type
+    TDecorative = record
+    public
+      FamilyKind: Byte;
+      DecorativeClass: Byte;
+      Weight: Byte;
+      Aspect: Byte;
+      Contrast: Byte;
+      SerifVariant: Byte;
+      Treatment: Byte;
+      Lining: Byte;
+      Topology: Byte;
+      CharacterRange: Byte;
+    end;
+  public type
+    TSymbol = record
+    public
+      FamilyKind: Byte;
+      SymbolKind: Byte;
+      Weight: Byte;
+      Spacing: Byte;
+      AspectRatioAndContrast: Byte;
+      AspectRatio94: Byte;
+      AspectRatio119: Byte;
+      AspectRatio157: Byte;
+      AspectRatio163: Byte;
+      AspectRatio211: Byte;
+    end;
+  {$REGION 'Internal Declarations'}
+  private
+    FData: array [0..9] of Byte;
+    function GetFamilyKind: Byte; inline;
+    function GetText: TText; inline;
+    function GetScript: TScript; inline;
+    function GetDecorative: TDecorative; inline;
+    function GetSymbol: TSymbol; inline;
+    function GetIsEmpty: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    property FamilyKind: Byte read GetFamilyKind;
+    property Text: TText read GetText;
+    property Script: TScript read GetScript;
+    property Decorative: TDecorative read GetDecorative;
+    property Symbol: TSymbol read GetSymbol;
+    property IsEmpty: Boolean read GetIsEmpty;
+  end;
+  PBLFontPanose = ^TBLFontPanose;
+
+type
+  /// <summary>
+  ///  Font face.
+  /// </summary>
+  TBLFontFace = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Virt: Pointer;
+      Weight: UInt16;
+      Stretch: UInt8;
+      Style: UInt8;
+      FaceInfo: TBLFontFaceInfo;
+      UniqueId: TBLUniqueId;
+      Data: TBLObjectCore;
+      FullName: TBLObjectCore;
+      FamilyName: TBLObjectCore;
+      SubfamilyName: TBLObjectCore;
+      PostscriptName: TBLObjectCore;
+      DesignMetrics: TBLFontDesignMetrics;
+      UnicodeCoverage: TBLFontUnicodeCoverage;
+      Panose: TBLFontPanose;
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsValid: Boolean; inline;
+    function GetIsEmpty: Boolean; inline;
+    function GetWeight: TBLFontWeight; inline;
+    function GetStretch: TBLFontStretch; inline;
+    function GetStyle: TBLFontStyle; inline;
+    function GetFaceInfo: PBLFontFaceInfo; inline;
+    function GetFaceType: TBLFontFaceType; inline;
+    function GetOutlineType: TBLFontOutlineType; inline;
+    function GetGlyphCount: Integer; inline;
+    function GetFaceIndex: Integer; inline;
+    function GetFaceFlags: TBLFontFaceFlags; inline;
+    function GetHasTypographicNames: Boolean; inline;
+    function GetHasTypographicMetrics: Boolean; inline;
+    function GetHasCharToGlyphMapping: Boolean; inline;
+    function GetHasHorizontalMetrics: Boolean; inline;
+    function GetHasVerticalMetrics: Boolean; inline;
+    function GetHasHorizontalKerning: Boolean; inline;
+    function GetHasVerticalKerning: Boolean; inline;
+    function GetHasOpenTypeFeatures: Boolean; inline;
+    function GetHasPanoseData: Boolean; inline;
+    function GetHasUnicodeCoverage: Boolean; inline;
+    function GetHasBaselineYAt0: Boolean; inline;
+    function GetHasLsbPointXAt0: Boolean; inline;
+    function GetHasVariationSequences: Boolean; inline;
+    function GetHasOpenTypeVariations: Boolean; inline;
+    function GetIsSymbolFont: Boolean; inline;
+    function GetIsLastResortFont: Boolean; inline;
+    function GetDiagFlags: TBLFontFaceDiagFlags; inline;
+    function GetUniqueId: TBLUniqueId; inline;
+    function GetData: TBLFontData; inline;
+    function GetFullName: TBLString; inline;
+    function GetFamilyName: TBLString; inline;
+    function GetSubfamilyName: TBLString; inline;
+    function GetPostScriptName: TBLString; inline;
+    function GetDesignMetrics: PBLFontDesignMetrics; inline;
+    function GetUnitsPerEm: Integer; inline;
+    function GetPanose: PBLFontPanose; inline;
+    function GetUnicodeCoverage: PBLFontUnicodeCoverage; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default initialized font face.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLFontFace);
+
+    /// <summary>
+    ///  Destroys the font face.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLFontFace);
+
+    /// <summary>
+    ///  Copy constructor makes a weak copy of the underlying representation of
+    ///  the `ASrc` font face.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLFontFace; const [ref] ASrc: TBLFontFace); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil` (null font face).
+    /// </summary>
+    class operator Equal(const ALeft: TBLFontFace; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font faces are equal (have the same contents).
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLFontFace): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (null font face).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLFontFace; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font faces are not equal (do not have the same contents).
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLFontFace): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether this and `AOther` font faces are equal.
+    /// </summary>
+    function Equals(const AOther: TBLFontFace): Boolean; inline;
+
+    procedure Reset; inline;
+    procedure Swap(var AOther: TBLFontFace); inline;
+
+    /// <summary>
+    ///  Creates a new `TBLFontFace` from a file specified by `AFilename`.
+    ///
+    ///  This is a utility method that first creates a `TBLFontData` and then
+    ///  calls `MakeFromData(FontData, 0)`.
+    ///  See `TBLFontData.MakeFromFile` for more details, especially the use of
+    ///  `AReadFlags` is important for system fonts.
+    /// </summary>
+    /// <remarks>
+    ///  This method offers a simplified creation of `TBLFontFace` directly from
+    ///  a file, but doesn't provide as much flexibility as `MakeFromData` as it
+    ///  allows to specify a `AFaceIndex`, which can be used to load multiple
+    ///  font faces from a TrueType/OpenType collection. The use of
+    ///  `MakeFromData` is recommended for any serious font handling.
+    /// </remarks>
+    /// <seealso cref="MakeFromData"/>
+    /// <seealso cref="TBLFontData"/>
+    /// <seealso cref="TBLFontData.MakeFromFile"/>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromFile(const AFilename: String;
+      const AReadFlags: TBLFileReadFlags = []); inline;
+
+    /// <summary>
+    ///  Creates a new `TBLFontFace` from `TBLFontData` at the given `AFaceIndex`.
+    ///
+    ///  On success the existing `TBLFontFace` is completely replaced by a new
+    ///  one, on failure the existing `TBLFontFace` is kept as is.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromData(const AFontData: TBLFontData;
+      const AFaceIndex: Integer); inline;
+
+    /// <summary>
+    ///  Tests whether the font face has a given `AFlag` set.
+    /// </summary>
+    function HasFaceFlag(const AFlag: TBLFontFaceFlag): Boolean; inline;
+
+    /// <summary>
+    ///  Calculates the character coverage of this `TBLFontFace`.
+    ///
+    ///  Each unicode character is represented by a single bit in the given BitSet.
+    /// </summary>
+//    procedure GetCharacterCoverage(const AOut: TBLBitSet); inline; // TBLBitSet is going to be deprecated?
+
+    /// <summary>
+    ///  Tests whether the font face provides the given OpenType `AScriptTag`.
+    /// </summary>
+    function HasScriptTag(const AScriptTag: TBLTag): Boolean; inline;
+
+    /// <summary>
+    ///  Tests whether the font face provides the given OpenType `AFeatureTag`.
+    /// </summary>
+    function HasFeatureTag(const AFeatureTag: TBLTag): Boolean; inline;
+
+    /// <summary>
+    ///  Tests whether the font face provides the given OpenType `AVariationTag`.
+    /// </summary>
+    function HasVariationTag(const AVariationTag: TBLTag): Boolean; inline;
+
+    /// <summary>
+    ///  Retrieves OpenType script tags provided by this `TBLFontFace`.
+    ///
+    ///  Each script tag is represented by 4 characters encoded in `TBLTag`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function GetScriptTags: TArray<TBLTag>; overload; inline;
+
+    /// <summary>
+    ///  Retrieves OpenType script tags provided by this `TBLFontFace`.
+    ///
+    ///  Each script tag is represented by 4 characters encoded in `TBLTag`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure GetScriptTags(const AOut: TBLArray<TBLTag>); overload; inline;
+
+    /// <summary>
+    ///  Retrieves OpenType feature tags provided by this `TBLFontFace`.
+    ///
+    ///  Each feature tag is represented by 4 characters encoded in `TBLTag`.
+    ///
+    ///  Feature tag registry:
+    ///   - <see href="https://docs.microsoft.com/en-us/typography/opentype/spec/featurelist">Microsoft</see>.
+    /// </summary>
+    function GetFeatureTags: TArray<TBLTag>; overload; inline;
+
+    /// <summary>
+    ///  Retrieves OpenType feature tags provided by this `TBLFontFace`.
+    ///
+    ///  Each feature tag is represented by 4 characters encoded in `TBLTag`.
+    ///
+    ///  Feature tag registry:
+    ///   - <see href="https://docs.microsoft.com/en-us/typography/opentype/spec/featurelist">Microsoft</see>.
+    /// </summary>
+    procedure GetFeatureTags(const AOut: TBLArray<TBLTag>); overload; inline;
+
+    /// <summary>
+    ///  Retrieves OpenType variation tags provided by this `TBLFontFace`.
+    ///
+    ///  Each variation tag is represented by 4 characters encoded in `TBLTag`.
+    ///
+    ///  Variation tag registry:
+    ///   - <see href="https://docs.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg">Microsoft</see>.
+    /// </summary>
+    function GetVariationTags: TArray<TBLTag>; overload; inline;
+
+    /// <summary>
+    ///  Retrieves OpenType variation tags provided by this `TBLFontFace`.
+    ///
+    ///  Each variation tag is represented by 4 characters encoded in `TBLTag`.
+    ///
+    ///  Variation tag registry:
+    ///   - <see href="https://docs.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg">Microsoft</see>.
+    /// </summary>
+    procedure GetVariationTags(const AOut: TBLArray<TBLTag>); overload; inline;
+
+    /// <summary>
+    ///  Whether the font face is a valid instance.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  Tests whether the font face is empty, which is the same as `not IsValid`.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  Font weight (returns default weight in case this is a variable font).
+    /// </summary>
+    property Weight: TBLFontWeight read GetWeight;
+
+    /// <summary>
+    ///  Font stretch (returns default stretch in case this is a variable font).
+    /// </summary>
+    property Stretch: TBLFontStretch read GetStretch;
+
+    /// <summary>
+    ///  Returns font style.
+    /// </summary>
+    property Style: TBLFontStyle read GetStyle;
+
+    /// <summary>
+    ///  Font face information.
+    /// </summary>
+    property FaceInfo: PBLFontFaceInfo read GetFaceInfo;
+
+    /// <summary>
+    ///  The font face type.
+    /// </summary>
+    property FaceType: TBLFontFaceType read GetFaceType;
+
+    /// <summary>
+    ///  The outline type.
+    /// </summary>
+    property OutlineType: TBLFontOutlineType read GetOutlineType;
+
+    /// <summary>
+    ///  The number of glyphs this font face provides.
+    /// </summary>
+    property GlyphCount: Integer read GetGlyphCount;
+
+    /// <summary>
+    ///  A zero-based index of this font face.
+    /// </summary>
+    /// <remarks>
+    ///  Face index does only make sense if this face is part of a TrueType or
+    ///  OpenType font collection. In that case the returned value would be the
+    ///  index of this face in that collection. If the face is not part of a
+    ///  collection then the returned value would always be zero.
+    /// </remarks>
+    property FaceIndex: Integer read GetFaceIndex;
+
+    /// <summary>
+    ///  Font face flags.
+    /// </summary>
+    property FaceFlags: TBLFontFaceFlags read GetFaceFlags;
+
+    /// <summary>
+    ///  Whether the font face uses typographic family and subfamily names.
+    /// </summary>
+    property HasTypographicNames: Boolean read GetHasTypographicNames;
+
+    /// <summary>
+    ///  Whether the font face uses typographic metrics.
+    /// </summary>
+    property HasTypographicMetrics: Boolean read GetHasTypographicMetrics;
+
+    /// <summary>
+    ///  Whether the font face provides character to glyph mapping.
+    /// </summary>
+    property HasCharToGlyphMapping: Boolean read GetHasCharToGlyphMapping;
+
+    /// <summary>
+    ///  Whether the font face has horizontal glyph metrics (advances, side bearings).
+    /// </summary>
+    property HasHorizontalMetrics: Boolean read GetHasHorizontalMetrics;
+
+    /// <summary>
+    ///  Whether the font face has vertical glyph metrics (advances, side bearings).
+    /// </summary>
+    property HasVerticalMetrics: Boolean read GetHasVerticalMetrics;
+
+    /// <summary>
+    ///  Whether the font face has a legacy horizontal kerning feature ('kern'
+    ///  table with horizontal kerning data).
+    /// </summary>
+    property HasHorizontalKerning: Boolean read GetHasHorizontalKerning;
+
+    /// <summary>
+    ///  Whether the font face has a legacy vertical kerning feature ('kern'
+    ///  table with vertical kerning data).
+    /// </summary>
+    property HasVerticalKerning: Boolean read GetHasVerticalKerning;
+
+    /// <summary>
+    ///  Whether the font face has OpenType features (GDEF, GPOS, GSUB).
+    /// </summary>
+    property HasOpenTypeFeatures: Boolean read GetHasOpenTypeFeatures;
+
+    /// <summary>
+    ///  Whether the font face has panose classification.
+    /// </summary>
+    property HasPanoseData: Boolean read GetHasPanoseData;
+
+    /// <summary>
+    ///  Whether the font face has unicode coverage information.
+    /// </summary>
+    property HasUnicodeCoverage: Boolean read GetHasUnicodeCoverage;
+
+    /// <summary>
+    ///  Whether the font face's baseline equals 0.
+    /// </summary>
+    property HasBaselineYAt0: Boolean read GetHasBaselineYAt0;
+
+    /// <summary>
+    ///  Whether the font face's left sidebearing point at `X` equals 0.
+    /// </summary>
+    property HasLsbPointXAt0: Boolean read GetHasLsbPointXAt0;
+
+    /// <summary>
+    ///  Whether the font face has unicode variation sequences feature.
+    /// </summary>
+    property HasVariationSequences: Boolean read GetHasVariationSequences;
+
+    /// <summary>
+    ///  Whether the font face has OpenType Font Variations feature.
+    /// </summary>
+    property HasOpenTypeVariations: Boolean read GetHasOpenTypeVariations;
+
+    /// <summary>
+    ///  Whether this is a symbol font.
+    /// </summary>
+    property IsSymbolFont: Boolean read GetIsSymbolFont;
+
+    /// <summary>
+    ///  Whether this is a last resort font.
+    /// </summary>
+    property IsLastResortFont: Boolean read GetIsLastResortFont;
+
+    /// <summary>
+    ///  Font face diagnostics flags.
+    /// </summary>
+    property DiagFlags: TBLFontFaceDiagFlags read GetDiagFlags;
+
+    /// <summary>
+    ///  A unique identifier describing this `TBLFontFace`.
+    /// </summary>
+    property UniqueId: TBLUniqueId read GetUniqueId;
+
+    /// <summary>
+    ///  `TBLFontData` associated with this font face.
+    /// </summary>
+    property Data: TBLFontData read GetData;
+
+    /// <summary>
+    ///  Full name of the font.
+    /// </summary>
+    property FullName: TBLString read GetFullName;
+
+    /// <summary>
+    ///  Family name of the font.
+    /// </summary>
+    property FamilyName: TBLString read GetFamilyName;
+
+    /// <summary>
+    ///  Subfamily name of the font.
+    /// </summary>
+    property SubfamilyName: TBLString read GetSubfamilyName;
+
+    /// <summary>
+    ///  PostScript name of the font.
+    /// </summary>
+    property PostScriptName: TBLString read GetPostScriptName;
+
+    /// <summary>
+    ///  Design metrics of this `TBLFontFace`.
+    /// </summary>
+    property DesignMetrics: PBLFontDesignMetrics read GetDesignMetrics;
+
+    /// <summary>
+    ///  Units per em, which are part of font's design metrics.
+    /// </summary>
+    property UnitsPerEm: Integer read GetUnitsPerEm;
+
+    /// <summary>
+    ///  Returns PANOSE classification of this `TBLFontFace`.
+    /// </summary>
+    property Panose: PBLFontPanose read GetPanose;
+
+    /// <summary>
+    ///  Returns unicode coverage of this `TBLFontFace`.
+    /// </summary>
+    /// <remarks>
+    ///  The returned unicode-coverage is not calculated by Blend2D so in
+    ///  general the value doesn't have to be correct. Consider
+    ///  `GetCharacterCoverage` to get a coverage calculated by Blend2D at
+    ///  character granularity.
+    /// </remarks>
+    property UnicodeCoverage: PBLFontUnicodeCoverage read GetUnicodeCoverage;
+  end;
 
 type
   /// <summary>
@@ -8408,6 +9752,768 @@ type
     property StrikethroughThickness: Single read FStrikethroughThickness;
   end;
   PBLFontMetrics = ^TBLFontMetrics;
+
+type
+  /// <summary>
+  ///  Associates a font feature tag with a value. Tag describes the feature (as
+  ///  provided by the font) and `Value` describes its value. Some features only
+  ///  allow boolean values 0 and 1 and some allow values up to 65535.
+  ///  Values less than 0 and greater than 65535 are invalid, however, only `-1`
+  ///  should be used as invalid value in general.
+  ///
+  ///  Registered OpenType features:
+  ///   - <see href="https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags">Microsoft</see>.
+  ///   - <see href="https://helpx.adobe.com/typekit/using/open-type-syntax.html">Adobe</see>.
+  /// </summary>
+  TBLFontFeatureItem = record
+  {$REGION 'Internal Declarations'}
+  private
+    FTag: TBLTag;
+    FValue: Int32;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Feature tag (32-bit).
+    /// </summary>
+    property Tag: TBLTag read FTag;
+
+    /// <summary>
+    ///  Feature value.
+    /// </summary>
+    /// <remarks>
+    ///  Values less than 0 and greater than 65535 are invalid.
+    /// </remarks>
+    property Value: Integer read FValue;
+  end;
+  {$POINTERMATH ON}
+  PBLFontFeatureItem = ^TBLFontFeatureItem;
+  {$POINTERMATH OFF}
+
+type
+  /// <summary>
+  ///  A view unifying the representation of an internal storage used by
+  ///  `TBLFontFeatureSettings`.
+  /// </summary>
+  TBLFontFeatureSettingsView = record
+  {$REGION 'Internal Declarations'}
+  private
+    FData: PBLFontFeatureItem;
+    FSize: Size_T;
+    FSsoData: array [0..35] of TBLFontFeatureItem;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetItem(const AIndex: NativeInt): TBLFontFeatureItem;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Whether the view is empty.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  Pointer to font feature items, where each item describes a tag and its
+    ///  value.
+    /// </summary>
+    property Data: PBLFontFeatureItem read FData;
+
+    /// <summary>
+    ///  Count of items in `Data`.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  The font feature items, where each item describes a tag and its value.
+    /// </summary>
+    property Items[const AIndex: NativeInt]: TBLFontFeatureItem read GetItem; default;
+  end;
+  PBLFontFeatureSettingsView = ^TBLFontFeatureSettingsView;
+
+type
+  /// <summary>
+  ///  Font feature settings.
+  /// </summary>
+  TBLFontFeatureSettings = record
+  {$REGION 'Internal Declarations'}
+  private
+    FBase: TBLObjectCore;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetCapacity: NativeInt; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates default initialized font feature settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLFontFeatureSettings);
+
+    /// <summary>
+    ///  Destroys the font feature settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLFontFeatureSettings);
+
+    /// <summary>
+    ///  Copy constructor makes a weak copy of the underlying representation of
+    ///  the `ASrc` font feature settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLFontFeatureSettings; const [ref] ASrc: TBLFontFeatureSettings); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty font feature settings).
+    /// </summary>
+    class operator Equal(const ALeft: TBLFontFeatureSettings; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font feature settings instances are equal.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLFontFeatureSettings): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty font feature settings).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLFontFeatureSettings; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font feature settings instances are not equal.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLFontFeatureSettings): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether this and `AOther` font feature settings are equal.
+    /// </summary>
+    function Equals(const AOther: TBLFontFeatureSettings): Boolean; inline;
+
+    /// <summary>
+    ///  Resets the font feature settings to a default constructed state.
+    /// </summary>
+    procedure Reset; inline;
+
+    procedure Clear; inline;
+
+    /// <summary>
+    ///  Swaps the underlying representation with `AOther`.
+    /// </summary>
+    procedure Swap(var AOther: TBLFontFeatureSettings); inline;
+
+    /// <summary>
+    ///  Returns a normalized view of tag/value pairs.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function View: TBLFontFeatureSettingsView; inline;
+
+    /// <summary>
+    ///  Tests whether the settings contains the given `AFeatureTag`.
+    /// </summary>
+    function HasValue(const AFeatureTag: TBLTag): Boolean; inline;
+
+    /// <summary>
+    ///  Returns the value associated with the given `AFeatureTag`.
+    ///
+    ///  If the `AFeatureTag` doesn't exist or is invalid `-1` is returned.
+    /// </summary>
+    function GetValue(const AFeatureTag: TBLTag): Integer; inline;
+
+    /// <summary>
+    ///  Sets or inserts the given `AFeatureTag` to the settings, associating
+    ///  the `AFeatureTag` with `AValue`.
+    ///
+    ///  The `AFeatureTag` must be valid, which means that it must contain 4
+    ///  characters within ' ' to '~' range - [32, 126] in ASCII. If the given
+    ///  `AFeatureTag` is not valid or `AValue` is out of range (maximum value
+    ///  is `65535`) an error is raised.
+    ///
+    ///  The following tags only support values that are either 0 (disabled) or
+    ///  1 (enabled):
+    ///
+    ///    - 'case'
+    ///    - 'clig'
+    ///    - 'cpct'
+    ///    - 'cpsp'
+    ///    - 'dlig'
+    ///    - 'dnom'
+    ///    - 'expt'
+    ///    - 'falt'
+    ///    - 'frac'
+    ///    - 'fwid'
+    ///    - 'halt'
+    ///    - 'hist'
+    ///    - 'hwid'
+    ///    - 'jalt'
+    ///    - 'kern'
+    ///    - 'liga'
+    ///    - 'lnum'
+    ///    - 'onum'
+    ///    - 'ordn'
+    ///    - 'palt'
+    ///    - 'pcap'
+    ///    - 'ruby'
+    ///    - 'smcp'
+    ///    - 'subs'
+    ///    - 'sups'
+    ///    - 'titl'
+    ///    - 'tnam'
+    ///    - 'tnum'
+    ///    - 'unic'
+    ///    - 'valt'
+    ///    - 'vkrn'
+    ///    - 'zero'
+    ///
+    ///  Trying to use any other value with these tags would fail.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetValue(const ATag: TBLTag; const AValue: Integer); inline;
+
+    /// <summary>
+    ///  Removes the given `AFeatureTag` and its associated value from the
+    ///  settings.
+    ///
+    ///  Nothing happens if the `AFeatureTag` is not in the settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveValue(const AFeatureTag: TBLTag); inline;
+
+    /// <summary>
+    ///  Whether the container is empty, which means that no tag/value pairs are
+    ///  stored in it.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  The number of feature tag/value pairs stored in the container.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  The container capacity.
+    /// </summary>
+    property Capacity: NativeInt read GetCapacity;
+
+    /// <summary>
+    ///  The value associated with the given `AFeatureTag`.
+    ///
+    ///  See `GetValue` and `SetValue` for more information.
+    /// </summary>
+    /// <seealso cref="GetValue"/>
+    /// <seealso cref="SetValue"/>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Values[const AFeatureTag: TBLTag]: Integer read GetValue write SetValue;
+  end;
+
+type
+  /// <summary>
+  ///  Associates a font variation tag with a value.
+  /// </summary>
+  TBLFontVariationItem = record
+  {$REGION 'Internal Declarations'}
+  private
+    FTag: TBLTag;
+    FValue: Single;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Variation tag (32-bit).
+    /// </summary>
+    property Tag: TBLTag read FTag;
+
+    /// <summary>
+    ///  Variation value.
+    /// </summary>
+    /// <remarks>
+    ///  Values outside of [0, 1] range are invalid.
+    /// </remarks>
+    property Value: Single read FValue;
+  end;
+  {$POINTERMATH ON}
+  PBLFontVariationItem = ^TBLFontVariationItem;
+  {$POINTERMATH OFF}
+
+type
+  /// <summary>
+  ///  A view unifying the representation of an internal storage used by
+  ///  `TBLFontVariationSettings`.
+  /// </summary>
+  TBLFontVariationSettingsView = record
+  {$REGION 'Internal Declarations'}
+  private
+    FData: PBLFontVariationItem;
+    FSize: Size_T;
+    FSsoData: array [0..3] of TBLFontVariationItem;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetItem(const AIndex: NativeInt): TBLFontVariationItem;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Whether the view is empty.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  Pointer to font variation items, where each item describes a tag and
+    ///  its value.
+    /// </summary>
+    property Data: PBLFontVariationItem read FData;
+
+    /// <summary>
+    ///  Count of items in `Data`.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  The font variation items, where each item describes a tag and its value.
+    /// </summary>
+    property Items[const AIndex: NativeInt]: TBLFontVariationItem read GetItem; default;
+  end;
+  PBLFontVariationSettingsView = ^TBLFontVariationSettingsView;
+
+type
+  /// <summary>
+  ///  Font variation settings.
+  /// </summary>
+  TBLFontVariationSettings = record
+  {$REGION 'Internal Declarations'}
+  private
+    FBase: TBLObjectCore;
+    function GetIsEmpty: Boolean; inline;
+    function GetSize: NativeInt; inline;
+    function GetCapacity: NativeInt; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates default initialized font variation settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLFontVariationSettings);
+
+    /// <summary>
+    ///  Destroys the font variation settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLFontVariationSettings);
+
+    /// <summary>
+    ///  Copy constructor makes a weak copy of the underlying representation of
+    ///  the `ASrc` font variation settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLFontVariationSettings; const [ref] ASrc: TBLFontVariationSettings); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty font variation settings).
+    /// </summary>
+    class operator Equal(const ALeft: TBLFontVariationSettings; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font variation settings instances are equal.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLFontVariationSettings): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty font variation settings).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLFontVariationSettings; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font variation settings instances are not equal.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLFontVariationSettings): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether this and `AOther` font variation settings are equal.
+    /// </summary>
+    function Equals(const AOther: TBLFontVariationSettings): Boolean; inline;
+
+    /// <summary>
+    ///  Resets the font variation settings to a default constructed state.
+    /// </summary>
+    procedure Reset; inline;
+
+    procedure Clear; inline;
+
+    /// <summary>
+    ///  Swaps the underlying representation with `AOther`.
+    /// </summary>
+    procedure Swap(var AOther: TBLFontVariationSettings); inline;
+
+    /// <summary>
+    ///  Returns a normalized view of tag/value pairs.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function View: TBLFontVariationSettingsView; inline;
+
+    /// <summary>
+    ///  Tests whether the settings contains the given `AVariationTag`.
+    /// </summary>
+    function HasValue(const AVariationTag: TBLTag): Boolean; inline;
+
+    /// <summary>
+    ///  Returns the value associated with the given `AVariationTag`.
+    ///
+    ///  If the `AVariationTag` doesn't exist or is invalid `NaN` is returned.
+    /// </summary>
+    function GetValue(const AVariationTag: TBLTag): Single; inline;
+
+    /// <summary>
+    ///  Sets or inserts the given `AVariationTag` to the settings, associating
+    ///  the `AVariationTag` with `AValue`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetValue(const ATag: TBLTag; const AValue: Single); inline;
+
+    /// <summary>
+    ///  Removes the given `AVariationTag` and its associated value from the
+    ///  settings.
+    ///
+    ///  Nothing happens if the `AVariationTag` is not in the settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RemoveValue(const AVariationTag: TBLTag); inline;
+
+    /// <summary>
+    ///  Whether the container is empty, which means that no tag/value pairs are
+    ///  stored in it.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  The number of variation tag/value pairs stored in the container.
+    /// </summary>
+    property Size: NativeInt read GetSize;
+
+    /// <summary>
+    ///  The container capacity.
+    /// </summary>
+    property Capacity: NativeInt read GetCapacity;
+
+    /// <summary>
+    ///  The value associated with the given `AVariationTag`.
+    ///
+    ///  See `GetValue` and `SetValue` for more information.
+    /// </summary>
+    /// <seealso cref="GetValue"/>
+    /// <seealso cref="SetValue"/>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Values[const AVariationTag: TBLTag]: Single read GetValue write SetValue;
+  end;
+
+type
+  /// <summary>
+  ///  Font.
+  /// </summary>
+  TBLFont = record
+  {$REGION 'Internal Declarations'}
+  private type
+    TImpl = record
+    public
+      Face: TBLObjectCore;
+      Weight: UInt16;
+      Stretch: UInt8;
+      Style: UInt8;
+      Reserved: UInt32;
+      Metrics: TBLFontMetrics;
+      Matrix: TBLFontMatrix;
+      FeatureSettings: TBLObjectCore;
+      VariationSettings: TBLObjectCore;
+    end;
+    PImpl = ^TImpl;
+  private
+    FBase: TBLObjectCore;
+    function GetIsValid: Boolean; inline;
+    function GetIsEmpty: Boolean; inline;
+    function GetFaceType: TBLFontFaceType; inline;
+    function GetFaceFlags: TBLFontFaceFlags; inline;
+    function GetSize: Single; inline;
+    procedure SetSize(const AValue: Single); inline;
+    function GetFace: TBLFontFace; inline;
+    function GetWeight: TBLFontWeight; inline;
+    function GetStretch: TBLFontStretch; inline;
+    function GetStyle: TBLFontStyle; inline;
+    function GetUnitsPerEm: Integer; inline;
+    function GetMatrix: TBLFontMatrix; inline;
+    function GetMetrics: PBLFontMetrics; inline;
+    function GetDesignMetrics: PBLFontDesignMetrics; inline;
+    function GetFeatureSettings: TBLFontFeatureSettings; inline;
+    procedure SetFeatureSettings(const AValue: TBLFontFeatureSettings); inline;
+    function GetVariationSettings: TBLFontVariationSettings; inline;
+    procedure SetVariationSettings(const AValue: TBLFontVariationSettings); inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default initialized font.
+    ///
+    ///  A default initialized font is not a valid font that could be used for
+    ///  rendering. It can be considered an empty or null font, which has no
+    ///  family, no glyphs, no tables, it's essentially empty.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLFont);
+
+    /// <summary>
+    ///  Destroys the font.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLFont);
+
+    /// <summary>
+    ///  Copy constructor makes a weak copy of the underlying representation of
+    ///  the `ASrc` font.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLFont; const [ref] ASrc: TBLFont); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil` (null font).
+    /// </summary>
+    class operator Equal(const ALeft: TBLFont; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two fonts are equal (have the same contents).
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLFont): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (null font).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLFont; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two fonts are not equal (do not have the same contents).
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLFont): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether this and `AOther` fonts are equal.
+    /// </summary>
+    function Equals(const AOther: TBLFont): Boolean; inline;
+
+    /// <summary>
+    ///  Resets the font to a default constructed state.
+    /// </summary>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Swaps the underlying representation of this font with the `AOther` font.
+    /// </summary>
+    procedure Swap(var AOther: TBLFont); inline;
+
+    /// <summary>
+    ///  Creates a new font from the existing font `AFace` scaled to the given
+    ///  `ASize`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromFace(const AFace: TBLFontFace; const ASize: Single); overload; inline;
+
+    /// <summary>
+    ///  Creates a new font from the existing font `AFace` scaled to the given
+    ///  `ASize`.
+    ///
+    ///  This is an overloaded function that takes additional argument
+    ///  `AFeatureSettings`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromFace(const AFace: TBLFontFace; const ASize: Single;
+      const AFeatureSettings: TBLFontFeatureSettings); overload; inline;
+
+    /// <summary>
+    ///  Creates a new font from the existing font `AFace` scaled to the given
+    ///  `ASize`.
+    ///
+    ///  This is an overloaded function that takes additional arguments, which
+    ///  are used to override font `AFeatureSettings` and font `AVariationSettings`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakeFromFace(const AFace: TBLFontFace; const ASize: Single;
+      const AFeatureSettings: TBLFontFeatureSettings;
+      const AVariationSettings: TBLFontVariationSettings); overload; inline;
+
+    /// <summary>
+    ///  Resets font feature settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ResetFeatureSettings; inline;
+
+    /// <summary>
+    ///  Resets font variation settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ResetVariationSettings; inline;
+
+    procedure Shape(const AGB: TBLGlyphBuffer); inline;
+
+    procedure MapTextToGlyphs(const AGB: TBLGlyphBuffer); overload; inline;
+    procedure MapTextToGlyphs(const AGB: TBLGlyphBuffer;
+      out AStateOut: TBLGlyphMappingState); overload; inline;
+
+    procedure PositionGlyphs(const AGB: TBLGlyphBuffer); inline;
+    procedure ApplyKerning(const AGB: TBLGlyphBuffer); inline;
+    procedure ApplyGSub(const AGB: TBLGlyphBuffer;
+      const ALookups: TBLBitArray); inline;
+    procedure ApplyGPos(const AGB: TBLGlyphBuffer;
+      const ALookups: TBLBitArray); inline;
+    procedure GetTextMetrics(const AGB: TBLGlyphBuffer;
+      out AMetrics: TBLTextMetrics); inline;
+
+    procedure GetGlyphBounds(const AGlyphData: PUInt32;
+      const AGlyphAdvance, ACount: NativeInt; out ABounds: PBLBoxI); overload; inline;
+    function GetGlyphBounds(const AGlyphData: PUInt32;
+      const AGlyphAdvance, ACount: NativeInt): TArray<TBLBoxI>; overload; inline;
+
+    procedure GetGlyphAdvances(const AGlyphData: PUInt32;
+      const AGlyphAdvance, ACount: NativeInt; out APlacements: PBLGlyphPlacement); overload; inline;
+    function GetGlyphAdvances(const AGlyphData: PUInt32;
+      const AGlyphAdvance, ACount: NativeInt): TArray<TBLGlyphPlacement>; overload; inline;
+
+    /// <summary>
+    ///  Retrieves outlines of a single glyph into the `AOut` path.
+    ///
+    ///  Optionally, a user can provide a `ASink` function with `AUserData`,
+    ///  which will be called periodically by the glyph outline decoder. The
+    ///  `ASink` can be used to immediately process the outline to prevent
+    ///  accumulating a large path in `AOut`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure GetGlyphOutlines(const AGlyphId: TBLGlyphId; const AOut: TBLPath;
+      const ASink: TBLPathSinkFunc = nil; const AUserData: Pointer = nil); overload; inline;
+
+    /// <summary>
+    ///  Retrieves outlines of a single glyph into the `AOut` path transformed
+    ///  by `AUsserTransform`.
+    ///
+    ///  Optionally, a user can provide a `ASink` function with `AUserData`,
+    ///  which will be called periodically by the glyph outline decoder. The
+    ///  `ASink` can be used to immediately process the outline to prevent
+    ///  accumulating a large path in `AOut`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure GetGlyphOutlines(const AGlyphId: TBLGlyphId;
+      const AUserTransform: TBLMatrix2D; const AOut: TBLPath;
+      const ASink: TBLPathSinkFunc = nil; const AUserData: Pointer = nil); overload; inline;
+
+    /// <summary>
+    ///  Retrieves outlines of a glyph run into the `AOut` path.
+    ///
+    ///  Optionally, a user can provide a `ASink` function with `AUserData`,
+    ///  which will be called periodically by the glyph outline decoder. The
+    ///  `ASink` can be used to immediately process the outline to prevent
+    ///  accumulating a large path in `AOut`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure GetGlyphRunOutlines(const AGlyphRun: TBLGlyphRun;
+      const AOut: TBLPath; const ASink: TBLPathSinkFunc = nil;
+      const AUserData: Pointer = nil); overload; inline;
+
+    /// <summary>
+    ///  Retrieves outlines of a glyph run into the `AOut` path transformed by
+    ///  `AUserTransform`.
+    ///
+    ///  Optionally, a user can provide a `ASink` function with `AUserData`,
+    ///  which will be called periodically by the glyph outline decoder. The
+    ///  `ASink` can be used to immediately process the outline to prevent
+    ///  accumulating a large path in `AOut`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure GetGlyphRunOutlines(const AGlyphRun: TBLGlyphRun;
+      const AUserTransform: TBLMatrix2D; const AOut: TBLPath;
+      const ASink: TBLPathSinkFunc = nil; const AUserData: Pointer = nil); overload; inline;
+
+    /// <summary>
+    ///  Whether the font is a valid instance.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  Tests whether the font is empty, which is the same as `not IsValid`.
+    /// </summary>
+    property IsEmpty: Boolean read GetIsEmpty;
+
+    /// <summary>
+    ///  The type of the font's associated font face.
+    /// </summary>
+    property FaceType: TBLFontFaceType read GetFaceType;
+
+    /// <summary>
+    ///  The flags of the font.
+    /// </summary>
+    property FaceFlags: TBLFontFaceFlags read GetFaceFlags;
+
+    /// <summary>
+    ///  The size of the font.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Size: Single read GetSize write SetSize;
+
+    /// <summary>
+    ///  The font's associated font face.
+    ///
+    ///  Returns the same font face, which was passed to `MakeFromFace`.
+    /// </summary>
+    /// <seealso cref="MakeFromFace"/>
+    property Face: TBLFontFace read GetFace;
+
+    /// <summary>
+    ///  The weight of the font.
+    /// </summary>
+    property Weight: TBLFontWeight read GetWeight;
+
+    /// <summary>
+    ///  The stretch of the font.
+    /// </summary>
+    property Stretch: TBLFontStretch read GetStretch;
+
+    /// <summary>
+    ///  The style of the font.
+    /// </summary>
+    property Style: TBLFontStyle read GetStyle;
+
+    /// <summary>
+    ///  The "units per em" (UPEM) of the font's associated font face.
+    /// </summary>
+    property UnitsPerEm: Integer read GetUnitsPerEm;
+
+    /// <summary>
+    ///  A 2x2 matrix of the font.
+    ///
+    ///  The returned `TBLFontMatrix` is used to scale fonts from design units
+    ///  into user units. The matrix usually has a negative `M11` member as
+    ///  fonts use a different coordinate system than Blend2D.
+    /// </summary>
+    property Matrix: TBLFontMatrix read GetMatrix;
+
+    /// <summary>
+    ///  The scaled metrics of the font.
+    ///
+    ///  The returned metrics is a scale of design metrics that match the font
+    ///  size and its options.
+    /// </summary>
+    property Metrics: PBLFontMetrics read GetMetrics;
+
+    /// <summary>
+    ///  The design metrics of the font.
+    ///
+    ///  The returned metrics is compatible with the metrics of `TBLFontFace`
+    ///  associated with this font.
+    /// </summary>
+    /// <seealso cref="TBLFontFace"/>
+    property DesignMetrics: PBLFontDesignMetrics read GetDesignMetrics;
+
+    /// <summary>
+    ///  Font feature settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property FeatureSettings: TBLFontFeatureSettings read GetFeatureSettings write SetFeatureSettings;
+
+    /// <summary>
+    ///  Font variation settings.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property VariationSettings: TBLFontVariationSettings read GetVariationSettings write SetVariationSettings;
+  end;
 {$ENDREGION 'Text'}
 
 {$REGION 'Rendering'}
@@ -8707,6 +10813,40 @@ begin
 end;
 
 {$ENDREGION 'Error Handling'}
+
+{$REGION 'Globals'}
+
+{ _TBLTagHelper }
+
+constructor _TBLTagHelper.Create(const AA, AB, AC, AD: Byte);
+begin
+  Self := (UInt32(AA) shl 24) or (AB shl 16) or (AC shl 8) or AD;
+end;
+
+constructor _TBLTagHelper.Create(const AA, AB, AC, AD: AnsiChar);
+begin
+  Self := (UInt32(AA) shl 24) or (Ord(AB) shl 16) or (Ord(AC) shl 8) or Ord(AD);
+end;
+
+constructor _TBLTagHelper.Create(const AFourCC: AnsiString);
+begin
+  Assert(Length(AFourCC) >= 4);
+  Self := (UInt32(AFourCC[Low(AnsiString)]) shl 24)
+       or (Ord(AFourCC[Low(AnsiString) + 1]) shl 16)
+       or (Ord(AFourCC[Low(AnsiString) + 2]) shl 16)
+       or  Ord(AFourCC[Low(AnsiString) + 3]);
+end;
+
+class operator _TBLTagHelper.Implicit(const AFourCC: AnsiString): TBLTag;
+begin
+  Assert(Length(AFourCC) >= 4);
+  Result := (UInt32(AFourCC[Low(AnsiString)]) shl 24)
+         or (Ord(AFourCC[Low(AnsiString) + 1]) shl 16)
+         or (Ord(AFourCC[Low(AnsiString) + 2]) shl 16)
+         or  Ord(AFourCC[Low(AnsiString) + 3]);
+end;
+{$ENDREGION 'Globals'}
+
 
 {$REGION 'Internal'}
 
@@ -11866,6 +14006,12 @@ begin
   FBase.Swap(AOther.FBase);
 end;
 
+function TBLArray<T>.ToArray: TArray<T>;
+begin
+  SetLength(Result, Size);
+  Move(Data^, Result[0], Length(Result) * SizeOf(T));
+end;
+
 procedure TBLArray<T>.Truncate(const AMaxSize: NativeInt);
 begin
   _BLCheck(_blArrayResize(@Self, Min(Size, AMaxSize), nil));
@@ -12432,6 +14578,13 @@ end;
 procedure TBLString.Swap(var AOther: TBLString);
 begin
   FBase.Swap(AOther.FBase);
+end;
+
+function TBLString.ToString: String;
+begin
+  var S: UTF8String;
+  SetString(S, Data, Size);
+  Result := String(S);
 end;
 
 procedure TBLString.Truncate(const ASize: NativeInt);
@@ -13964,7 +16117,7 @@ end;
 
 function TBLGradient.GetValue(const AIndex: NativeInt): Double;
 begin
-  Assert(NativeUInt(AIndex) <= Ord(High(TBLGradientValue)));
+  Assert(NativeUInt(AIndex) <= NativeUInt(High(TBLGradientValue)));
   Result := PImpl(FBase.FImpl).Values[TBLGradientValue(AIndex)];
 end;
 
@@ -14343,7 +16496,7 @@ end;
 
 procedure TBLGradient.SetValue(const AIndex: NativeInt; const AValue: Double);
 begin
-  Assert(NativeUInt(AIndex) <= Ord(High(TBLGradientValue)));
+  Assert(NativeUInt(AIndex) <= NativeUInt(High(TBLGradientValue)));
   _BLCheck(_blGradientSetValue(@Self, AIndex, AValue));
 end;
 
@@ -14425,6 +16578,13 @@ end;
 {$ENDREGION 'Styling'}
 
 {$REGION 'Text'}
+
+{ TBLTextMetrics }
+
+procedure TBLTextMetrics.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
 
 { TBLGlyphPlacement }
 
@@ -14813,6 +16973,642 @@ begin
   FUndefinedCount := 0;
 end;
 
+{ TBLFontTable }
+
+function TBLFontTable.GetIsEmpty: Boolean;
+begin
+  Result := (FSize = 0);
+end;
+
+function TBLFontTable.GetSize: NativeInt;
+begin
+  Result := FSize;
+end;
+
+procedure TBLFontTable.Reset;
+begin
+  FData := nil;
+  FSize := 0;
+end;
+
+procedure TBLFontTable.Reset(const AData: Pointer; const ASize: NativeInt);
+begin
+  FData := AData;
+  FSize := ASize;
+end;
+
+{ TBLFontData }
+
+class operator TBLFontData.Assign(var ADest: TBLFontData;
+  const [ref] ASrc: TBLFontData);
+begin
+  _BLCheck(_blFontDataInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLFontData.Equal(const ALeft: TBLFontData;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class procedure TBLFontData.DestroyDynArray(impl, externalData,
+  userData: Pointer);
+begin
+  var Data: TBytes;
+  Pointer(Data) := userData;
+  // Exiting will decrease ref count
+end;
+
+class operator TBLFontData.Equal(const ALeft, ARight: TBLFontData): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLFontData.Equals(const AOther: TBLFontData): Boolean;
+begin
+  Result := _blFontDataEquals(@Self, @AOther);
+end;
+
+class operator TBLFontData.Finalize(var ADest: TBLFontData);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blFontDataDestroy(@ADest));
+end;
+
+function TBLFontData.GetFaceCount: Integer;
+begin
+  Result := PImpl(FBase.FImpl).FaceCount;
+end;
+
+function TBLFontData.GetFaceType: TBLFontFaceType;
+begin
+  Result := TBLFontFaceType(PImpl(FBase.FImpl).FaceType);
+end;
+
+function TBLFontData.GetFlags: TBLFontDataFlags;
+begin
+  Byte(Result) := (PImpl(FBase.FImpl).Flags);
+end;
+
+function TBLFontData.GetIsCollection: Boolean;
+begin
+  Result := (TBLFontDataFlag.Collection in GetFlags);
+end;
+
+function TBLFontData.GetIsEmpty: Boolean;
+begin
+  Result := (PImpl(FBase.FImpl).FaceCount = 0);
+end;
+
+function TBLFontData.GetIsValid: Boolean;
+begin
+  Result := (PImpl(FBase.FImpl).FaceCount <> 0);
+end;
+
+function TBLFontData.GetTable(const AFaceIndex: Integer;
+  const ATag: TBLTag): TBLFontTable;
+begin
+  _blFontDataGetTables(@Self, AFaceIndex, @Result, @ATag, 1);
+end;
+
+function TBLFontData.GetTables(const AFaceIndex: Integer;
+  const ATags: TArray<TBLTag>): TArray<TBLFontTable>;
+begin
+  var Tables: PBLFontTable := nil;
+  var Count := _blFontDataGetTables(@Self, AFaceIndex, Tables, @ATags, Length(ATags));
+  SetLength(Result, Count);
+  Move(Tables^, Result[0], Count * SizeOf(TBLFontTable));
+end;
+
+function TBLFontData.GetTableTags(const AFaceIndex: Integer): TArray<TBLTag>;
+begin
+  var Dst: TBLArray<TBLTag>;
+  _BLCheck(_blFontDataGetTableTags(@Self, AFaceIndex, @Dst));
+  Result := Dst.ToArray;
+end;
+
+procedure TBLFontData.GetTableTags(const AFaceIndex: Integer;
+  const ADst: TBLArray<TBLTag>);
+begin
+  _BLCheck(_blFontDataGetTableTags(@Self, AFaceIndex, @ADst));
+end;
+
+class operator TBLFontData.Initialize(out ADest: TBLFontData);
+begin
+  _BLCheck(_blFontDataInit(@ADest));
+end;
+
+procedure TBLFontData.MakeFromData(const AData: TBLArray<Byte>);
+begin
+  _BLCheck(_blFontDataCreateFromDataArray(@Self, @AData));
+end;
+
+procedure TBLFontData.MakeFromData(const AData: Pointer; const ASize: NativeInt;
+  const ADestroyFunc: TBLDestroyExternalDataFunc; const AUserData: Pointer);
+begin
+  _BLCheck(_blFontDataCreateFromData(@Self, AData, ASize, ADestroyFunc, AUserData));
+end;
+
+procedure TBLFontData.MakeFromData(const AData: TBytes);
+begin
+  var Copy := AData;     // Increase ref count
+  var Result := _blFontDataCreateFromData(@Self, Pointer(AData), Length(AData),
+    DestroyDynArray, Pointer(AData));
+  if (Result = 0) then
+    Pointer(Copy) := nil // Does NOT decrease ref count
+  else
+    _BLCheck(Result);
+end;
+
+procedure TBLFontData.MakeFromFile(const AFilename: String;
+  const AReadFlags: TBLFileReadFlags);
+begin
+  _BLCheck(_blFontDataCreateFromFile(@Self, PUTF8Char(UTF8String(AFilename)),
+    Byte(AReadFlags)));
+end;
+
+class operator TBLFontData.NotEqual(const ALeft: TBLFontData;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLFontData.NotEqual(const ALeft, ARight: TBLFontData): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLFontData.Reset;
+begin
+  _BLCheck(_blFontDataReset(@Self));
+end;
+
+procedure TBLFontData.Swap(var AOther: TBLFontData);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+{ TBLFontFaceInfo }
+
+function TBLFontFaceInfo.GetDiagFlags: TBLFontFaceDiagFlags;
+begin
+  Byte(Result) := FDiagFlags;
+end;
+
+function TBLFontFaceInfo.GetFaceFlags: TBLFontFaceFlags;
+begin
+  Cardinal(Result) := FFaceFlags;
+end;
+
+function TBLFontFaceInfo.GetFaceType: TBLFontFaceType;
+begin
+  Result := TBLFontFaceType(FFaceType);
+end;
+
+function TBLFontFaceInfo.GetOutlineType: TBLFontOutlineType;
+begin
+  Result := TBLFontOutlineType(FOutlineType);
+end;
+
+procedure TBLFontFaceInfo.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLFontDesignMetrics }
+
+procedure TBLFontDesignMetrics.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLFontUnicodeCoverage }
+
+procedure TBLFontUnicodeCoverage.ClearBit(const AIndex: Integer);
+begin
+  Assert(Cardinal(AIndex) < 128);
+  var I := AIndex shr 5;
+  FData[I] := FData[I] and not (UInt32(1) shl (AIndex and 31));
+end;
+
+class operator TBLFontUnicodeCoverage.Equal(const ALeft,
+  ARight: TBLFontUnicodeCoverage): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLFontUnicodeCoverage.Equals(
+  const AOther: TBLFontUnicodeCoverage): Boolean;
+begin
+  Result := (FData[0] = AOther.FData[0])
+        and (FData[1] = AOther.FData[1])
+        and (FData[2] = AOther.FData[2])
+        and (FData[3] = AOther.FData[3]);
+end;
+
+function TBLFontUnicodeCoverage.GetIsEmpty: Boolean;
+begin
+  Result := ((FData[0] or FData[1] or FData[2] or FData[3]) = 0);
+end;
+
+function TBLFontUnicodeCoverage.HasBit(const AIndex: Integer): Boolean;
+begin
+  Assert(Cardinal(AIndex) < 128);
+  var I := AIndex shr 5;
+  Result := ((FData[I] and (UInt32(1) shl (AIndex and 31))) <> 0);
+end;
+
+class operator TBLFontUnicodeCoverage.NotEqual(const ALeft,
+  ARight: TBLFontUnicodeCoverage): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLFontUnicodeCoverage.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+procedure TBLFontUnicodeCoverage.SetBit(const AIndex: Integer);
+begin
+  Assert(Cardinal(AIndex) < 128);
+  var I := AIndex shr 5;
+  FData[I] := FData[I] or (UInt32(1) shl (AIndex and 31));
+end;
+
+procedure TBLFontUnicodeCoverage.SetBitValue(const AIndex: Integer;
+  const AValue: Boolean);
+begin
+  if (AValue) then
+    SetBit(AIndex)
+  else
+    ClearBit(AIndex);
+end;
+
+{ TBLFontPanose }
+
+function TBLFontPanose.GetDecorative: TDecorative;
+begin
+  Move(FData, Result, SizeOf(Result));
+end;
+
+function TBLFontPanose.GetFamilyKind: Byte;
+begin
+  Result := FData[0];
+end;
+
+function TBLFontPanose.GetIsEmpty: Boolean;
+begin
+  Result := ((FData[0] or FData[1] or FData[2] or FData[3] or FData[4]
+           or FData[5] or FData[6] or FData[7] or FData[8] or FData[9]) = 0);
+end;
+
+function TBLFontPanose.GetScript: TScript;
+begin
+  Move(FData, Result, SizeOf(Result));
+end;
+
+function TBLFontPanose.GetSymbol: TSymbol;
+begin
+  Move(FData, Result, SizeOf(Result));
+end;
+
+function TBLFontPanose.GetText: TText;
+begin
+  Move(FData, Result, SizeOf(Result));
+end;
+
+procedure TBLFontPanose.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLFontFace }
+
+class operator TBLFontFace.Assign(var ADest: TBLFontFace;
+  const [ref] ASrc: TBLFontFace);
+begin
+  _BLCheck(_blFontFaceInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLFontFace.Equal(const ALeft: TBLFontFace;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class operator TBLFontFace.Equal(const ALeft, ARight: TBLFontFace): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLFontFace.Equals(const AOther: TBLFontFace): Boolean;
+begin
+  Result := _blFontFaceEquals(@Self, @AOther);
+end;
+
+class operator TBLFontFace.Finalize(var ADest: TBLFontFace);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blFontFaceDestroy(@ADest));
+end;
+
+function TBLFontFace.GetData: TBLFontData;
+begin
+  _blFontFaceAssignWeak(@Result, @PImpl(FBase.FImpl).Data);
+end;
+
+function TBLFontFace.GetDesignMetrics: PBLFontDesignMetrics;
+begin
+  Result := @PImpl(FBase.FImpl).DesignMetrics;
+end;
+
+function TBLFontFace.GetDiagFlags: TBLFontFaceDiagFlags;
+begin
+  Result := PImpl(FBase.FImpl).FaceInfo.DiagFlags;
+end;
+
+function TBLFontFace.GetFaceFlags: TBLFontFaceFlags;
+begin
+  Result := PImpl(FBase.FImpl).FaceInfo.FaceFlags;
+end;
+
+function TBLFontFace.GetFaceIndex: Integer;
+begin
+  Result := PImpl(FBase.FImpl).FaceInfo.FFaceIndex;
+end;
+
+function TBLFontFace.GetFaceInfo: PBLFontFaceInfo;
+begin
+  Result := @PImpl(FBase.FImpl).FaceInfo;
+end;
+
+function TBLFontFace.GetFaceType: TBLFontFaceType;
+begin
+  Result := PImpl(FBase.FImpl).FaceInfo.FaceType;
+end;
+
+function TBLFontFace.GetFamilyName: TBLString;
+begin
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).FamilyName);
+end;
+
+procedure TBLFontFace.GetFeatureTags(const AOut: TBLArray<TBLTag>);
+begin
+  _BLCheck(_blFontFaceGetFeatureTags(@Self, @AOut));
+end;
+
+function TBLFontFace.GetFeatureTags: TArray<TBLTag>;
+begin
+  var Tags: TBLArray<TBLTag>;
+  _BLCheck(_blFontFaceGetFeatureTags(@Self, @Tags));
+  Result := Tags.ToArray;
+end;
+
+function TBLFontFace.GetFullName: TBLString;
+begin
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).FullName);
+end;
+
+function TBLFontFace.GetGlyphCount: Integer;
+begin
+  Result := PImpl(FBase.FImpl).FaceInfo.FGlyphCount;
+end;
+
+function TBLFontFace.GetHasBaselineYAt0: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.BaselineYEquals0);
+end;
+
+function TBLFontFace.GetHasCharToGlyphMapping: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.CharToGlyphMapping);
+end;
+
+function TBLFontFace.GetHasHorizontalKerning: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.HorizontalKerning);
+end;
+
+function TBLFontFace.GetHasHorizontalMetrics: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.HorizontalMetrics);
+end;
+
+function TBLFontFace.GetHasLsbPointXAt0: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.LsbPointXEquals0);
+end;
+
+function TBLFontFace.GetHasOpenTypeFeatures: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.OpenTypeFeatures);
+end;
+
+function TBLFontFace.GetHasOpenTypeVariations: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.OpenTypeVariations);
+end;
+
+function TBLFontFace.GetHasPanoseData: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.PanoseData);
+end;
+
+function TBLFontFace.GetHasTypographicMetrics: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.TypographicMetrics);
+end;
+
+function TBLFontFace.GetHasTypographicNames: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.TypographicNames);
+end;
+
+function TBLFontFace.GetHasUnicodeCoverage: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.UnicodeCoverage);
+end;
+
+function TBLFontFace.GetHasVariationSequences: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.VariationSequences);
+end;
+
+function TBLFontFace.GetHasVerticalKerning: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.VerticalKerning);
+end;
+
+function TBLFontFace.GetHasVerticalMetrics: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.VerticalMetrics);
+end;
+
+function TBLFontFace.GetIsEmpty: Boolean;
+begin
+  Result := not GetIsValid;
+end;
+
+function TBLFontFace.GetIsLastResortFont: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.LastResortFont);
+end;
+
+function TBLFontFace.GetIsSymbolFont: Boolean;
+begin
+  Result := HasFaceFlag(TBLFontFaceFlag.SymbolFont);
+end;
+
+function TBLFontFace.GetIsValid: Boolean;
+begin
+  Result := (PImpl(FBase.FImpl).FaceInfo.FFaceType <> 0);
+end;
+
+function TBLFontFace.GetOutlineType: TBLFontOutlineType;
+begin
+  Result := PImpl(FBase.FImpl).FaceInfo.OutlineType;
+end;
+
+function TBLFontFace.GetPanose: PBLFontPanose;
+begin
+  Result := @PImpl(FBase.FImpl).Panose;
+end;
+
+function TBLFontFace.GetPostScriptName: TBLString;
+begin
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).PostscriptName);
+end;
+
+procedure TBLFontFace.GetScriptTags(const AOut: TBLArray<TBLTag>);
+begin
+  _BLCheck(_blFontFaceGetScriptTags(@Self, @AOut));
+end;
+
+function TBLFontFace.GetScriptTags: TArray<TBLTag>;
+begin
+  var Tags: TBLArray<TBLTag>;
+  _BLCheck(_blFontFaceGetScriptTags(@Self, @Tags));
+  Result := Tags.ToArray;
+end;
+
+function TBLFontFace.GetStretch: TBLFontStretch;
+begin
+  Result := TBLFontStretch(PImpl(FBase.FImpl).Stretch);
+end;
+
+function TBLFontFace.GetStyle: TBLFontStyle;
+begin
+  Result := TBLFontStyle(PImpl(FBase.FImpl).Style);
+end;
+
+function TBLFontFace.GetSubfamilyName: TBLString;
+begin
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).SubfamilyName);
+end;
+
+function TBLFontFace.GetUnicodeCoverage: PBLFontUnicodeCoverage;
+begin
+  Result := @PImpl(FBase.FImpl).UnicodeCoverage;
+end;
+
+function TBLFontFace.GetUniqueId: TBLUniqueId;
+begin
+  Result := PImpl(FBase.FImpl).UniqueId;
+end;
+
+function TBLFontFace.GetUnitsPerEm: Integer;
+begin
+  Result := PImpl(FBase.FImpl).DesignMetrics.FUnitsPerEm;
+end;
+
+procedure TBLFontFace.GetVariationTags(const AOut: TBLArray<TBLTag>);
+begin
+  _BLCheck(_blFontFaceGetVariationTags(@Self, @AOut));
+end;
+
+function TBLFontFace.GetVariationTags: TArray<TBLTag>;
+begin
+  var Tags: TBLArray<TBLTag>;
+  _BLCheck(_blFontFaceGetVariationTags(@Self, @Tags));
+  Result := Tags.ToArray;
+end;
+
+function TBLFontFace.GetWeight: TBLFontWeight;
+begin
+  Result := TBLFontWeight(PImpl(FBase.FImpl).Weight);
+end;
+
+function TBLFontFace.HasFaceFlag(const AFlag: TBLFontFaceFlag): Boolean;
+begin
+  Result := (AFlag in GetFaceFlags);
+end;
+
+function TBLFontFace.HasFeatureTag(const AFeatureTag: TBLTag): Boolean;
+begin
+  Result := _blFontFaceHasFeatureTag(@Self, AFeatureTag);
+end;
+
+function TBLFontFace.HasScriptTag(const AScriptTag: TBLTag): Boolean;
+begin
+  Result := _blFontFaceHasScriptTag(@Self, AScriptTag);
+end;
+
+function TBLFontFace.HasVariationTag(const AVariationTag: TBLTag): Boolean;
+begin
+  Result := _blFontFaceHasVariationTag(@Self, AVariationTag);
+end;
+
+class operator TBLFontFace.Initialize(out ADest: TBLFontFace);
+begin
+  _BLCheck(_blFontFaceInit(@ADest));
+end;
+
+procedure TBLFontFace.MakeFromData(const AFontData: TBLFontData;
+  const AFaceIndex: Integer);
+begin
+  _BLCheck(_blFontFaceCreateFromData(@Self, @AFontData, AFaceIndex));
+end;
+
+procedure TBLFontFace.MakeFromFile(const AFilename: String;
+  const AReadFlags: TBLFileReadFlags);
+begin
+  _BLCheck(_blFontFaceCreateFromFile(@Self, PUTF8Char(UTF8String(AFilename)), Byte(AReadFlags)));
+end;
+
+class operator TBLFontFace.NotEqual(const ALeft: TBLFontFace;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLFontFace.NotEqual(const ALeft, ARight: TBLFontFace): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLFontFace.Reset;
+begin
+  _BLCheck(_blFontFaceReset(@Self));
+end;
+
+procedure TBLFontFace.Swap(var AOther: TBLFontFace);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
 { TBLFontMatrix }
 
 class function TBLFontMatrix.Create: TBLFontMatrix;
@@ -14849,6 +17645,564 @@ end;
 procedure TBLFontMetrics.Reset;
 begin
   FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLFontFeatureItem }
+
+procedure TBLFontFeatureItem.Reset;
+begin
+  FTag := 0;
+  FValue := 0;
+end;
+
+{ TBLFontFeatureSettingsView }
+
+function TBLFontFeatureSettingsView.GetIsEmpty: Boolean;
+begin
+  Result := (FSize = 0);
+end;
+
+function TBLFontFeatureSettingsView.GetItem(
+  const AIndex: NativeInt): TBLFontFeatureItem;
+begin
+  Assert(NativeUInt(AIndex) < NativeUInt(FSize));
+  Result := FData[AIndex];
+end;
+
+function TBLFontFeatureSettingsView.GetSize: NativeInt;
+begin
+  Result := FSize;
+end;
+
+{ TBLFontFeatureSettings }
+
+class operator TBLFontFeatureSettings.Assign(var ADest: TBLFontFeatureSettings;
+  const [ref] ASrc: TBLFontFeatureSettings);
+begin
+  _BLCheck(_blFontFeatureSettingsInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLFontFeatureSettings.Equal(const ALeft: TBLFontFeatureSettings;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+procedure TBLFontFeatureSettings.Clear;
+begin
+  _BLCheck(_blFontFeatureSettingsClear(@Self));
+end;
+
+class operator TBLFontFeatureSettings.Equal(const ALeft,
+  ARight: TBLFontFeatureSettings): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLFontFeatureSettings.Equals(
+  const AOther: TBLFontFeatureSettings): Boolean;
+begin
+  Result := _blFontFeatureSettingsEquals(@Self, @AOther);
+end;
+
+class operator TBLFontFeatureSettings.Finalize(
+  var ADest: TBLFontFeatureSettings);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blFontFeatureSettingsDestroy(@ADest));
+end;
+
+function TBLFontFeatureSettings.GetCapacity: NativeInt;
+begin
+  Result := _blFontFeatureSettingsGetCapacity(@Self);
+end;
+
+function TBLFontFeatureSettings.GetIsEmpty: Boolean;
+begin
+  Result := (Size = 0);
+end;
+
+function TBLFontFeatureSettings.GetSize: NativeInt;
+begin
+  Result := _blFontFeatureSettingsGetSize(@Self);
+end;
+
+function TBLFontFeatureSettings.GetValue(const AFeatureTag: TBLTag): Integer;
+begin
+  Result := Integer(_blFontFeatureSettingsGetValue(@Self, AFeatureTag));
+end;
+
+function TBLFontFeatureSettings.HasValue(const AFeatureTag: TBLTag): Boolean;
+begin
+  Result := _blFontFeatureSettingsHasValue(@Self, AFeatureTag);
+end;
+
+class operator TBLFontFeatureSettings.Initialize(
+  out ADest: TBLFontFeatureSettings);
+begin
+  _BLCheck(_blFontFeatureSettingsInit(@ADest));
+end;
+
+class operator TBLFontFeatureSettings.NotEqual(
+  const ALeft: TBLFontFeatureSettings; const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLFontFeatureSettings.NotEqual(const ALeft,
+  ARight: TBLFontFeatureSettings): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLFontFeatureSettings.RemoveValue(const AFeatureTag: TBLTag);
+begin
+  _BLCheck(_blFontFeatureSettingsRemoveValue(@Self, AFeatureTag));
+end;
+
+procedure TBLFontFeatureSettings.Reset;
+begin
+  _BLCheck(_blFontFeatureSettingsReset(@Self));
+end;
+
+procedure TBLFontFeatureSettings.SetValue(const ATag: TBLTag;
+  const AValue: Integer);
+begin
+  _BLCheck(_blFontFeatureSettingsSetValue(@Self, ATag, UInt32(AValue)));
+end;
+
+procedure TBLFontFeatureSettings.Swap(var AOther: TBLFontFeatureSettings);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+function TBLFontFeatureSettings.View: TBLFontFeatureSettingsView;
+begin
+  _BLCheck(_blFontFeatureSettingsGetView(@Self, @Result));
+end;
+
+{ TBLFontVariationItem }
+
+procedure TBLFontVariationItem.Reset;
+begin
+  FTag := 0;
+  FValue := 0;
+end;
+
+{ TBLFontVariationSettingsView }
+
+function TBLFontVariationSettingsView.GetIsEmpty: Boolean;
+begin
+  Result := (FSize = 0);
+end;
+
+function TBLFontVariationSettingsView.GetItem(
+  const AIndex: NativeInt): TBLFontVariationItem;
+begin
+  Assert(NativeUInt(AIndex) < NativeUInt(FSize));
+  Result := FData[AIndex];
+end;
+
+function TBLFontVariationSettingsView.GetSize: NativeInt;
+begin
+  Result := FSize;
+end;
+
+{ TBLFontVariationSettings }
+
+class operator TBLFontVariationSettings.Assign(
+  var ADest: TBLFontVariationSettings;
+  const [ref] ASrc: TBLFontVariationSettings);
+begin
+  _BLCheck(_blFontVariationSettingsInitWeak(@ADest, @ASrc));
+end;
+
+procedure TBLFontVariationSettings.Clear;
+begin
+  _BLCheck(_blFontVariationSettingsClear(@Self));
+end;
+
+class operator TBLFontVariationSettings.Equal(const ALeft,
+  ARight: TBLFontVariationSettings): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLFontVariationSettings.Equal(
+  const ALeft: TBLFontVariationSettings; const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+function TBLFontVariationSettings.Equals(
+  const AOther: TBLFontVariationSettings): Boolean;
+begin
+  Result := _blFontVariationSettingsEquals(@Self, @AOther);
+end;
+
+class operator TBLFontVariationSettings.Finalize(
+  var ADest: TBLFontVariationSettings);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blFontVariationSettingsDestroy(@ADest));
+end;
+
+function TBLFontVariationSettings.GetCapacity: NativeInt;
+begin
+  Result := _blFontVariationSettingsGetCapacity(@Self);
+end;
+
+function TBLFontVariationSettings.GetIsEmpty: Boolean;
+begin
+  Result := (Size = 0);
+end;
+
+function TBLFontVariationSettings.GetSize: NativeInt;
+begin
+  Result := _blFontVariationSettingsGetSize(@Self);
+end;
+
+function TBLFontVariationSettings.GetValue(const AVariationTag: TBLTag): Single;
+begin
+  Result := _blFontVariationSettingsGetValue(@Self, AVariationTag);
+end;
+
+function TBLFontVariationSettings.HasValue(
+  const AVariationTag: TBLTag): Boolean;
+begin
+  Result := _blFontVariationSettingsHasValue(@Self, AVariationTag);
+end;
+
+class operator TBLFontVariationSettings.Initialize(
+  out ADest: TBLFontVariationSettings);
+begin
+  _BLCheck(_blFontVariationSettingsInit(@ADest));
+end;
+
+class operator TBLFontVariationSettings.NotEqual(const ALeft,
+  ARight: TBLFontVariationSettings): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLFontVariationSettings.NotEqual(
+  const ALeft: TBLFontVariationSettings; const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+procedure TBLFontVariationSettings.RemoveValue(const AVariationTag: TBLTag);
+begin
+  _BLCheck(_blFontVariationSettingsRemoveValue(@Self, AVariationTag));
+end;
+
+procedure TBLFontVariationSettings.Reset;
+begin
+  _BLCheck(_blFontVariationSettingsReset(@Self));
+end;
+
+procedure TBLFontVariationSettings.SetValue(const ATag: TBLTag;
+  const AValue: Single);
+begin
+  _BLCheck(_blFontVariationSettingsSetValue(@Self, ATag, AValue));
+end;
+
+procedure TBLFontVariationSettings.Swap(var AOther: TBLFontVariationSettings);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+function TBLFontVariationSettings.View: TBLFontVariationSettingsView;
+begin
+  _BLCheck(_blFontVariationSettingsGetView(@Self, @Result));
+end;
+
+{ TBLFont }
+
+procedure TBLFont.ApplyGPos(const AGB: TBLGlyphBuffer;
+  const ALookups: TBLBitArray);
+begin
+  _BLCheck(_blFontApplyGPos(@Self, @AGB, @ALookups));
+end;
+
+procedure TBLFont.ApplyGSub(const AGB: TBLGlyphBuffer;
+  const ALookups: TBLBitArray);
+begin
+  _BLCheck(_blFontApplyGSub(@Self, @AGB, @ALookups));
+end;
+
+procedure TBLFont.ApplyKerning(const AGB: TBLGlyphBuffer);
+begin
+  _BLCheck(_blFontApplyKerning(@Self, @AGB));
+end;
+
+class operator TBLFont.Assign(var ADest: TBLFont; const [ref] ASrc: TBLFont);
+begin
+  _BLCheck(_blFontInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLFont.Equal(const ALeft: TBLFont;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class operator TBLFont.Equal(const ALeft, ARight: TBLFont): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLFont.Equals(const AOther: TBLFont): Boolean;
+begin
+  Result := _blFontEquals(@Self, @AOther);
+end;
+
+class operator TBLFont.Finalize(var ADest: TBLFont);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blFontDestroy(@ADest));
+end;
+
+function TBLFont.GetDesignMetrics: PBLFontDesignMetrics;
+begin
+  Result := GetFace.DesignMetrics;
+end;
+
+function TBLFont.GetFace: TBLFontFace;
+begin
+  _blFontFaceAssignWeak(@Result, @PImpl(FBase.FImpl).Face);
+end;
+
+function TBLFont.GetFaceFlags: TBLFontFaceFlags;
+begin
+  Result := GetFace.FaceFlags;
+end;
+
+function TBLFont.GetFaceType: TBLFontFaceType;
+begin
+  Result := GetFace.FaceType;
+end;
+
+function TBLFont.GetFeatureSettings: TBLFontFeatureSettings;
+begin
+  _blFontFeatureSettingsAssignWeak(@Result, @PImpl(FBase.FImpl).FeatureSettings);
+end;
+
+function TBLFont.GetGlyphAdvances(const AGlyphData: PUInt32;
+  const AGlyphAdvance, ACount: NativeInt): TArray<TBLGlyphPlacement>;
+begin
+  SetLength(Result, ACount);
+  _BLCheck(_blFontGetGlyphAdvances(@Self, AGlyphData, AGlyphAdvance, Result, ACount));
+end;
+
+procedure TBLFont.GetGlyphAdvances(const AGlyphData: PUInt32;
+  const AGlyphAdvance, ACount: NativeInt; out APlacements: PBLGlyphPlacement);
+begin
+  _BLCheck(_blFontGetGlyphAdvances(@Self, AGlyphData, AGlyphAdvance, APlacements, ACount));
+end;
+
+function TBLFont.GetGlyphBounds(const AGlyphData: PUInt32;
+  const AGlyphAdvance, ACount: NativeInt): TArray<TBLBoxI>;
+begin
+  SetLength(Result, ACount);
+  _BLCheck(_blFontGetGlyphBounds(@Self, AGlyphData, AGlyphAdvance, Result, ACount));
+end;
+
+procedure TBLFont.GetGlyphOutlines(const AGlyphId: TBLGlyphId;
+  const AUserTransform: TBLMatrix2D; const AOut: TBLPath;
+  const ASink: TBLPathSinkFunc; const AUserData: Pointer);
+begin
+  _BLCheck(_blFontGetGlyphOutlines(@Self, AGlyphId, @AUserTransform, @AOut, ASink, AUserData));
+end;
+
+procedure TBLFont.GetGlyphRunOutlines(const AGlyphRun: TBLGlyphRun;
+  const AUserTransform: TBLMatrix2D; const AOut: TBLPath;
+  const ASink: TBLPathSinkFunc; const AUserData: Pointer);
+begin
+  _BLCheck(_blFontGetGlyphRunOutlines(@Self, @AGlyphRun, @AUserTransform, @AOut, ASink, AUserData));
+end;
+
+procedure TBLFont.GetGlyphRunOutlines(const AGlyphRun: TBLGlyphRun;
+  const AOut: TBLPath; const ASink: TBLPathSinkFunc; const AUserData: Pointer);
+begin
+  _BLCheck(_blFontGetGlyphRunOutlines(@Self, @AGlyphRun, nil, @AOut, ASink, AUserData));
+end;
+
+procedure TBLFont.GetGlyphOutlines(const AGlyphId: TBLGlyphId;
+  const AOut: TBLPath; const ASink: TBLPathSinkFunc; const AUserData: Pointer);
+begin
+  _BLCheck(_blFontGetGlyphOutlines(@Self, AGlyphId, nil, @AOut, ASink, AUserData));
+end;
+
+procedure TBLFont.GetGlyphBounds(const AGlyphData: PUInt32;
+  const AGlyphAdvance, ACount: NativeInt; out ABounds: PBLBoxI);
+begin
+  _BLCheck(_blFontGetGlyphBounds(@Self, AGlyphData, AGlyphAdvance, ABounds, ACount));
+end;
+
+function TBLFont.GetIsEmpty: Boolean;
+begin
+  Result := not IsValid;
+end;
+
+function TBLFont.GetIsValid: Boolean;
+begin
+  Result := GetFace.IsValid;
+end;
+
+function TBLFont.GetMatrix: TBLFontMatrix;
+begin
+  Result := PImpl(FBase.FImpl).Matrix;
+end;
+
+function TBLFont.GetMetrics: PBLFontMetrics;
+begin
+  Result := @PImpl(FBase.FImpl).Metrics;
+end;
+
+function TBLFont.GetSize: Single;
+begin
+  Result := PImpl(FBase.FImpl).Metrics.Size;
+end;
+
+function TBLFont.GetStretch: TBLFontStretch;
+begin
+  Result := TBLFontStretch(PImpl(FBase.FImpl).Stretch);
+end;
+
+function TBLFont.GetStyle: TBLFontStyle;
+begin
+  Result := TBLFontStyle(PImpl(FBase.FImpl).Style);
+end;
+
+procedure TBLFont.GetTextMetrics(const AGB: TBLGlyphBuffer;
+  out AMetrics: TBLTextMetrics);
+begin
+  _BLCheck(_blFontGetTextMetrics(@Self, @AGB, @AMetrics));
+end;
+
+function TBLFont.GetUnitsPerEm: Integer;
+begin
+  Result := GetFace.UnitsPerEm;
+end;
+
+function TBLFont.GetVariationSettings: TBLFontVariationSettings;
+begin
+  _blFontFeatureSettingsAssignWeak(@Result, @PImpl(FBase.FImpl).VariationSettings);
+end;
+
+function TBLFont.GetWeight: TBLFontWeight;
+begin
+  Result := TBLFontWeight(PImpl(FBase.FImpl).Weight);
+end;
+
+class operator TBLFont.Initialize(out ADest: TBLFont);
+begin
+  _BLCheck(_blFontInit(@ADest));
+end;
+
+procedure TBLFont.MakeFromFace(const AFace: TBLFontFace; const ASize: Single;
+  const AFeatureSettings: TBLFontFeatureSettings;
+  const AVariationSettings: TBLFontVariationSettings);
+begin
+  _BLCheck(_blFontCreateFromFaceWithSettings(@Self, @AFace, ASize,
+    @AFeatureSettings, @AVariationSettings));
+end;
+
+procedure TBLFont.MapTextToGlyphs(const AGB: TBLGlyphBuffer;
+  out AStateOut: TBLGlyphMappingState);
+begin
+  _BLCheck(_blFontMapTextToGlyphs(@Self, @AGB, @AStateOut));
+end;
+
+procedure TBLFont.MapTextToGlyphs(const AGB: TBLGlyphBuffer);
+begin
+  _BLCheck(_blFontMapTextToGlyphs(@Self, @AGB, nil));
+end;
+
+procedure TBLFont.MakeFromFace(const AFace: TBLFontFace; const ASize: Single;
+  const AFeatureSettings: TBLFontFeatureSettings);
+begin
+  _BLCheck(_blFontCreateFromFaceWithSettings(@Self, @AFace, ASize, @AFeatureSettings, nil));
+end;
+
+procedure TBLFont.MakeFromFace(const AFace: TBLFontFace; const ASize: Single);
+begin
+  _BLCheck(_blFontCreateFromFace(@Self, @AFace, ASize));
+end;
+
+class operator TBLFont.NotEqual(const ALeft: TBLFont;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsEmpty) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLFont.NotEqual(const ALeft, ARight: TBLFont): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLFont.PositionGlyphs(const AGB: TBLGlyphBuffer);
+begin
+  _BLCheck(_blFontPositionGlyphs(@Self, @AGB));
+end;
+
+procedure TBLFont.Reset;
+begin
+  _blFontReset(@Self);
+end;
+
+procedure TBLFont.ResetFeatureSettings;
+begin
+  _BLCheck(_blFontResetFeatureSettings(@Self));
+end;
+
+procedure TBLFont.ResetVariationSettings;
+begin
+  _BLCheck(_blFontResetVariationSettings(@Self));
+end;
+
+procedure TBLFont.SetFeatureSettings(const AValue: TBLFontFeatureSettings);
+begin
+  _BLCheck(_blFontSetFeatureSettings(@Self, @AValue));
+end;
+
+procedure TBLFont.SetSize(const AValue: Single);
+begin
+  _BLCheck(_blFontSetSize(@Self, AValue));
+end;
+
+procedure TBLFont.SetVariationSettings(const AValue: TBLFontVariationSettings);
+begin
+  _BLCheck(_blFontSetVariationSettings(@Self, @AValue));
+end;
+
+procedure TBLFont.Shape(const AGB: TBLGlyphBuffer);
+begin
+  _BLCheck(_blFontShape(@Self, @AGB));
+end;
+
+procedure TBLFont.Swap(var AOther: TBLFont);
+begin
+  FBase.Swap(AOther.FBase);
 end;
 
 {$ENDREGION 'Text'}
@@ -15152,7 +18506,7 @@ end;
 
 function _TBLImageDecoderHelper.GetCodec: TBLImageCodec;
 begin
-  Result.FBase := PImpl(FBase.FImpl).Codec;
+  _blImageCodecAssignWeak(@Result, @PImpl(FBase.FImpl).Codec);
 end;
 
 procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
@@ -15272,7 +18626,7 @@ end;
 
 function _TBLImageEncoderHelper.GetCodec: TBLImageCodec;
 begin
-  Result.FBase := PImpl(FBase.FImpl).Codec;
+  _blImageCodecAssignWeak(@Result, @PImpl(FBase.FImpl).Codec);
 end;
 
 procedure _TBLImageEncoderHelper.WriteFrame(const ADst: TBLArray<Byte>;
@@ -15437,7 +18791,7 @@ end;
 
 function TBLImageCodec.GetExtensions: TBLString;
 begin
-  Result.FBase := PImpl(FBase.FImpl).Extensions;
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).Extensions);
 end;
 
 function TBLImageCodec.GetFeatures: TBLImageCodecFeatures;
@@ -15453,17 +18807,17 @@ end;
 
 function TBLImageCodec.GetMimeType: TBLString;
 begin
-  Result.FBase := PImpl(FBase.FImpl).MimeType;
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).MimeType);
 end;
 
 function TBLImageCodec.GetName: TBLString;
 begin
-  Result.FBase := PImpl(FBase.FImpl).Name;
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).Name);
 end;
 
 function TBLImageCodec.GetVendor: TBLString;
 begin
-  Result.FBase := PImpl(FBase.FImpl).Vendor;
+  _blStringAssignWeak(@Result, @PImpl(FBase.FImpl).Vendor);
 end;
 
 function TBLImageCodec.HasFeature(

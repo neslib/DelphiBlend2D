@@ -969,6 +969,236 @@ function _blFontGetGlyphRunOutlines(const self: Pointer; const glyphRun: Pointer
   external _LIB_BLEND2D name _PU + 'blFontGetGlyphRunOutlines';
 {$ENDREGION 'font.h'}
 
+{$REGION 'fontdata.h'}
+function _blFontDataInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataInit';
+
+function _blFontDataInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataInitMove';
+
+function _blFontDataInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataInitWeak';
+
+function _blFontDataDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataDestroy';
+
+function _blFontDataReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataReset';
+
+function _blFontDataAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataAssignMove';
+
+function _blFontDataAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataAssignWeak';
+
+function _blFontDataCreateFromFile(self: Pointer; const fileName: PUTF8Char; readFlags: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataCreateFromFile';
+
+function _blFontDataCreateFromDataArray(self: Pointer; const dataArray: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataCreateFromDataArray';
+
+function _blFontDataCreateFromData(self: Pointer; const data: Pointer; dataSize: Size_T; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataCreateFromData';
+
+function _blFontDataEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataEquals';
+
+function _blFontDataGetFaceCount(const self: Pointer): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetFaceCount';
+
+function _blFontDataGetFaceType(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetFaceType';
+
+function _blFontDataGetFlags(const self: Pointer): Cardinal; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetFlags';
+
+function _blFontDataGetTableTags(const self: Pointer; faceIndex: UInt32; dst: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetTableTags';
+
+function _blFontDataGetTables(const self: Pointer; faceIndex: UInt32; dst: Pointer; const tags: Pointer; count: Size_T): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontDataGetTables';
+{$ENDREGION 'fontdata.h'}
+
+{$REGION 'fontface.h'}
+function _blFontFaceInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceInit';
+
+function _blFontFaceInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceInitMove';
+
+function _blFontFaceInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceInitWeak';
+
+function _blFontFaceDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceDestroy';
+
+function _blFontFaceReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceReset';
+
+function _blFontFaceAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceAssignMove';
+
+function _blFontFaceAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceAssignWeak';
+
+function _blFontFaceEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceEquals';
+
+function _blFontFaceCreateFromFile(self: Pointer; const fileName: PUTF8Char; readFlags: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceCreateFromFile';
+
+function _blFontFaceCreateFromData(self: Pointer; const fontData: Pointer; faceIndex: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceCreateFromData';
+
+function _blFontFaceGetFullName(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFullName';
+
+function _blFontFaceGetFamilyName(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFamilyName';
+
+function _blFontFaceGetSubfamilyName(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetSubfamilyName';
+
+function _blFontFaceGetPostScriptName(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetPostScriptName';
+
+function _blFontFaceGetFaceInfo(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFaceInfo';
+
+function _blFontFaceGetDesignMetrics(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetDesignMetrics';
+
+function _blFontFaceGetUnicodeCoverage(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetUnicodeCoverage';
+
+function _blFontFaceGetCharacterCoverage(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetCharacterCoverage';
+
+function _blFontFaceHasScriptTag(const self: Pointer; scriptTag: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceHasScriptTag';
+
+function _blFontFaceHasFeatureTag(const self: Pointer; featureTag: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceHasFeatureTag';
+
+function _blFontFaceHasVariationTag(const self: Pointer; variationTag: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceHasVariationTag';
+
+function _blFontFaceGetScriptTags(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetScriptTags';
+
+function _blFontFaceGetFeatureTags(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetFeatureTags';
+
+function _blFontFaceGetVariationTags(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFaceGetVariationTags';
+{$ENDREGION 'fontface.h'}
+
+{$REGION 'fontfeaturesettings.h'}
+function _blFontFeatureSettingsInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsInit';
+
+function _blFontFeatureSettingsInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsInitMove';
+
+function _blFontFeatureSettingsInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsInitWeak';
+
+function _blFontFeatureSettingsDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsDestroy';
+
+function _blFontFeatureSettingsReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsReset';
+
+function _blFontFeatureSettingsClear(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsClear';
+
+function _blFontFeatureSettingsShrink(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsShrink';
+
+function _blFontFeatureSettingsAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsAssignMove';
+
+function _blFontFeatureSettingsAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsAssignWeak';
+
+function _blFontFeatureSettingsGetSize(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetSize';
+
+function _blFontFeatureSettingsGetCapacity(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetCapacity';
+
+function _blFontFeatureSettingsGetView(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetView';
+
+function _blFontFeatureSettingsHasValue(const self: Pointer; featureTag: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsHasValue';
+
+function _blFontFeatureSettingsGetValue(const self: Pointer; featureTag: UInt32): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsGetValue';
+
+function _blFontFeatureSettingsSetValue(self: Pointer; featureTag: UInt32; value: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsSetValue';
+
+function _blFontFeatureSettingsRemoveValue(self: Pointer; featureTag: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsRemoveValue';
+
+function _blFontFeatureSettingsEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsEquals';
+{$ENDREGION 'fontfeaturesettings.h'}
+
+{$REGION 'fontvariationsettings.h'}
+function _blFontVariationSettingsInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsInit';
+
+function _blFontVariationSettingsInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsInitMove';
+
+function _blFontVariationSettingsInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsInitWeak';
+
+function _blFontVariationSettingsDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsDestroy';
+
+function _blFontVariationSettingsReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsReset';
+
+function _blFontVariationSettingsClear(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsClear';
+
+function _blFontVariationSettingsShrink(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsShrink';
+
+function _blFontVariationSettingsAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsAssignMove';
+
+function _blFontVariationSettingsAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsAssignWeak';
+
+function _blFontVariationSettingsGetSize(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetSize';
+
+function _blFontVariationSettingsGetCapacity(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetCapacity';
+
+function _blFontVariationSettingsGetView(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetView';
+
+function _blFontVariationSettingsHasValue(const self: Pointer; variationTag: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsHasValue';
+
+function _blFontVariationSettingsGetValue(const self: Pointer; variationTag: UInt32): Single; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsGetValue';
+
+function _blFontVariationSettingsSetValue(self: Pointer; variationTag: UInt32; value: Single): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsSetValue';
+
+function _blFontVariationSettingsRemoveValue(self: Pointer; variationTag: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsRemoveValue';
+
+function _blFontVariationSettingsEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontVariationSettingsEquals';
+{$ENDREGION 'fontvariationsettings.h'}
+
 {$REGION 'format.h'}
 function _blFormatInfoQuery(self: Pointer; format: Integer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blFormatInfoQuery';
