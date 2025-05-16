@@ -20,6 +20,7 @@ const
 type
   PUInt8 = PByte;
   PPUInt8 = ^PByte;
+  PInt32 = ^Int32;
   PPUInt32 = ^PUInt32;
   PPUTF8Char = ^PUTF8Char;
 
@@ -1146,6 +1147,56 @@ function _blFontFeatureSettingsEquals(const a: Pointer; const b: Pointer): Boole
   external _LIB_BLEND2D name _PU + 'blFontFeatureSettingsEquals';
 {$ENDREGION 'fontfeaturesettings.h'}
 
+{$REGION 'fontmanager.h'}
+function _blFontManagerInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerInit';
+
+function _blFontManagerInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerInitMove';
+
+function _blFontManagerInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerInitWeak';
+
+function _blFontManagerInitNew(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerInitNew';
+
+function _blFontManagerDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerDestroy';
+
+function _blFontManagerReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerReset';
+
+function _blFontManagerAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerAssignMove';
+
+function _blFontManagerAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerAssignWeak';
+
+function _blFontManagerCreate(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerCreate';
+
+function _blFontManagerGetFaceCount(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerGetFaceCount';
+
+function _blFontManagerGetFamilyCount(const self: Pointer): Size_T; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerGetFamilyCount';
+
+function _blFontManagerHasFace(const self: Pointer; const face: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerHasFace';
+
+function _blFontManagerAddFace(self: Pointer; const face: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerAddFace';
+
+function _blFontManagerQueryFace(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; const properties: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerQueryFace';
+
+function _blFontManagerQueryFacesByFamilyName(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerQueryFacesByFamilyName';
+
+function _blFontManagerEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFontManagerEquals';
+{$ENDREGION 'fontmanager.h'}
+
 {$REGION 'fontvariationsettings.h'}
 function _blFontVariationSettingsInit(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blFontVariationSettingsInit';
@@ -1578,6 +1629,77 @@ function _blMatrix2DMapPointDArray(const self: Pointer; dst: Pointer; const src:
   external _LIB_BLEND2D name _PU + 'blMatrix2DMapPointDArray';
 {$ENDREGION 'matrix.h'}
 
+{$REGION 'object.h'}
+function _blObjectAllocImpl(self: Pointer; objectInfo: UInt32; implSize: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAllocImpl';
+
+function _blObjectAllocImplAligned(self: Pointer; objectInfo: UInt32; implSize: Size_T; implAlignment: Size_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAllocImplAligned';
+
+function _blObjectAllocImplExternal(self: Pointer; objectInfo: UInt32; implSize: Size_T; immutable: Boolean; destroyFunc: _BLDestroyExternalDataFunc; userData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAllocImplExternal';
+
+function _blObjectFreeImpl(impl: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectFreeImpl';
+
+function _blObjectInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectInitMove';
+
+function _blObjectInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectInitWeak';
+
+function _blObjectReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectReset';
+
+function _blObjectAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAssignMove';
+
+function _blObjectAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectAssignWeak';
+
+function _blObjectGetProperty(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; valueOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetProperty';
+
+function _blObjectGetPropertyBool(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; valueOut: PBoolean): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyBool';
+
+function _blObjectGetPropertyInt32(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; valueOut: PInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyInt32';
+
+function _blObjectGetPropertyInt64(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; valueOut: PInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyInt64';
+
+function _blObjectGetPropertyUInt32(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; valueOut: PUInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyUInt32';
+
+function _blObjectGetPropertyUInt64(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; valueOut: PUInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyUInt64';
+
+function _blObjectGetPropertyDouble(const self: Pointer; const name: PUTF8Char; nameSize: Size_T; valueOut: PDouble): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectGetPropertyDouble';
+
+function _blObjectSetProperty(self: Pointer; const name: PUTF8Char; nameSize: Size_T; const value: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetProperty';
+
+function _blObjectSetPropertyBool(self: Pointer; const name: PUTF8Char; nameSize: Size_T; value: Boolean): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyBool';
+
+function _blObjectSetPropertyInt32(self: Pointer; const name: PUTF8Char; nameSize: Size_T; value: Int32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyInt32';
+
+function _blObjectSetPropertyInt64(self: Pointer; const name: PUTF8Char; nameSize: Size_T; value: Int64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyInt64';
+
+function _blObjectSetPropertyUInt32(self: Pointer; const name: PUTF8Char; nameSize: Size_T; value: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyUInt32';
+
+function _blObjectSetPropertyUInt64(self: Pointer; const name: PUTF8Char; nameSize: Size_T; value: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyUInt64';
+
+function _blObjectSetPropertyDouble(self: Pointer; const name: PUTF8Char; nameSize: Size_T; value: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blObjectSetPropertyDouble';
+{$ENDREGION 'object.h'}
+
 {$REGION 'path.h'}
 type
   _BLPathStrokeSinkFunc = function(a: Pointer; b: Pointer; c: Pointer; inputStart: Size_T; inputEnd: Size_T; userData: Pointer): Integer; cdecl;
@@ -1958,3 +2080,145 @@ function _blStringCompareData(const self: Pointer; const str: PUTF8Char; n: Size
   external _LIB_BLEND2D name _PU + 'blStringCompareData';
 {$ENDREGION 'string.h'}
 
+{$REGION 'var.h'}
+function _blVarInitType(self: Pointer; &type: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitType';
+
+function _blVarInitNull(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitNull';
+
+function _blVarInitBool(self: Pointer; value: Boolean): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitBool';
+
+function _blVarInitInt32(self: Pointer; value: Int32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitInt32';
+
+function _blVarInitInt64(self: Pointer; value: Int64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitInt64';
+
+function _blVarInitUInt32(self: Pointer; value: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitUInt32';
+
+function _blVarInitUInt64(self: Pointer; value: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitUInt64';
+
+function _blVarInitDouble(self: Pointer; value: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitDouble';
+
+function _blVarInitRgba(self: Pointer; const rgba: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitRgba';
+
+function _blVarInitRgba32(self: Pointer; rgba32: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitRgba32';
+
+function _blVarInitRgba64(self: Pointer; rgba64: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitRgba64';
+
+function _blVarInitMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitMove';
+
+function _blVarInitWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarInitWeak';
+
+function _blVarDestroy(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarDestroy';
+
+function _blVarReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarReset';
+
+function _blVarAssignNull(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignNull';
+
+function _blVarAssignBool(self: Pointer; value: Boolean): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignBool';
+
+function _blVarAssignInt32(self: Pointer; value: Int32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignInt32';
+
+function _blVarAssignInt64(self: Pointer; value: Int64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignInt64';
+
+function _blVarAssignUInt32(self: Pointer; value: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignUInt32';
+
+function _blVarAssignUInt64(self: Pointer; value: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignUInt64';
+
+function _blVarAssignDouble(self: Pointer; value: Double): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignDouble';
+
+function _blVarAssignRgba(self: Pointer; const rgba: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignRgba';
+
+function _blVarAssignRgba32(self: Pointer; rgba32: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignRgba32';
+
+function _blVarAssignRgba64(self: Pointer; rgba64: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignRgba64';
+
+function _blVarAssignMove(self: Pointer; other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignMove';
+
+function _blVarAssignWeak(self: Pointer; const other: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarAssignWeak';
+
+function _blVarGetType(const self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarGetType';
+
+function _blVarToBool(const self: Pointer; &out: PBoolean): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToBool';
+
+function _blVarToInt32(const self: Pointer; &out: PInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToInt32';
+
+function _blVarToInt64(const self: Pointer; &out: PInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToInt64';
+
+function _blVarToUInt32(const self: Pointer; &out: PUInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToUInt32';
+
+function _blVarToUInt64(const self: Pointer; &out: PUInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToUInt64';
+
+function _blVarToDouble(const self: Pointer; &out: PDouble): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToDouble';
+
+function _blVarToRgba(const self: Pointer; &out: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToRgba';
+
+function _blVarToRgba32(const self: Pointer; &out: PUInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToRgba32';
+
+function _blVarToRgba64(const self: Pointer; &out: PUInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarToRgba64';
+
+function _blVarEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEquals';
+
+function _blVarEqualsNull(const self: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsNull';
+
+function _blVarEqualsBool(const self: Pointer; value: Boolean): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsBool';
+
+function _blVarEqualsInt64(const self: Pointer; value: Int64): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsInt64';
+
+function _blVarEqualsUInt64(const self: Pointer; value: UInt64): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsUInt64';
+
+function _blVarEqualsDouble(const self: Pointer; value: Double): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsDouble';
+
+function _blVarEqualsRgba(const self: Pointer; const rgba: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsRgba';
+
+function _blVarEqualsRgba32(const self: Pointer; rgba32: UInt32): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsRgba32';
+
+function _blVarEqualsRgba64(const self: Pointer; rgba64: UInt64): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarEqualsRgba64';
+
+function _blVarStrictEquals(const a: Pointer; const b: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blVarStrictEquals';
+{$ENDREGION 'var.h'}

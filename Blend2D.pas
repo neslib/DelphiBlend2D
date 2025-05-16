@@ -624,7 +624,6 @@ type
     ///  Result = (not A) and B.
     /// </summary>
     NotAnd);
-
 {$ENDREGION 'Globals'}
 
 {$REGION 'Objects'}
@@ -957,6 +956,12 @@ type
 //    procedure InitStatic(const AInfo: UInt32); inline;
     function NeedsCleanup: Boolean; inline;
     procedure Swap(var AOther: TBLObjectCore); inline;
+  private
+    function AField: UInt32; inline;
+    function BField: UInt32; inline;
+    function CField: UInt32; inline;
+    function PField: UInt32; inline;
+    function QField: UInt32; inline;
   {$ENDREGION 'Internal Declarations'}
   end;
 
@@ -10514,17 +10519,1254 @@ type
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     property VariationSettings: TBLFontVariationSettings read GetVariationSettings write SetVariationSettings;
   end;
+
+{ ============================================================================
+   [Text - Font Management]
+  ============================================================================ }
+
+type
+  /// <summary>
+  ///  Properties that can be used to query `TBLFont` and `TBLFontFace`.
+  /// </summary>
+  /// <seealso cref="TBLFont"/>
+  /// <seealso cref="TBLFontFace"/>
+  /// <seealso cref="TBLFontManager"/>
+  TBLFontQueryProperties = record
+  public
+    /// <summary>
+    ///  Font style.
+    /// </summary>
+    Style: TBLFontStyle;
+
+    /// <summary>
+    ///  Font weight.
+    /// </summary>
+    Weight: TBLFontWeight;
+
+    /// <summary>
+    ///  Font stretch.
+    /// </summary>
+    Stretch: TBLFontStretch;
+  public
+    procedure Reset; inline;
+  end;
+  PBLFontQueryProperties = ^TBLFontQueryProperties;
+
+type
+  /// <summary>
+  ///  Font manager.
+  /// </summary>
+  TBLFontManager = record
+  {$REGION 'Internal Declarations'}
+  private
+    FBase: TBLObjectCore;
+    function GetIsValid: Boolean; inline;
+    function GetFaceCount: NativeInt; inline;
+    function GetFamilyCount: NativeInt; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default initialized font manager.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLFontManager);
+
+    /// <summary>
+    ///  Destroys the font manager.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLFontManager);
+
+    /// <summary>
+    ///  Copy constructor makes a weak copy of the underlying representation of
+    ///  the `ASrc` font manager.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLFontManager; const [ref] ASrc: TBLFontManager); inline;
+
+    /// <summary>
+    ///  Used to compare against `nil` (null font manager).
+    /// </summary>
+    class operator Equal(const ALeft: TBLFontManager; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font managers are equal (have the same contents).
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLFontManager): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (null font manager).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLFontManager; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font managers are not equal (do not have the same contents).
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLFontManager): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether this and `AOther` font managers are equal.
+    /// </summary>
+    function Equals(const AOther: TBLFontManager): Boolean; inline;
+
+    /// <summary>
+    ///  Resets the font manager to a default constructed state.
+    /// </summary>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Swaps the underlying representation of this font manager with the
+    ///  `AOther` font manager.
+    /// </summary>
+    procedure Swap(var AOther: TBLFontManager); inline;
+
+    /// <summary>
+    ///  Makes a valid `TBLFontManager` instance.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Make; inline;
+
+    /// <summary>
+    ///  Tests whether the font manager contains the given font `AFace`.
+    /// </summary>
+    function HasFace(const AFace: TBLFontFace): Boolean; inline;
+
+    /// <summary>
+    ///  Adds a font `AFace` to the font manager.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure. For example if the font `AFace` is invalid.</exception>
+    procedure AddFace(const AFace: TBLFontFace); inline;
+
+    /// <summary>
+    ///  Queries a font face by family `AName` and returns the result.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function QueryFace(const AName: String): TBLFontFace; overload; inline;
+
+    /// <summary>
+    ///  Queries a font face by family `AName` and returns the result.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function QueryFace(const AName: TBLStringView): TBLFontFace; overload; inline;
+
+    /// <summary>
+    ///  Queries a font face by family `AName` and returns the result.
+    ///
+    ///  An `AProperties` parameter contains query properties that the query
+    ///  engine will consider when doing the match. The best candidate will be
+    ///  selected based on the following rules:
+    ///
+    ///    - Style has the highest priority.
+    ///    - Weight has the lowest priority.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function QueryFace(const AName: String;
+      const AProperties: TBLFontQueryProperties): TBLFontFace; overload; inline;
+
+    /// <summary>
+    ///  Queries a font face by family `AName` and returns the result.
+    ///
+    ///  An `AProperties` parameter contains query properties that the query
+    ///  engine will consider when doing the match. The best candidate will be
+    ///  selected based on the following rules:
+    ///
+    ///    - Style has the highest priority.
+    ///    - Weight has the lowest priority.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function QueryFace(const AName: TBLStringView;
+      const AProperties: TBLFontQueryProperties): TBLFontFace; overload; inline;
+
+    /// <summary>
+    ///  Queries all font faces by family `AName`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function QueryFacesByFamilyName(const AName: String): TArray<TBLFontFace>; overload; inline;
+
+    /// <summary>
+    ///  Queries all font faces by family `AName` and stores the result to `AOut`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure QueryFacesByFamilyName(const AName: String;
+      const AOut: TBLArray<TBLFontFace>); overload; inline;
+
+    /// <summary>
+    ///  Queries all font faces by family `AName`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function QueryFacesByFamilyName(const AName: TBLStringView): TArray<TBLFontFace>; overload; inline;
+
+    /// <summary>
+    ///  Queries all font faces by family `AName` and stores the result to `AOut`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure QueryFacesByFamilyName(const AName: TBLStringView;
+      const AOut: TBLArray<TBLFontFace>); overload; inline;
+
+    /// <summary>
+    ///  Whether the font manager is a valid `TBLFontManager` and not a built-in
+    ///  default instance.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  The number of `TBLFontFace` instances the font manager holds.
+    /// </summary>
+    /// <seealso cref="TBLFontFace"/>
+    property FaceCount: NativeInt read GetFaceCount;
+
+    /// <summary>
+    ///  The number of unique font families the font manager holds.
+    /// </summary>
+    property FamilyCount: NativeInt read GetFamilyCount;
+  end;
+
 {$ENDREGION 'Text'}
 
+{$REGION 'Variant'}
+type
+  /// <summary>
+  ///  Blend2D variant.
+  /// </summary>
+  TBLVar = record
+  {$REGION 'Internal Declarations'}
+  private
+    FBase: TBLObjectCore;
+    class function GetNull: TBLVar; inline; static;
+    function GetObjectType: TBLObjectType; inline;
+    function GetIsArray: Boolean; inline;
+    function GetIsBitArray: Boolean; inline;
+    function GetIsBoolean: Boolean; inline;
+    function GetIsContext: Boolean; inline;
+    function GetIsDouble: Boolean; inline;
+    function GetIsFont: Boolean; inline;
+    function GetIsFontData: Boolean; inline;
+    function GetIsFontFace: Boolean; inline;
+    function GetIsFontManager: Boolean; inline;
+    function GetIsGradient: Boolean; inline;
+    function GetIsImage: Boolean; inline;
+    function GetIsImageCodec: Boolean; inline;
+    function GetIsImageDecoder: Boolean; inline;
+    function GetIsImageEncoder: Boolean; inline;
+    function GetIsInt64: Boolean; inline;
+    function GetIsNull: Boolean; inline;
+    function GetIsPath: Boolean; inline;
+    function GetIsPattern: Boolean; inline;
+    function GetIsString: Boolean; inline;
+    function GetIsRgba: Boolean; inline;
+    function GetIsRgba32: Boolean; inline;
+    function GetIsRgba64: Boolean; inline;
+    function GetIsUInt64: Boolean; inline;
+    function GetIsStyle: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates a default initialized variant.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Initialize(out ADest: TBLVar);
+
+    /// <summary>
+    ///  Destroys the variant.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLVar);
+
+    /// <summary>
+    ///  Copy constructor makes a weak copy of the underlying representation of
+    ///  the `ASrc` variant.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLVar; const [ref] ASrc: TBLVar); inline;
+
+    /// <summary>
+    ///  Returns True if two variants are equal (have the same contents).
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLVar): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: Boolean): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: Integer): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: Cardinal): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: Int64): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: UInt64): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: Double): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLRgba): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLRgba32): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLRgba64): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two variants are not equal (do not have the same contents).
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLVar): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: Boolean): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: Integer): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: Cardinal): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: Int64): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: UInt64): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: Double): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLRgba): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLRgba32): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLRgba64): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether this and `AOther` font managers are equal.
+    /// </summary>
+    function Equals(const AOther: TBLVar): Boolean; overload; inline;
+    function Equals(const AValue: Boolean): Boolean; overload; inline;
+    function Equals(const AValue: Integer): Boolean; overload; inline;
+    function Equals(const AValue: Cardinal): Boolean; overload; inline;
+    function Equals(const AValue: Int64): Boolean; overload; inline;
+    function Equals(const AValue: UInt64): Boolean; overload; inline;
+    function Equals(const AValue: Double): Boolean; overload; inline;
+    function Equals(const AValue: TBLRgba): Boolean; overload; inline;
+    function Equals(const AValue: TBLRgba32): Boolean; overload; inline;
+    function Equals(const AValue: TBLRgba64): Boolean; overload; inline;
+
+    function StrictEquals(const AOther: TBLVar): Boolean; inline;
+
+    class operator Implicit(const AValue: Boolean): TBLVar; inline; static;
+    class operator Implicit(const AValue: Integer): TBLVar; inline; static;
+    class operator Implicit(const AValue: Cardinal): TBLVar; inline; static;
+    class operator Implicit(const AValue: Int64): TBLVar; inline; static;
+    class operator Implicit(const AValue: UInt64): TBLVar; inline; static;
+    class operator Implicit(const AValue: Double): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLRgba): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLRgba32): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLRgba64): TBLVar; inline; static;
+
+    /// <summary>
+    ///  Converts this value to `Boolean`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToBoolean: Boolean; inline;
+
+    /// <summary>
+    ///  Converts this value to `Integer`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToInteger: Integer; inline;
+
+    /// <summary>
+    ///  Converts this value to `Cardinal`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToCardinal: Cardinal; inline;
+
+    /// <summary>
+    ///  Converts this value to `Int64`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToInt64: Int64; inline;
+
+    /// <summary>
+    ///  Converts this value to `UInt64`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToUInt64: UInt64; inline;
+
+    /// <summary>
+    ///  Converts this value to `Double`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToDouble: Double; inline;
+
+    /// <summary>
+    ///  Converts this value to `TBLRgba`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToRgba: TBLRgba; inline;
+
+    /// <summary>
+    ///  Converts this value to `TBLRgba32`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToRgba32: TBLRgba32; inline;
+
+    /// <summary>
+    ///  Converts this value to `TBLRgba64`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function ToRgba64: TBLRgba64; inline;
+
+    /// <summary>
+    ///  Resets the variant to a default constructed state.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Swaps the underlying representation of this variant with the
+    ///  `AOther` variant.
+    /// </summary>
+    procedure Swap(var AOther: TBLVar); inline;
+
+    class property Null: TBLVar read GetNull;
+
+    /// <summary>
+    ///  The type of the underlying object.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property ObjectType: TBLObjectType read GetObjectType;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents a `TBLArray<T>` storing any
+    ///  supported type.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsArray: Boolean read GetIsArray;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLBitArray`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsBitArray: Boolean read GetIsBitArray;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents a boxed `Boolean` value.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsBoolean: Boolean read GetIsBoolean;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLContext`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsContext: Boolean read GetIsContext;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents a boxed `Double` value.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsDouble: Boolean read GetIsDouble;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLFont`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsFont: Boolean read GetIsFont;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLFontData`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsFontData: Boolean read GetIsFontData;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLFontFace`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsFontFace: Boolean read GetIsFontFace;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLFontManager`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsFontManager: Boolean read GetIsFontManager;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLGradient`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsGradient: Boolean read GetIsGradient;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLImage`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsImage: Boolean read GetIsImage;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLImageCodec`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsImageCodec: Boolean read GetIsImageCodec;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLImageDecoder`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsImageDecoder: Boolean read GetIsImageDecoder;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLImageEncoder`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsImageEncoder: Boolean read GetIsImageEncoder;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents a boxed `Int64` value.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsInt64: Boolean read GetIsInt64;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents a null value.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsNull: Boolean read GetIsNull;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLPath`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsPath: Boolean read GetIsPath;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLPattern`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsPattern: Boolean read GetIsPattern;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents `TBLString`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsString: Boolean read GetIsString;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents boxed `TBLRgba`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsRgba: Boolean read GetIsRgba;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents boxed `TBLRgba32`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsRgba32: Boolean read GetIsRgba32;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents boxed `TBLRgba64`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsRgba64: Boolean read GetIsRgba64;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance represents a boxed `UIn64` value.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsUInt64: Boolean read GetIsUInt64;
+
+    /// <summary>
+    ///  Whether this `TBLVar` instance is a style that can be used with the
+    ///  rendering context.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property IsStyle: Boolean read GetIsStyle;
+  end;
+{$ENDREGION 'Variant'}
+
 {$REGION 'Rendering'}
+  /// <summary>
+  ///  Rendering context type.
+  /// </summary>
+  TBLContextType = (
+    /// <summary>
+    ///  No rendering context.
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///  Dummy rendering context.
+    /// </summary>
+    Dummy,
+
+    /// <summary>
+    ///  Software-accelerated rendering context.
+    /// </summary>
+    Raster = 3);
+
+type
+  /// <summary>
+  ///  Rendering context hint.
+  /// </summary>
+  TBLContextHint = (
+    /// <summary>
+    ///  Rendering quality.
+    /// </summary>
+    RenderingQuality,
+
+    /// <summary>
+    ///  Gradient quality.
+    /// </summary>
+    GradientQuality,
+
+    /// <summary>
+    ///  Pattern quality.
+    /// </summary>
+    PatternQuality);
+
+type
+  /// <summary>
+  ///  Describes a rendering context style slot - fill or stroke.
+  /// </summary>
+  TBLContextStyleSlot = (
+    /// <summary>
+    ///  Fill operation style slot.
+    /// </summary>
+    Fill,
+
+    /// <summary>
+    ///  Stroke operation style slot.
+    /// </summary>
+    Stroke);
+
+type
+  /// <summary>
+  ///  The type of a text rendering operation.
+  ///
+  ///  This value specifies the type of the parameter passed to the text
+  ///  rendering API.
+  /// </summary>
+  /// </remarks>
+  ///  In most cases this should not be required to use by Blend2D users since
+  ///  the API provides functions that use `TBLContextRenderTextOp` internally.
+  /// </remarks>
+  TBLContextRenderTextOp = (
+    /// <summary>
+    ///  UTF-8 text rendering operation - UTF-8 string passed as
+    ///  `TBLStringView`, `TBLArrayView<Byte>` or `TBLArrayView<UTF8Char>`.
+    /// </summary>
+    Utf8 = Ord(TBLTextEncoding.Utf8),
+
+    /// <summary>
+    ///  UTF-16 text rendering operation - UTF-16 string passed as
+    ///  `TBLArrayView<UInt16>` or `TBLArrayView<WideChar>`.
+    /// </summary>
+    Utf16 = Ord(TBLTextEncoding.Utf16),
+
+    /// <summary>
+    ///  UTF-32 text rendering operation - UTF-32 string passed as
+    ///  `TBLArrayView<UInt32>` or `TBLArrayView<UCS4Char>`.
+    /// </summary>
+    Utf32 = Ord(TBLTextEncoding.Utf32),
+
+    /// <summary>
+    ///  LATIN1 text rendering operation - LATIN1 string is passed as
+    ///  `TBLStringView`, `TBLArrayView<Byte>` or `TBLArrayView<AnsiChar>`.
+    /// </summary>
+    Latin1 = Ord(TBLTextEncoding.Latin1),
+
+    /// <summary>
+    ///  Glyph run text rendering operation - the `TBLGlyphRun` parameter is
+    ///  passed.
+    /// </summary>
+    GlyphRun = 4);
+
+type
+  /// <summary>
+  ///  Rendering context flush flags, used by `TBLContext.Flush`.
+  /// </summary>
+  /// <seealso cref="TBLContext.Flush"/>
+  TBLContextFlushFlag = (
+    _Reserved = 0,
+
+    /// <summary>
+    ///  Flushes the command queue and waits for its completion (will block
+    ///  until done).
+    /// </summary>
+    Sync = 31);
+
+  /// <summary>
+  ///  Rendering context flush flags, used by `TBLContext.Flush`.
+  /// </summary>
+  /// <seealso cref="TBLContext.Flush"/>
+  TBLContextFlushFlags = set of TBLContextFlushFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLContextFlushFlags`.
+  /// </summary>
+  _TBLContextFlushFlagsHelper = record helper for TBLContextFlushFlags
+  public const
+    /// <summary>
+    ///  No flags.
+    /// </summary>
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Rendering context creation flags.
+  /// </summary>
+  TBLContextCreateFlag = (
+    /// <summary>
+    ///  Disables JIT pipeline generator.
+    /// </summary>
+    DisableJit = 0,
+
+    /// <summary>
+    ///  Fallbacks to a synchronous rendering in case that the rendering engine
+    ///  wasn't able to acquire threads. This flag only makes sense when the
+    ///  asynchronous mode was specified by having `ThreadCount` greater than 0.
+    ///  If the rendering context fails to acquire at least one thread it would
+    ///  fallback to synchronous mode with no worker threads.
+    /// </summary>
+    /// <remarks>
+    ///  If this flag is specified with `ThreadCount = 1` it means to
+    ///  immediately fallback to synchronous rendering. It's only practical to
+    ///  use this flag with 2 or more requested threads.
+    /// </remarks>
+    FallbackToSync = 20,
+
+    /// <summary>
+    ///  If this flag is specified and asynchronous rendering is enabled then
+    ///  the context would create its own isolated  thread-pool, which is useful
+    ///  for debugging purposes.
+    ///
+    ///  Do not use this flag in production as rendering contexts with isolated
+    ///  thread-pool have to create and destroy all threads they use. This flag
+    ///  is only useful for testing, debugging, and isolated benchmarking.
+    /// </summary>
+    IsolatedThreadPool = 24,
+
+    /// <summary>
+    ///  If this flag is specified and JIT pipeline generation enabled then the
+    ///  rendering context would create its own isolated JIT runtime. which is
+    ///  useful for debugging purposes. This flag will be ignored if JIT
+    ///  pipeline compilation is either not supported or was disabled by other
+    ///  flags.
+    ///
+    ///  Do not use this flag in production as rendering contexts with isolated
+    ///  JIT runtime do not use global pipeline cache, that's it, after the
+    ///  rendering context is destroyed the JIT runtime is destroyed with it
+    ///  with all compiled pipelines. This flag is only useful for testing,
+    ///  debugging, and isolated benchmarking.
+    /// </summary>
+    IsolatedJitRuntime = 25,
+
+    /// <summary>
+    ///  Enables logging to stderr of isolated runtime.
+    /// </summary>
+    /// <remarks>
+    ///  Must be used with `IsolatedJitRuntime` otherwise it would have no
+    ///  effect.
+    /// </remarks>
+    IsolatedJitLogging = 26,
+
+    /// <summary>
+    ///  Override CPU features when creating isolated context.
+    /// </summary>
+    OverrideCpuFeatures = 27);
+
+  /// <summary>
+  ///  Rendering context creation flags.
+  /// </summary>
+  TBLContextCreateFlags = set of TBLContextCreateFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLContextCreateFlags`.
+  /// </summary>
+  _TBLContextCreateFlagsHelper = record helper for TBLContextCreateFlags
+  public const
+    /// <summary>
+    ///  No flags.
+    /// </summary>
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Error flags that are accumulated during the rendering context lifetime
+  ///  and that can be queried through `TBLContext.AccumulatedErrorFlags`. The
+  ///  reason why these flags exist is that errors can happen during
+  ///  asynchronous rendering, and there is no way the user can catch these
+  ///  errors.
+  /// </summary>
+  /// <seealso cref="TBLContext.AccumulatedErrorFlags"/>
+  TBLContextErrorFlag = (
+    /// <summary>
+    ///  The rendering context returned or encountered `TBLResult.InvalidValue`,
+    ///  which is mostly related to the function argument handling. It's very
+    ///  likely some argument was wrong when calling `TBLContext` API.
+    /// </summary>
+    InvalidValue = 0,
+
+    /// <summary>
+    ///  Invalid state describes something wrong, for example a pipeline
+    ///  compilation error.
+    /// </summary>
+    InvalidState = 1,
+
+    /// <summary>
+    ///  The rendering context has encountered invalid geometry.
+    /// </summary>
+    InvalidGeometry = 2,
+
+    /// <summary>
+    ///  The rendering context has encountered invalid glyph.
+    /// </summary>
+    InvalidGlyph = 3,
+
+    /// <summary>
+    ///  The rendering context has encountered invalid or uninitialized font.
+    /// </summary>
+    InvalidFont = 4,
+
+    /// <summary>
+    ///  Thread pool was exhausted and couldn't acquire the requested number of
+    ///  threads.
+    /// </summary>
+    ThreadPoolExhausted = 29,
+
+    /// <summary>
+    ///  Out of memory condition.
+    /// </summary>
+    OutOfMemory = 30,
+
+    /// <summary>
+    ///  Unknown error, which we don't have flag for.
+    /// </summary>
+    UnknownError = 31);
+
+  /// <summary>
+  ///  Error flags that are accumulated during the rendering context lifetime.
+  /// </summary>
+  TBLContextErrorFlags = set of TBLContextErrorFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLContextErrorFlags`.
+  /// </summary>
+  _TBLContextErrorFlagsHelper = record helper for TBLContextErrorFlags
+  public const
+    /// <summary>
+    ///  No flags.
+    /// </summary>
+    None = [];
+  end;
+
+type
+  /// <summary>
+  ///  Specifies the behavior of `TBLContext.SwapStyles` operation.
+  /// </summary>
+  /// <seealso cref="TBLContext.SwapStyles"/>
+  TBLContextStyleSwapMode = (
+    /// <summary>
+    ///  Swap only fill and stroke styles without affecting fill and stroke alpha.
+    /// </summary>
+    Styles,
+
+    /// <summary>
+    ///  Swap both fill and stroke styles and their alpha values.
+    /// </summary>
+    StyledWithAlpha);
+
+type
+  /// <summary>
+  ///  Specifies how style transformation matrix is combined with the rendering
+  ///  context transformation matrix, used by `TBLContext.SetStyle` function.
+  /// </summary>
+  /// <seealso cref="TBLContext.SetStyle"/>
+  TBLContextStyleTransformMode = (
+    /// <summary>
+    ///  Style transformation matrix should be transformed with the rendering
+    ///  context user and meta matrix (default).
+    /// </summary>
+    /// <remarks>
+    ///  This transformation mode is identical to how user geometry is
+    ///  transformed and it's the default transformation and most likely the
+    ///  behavior expected in most cases.
+    /// </remarks>
+    User,
+
+    /// <summary>
+    ///  Style transformation matrix should be transformed with the rendering
+    ///  context meta matrix.
+    /// </summary>
+    Meta,
+
+    /// <summary>
+    ///  Style transformation matrix is considered absolute, and is not combined
+    ///  with a rendering context transform.
+    /// </summary>
+    None);
+
+type
+  /// <summary>
+  ///  Composition & blending operator.
+  /// </summary>
+  TBLCompOp = (
+    /// <summary>
+    ///  Source-over [default].
+    /// </summary>
+    SrcOver,
+
+    /// <summary>
+    ///  Source-copy.
+    /// </summary>
+    SrcCopy,
+
+    /// <summary>
+    ///  Source-in.
+    /// </summary>
+    SrcIn,
+
+    /// <summary>
+    ///  Source-out.
+    /// </summary>
+    SrcOut,
+
+    /// <summary>
+    ///  Source-atop.
+    /// </summary>
+    SrcAtop,
+
+    /// <summary>
+    ///  Destination-over.
+    /// </summary>
+    DstOver,
+
+    /// <summary>
+    ///  Destination-copy [nop].
+    /// </summary>
+    DstCopy,
+
+    /// <summary>
+    ///  Destination-in.
+    /// </summary>
+    DstIn,
+
+    /// <summary>
+    ///  Destination-out.
+    /// </summary>
+    DstOut,
+
+    /// <summary>
+    ///  Destination-atop.
+    /// </summary>
+    DstAtop,
+
+    /// <summary>
+    ///  Xor.
+    /// </summary>
+    ExclusiveOr,
+
+    /// <summary>
+    ///  Clear.
+    /// </summary>
+    Clear,
+
+    /// <summary>
+    ///  Plus.
+    /// </summary>
+    Plus,
+
+    /// <summary>
+    ///  Minus.
+    /// </summary>
+    Minus,
+
+    /// <summary>
+    ///  Modulate.
+    /// </summary>
+    Modulate,
+
+    /// <summary>
+    ///  Multiply.
+    /// </summary>
+    Multiply,
+
+    /// <summary>
+    ///  Screen.
+    /// </summary>
+    Screen,
+
+    /// <summary>
+    ///  Overlay.
+    /// </summary>
+    Overlay,
+
+    /// <summary>
+    ///  Darken.
+    /// </summary>
+    Darken,
+
+    /// <summary>
+    ///  Lighten.
+    /// </summary>
+    Lighten,
+
+    /// <summary>
+    ///  Color dodge.
+    /// </summary>
+    ColorDodge,
+
+    /// <summary>
+    ///  Color burn.
+    /// </summary>
+    ColorBurn,
+
+    /// <summary>
+    ///  Linear burn.
+    /// </summary>
+    LinearBurn,
+
+    /// <summary>
+    ///  Linear light.
+    /// </summary>
+    LinearLight,
+
+    /// <summary>
+    ///  Pin light.
+    /// </summary>
+    PinLight,
+
+    /// <summary>
+    ///  Hard-light.
+    /// </summary>
+    HardLight,
+
+    /// <summary>
+    ///  Soft-light.
+    /// </summary>
+    SoftLight,
+
+    /// <summary>
+    ///  Difference.
+    /// </summary>
+    Difference,
+
+    /// <summary>
+    ///  Exclusion.
+    /// </summary>
+    Exclusion);
+
+type
+  /// <summary>
+  ///  Rendering quality.
+  /// </summary>
+  TBLRenderingQuality = (
+    /// <summary>
+    ///  Render using anti-aliasing.
+    /// </summary>
+    AntiAlias);
+
+type
+  /// <summary>
+  ///  Information that can be used to customize the rendering context.
+  /// </summary>
+  TBLContextCreateInfo = record
+  public
+    /// <summary>
+    ///  Create flags.
+    /// </summary>
+    Flags: TBLContextCreateFlags;
+
+    /// <summary>
+    ///  Number of worker threads to use for asynchronous rendering, if non-zero.
+    ///
+    ///  If `ThreadCount` is zero it means to initialize the context for
+    ///  synchronous rendering. This means that every operation will take effect
+    ///  immediately. If `ThreadCount` is `1` it means that the rendering will
+    ///  be asynchronous, but no thread would be acquired from a thread-pool,
+    ///  because the user thread will be used as a worker. And finally, if
+    ///  `ThreadCount` is greater than `1` then total of `ThreadCount - 1`
+    ///  threads will be acquired from thread-pool and used as additional
+    ///  workers.
+    /// </summary>
+    ThreadCount: Integer;
+
+    /// <summary>
+    ///  CPU features to use in isolated JIT runtime (if supported), only used
+    ///  when `Flags` contains `TBLContextCreateFlag.OverrideCpuFeatures`.
+    /// </summary>
+    CpuFeatures: Cardinal;
+
+    /// <summary>
+    ///  Maximum number of commands to be queued.
+    ///
+    ///  If this parameter is zero the queue size will be determined
+    ///  automatically.
+    /// </summary>
+    CommandQueueLimit: Integer;
+
+    /// <summary>
+    ///  Maximum number of saved states.
+    /// </summary>
+    /// <remarks>
+    ///  Zero value tells the rendering engine to use the default saved state
+    ///  limit, which currently defaults to 4096 states. This option allows to
+    ///  even increase or decrease the limit, depending on the use case.
+    /// </remarks>
+    SavedStateLimit: Integer;
+
+    /// <summary>
+    ///  Pixel origin.
+    ///
+    ///  Pixel origin is an offset in pixel units that can be used as an origin
+    ///  for fetchers and effects that use a pixel X/Y coordinate in the
+    ///  calculation. One example of using pixel origin is dithering, where it's
+    ///  used to shift the dithering matrix.
+    /// </summary>
+    PixelOrigin: TBLPointI;
+
+    /// <summary>
+    ///  Reserved for future use, must be zero.
+    /// </summary>
+    _Reserved: Cardinal;
+  public
+    procedure Reset; inline;
+  end;
+  PBLContextCreateInfo = ^TBLContextCreateInfo;
+
+type
+  /// <summary>
+  ///  Holds an arbitrary 128-bit value (cookie) that can be used to match other
+  ///  cookies. Blend2D uses cookies in places where it allows to "lock" some
+  ///  state that can only be unlocked by a matching cookie. Please don't
+  ///  confuse cookies with a security of any kind, it's just an arbitrary data
+  ///  that must match to proceed with a certain operation.
+  ///
+  ///  Cookies can be used with `TBLContext.Save` and `TBLContext.Restore`
+  ///  operations.
+  /// </summary>
+  /// <seealso cref="TBLContext.Save"/>
+  /// <seealso cref="TBLContext.Restore"/>
+  TBLContextCookie = record
+  {$REGION 'Internal Declarations'}
+  private
+    FData: array [0..1] of UInt64;
+    function GetIsEmpty: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    class operator Equal(const ALeft, ARight: TBLContextCookie): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLContextCookie): Boolean; inline; static;
+
+    procedure Reset; overload; inline;
+    procedure Reset(const AOther: TBLContextCookie); overload; inline;
+    procedure Reset(const AData0, AData1: UInt64); overload; inline;
+
+    function Equals(const AOther: TBLContextCookie): Boolean; inline;
+
+    property IsEmpty: Boolean read GetIsEmpty;
+  end;
+  PBLContextCookie = ^TBLContextCookie;
+
+type
+  /// <summary>
+  ///  Rendering context hints.
+  /// </summary>
+  TBLContextHints = record
+  {$REGION 'Internal Declarations'}
+  private
+    function GetRenderingQuality: TBLRenderingQuality; inline;
+    function GetGradientQuality: TBLGradientQuality; inline;
+    function GetPatternQuality: TBLPatternQuality; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    Hints: array [TBLContextHint] of Byte;
+  public
+    procedure Reset; inline;
+
+    property RenderingQuality: TBLRenderingQuality read GetRenderingQuality;
+    property GradientQuality: TBLGradientQuality read GetGradientQuality;
+    property PatternQuality: TBLPatternQuality read GetPatternQuality;
+  end;
+  PBLContextHints = ^TBLContextHints;
+
 type
   /// <summary>
   ///  Rendering context.
   /// </summary>
   TBLContext = record
   {$REGION 'Internal Declarations'}
+  private type
+    TState = record
+    public
+      TargetImage: TBLObjectCore;
+      Targetize: TBLSize;
+      Hints: TBLContextHints;
+      CompOp: Byte;
+      FillRule: Byte;
+      StyleType: array [0..1] of Byte;
+      SavedStateCount: Int32;
+      GlobalAlpha: Double;
+      StyleAlpha: array [0..1] of Double;
+      StrokeOptions: TBLStrokeOptions;
+      ApproximationOptions: TBLApproximationOptions;
+      MetaTransform: TBLMatrix2D;
+      UserTransform: TBLMatrix2D;
+      FinalTransform: TBLMatrix2D;
+    end;
+    PState = ^TState;
+  private type
+    TImpl = record
+    public
+      Virt: Pointer;
+      State: PState;
+      ContextType: UInt32;
+    end;
+    PImpl = ^TImpl;
   private
     FBase: TBLObjectCore;
+    function GetTargetSize: TBLSize; inline;
+    function GetTargetWidth: Double; inline;
+    function GetTargetHeight: Double; inline;
+    function GetTargetImage: TBLImage; inline;
+    function GetContextType: TBLContextType; inline;
+    function GetIsValid: Boolean; inline;
+    function GetThreadCount: Integer; inline;
+    function GetAccumulatedErrorFlags: TBLContextErrorFlags; inline;
+    function GetSavedStateCount: Integer; inline;
+    function GetMetaTransform: TBLMatrix2D; inline;
+    function GetUserTransform: TBLMatrix2D; inline;
+    procedure SetUserTransform(const AValue: TBLMatrix2D); inline;
+    function GetFinalTransform: TBLMatrix2D; inline;
+    function GetHints: TBLContextHints; inline;
+    procedure SetHints(const AValue: TBLContextHints); inline;
+    function GetRenderingQuality: TBLRenderingQuality; inline;
+    procedure SetRenderingQuality(const AValue: TBLRenderingQuality); inline;
+    function GetGradientQuality: TBLGradientQuality; inline;
+    procedure SetGradientQuality(const AValue: TBLGradientQuality); inline;
+    function GetPatternQuality: TBLPatternQuality; inline;
+    procedure SetPatternQuality(const AValue: TBLPatternQuality); inline;
+    function GetApproximationOptions: TBLApproximationOptions; inline;
+    procedure SetApproximationOptions(const AValue: TBLApproximationOptions); inline;
+    function GetFlattenMode: TBLFlattenMode; inline;
+    procedure SetFlattenMode(const AValue: TBLFlattenMode); inline;
+    function GetFlattenTolerance: Double; inline;
+    procedure SetFlattenTolerance(const AValue: Double); inline;
+    function GetCompOp: TBLCompOp; inline;
+    procedure SetCompOp(const AValue: TBLCompOp); inline;
+    function GetGlobalAlpha: Double; inline;
+    procedure SetGlobalAlpha(const AValue: Double); inline;
+    function GetStyleType(const ASlot: TBLContextStyleSlot): TBLObjectType; inline;
+    function GetStyle(const ASlot: TBLContextStyleSlot): TBLVar; inline;
+    function GetTransformedStyle(const ASlot: TBLContextStyleSlot): TBLVar; inline;
+    function GetStyleAlpha(const ASlot: TBLContextStyleSlot): Double; inline;
+    procedure SetStyleAlpha(const ASlot: TBLContextStyleSlot;
+      const AValue: Double); inline;
+    function GetFillStyleType: TBLObjectType; inline;
+    function GetFillStyle: TBLVar; inline;
+    function GetTransformedFillStyle: TBLVar; inline;
+    function GetFillAlpha: Double; inline;
+    procedure SetFillAlpha(const AValue: Double); inline;
+    function GetFillRule: TBLFillRule; inline;
+    procedure SetFillRule(const AValue: TBLFillRule); inline;
+    function GetStrokeStyleType: TBLObjectType; inline;
+    function GetStrokeStyle: TBLVar; inline;
+    function GetTransformedStrokeStyle: TBLVar; inline;
+    function GetStrokeWidth: Double; inline;
+    procedure SetStrokeWidth(const AValue: Double); inline;
+    function GetStrokeMiterLimit: Double; inline;
+    procedure SetStrokeMiterLimit(const AValue: Double); inline;
+    function GetStrokeJoin: TBLStrokeJoin; inline;
+    procedure SetStrokeJoin(const AValue: TBLStrokeJoin); inline;
+    function GetStrokeStartCap: TBLStrokeCap; inline;
+    procedure SetStrokeStartCap(const AValue: TBLStrokeCap); inline;
+    function GetStrokeEndCap: TBLStrokeCap; inline;
+    procedure SetStrokeEndCap(const AValue: TBLStrokeCap); inline;
+    function GetStrokeTransformOrder: TBLStrokeTransformOrder; inline;
+    procedure SetStrokeTransformOrder(const AValue: TBLStrokeTransformOrder); inline;
+    function GetStrokeDashOffset: Double; inline;
+    procedure SetStrokeDashOffset(const AValue: Double); inline;
+    function GetStrokeDashArray: TBLArray<Double>; inline;
+    procedure SetStrokeDashArray(const AValue: TBLArray<Double>); inline;
+    function GetStrokeOptions: TBLStrokeOptions; inline;
+    procedure SetStrokeOptions(const AValue: TBLStrokeOptions); inline;
+    function GetStrokeAlpha: Double; inline;
+    procedure SetStrokeAlpha(const AValue: Double); inline;
+  private
+    function Impl: PImpl; inline;
+    function State: PState; inline;
   {$ENDREGION 'Internal Declarations'}
   public
     /// <summary>
@@ -10571,6 +11813,26 @@ type
     class operator Assign(var ADest: TBLContext; const [ref] ASrc: TBLContext); inline;
 
     /// <summary>
+    ///  Used to compare against `nil` (null or invalid context).
+    /// </summary>
+    class operator Equal(const ALeft: TBLContext; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two contexts are equal.
+    /// </summary>
+    class operator Equal(const ALeft, ARight: TBLContext): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (null or invalid context).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLContext; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Returns True if two font contexts are not equal.
+    /// </summary>
+    class operator NotEqual(const ALeft, ARight: TBLContext): Boolean; inline; static;
+
+    /// <summary>
     ///  Creates a new rendering context for rendering to the image `ATarget`.
     ///
     ///  This is a simplified constructor that can be used to create a rendering
@@ -10578,7 +11840,62 @@ type
     ///  rendering context will use a single-threaded synchronous rendering.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    constructor Create(const ATarget: TBLImage);
+    constructor Create(const ATarget: TBLImage); overload;
+
+    /// <summary>
+    ///  Creates a new rendering context for rendering to the image `ATarget`.
+    ///
+    ///  This is an advanced constructor that can be used to create a rendering
+    ///  context with additional parameters. These parameters can be used to
+    ///  specify the number of threads to be used during rendering and to select
+    ///  other features.
+    /// </summary>
+    constructor Create(const ATarget: TBLImage;
+      const ACreateInfo: TBLContextCreateInfo); overload;
+
+    /// <summary>
+    ///  Returns whether this and `AOther` point to the same rendering context.
+    /// </summary>
+    function Equals(const AOther: TBLContext): Boolean;
+
+    /// <summary>
+    ///  Resets this rendering context to the default constructed one.
+    ///
+    ///  Similar behavior to the destructor, but the rendering context will
+    ///  still be a valid object after the call to `Reset` and would behave like
+    ///  a default constructed context.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Begins rendering to the given `AImage`.
+    ///
+    ///  This is a simplified `Start` method that can be used to create a
+    ///  rendering context without any additional parameters, which means that
+    ///  the rendering context will use a single-threaded synchronous rendering.
+    ///
+    ///  If this operation succeeds then the rendering context will have
+    ///  exclusive access to the image data. This means that no other renderer
+    ///  can use it during rendering.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Start(const AImage: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Begins rendering to the given `AImage`.
+    ///
+    ///  This is an advanced `Start` method that can be used to create a
+    ///  rendering context with additional parameters. These parameters can be
+    ///  used to specify the number of threads to be used during rendering and
+    ///  to select other features.
+    ///
+    ///  If this operation succeeds then the rendering context will have
+    ///  exclusive access to the image data. This means that no other renderer
+    ///  can use it during rendering.
+    /// </summary>
+    procedure Start(const AImage: TBLImage;
+      const ACreateInfo: TBLContextCreateInfo); overload; inline;
 
     /// <summary>
     ///  Waits for completion of all render commands and detaches the rendering
@@ -10594,6 +11911,643 @@ type
     /// </remarks>
     /// <seealso cref="Flush"/>
     procedure Finish; inline;
+
+    /// <summary>
+    ///  Flushes the context.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Flush(const AFlags: TBLContextFlushFlags); inline;
+
+    /// <summary>
+    ///  Saves the current rendering context state.
+    ///
+    ///  Blend2D uses optimizations that make `Save` a cheap operation. Only
+    ///  core values are actually saved, others will only be saved if they are
+    ///  modified. This means that consecutive calls to `Save` and `Restore` do
+    ///  almost nothing.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Restore"/>
+    procedure Save; overload; inline;
+
+    /// <summary>
+    ///  Saves the current rendering context state and creates a restoration
+    ///  `cookie`.
+    ///
+    ///  If you use a `cookie` to save a state you have to use the same cookie
+    ///  to restore it otherwise the `Restore` would fail. Please note that
+    ///  cookies are not a means of security, they are provided for making it
+    ///  easier to guarantee that a code that you may not control won't break
+    ///  your context.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Restore"/>
+    procedure Save(out ACookie: TBLContextCookie); overload; inline;
+
+    /// <summary>
+    ///  Restores the top-most saved context-state.
+    ///
+    ///  Possible error conditions:
+    ///
+    ///    - TBLResult.Success - State was restored successfully.
+    ///    - TBLResult.NoStatesToRestore - There are no saved states to restore.
+    ///    - TBLResult.NoMatchingCookie - Previous state was saved with cookie,
+    ///      which was not provided. You would need the correct cookie to
+    ///      restore such state.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Save"/>
+    procedure Restore; overload; inline;
+
+    /// <summary>
+    ///  Restores the top-most saved context-state.
+    ///
+    ///  Possible error conditions:
+    ///
+    ///    - TBLResult.Success - State was restored successfully.
+    ///    - TBLResult.NoStatesToRestore - There are no saved states to restore.
+    ///    - TBLResult.NoMatchingCookie - The cookie did't match any saved state.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Save"/>
+    procedure Restore(const ACookie: TBLContextCookie); overload; inline;
+
+    /// <summary>
+    ///  Sets user transformation matrix to `ATransform`.
+    /// </summary>
+    /// <remarks>
+    ///  This only assigns the user transformation matrix, which means that the
+    ///  meta transformation matrix is kept as is. This means that the final
+    ///  transformation matrix will be recalculated based on the given
+    ///  `transform`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetTransform(const ATransform: TBLMatrix2D); inline;
+
+    /// <summary>
+    ///  Resets user transformation matrix to identity.
+    /// </summary>
+    /// <remarks>
+    ///  This only resets the user transformation matrix, which means that the
+    ///  meta transformation matrix is kept as is. This means that the final
+    ///  transformation matrix after `ResetTransform` would be the same as meta
+    ///  transformation matrix.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ResetTransform; inline;
+
+    /// <summary>
+    ///  Translates the user transformation matrix by `[AX, AY]`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Translate(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Translates the user transformation matrix by `[AP]` (floating-point).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Translate(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Translates the user transformation matrix by `[AP]` (integer).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Translate(const AP: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Scales the user transformation matrix by `AXY` (both X and Y is scaled
+    ///  by `AXY`).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Scale(const AXY: Double); overload; inline;
+
+    /// <summary>
+    ///  Scales the user transformation matrix by `[AX, AY]`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Scale(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Scales the user transformation matrix by `[AP]` (floating-point).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Scale(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Scales the user transformation matrix by `[AP]` (integer).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Scale(const AP: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Skews the user transformation matrix by `[AX, AY]`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Skew(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Skews the user transformation matrix by `[AP]` (floating-point).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Skew(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix by `AAngle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Rotate(const AAngle: Double); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix at `[AX, AY]` by `AAngle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Rotate(const AAngle, AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix at `AOrigin` (floating-point) by
+    ///  `AAngle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix at `AOrigin` (integer) by
+    ///  `AAngle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Rotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Transforms the user transformation matrix by `ATransform`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure ApplyTransform(const ATransform: TBLMatrix2D); inline;
+
+    /// <summary>
+    ///  Post-translates the used transformation matrix by `[AX, AY]`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-translation uses a reversed order of matrix multiplication when
+    ///  compared to `Translate`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Translate"/>
+    procedure PostTranslate(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Post-Translates the used transformation matrix by `[AP]` (floating-point).
+    /// </summary>
+    /// <remarks>
+    ///  Post-translation uses a reversed order of matrix multiplication when
+    ///  compared to `Translate`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Translate"/>
+    procedure PostTranslate(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Post-Translates the used transformation matrix by `[AP]` (integer).
+    /// </summary>
+    /// <remarks>
+    ///  Post-translation uses a reversed order of matrix multiplication when
+    ///  compared to `Translate`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Translate"/>
+    procedure PostTranslate(const AP: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Post-scales the user transformation matrix by `AXY` (both X and Y is
+    ///  scaled by `AXY`).
+    /// </summary>
+    /// <remarks>
+    ///  Post-scale uses a reversed order of matrix multiplication when compared
+    ///  `Scale`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Scale"/>
+    procedure PostScale(const AXY: Double); overload; inline;
+
+    /// <summary>
+    ///  Post-scales the user transformation matrix by `[AX, AY]`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-scale uses a reversed order of matrix multiplication when compared
+    ///  `Scale`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Scale"/>
+    procedure PostScale(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Post-scales the user transformation matrix by `[AP]` (floating-point).
+    /// </summary>
+    /// <remarks>
+    ///  Post-scale uses a reversed order of matrix multiplication when compared
+    ///  `Scale`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Scale"/>
+    procedure PostScale(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Post-scales the user transformation matrix by `[AP]` (integer).
+    /// </summary>
+    /// <remarks>
+    ///  Post-scale uses a reversed order of matrix multiplication when compared
+    ///  `Scale`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Scale"/>
+    procedure PostScale(const AP: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Skews the user transformation matrix by `[AX, AY]`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-skew uses a reversed order of matrix multiplication when compared
+    ///  to `Skew`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Skew"/>
+    procedure PostSkew(const AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Skews the user transformation matrix by `[AP]` (floating-point).
+    /// </summary>
+    /// <remarks>
+    ///  Post-skew uses a reversed order of matrix multiplication when compared
+    ///  to `Skew`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Skew"/>
+    procedure PostSkew(const AP: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix by `AAngle`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-rotation uses a reversed order of matrix multiplication when
+    ///  compared to `Rotate`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Rotate"/>
+    procedure PostRotate(const AAngle: Double); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix at `[AX, AY]` by `AAngle`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-rotation uses a reversed order of matrix multiplication when
+    ///  compared to `Rotate`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Rotate"/>
+    procedure PostRotate(const AAngle, AX, AY: Double); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix at `AOrigin` (floating-point) by
+    ///  `AAngle`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-rotation uses a reversed order of matrix multiplication when
+    ///  compared to `Rotate`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Rotate"/>
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Rotates the user transformation matrix at `AOrigin` (integer) by
+    ///  `AAngle`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-rotation uses a reversed order of matrix multiplication when
+    ///  compared to `Rotate`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Rotate"/>
+    procedure PostRotate(const AAngle: Double; const AOrigin: TBLPointI); overload; inline;
+
+    /// <summary>
+    ///  Transforms the user transformation matrix by `ATransform`.
+    /// </summary>
+    /// <remarks>
+    ///  Post-transform uses a reversed order of matrix multiplication when
+    ///  compared to `ApplyTransform`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="ApplyTransform"/>
+    procedure PostTransform(const ATransform: TBLMatrix2D); inline;
+
+    /// <summary>
+    ///  Stores the result of combining the current `MetaTransform` and
+    ///  `UserTransform` to `MetaTransform` and resets `UserTransform` to
+    ///  identity as shown below:
+    ///
+    ///  ```
+    ///  MetaTransform := MetaTransform * UserTransform;
+    ///  UserTransform := Identity
+    ///  ```
+    ///
+    ///  Please note that this operation is irreversible. The only way to
+    ///  restore a meta-matrix is to `Save` the rendering context state, then to
+    ///  use `UserToMeta`, and then restored by `Restore` when needed.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Save"/>
+    /// <seealso cref="Restore"/>
+    procedure UserToMeta; inline;
+
+    /// <summary>
+    ///  Sets the given rendering hint `AHintType` to `AValue`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetHint(const AHintType: TBLContextHint;
+      const AValue: Integer); inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot;
+      const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot;
+      const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot;
+      const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot;
+      const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot;
+      const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot;
+      const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation and
+    ///  applied `ATransformMode`.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot; const AStyle: TBLGradient;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation and
+    ///  applied `ATransformMode`.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot; const AStyle: TBLPattern;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation and
+    ///  applied `ATransformMode`.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot; const AStyle: TBLVar;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets the given style `ASlot` to Null, which disables it.
+    ///
+    ///  Styles set to Null would reject all rendering operations that would
+    ///  otherwise use that style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure DisableStyle(const ASlot: TBLContextStyleSlot); inline;
+
+    /// <summary>
+    ///  Swaps fill and stroke styles.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SwapStyles(const AMode: TBLContextStyleSwapMode); inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLGradient;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLPattern;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TBLVar;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style to Null, which disables it.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure DisableFillStyle; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLGradient;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLPattern;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    ///
+    ///  This is a convenience method that allows to control how the given
+    ///  `AStyle` is transformed. By default, if `ATransformMode` is not
+    ///  provided, the rendering context combines the style transformation
+    ///  matrix with user transformation matrix, which is compatible with
+    ///  how it transforms geometry. However, if that is undesired, a
+    ///  `ATransformMode` can override the default operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TBLVar;
+      const ATransformMode: TBLContextStyleTransformMode); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style to Null, which disables it.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure DisableStrokeStyle; inline;
+
+    /// <summary>
+    ///  Sets stroke cap of the specified `APosition` to `AStrokeCap`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeCap(const APosition: TBLStrokeCapPosition;
+      const AStrokeCap: TBLStrokeCap); inline;
+
+    /// <summary>
+    ///  Sets all stroke caps to `AStrokeCap`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeCaps(const AStrokeCap: TBLStrokeCap); inline;
 
     /// <summary>
     ///  Clear everything to a transparent black, which is the same operation as
@@ -10620,6 +12574,359 @@ type
     ///  Fills the given `APath` with the given `AColor`.
     /// </summary>
     procedure FillPath(const APath: TBLPath; const AColor: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  The target size in abstract units (pixels in case of `TBLImage`).
+    /// </summary>
+    property TargetSize: TBLSize read GetTargetSize;
+
+    /// <summary>
+    ///  The target width in abstract units (pixels in case of `TBLImage`).
+    /// </summary>
+    property TargetWidth: Double read GetTargetWidth;
+
+    /// <summary>
+    ///  The target height in abstract units (pixels in case of `TBLImage`).
+    /// </summary>
+    property TargetHeight: Double read GetTargetHeight;
+
+    /// <summary>
+    ///  Returns the target image or nil if there is no target image.
+    /// </summary>
+    /// <remarks>
+    ///  The rendering context doesn't own the image, but it increases its
+    ///  writer count, which means that the image will not be destroyed even
+    ///  when user destroys it during the rendering (in such case it will be
+    ///  destroyed after the rendering ends when the writer count goes to zero).
+    ///  This means that the rendering context must hold the image and not the
+    ///  `TBLImage` passed to either the constructor or `Start` method. So the
+    ///  returned image is not the same as the image passed to `Start`, but it
+    ///  points to the same underlying data.
+    /// </remarks>
+    property TargetImage: TBLImage read GetTargetImage;
+
+    /// <summary>
+    ///  Returns the type of this context, see \ref BLContextType.
+    /// </summary>
+    property ContextType: TBLContextType read GetContextType;
+
+    /// <summary>
+    ///  Tests whether the context is a valid rendering context that has
+    ///  attached target to it.
+    /// </summary>
+    property IsValid: Boolean read GetIsValid;
+
+    /// <summary>
+    ///  The number of threads that the rendering context uses.
+    ///
+    ///  If the returned value is zero it means that the rendering is
+    ///  synchronous, otherwise it describes the number of  threads used for
+    ///  asynchronous rendering which include the user thread. For example if
+    ///  the returned value is `2` it means that the rendering context uses the
+    ///  user thread and one more worker.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property ThreadCount: Integer read GetThreadCount;
+
+    /// <summary>
+    ///  Accumulated errors as flags.
+    ///
+    ///  Errors may accumulate during the lifetime of the rendering context.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property AccumulatedErrorFlags: TBLContextErrorFlags read GetAccumulatedErrorFlags;
+
+    /// <summary>
+    ///  The number of saved states in the context (0 means no saved states).
+    /// </summary>
+    /// <remarks>
+    ///  Each successful call to `Save` increments the saved-state counter and
+    ///  each successful call to `Restore` decrements it. However, the calls
+    ///  must be successful as the rendering context allows to restrict the
+    ///  number of save states, for example, or to use a `TBLContextCookie` to
+    ///  guard state save and restoration.
+    /// </remarks>
+    /// <seealso cref="Save"/>
+    /// <seealso cref="Restore"/>
+    /// <seealso cref="TBLContextCookie"/>
+    property SavedStateCount: Integer read GetSavedStateCount;
+
+    /// <summary>
+    ///  Meta transformation matrix.
+    ///
+    ///  Meta matrix is a core transformation matrix that is normally not
+    ///  changed by transformations applied to the context. Instead it acts as a
+    ///  secondary matrix used to create the final transformation matrix from
+    ///  meta and user matrices.
+    ///
+    ///  Meta matrix can be used to scale the whole context for HI-DPI rendering
+    ///  or to change the orientation of the image being rendered, however, the
+    ///  number of use-cases is unlimited.
+    ///
+    ///  To change the meta-matrix you must first change user-matrix and then
+    ///  call `UserToMeta`, which would update meta-matrix and clear
+    ///  user-matrix.
+    /// </summary>
+    /// <seealso cref="UserTransform"/>
+    /// <seealso cref="UserToMeta"/>
+    property MetaTransform: TBLMatrix2D read GetMetaTransform;
+
+    /// <summary>
+    ///  User transformation matrix.
+    ///
+    ///  User matrix contains all transformations that happened to the rendering
+    ///  context unless the context was restored or `UserToMeta` was called.
+    /// </summary>
+    /// <remarks>
+    ///  Setting this property only assigns the user transformation matrix,
+    ///  which means that the meta transformation matrix is kept as is. This
+    ///  means that the final transformation matrix will be recalculated based
+    ///  on the given `transform`.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="UserToMeta"/>
+    property UserTransform: TBLMatrix2D read GetUserTransform write SetUserTransform;
+
+    /// <summary>
+    ///  Final transformation matrix.
+    ///
+    ///  Final transformation matrix is a combination of meta and user
+    ///  transformation matrices. It's the final transformation that the
+    ///  rendering context applies to all input coordinates.
+    /// </summary>
+    property FinalTransform: TBLMatrix2D read GetFinalTransform;
+
+    /// <summary>
+    ///  Rendering context hints.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Hints: TBLContextHints read GetHints write SetHints;
+
+    /// <summary>
+    ///  The rendering quality hint.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property RenderingQuality: TBLRenderingQuality read GetRenderingQuality write SetRenderingQuality;
+
+    /// <summary>
+    ///  The gradient quality hint.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property GradientQuality: TBLGradientQuality read GetGradientQuality write SetGradientQuality;
+
+    /// <summary>
+    ///  The pattern quality hint.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property PatternQuality: TBLPatternQuality read GetPatternQuality write SetPatternQuality;
+
+    /// <summary>
+    ///  Approximation options.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property ApproximationOptions: TBLApproximationOptions read GetApproximationOptions write SetApproximationOptions;
+
+    /// <summary>
+    ///  Flatten mode (how curves are flattened).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property FlattenMode: TBLFlattenMode read GetFlattenMode write SetFlattenMode;
+
+    /// <summary>
+    ///  Tolerance used for curve flattening.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property FlattenTolerance: Double read GetFlattenTolerance write SetFlattenTolerance;
+
+    /// <summary>
+    ///  Composition operator.
+    ///
+    ///  The composition operator is part of the rendering context state and is
+    ///  subject to `Save` and `Restore`. The default composition operator is
+    ///  `TBLCompOp.SrcOver`, which would be returned immediately after the
+    ///  rendering context is created.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Save"/>
+    /// <seealso cref="Restore"/>
+    property CompOp: TBLCompOp read GetCompOp write SetCompOp;
+
+    /// <summary>
+    ///  The global alpha value.
+    ///
+    ///  The global alpha value is part of the rendering context state and is
+    ///  subject to `Save` and `Restore`. The default value is `1.0`, which
+    ///  would be returned immediately after the rendering context is created.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="Save"/>
+    /// <seealso cref="Restore"/>
+    property GlobalAlpha: Double read GetGlobalAlpha write SetGlobalAlpha;
+
+    /// <summary>
+    ///  The current style type associated with the given style `ASlot`.
+    /// </summary>
+    property StyleType[const ASlot: TBLContextStyleSlot]: TBLObjectType read GetStyleType;
+
+    /// <summary>
+    ///  The styles associated with the given style `ASlot`.
+    /// </summary>
+    /// <remarks>
+    ///  When reading this property, the original style passed to the rendering
+    ///  context is returned, with its original transformation matrix if it's
+    ///  not a solid color. Consider using `TransformedStyle` if you want to get
+    ///  a style with the transformation matrix that the rendering context
+    ///  actually uses to render it.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="TransformedStyle"/>
+    property Style[const ASlot: TBLContextStyleSlot]: TBLVar read GetStyle write SetStyle;
+
+    /// <summary>
+    ///  The styles associated with the given style `ASlot`.
+    ///
+    ///  The retrieved style uses a transformation matrix that is a combination
+    ///  of style transformation matrix and the rendering context matrix at a
+    ///  time the style was set.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property TransformedStyle[const ASlot: TBLContextStyleSlot]: TBLVar read GetTransformedStyle;
+
+    /// <summary>
+    ///  Fill or stroke alpha value associated with the given style `ASlot`.
+    ///
+    ///  Behaves like `FillAlpha` or `StrokeAlpha` depending on style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StyleAlpha[const ASlot: TBLContextStyleSlot]: Double read GetStyleAlpha write SetStyleAlpha;
+
+    /// <summary>
+    ///  The current fill style type.
+    /// </summary>
+    property FillStyleType: TBLObjectType read GetFillStyleType;
+
+    /// <summary>
+    ///  Fill style.
+    /// </summary>
+    /// <remarks>
+    ///  When reading this property, the original style passed to the rendering
+    ///  context is returned, with its original transformation matrix if it's
+    ///  not a solid color. Consider using `TransformedFillStyle` if you want to
+    ///  get a style with the transformation matrix that the rendering context
+    ///  actually uses to render it.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property FillStyle: TBLVar read GetFillStyle write SetFillStyle;
+
+    /// <summary>
+    ///  Transformed fill style.
+    ///
+    ///  The retrieved style uses a transformation matrix that is a combination
+    ///  of style transformation matrix and the rendering context matrix at a
+    ///  time the style was set.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property TransformedFillStyle: TBLVar read GetTransformedFillStyle;
+
+    /// <summary>
+    ///  Fill alpha value.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property FillAlpha: Double read GetFillAlpha write SetFillAlpha;
+
+    /// <summary>
+    ///  Returns fill rule.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property FillRule: TBLFillRule read GetFillRule write SetFillRule;
+
+    /// <summary>
+    ///  Returns the current stroke style type.
+    /// </summary>
+    property StrokeStyleType: TBLObjectType read GetStrokeStyleType;
+
+    /// <summary>
+    ///  Stroke style.
+    /// </summary>
+    /// <remarks>
+    ///  When reading this property, the original style passed to the rendering
+    ///  context is returned, with its original transformation matrix if it's
+    ///  not a solid color. Consider using `TransformedStrokeStyle` if you want
+    ///  to get a style with the transformation matrix that the rendering
+    ///  context actually uses to render it.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeStyle: TBLVar read GetStrokeStyle write SetStrokeStyle;
+
+    /// <summary>
+    ///  Transformed stroke style.
+    ///
+    ///  The retrieved style uses a transformation matrix that is a combination
+    ///  of style transformation matrix and the rendering context matrix at a
+    ///  time the style was set.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property TransformedStrokeStyle: TBLVar read GetTransformedStrokeStyle;
+
+    /// <summary>
+    ///  Stroke width.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeWidth: Double read GetStrokeWidth write SetStrokeWidth;
+
+    /// <summary>
+    ///  Stroke miter-limit.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeMiterLimit: Double read GetStrokeMiterLimit write SetStrokeMiterLimit;
+
+    /// <summary>
+    ///  Stroke join.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeJoin: TBLStrokeJoin read GetStrokeJoin write SetStrokeJoin;
+
+    /// <summary>
+    ///  Stroke start-cap.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeStartCap: TBLStrokeCap read GetStrokeStartCap write SetStrokeStartCap;
+
+    /// <summary>
+    ///  Stroke end-cap.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeEndCap: TBLStrokeCap read GetStrokeEndCap write SetStrokeEndCap;
+
+    /// <summary>
+    ///  Stroke transform order.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeTransformOrder: TBLStrokeTransformOrder read GetStrokeTransformOrder write SetStrokeTransformOrder;
+
+    /// <summary>
+    ///  Returns stroke dash-offset.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeDashOffset: Double read GetStrokeDashOffset write SetStrokeDashOffset;
+
+    /// <summary>
+    ///  Stroke dash-array.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeDashArray: TBLArray<Double> read GetStrokeDashArray write SetStrokeDashArray;
+
+    /// <summary>
+    ///  Stroke options.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeOptions: TBLStrokeOptions read GetStrokeOptions write SetStrokeOptions;
+
+    /// <summary>
+    ///  Stroke alpha value.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property StrokeAlpha: Double read GetStrokeAlpha write SetStrokeAlpha;
   end;
 {$ENDREGION 'Rendering'}
 
@@ -10638,9 +12945,9 @@ type
       const AArrayType: TBLObjectType); static;
     class function AreEqual(const ALeft, ARight: T): Boolean; static;
   end;
-{$ENDREGION 'Internal'}
 
 {$INCLUDE 'Blend2D.Api.inc'}
+{$ENDREGION 'Internal'}
 
 implementation
 
@@ -10845,12 +13152,27 @@ begin
          or (Ord(AFourCC[Low(AnsiString) + 2]) shl 16)
          or  Ord(AFourCC[Low(AnsiString) + 3]);
 end;
-{$ENDREGION 'Globals'}
 
+{$ENDREGION 'Globals'}
 
 {$REGION 'Internal'}
 
 { TBLObjectCore }
+
+function TBLObjectCore.AField: UInt32;
+begin
+  Result := (FInfo shr A_SHIFT) and (A_MASK shr A_SHIFT);
+end;
+
+function TBLObjectCore.BField: UInt32;
+begin
+  Result := (FInfo shr B_SHIFT) and (B_MASK shr B_SHIFT);
+end;
+
+function TBLObjectCore.CField: UInt32;
+begin
+  Result := (FInfo shr C_SHIFT) and (C_MASK shr C_SHIFT);
+end;
 
 //procedure TBLObjectCore.InitStatic(const AInfo: UInt32);
 //begin
@@ -10862,6 +13184,16 @@ end;
 function TBLObjectCore.NeedsCleanup: Boolean;
 begin
   Result := (FInfo >= MDR_FLAGS);
+end;
+
+function TBLObjectCore.PField: UInt32;
+begin
+  Result := (FInfo shr P_SHIFT) and (P_MASK shr P_SHIFT);
+end;
+
+function TBLObjectCore.QField: UInt32;
+begin
+  Result := (FInfo shr Q_SHIFT) and (Q_MASK shr Q_SHIFT);
 end;
 
 //class function TBLObjectCore.PackAbcp(const AA, AB, AC, AP: UInt32): UInt32;
@@ -14009,7 +16341,18 @@ end;
 function TBLArray<T>.ToArray: TArray<T>;
 begin
   SetLength(Result, Size);
-  Move(Data^, Result[0], Length(Result) * SizeOf(T));
+  if (FArrayType = TBLObjectType.ArrayObject) then
+  begin
+    { Call CMR operators }
+    var Data := P(_blArrayGetData(@Self));
+    for var I := 0 to Length(Result) - 1 do
+    begin
+      Result[I] := Data^;
+      Inc(Data);
+    end;
+  end
+  else
+    Move(Data^, Result[0], Length(Result) * SizeOf(T));
 end;
 
 procedure TBLArray<T>.Truncate(const AMaxSize: NativeInt);
@@ -18205,6 +20548,170 @@ begin
   FBase.Swap(AOther.FBase);
 end;
 
+{ TBLFontQueryProperties }
+
+procedure TBLFontQueryProperties.Reset;
+begin
+  Style := TBLFontStyle.Normal;
+  Weight := TBLFontWeight.Normal;
+  Stretch := TBLFontStretch.Normal;
+end;
+
+{ TBLFontManager }
+
+procedure TBLFontManager.AddFace(const AFace: TBLFontFace);
+begin
+  _BLCheck(_blFontManagerAddFace(@Self, @AFace));
+end;
+
+class operator TBLFontManager.Assign(var ADest: TBLFontManager;
+  const [ref] ASrc: TBLFontManager);
+begin
+  _BLCheck(_blFontManagerInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLFontManager.Equal(const ALeft,
+  ARight: TBLFontManager): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLFontManager.Equal(const ALeft: TBLFontManager;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+function TBLFontManager.Equals(const AOther: TBLFontManager): Boolean;
+begin
+  Result := _blFontManagerEquals(@Self, @AOther);
+end;
+
+class operator TBLFontManager.Finalize(var ADest: TBLFontManager);
+begin
+  _BLCheck(_blFontManagerDestroy(@ADest));
+end;
+
+function TBLFontManager.GetFaceCount: NativeInt;
+begin
+  Result := _blFontManagerGetFaceCount(@Self);
+end;
+
+function TBLFontManager.GetFamilyCount: NativeInt;
+begin
+  Result := _blFontManagerGetFamilyCount(@Self);
+end;
+
+function TBLFontManager.GetIsValid: Boolean;
+begin
+  Result := (FBase.AField = 0);
+end;
+
+function TBLFontManager.HasFace(const AFace: TBLFontFace): Boolean;
+begin
+  Result := _blFontManagerHasFace(@Self, @AFace);
+end;
+
+class operator TBLFontManager.Initialize(out ADest: TBLFontManager);
+begin
+  _BLCheck(_blFontManagerInit(@ADest));
+end;
+
+procedure TBLFontManager.Make;
+begin
+  _BLCheck(_blFontManagerCreate(@Self));
+end;
+
+class operator TBLFontManager.NotEqual(const ALeft,
+  ARight: TBLFontManager): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+function TBLFontManager.QueryFace(const AName: String): TBLFontFace;
+begin
+  var Name := UTF8String(AName);
+  _BLCheck(_blFontManagerQueryFace(@Self, PUTF8Char(Name), Length(Name),
+    nil, @Result));
+end;
+
+function TBLFontManager.QueryFace(const AName: TBLStringView): TBLFontFace;
+begin
+  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FSize,
+    nil, @Result));
+end;
+
+function TBLFontManager.QueryFace(const AName: String;
+  const AProperties: TBLFontQueryProperties): TBLFontFace;
+begin
+  var Name := UTF8String(AName);
+  _BLCheck(_blFontManagerQueryFace(@Self, PUTF8Char(Name), Length(Name),
+    @AProperties, @Result));
+end;
+
+function TBLFontManager.QueryFace(const AName: TBLStringView;
+  const AProperties: TBLFontQueryProperties): TBLFontFace;
+begin
+  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FSize,
+    @AProperties, @Result));
+end;
+
+function TBLFontManager.QueryFacesByFamilyName(
+  const AName: String): TArray<TBLFontFace>;
+begin
+  var Faces: TBLArray<TBLFontFace>;
+  var Name := UTF8String(AName);
+  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, PUTF8Char(Name),
+    Length(AName), @Faces));
+  Result := Faces.ToArray;
+end;
+
+procedure TBLFontManager.QueryFacesByFamilyName(const AName: String;
+  const AOut: TBLArray<TBLFontFace>);
+begin
+  var Name := UTF8String(AName);
+  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, PUTF8Char(Name),
+    Length(AName), @AOut));
+end;
+
+function TBLFontManager.QueryFacesByFamilyName(
+  const AName: TBLStringView): TArray<TBLFontFace>;
+begin
+  var Faces: TBLArray<TBLFontFace>;
+  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData),
+    AName.FSize, @Faces));
+  Result := Faces.ToArray;
+end;
+
+procedure TBLFontManager.QueryFacesByFamilyName(const AName: TBLStringView;
+  const AOut: TBLArray<TBLFontFace>);
+begin
+  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData),
+    AName.FSize, @AOut));
+end;
+
+class operator TBLFontManager.NotEqual(const ALeft: TBLFontManager;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+procedure TBLFontManager.Reset;
+begin
+  _BLCheck(_blFontManagerReset(@Self));
+end;
+
+procedure TBLFontManager.Swap(var AOther: TBLFontManager);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
 {$ENDREGION 'Text'}
 
 {$REGION 'Imaging'}
@@ -19115,9 +21622,508 @@ end;
 
 {$ENDREGION 'Imaging'}
 
+{$REGION 'Variant'}
+{ TBLVar }
+
+class operator TBLVar.Assign(var ADest: TBLVar; const [ref] ASrc: TBLVar);
+begin
+  _BLCheck(_blVarInitWeak(@ADest, @ASrc));
+end;
+
+class operator TBLVar.Equal(const ALeft, ARight: TBLVar): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLVar.Equals(const AValue: Int64): Boolean;
+begin
+  Result := _blVarEqualsInt64(@Self, AValue);
+end;
+
+function TBLVar.Equals(const AValue: Cardinal): Boolean;
+begin
+  Result := _blVarEqualsUInt64(@Self, AValue);
+end;
+
+function TBLVar.Equals(const AValue: Integer): Boolean;
+begin
+  Result := _blVarEqualsInt64(@Self, AValue);
+end;
+
+function TBLVar.Equals(const AValue: Boolean): Boolean;
+begin
+  Result := _blVarEqualsBool(@Self, AValue);
+end;
+
+function TBLVar.Equals(const AValue: UInt64): Boolean;
+begin
+  Result := _blVarEqualsUInt64(@Self, AValue);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar; const ARight: Int64): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: Cardinal): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: Integer): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: Boolean): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar; const ARight: UInt64): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLRgba64): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLRgba32): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLRgba): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar; const ARight: Double): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLVar.Equals(const AValue: TBLRgba64): Boolean;
+begin
+  Result := _blVarEqualsRgba64(@Self, AValue.Value);
+end;
+
+function TBLVar.Equals(const AValue: TBLRgba32): Boolean;
+begin
+  Result := _blVarEqualsRgba32(@Self, AValue.Value);
+end;
+
+function TBLVar.Equals(const AValue: TBLRgba): Boolean;
+begin
+  Result := _blVarEqualsRgba(@Self, @AValue);
+end;
+
+function TBLVar.Equals(const AValue: Double): Boolean;
+begin
+  Result := _blVarEqualsDouble(@Self, AValue);
+end;
+
+function TBLVar.Equals(const AOther: TBLVar): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+class operator TBLVar.Finalize(var ADest: TBLVar);
+begin
+  if (ADest.FBase.NeedsCleanup) then
+    _BLCheck(_blVarDestroy(@ADest));
+end;
+
+function TBLVar.GetIsArray: Boolean;
+begin
+  var ObjType := GetObjectType;
+  Result := (ObjType >= TBLObjectType.MinArray) and (ObjType <= TBLObjectType.MaxArray);
+end;
+
+function TBLVar.GetIsBitArray: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.BitArray);
+end;
+
+function TBLVar.GetIsBoolean: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Bool);
+end;
+
+function TBLVar.GetIsContext: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Context);
+end;
+
+function TBLVar.GetIsDouble: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Double);
+end;
+
+function TBLVar.GetIsFont: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Font);
+end;
+
+function TBLVar.GetIsFontData: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.FontData);
+end;
+
+function TBLVar.GetIsFontFace: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.FontFace);
+end;
+
+function TBLVar.GetIsFontManager: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.FontManager);
+end;
+
+function TBLVar.GetIsGradient: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Gradient);
+end;
+
+function TBLVar.GetIsImage: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Image);
+end;
+
+function TBLVar.GetIsImageCodec: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.ImageCodec);
+end;
+
+function TBLVar.GetIsImageDecoder: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.ImageDecoder);
+end;
+
+function TBLVar.GetIsImageEncoder: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.ImageEncoder);
+end;
+
+function TBLVar.GetIsInt64: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Int64);
+end;
+
+function TBLVar.GetIsNull: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Null);
+end;
+
+function TBLVar.GetIsPath: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Path);
+end;
+
+function TBLVar.GetIsPattern: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Pattern);
+end;
+
+function TBLVar.GetIsRgba: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Rgba);
+end;
+
+function TBLVar.GetIsRgba32: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Rgba32);
+end;
+
+function TBLVar.GetIsRgba64: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.Rgba64);
+end;
+
+function TBLVar.GetIsString: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.String);
+end;
+
+function TBLVar.GetIsStyle: Boolean;
+begin
+  var ObjType := GetObjectType;
+  Result := (ObjType >= TBLObjectType.MinStyle) and (ObjType <= TBLObjectType.MaxStyle);
+end;
+
+function TBLVar.GetIsUInt64: Boolean;
+begin
+  Result := (GetObjectType = TBLObjectType.UInt64);
+end;
+
+class function TBLVar.GetNull: TBLVar;
+begin
+  { Uses Initialize operator }
+end;
+
+function TBLVar.GetObjectType: TBLObjectType;
+begin
+  Result := TBLObjectType(_blVarGetType(@Self));
+end;
+
+class operator TBLVar.Implicit(const AValue: Int64): TBLVar;
+begin
+  _BLCheck(_blVarAssignInt64(@Result, AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: Cardinal): TBLVar;
+begin
+  _BLCheck(_blVarAssignUInt32(@Result, AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: Integer): TBLVar;
+begin
+  _BLCheck(_blVarAssignInt32(@Result, AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: Boolean): TBLVar;
+begin
+  _BLCheck(_blVarAssignBool(@Result, AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: UInt64): TBLVar;
+begin
+  _BLCheck(_blVarAssignUInt64(@Result, AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLRgba64): TBLVar;
+begin
+  _BLCheck(_blVarAssignRgba64(@Result, AValue.Value));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLRgba32): TBLVar;
+begin
+  _BLCheck(_blVarAssignRgba32(@Result, AValue.Value));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLRgba): TBLVar;
+begin
+  _BLCheck(_blVarAssignRgba(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: Double): TBLVar;
+begin
+  _BLCheck(_blVarAssignDouble(@Result, AValue));
+end;
+
+class operator TBLVar.Initialize(out ADest: TBLVar);
+begin
+  _BLCheck(_blVarInitNull(@ADest));
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: Int64): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: Cardinal): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: Integer): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: Boolean): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: UInt64): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLRgba64): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLRgba32): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLRgba): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: Double): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft, ARight: TBLVar): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLVar.Reset;
+begin
+  _BLCheck(_blVarReset(@Self));
+end;
+
+function TBLVar.StrictEquals(const AOther: TBLVar): Boolean;
+begin
+  Result := _blVarStrictEquals(@Self, @AOther);
+end;
+
+procedure TBLVar.Swap(var AOther: TBLVar);
+begin
+  FBase.Swap(AOther.FBase);
+end;
+
+function TBLVar.ToBoolean: Boolean;
+begin
+  _BLCheck(_blVarToBool(@Self, @Result));
+end;
+
+function TBLVar.ToCardinal: Cardinal;
+begin
+  _BLCheck(_blVarToUInt32(@Self, @Result));
+end;
+
+function TBLVar.ToDouble: Double;
+begin
+  _BLCheck(_blVarToDouble(@Self, @Result));
+end;
+
+function TBLVar.ToInt64: Int64;
+begin
+  _BLCheck(_blVarToInt64(@Self, @Result));
+end;
+
+function TBLVar.ToInteger: Integer;
+begin
+  _BLCheck(_blVarToInt32(@Self, @Result));
+end;
+
+function TBLVar.ToRgba: TBLRgba;
+begin
+  _BLCheck(_blVarToRgba(@Self, @Result));
+end;
+
+function TBLVar.ToRgba32: TBLRgba32;
+begin
+  _BLCheck(_blVarToRgba32(@Self, @Result));
+end;
+
+function TBLVar.ToRgba64: TBLRgba64;
+begin
+  _BLCheck(_blVarToRgba64(@Self, @Result));
+end;
+
+function TBLVar.ToUInt64: UInt64;
+begin
+  _BLCheck(_blVarToUInt64(@Self, @Result));
+end;
+
+{$ENDREGION 'Variant'}
+
 {$REGION 'Rendering'}
 
+{ TBLContextCreateInfo }
+
+procedure TBLContextCreateInfo.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLContextCookie }
+
+class operator TBLContextCookie.Equal(const ALeft,
+  ARight: TBLContextCookie): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLContextCookie.Equals(const AOther: TBLContextCookie): Boolean;
+begin
+  Result := (FData[0] = AOther.FData[0]) and (FData[1] = AOther.FData[1]);
+end;
+
+function TBLContextCookie.GetIsEmpty: Boolean;
+begin
+  Result := (FData[0] = 0) and (FData[1] = 0);
+end;
+
+class operator TBLContextCookie.NotEqual(const ALeft,
+  ARight: TBLContextCookie): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLContextCookie.Reset(const AData0, AData1: UInt64);
+begin
+  FData[0] := AData0;
+  FData[1] := AData1;
+end;
+
+procedure TBLContextCookie.Reset;
+begin
+  FData[0] := 0;
+  FData[1] := 0;
+end;
+
+procedure TBLContextCookie.Reset(const AOther: TBLContextCookie);
+begin
+  FData[0] := AOther.FData[0];
+  FData[1] := AOther.FData[1];
+end;
+
+{ TBLContextHints }
+
+function TBLContextHints.GetGradientQuality: TBLGradientQuality;
+begin
+  Result := TBLGradientQuality(Hints[TBLContextHint.GradientQuality])
+end;
+
+function TBLContextHints.GetPatternQuality: TBLPatternQuality;
+begin
+  Result := TBLPatternQuality(Hints[TBLContextHint.PatternQuality])
+end;
+
+function TBLContextHints.GetRenderingQuality: TBLRenderingQuality;
+begin
+  Result := TBLRenderingQuality(Hints[TBLContextHint.RenderingQuality])
+end;
+
+procedure TBLContextHints.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
 { TBLContext }
+
+procedure TBLContext.ApplyTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Transform), @ATransform));
+end;
 
 class operator TBLContext.Assign(var ADest: TBLContext; const [ref] ASrc: TBLContext);
 begin
@@ -19127,6 +22133,49 @@ end;
 procedure TBLContext.ClearAll;
 begin
   _BLCheck(_blContextClearAll(@Self));
+end;
+
+constructor TBLContext.Create(const ATarget: TBLImage;
+  const ACreateInfo: TBLContextCreateInfo);
+begin
+  _BLCheck(_blContextInitAs(@Self, @ATarget, @ACreateInfo));
+end;
+
+procedure TBLContext.DisableFillStyle;
+begin
+  _BLCheck(_blContextDisableFillStyle(@Self));
+end;
+
+procedure TBLContext.DisableStrokeStyle;
+begin
+  _BLCheck(_blContextDisableStrokeStyle(@Self));
+end;
+
+procedure TBLContext.DisableStyle(const ASlot: TBLContextStyleSlot);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextDisableFillStyle(@Self))
+  else
+    _BLCheck(_blContextDisableStrokeStyle(@Self));
+end;
+
+class operator TBLContext.Equal(const ALeft: TBLContext;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLContext.Equal(const ALeft, ARight: TBLContext): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLContext.Equals(const AOther: TBLContext): Boolean;
+begin
+  Result := (FBase.FImpl = AOther.FBase.FImpl);
 end;
 
 constructor TBLContext.Create(const ATarget: TBLImage);
@@ -19155,10 +22204,812 @@ begin
   _BLCheck(_blContextEnd(@Self));
 end;
 
+procedure TBLContext.Flush(const AFlags: TBLContextFlushFlags);
+begin
+  _BLCheck(_blContextFlush(@Self, Cardinal(AFlags)));
+end;
+
+function TBLContext.GetAccumulatedErrorFlags: TBLContextErrorFlags;
+begin
+  _BLCheck(_blObjectGetPropertyUInt32(@Self, 'accumulatedErrorFlags', 21, @Result));
+end;
+
+function TBLContext.GetApproximationOptions: TBLApproximationOptions;
+begin
+  Result := State.ApproximationOptions;
+end;
+
+function TBLContext.GetCompOp: TBLCompOp;
+begin
+  Result := TBLCompOp(State.CompOp);
+end;
+
+function TBLContext.GetContextType: TBLContextType;
+begin
+  Result := TBLContextType(Impl.ContextType);
+end;
+
+function TBLContext.GetFillAlpha: Double;
+begin
+  Result := State.StyleAlpha[Ord(TBLContextStyleSlot.Fill)];
+end;
+
+function TBLContext.GetFillRule: TBLFillRule;
+begin
+  Result := TBLFillRule(State.FillRule);
+end;
+
+function TBLContext.GetFillStyle: TBLVar;
+begin
+  _BLCheck(_blContextGetFillStyle(@Self, @Result))
+end;
+
+function TBLContext.GetFillStyleType: TBLObjectType;
+begin
+  Result := TBLObjectType(State.StyleType[Ord(TBLContextStyleSlot.Fill)]);
+end;
+
+function TBLContext.GetFinalTransform: TBLMatrix2D;
+begin
+  Result := State.FinalTransform;
+end;
+
+function TBLContext.GetFlattenMode: TBLFlattenMode;
+begin
+  Result := State.ApproximationOptions.FlattenMode;
+end;
+
+function TBLContext.GetFlattenTolerance: Double;
+begin
+  Result := State.ApproximationOptions.FlattenTolerance;
+end;
+
+function TBLContext.GetGlobalAlpha: Double;
+begin
+  Result := State.GlobalAlpha;
+end;
+
+function TBLContext.GetGradientQuality: TBLGradientQuality;
+begin
+  Result := State.Hints.GradientQuality;
+end;
+
+function TBLContext.GetHints: TBLContextHints;
+begin
+  Result := State.Hints;
+end;
+
+function TBLContext.GetIsValid: Boolean;
+begin
+  Result := (ContextType <> TBLContextType.None);
+end;
+
+function TBLContext.GetMetaTransform: TBLMatrix2D;
+begin
+  Result := State.MetaTransform;
+end;
+
+function TBLContext.GetPatternQuality: TBLPatternQuality;
+begin
+  Result := State.Hints.PatternQuality;
+end;
+
+function TBLContext.GetRenderingQuality: TBLRenderingQuality;
+begin
+  Result := State.Hints.RenderingQuality;
+end;
+
+function TBLContext.GetSavedStateCount: Integer;
+begin
+  Result := State.SavedStateCount;
+end;
+
+function TBLContext.GetStrokeAlpha: Double;
+begin
+  Result := State.StyleAlpha[Ord(TBLContextStyleSlot.Stroke)];
+end;
+
+function TBLContext.GetStrokeDashArray: TBLArray<Double>;
+begin
+  Result := State.StrokeOptions.DashArray;
+end;
+
+function TBLContext.GetStrokeDashOffset: Double;
+begin
+  Result := State.StrokeOptions.DashOffset;
+end;
+
+function TBLContext.GetStrokeEndCap: TBLStrokeCap;
+begin
+  Result := State.StrokeOptions.EndCap;
+end;
+
+function TBLContext.GetStrokeJoin: TBLStrokeJoin;
+begin
+  Result := State.StrokeOptions.Join;
+end;
+
+function TBLContext.GetStrokeMiterLimit: Double;
+begin
+  Result := State.StrokeOptions.MiterLimit;
+end;
+
+function TBLContext.GetStrokeOptions: TBLStrokeOptions;
+begin
+  Result := State.StrokeOptions;
+end;
+
+function TBLContext.GetStrokeStartCap: TBLStrokeCap;
+begin
+  Result := State.StrokeOptions.StartCap;
+end;
+
+function TBLContext.GetStrokeStyle: TBLVar;
+begin
+  _BLCheck(_blContextGetStrokeStyle(@Self, @Result))
+end;
+
+function TBLContext.GetStrokeStyleType: TBLObjectType;
+begin
+  Result := TBLObjectType(State.StyleType[Ord(TBLContextStyleSlot.Stroke)]);
+end;
+
+function TBLContext.GetStrokeTransformOrder: TBLStrokeTransformOrder;
+begin
+  Result := State.StrokeOptions.TransformOrder;
+end;
+
+function TBLContext.GetStrokeWidth: Double;
+begin
+  Result := State.StrokeOptions.Width;
+end;
+
+function TBLContext.GetStyle(const ASlot: TBLContextStyleSlot): TBLVar;
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextGetFillStyle(@Self, @Result))
+  else
+    _BLCheck(_blContextGetStrokeStyle(@Self, @Result));
+end;
+
+function TBLContext.GetStyleAlpha(const ASlot: TBLContextStyleSlot): Double;
+begin
+  Result := State.StyleAlpha[Ord(ASlot)];
+end;
+
+function TBLContext.GetStyleType(
+  const ASlot: TBLContextStyleSlot): TBLObjectType;
+begin
+  Result := TBLObjectType(State.StyleType[Ord(ASlot)]);
+end;
+
+function TBLContext.GetTargetHeight: Double;
+begin
+  Result := State.Targetize.H;
+end;
+
+function TBLContext.GetTargetImage: TBLImage;
+begin
+  _blImageAssignWeak(@Result, @State.TargetImage);
+end;
+
+function TBLContext.GetTargetSize: TBLSize;
+begin
+  Result := State.Targetize;
+end;
+
+function TBLContext.GetTargetWidth: Double;
+begin
+  Result := State.Targetize.W;
+end;
+
+function TBLContext.GetThreadCount: Integer;
+begin
+  _BLCheck(_blObjectGetPropertyUInt32(@Self, 'threadCount', 11, @Result));
+end;
+
+function TBLContext.GetTransformedFillStyle: TBLVar;
+begin
+  _BLCheck(_blContextGetTransformedFillStyle(@Self, @Result))
+end;
+
+function TBLContext.GetTransformedStrokeStyle: TBLVar;
+begin
+  _BLCheck(_blContextGetTransformedStrokeStyle(@Self, @Result))
+end;
+
+function TBLContext.GetTransformedStyle(
+  const ASlot: TBLContextStyleSlot): TBLVar;
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextGetTransformedFillStyle(@Self, @Result))
+  else
+    _BLCheck(_blContextGetTransformedStrokeStyle(@Self, @Result));
+end;
+
+function TBLContext.GetUserTransform: TBLMatrix2D;
+begin
+  Result := State.UserTransform;
+end;
+
+function TBLContext.Impl: PImpl;
+begin
+  Result := PImpl(FBase.FImpl);
+end;
+
 class operator TBLContext.Initialize(out ADest: TBLContext);
 begin
   _BLCheck(_blContextInit(@ADest));
 end;
+
+class operator TBLContext.NotEqual(const ALeft: TBLContext;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.IsValid) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+class operator TBLContext.NotEqual(const ALeft, ARight: TBLContext): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLContext.PostRotate(const AAngle: Double);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotate), @AAngle));
+end;
+
+procedure TBLContext.PostRotate(const AAngle, AX, AY: Double);
+var
+  Values: array [0..2] of Single;
+begin
+  Values[0] := AAngle;
+  Values[1] := AX;
+  Values[2] := AY;
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLContext.PostRotate(const AAngle: Double; const AOrigin: TBLPointI);
+var
+  Values: array [0..2] of Single;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLContext.PostRotate(const AAngle: Double; const AOrigin: TBLPoint);
+var
+  Values: array [0..2] of Single;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostRotatePoint), @Values));
+end;
+
+procedure TBLContext.PostScale(const AP: TBLPoint);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @AP));
+end;
+
+procedure TBLContext.PostScale(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLContext.PostScale(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLContext.PostScale(const AXY: Double);
+begin
+  var P := BLPoint(AXY, AXY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostScale), @P));
+end;
+
+procedure TBLContext.PostSkew(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostSkew), @P));
+end;
+
+procedure TBLContext.PostSkew(const AP: TBLPoint);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostSkew), @AP));
+end;
+
+procedure TBLContext.PostTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostTransform), @ATransform));
+end;
+
+procedure TBLContext.PostTranslate(const AP: TBLPoint);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @AP));
+end;
+
+procedure TBLContext.PostTranslate(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @P));
+end;
+
+procedure TBLContext.PostTranslate(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.PostTranslate), @P));
+end;
+
+procedure TBLContext.Reset;
+begin
+  _BLCheck(_blContextReset(@Self));
+end;
+
+procedure TBLContext.ResetTransform;
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Reset), nil));
+end;
+
+procedure TBLContext.Restore(const ACookie: TBLContextCookie);
+begin
+  _BLCheck(_blContextRestore(@Self, @ACookie));
+end;
+
+procedure TBLContext.Rotate(const AAngle: Double);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Rotate), @AAngle));
+end;
+
+procedure TBLContext.Rotate(const AAngle, AX, AY: Double);
+var
+  Values: array [0..2] of Single;
+begin
+  Values[0] := AAngle;
+  Values[1] := AX;
+  Values[2] := AY;
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLContext.Rotate(const AAngle: Double; const AOrigin: TBLPoint);
+var
+  Values: array [0..2] of Single;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLContext.Rotate(const AAngle: Double; const AOrigin: TBLPointI);
+var
+  Values: array [0..2] of Single;
+begin
+  Values[0] := AAngle;
+  Values[1] := AOrigin.X;
+  Values[2] := AOrigin.Y;
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.RotatePoint), @Values));
+end;
+
+procedure TBLContext.Restore;
+begin
+  _BLCheck(_blContextRestore(@Self, nil));
+end;
+
+procedure TBLContext.Save;
+begin
+  _BLCheck(_blContextSave(@Self, nil));
+end;
+
+procedure TBLContext.Save(out ACookie: TBLContextCookie);
+begin
+  _BLCheck(_blContextSave(@Self, @ACookie));
+end;
+
+procedure TBLContext.Scale(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLContext.Scale(const AXY: Double);
+begin
+  var P := BLPoint(AXY, AXY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLContext.Scale(const AP: TBLPoint);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @AP));
+end;
+
+procedure TBLContext.Scale(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Scale), @P));
+end;
+
+procedure TBLContext.SetApproximationOptions(
+  const AValue: TBLApproximationOptions);
+begin
+  _BLCheck(_blContextSetApproximationOptions(@Self, @AValue));
+end;
+
+procedure TBLContext.SetCompOp(const AValue: TBLCompOp);
+begin
+  _BLCheck(_blContextSetCompOp(@Self, Ord(AValue)));
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextSetFillStyle(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLRgba);
+begin
+  _BLCheck(_blContextSetFillStyleRgba(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextSetFillStyleRgba32(@Self, AStyle.Value))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextSetFillStyleRgba64(@Self, AStyle.Value))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextSetFillStyle(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextSetFillStyle(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLGradient;
+  const ATransformMode: TBLContextStyleTransformMode);
+begin
+  _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLPattern;
+  const ATransformMode: TBLContextStyleTransformMode);
+begin
+  _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+end;
+
+procedure TBLContext.SetFillAlpha(const AValue: Double);
+begin
+  _BLCheck(_blContextSetFillAlpha(@Self, AValue));
+end;
+
+procedure TBLContext.SetFillRule(const AValue: TBLFillRule);
+begin
+  _BLCheck(_blContextSetFillRule(@Self, Ord(AValue)));
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TBLVar;
+  const ATransformMode: TBLContextStyleTransformMode);
+begin
+  _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+end;
+
+procedure TBLContext.SetFlattenMode(const AValue: TBLFlattenMode);
+begin
+  _BLCheck(_blContextSetFlattenMode(@Self, Ord(AValue)));
+end;
+
+procedure TBLContext.SetFlattenTolerance(const AValue: Double);
+begin
+  _BLCheck(_blContextSetFlattenTolerance(@Self, AValue));
+end;
+
+procedure TBLContext.SetGlobalAlpha(const AValue: Double);
+begin
+  _BLCheck(_blContextSetGlobalAlpha(@Self, AValue));
+end;
+
+procedure TBLContext.SetGradientQuality(const AValue: TBLGradientQuality);
+begin
+  _BLCheck(_blContextSetHint(@Self, Ord(TBLContextHint.GradientQuality), Ord(AValue)));
+end;
+
+procedure TBLContext.SetHint(const AHintType: TBLContextHint;
+  const AValue: Integer);
+begin
+  _BLCheck(_blContextSetHint(@Self, Ord(AHintType), AValue));
+end;
+
+procedure TBLContext.SetHints(const AValue: TBLContextHints);
+begin
+  _BLCheck(_blContextSetHints(@Self, @AValue));
+end;
+
+procedure TBLContext.SetPatternQuality(const AValue: TBLPatternQuality);
+begin
+  _BLCheck(_blContextSetHint(@Self, Ord(TBLContextHint.PatternQuality), Ord(AValue)));
+end;
+
+procedure TBLContext.SetRenderingQuality(const AValue: TBLRenderingQuality);
+begin
+  _BLCheck(_blContextSetHint(@Self, Ord(TBLContextHint.RenderingQuality), Ord(AValue)));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLRgba);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyleRgba(@Self, @AStyle))
+  else
+    _BLCheck(_blContextSetStrokeStyleRgba(@Self, @AStyle));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLRgba32);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyleRgba32(@Self, AStyle.Value))
+  else
+    _BLCheck(_blContextSetStrokeStyleRgba32(@Self, AStyle.Value));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLRgba64);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyleRgba64(@Self, AStyle.Value))
+  else
+    _BLCheck(_blContextSetStrokeStyleRgba64(@Self, AStyle.Value));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLGradient);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyle(@Self, @AStyle))
+  else
+    _BLCheck(_blContextSetStrokeStyle(@Self, @AStyle));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLPattern);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyle(@Self, @AStyle))
+  else
+    _BLCheck(_blContextSetStrokeStyle(@Self, @AStyle));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLVar);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyle(@Self, @AStyle))
+  else
+    _BLCheck(_blContextSetStrokeStyle(@Self, @AStyle));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLGradient;
+  const ATransformMode: TBLContextStyleTransformMode);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+  else
+    _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLPattern; const ATransformMode: TBLContextStyleTransformMode);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+  else
+    _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)));
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextSetStrokeStyle(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLRgba);
+begin
+  _BLCheck(_blContextSetStrokeStyleRgba(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextSetStrokeStyleRgba32(@Self, AStyle.Value))
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextSetStrokeStyleRgba64(@Self, AStyle.Value))
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextSetStrokeStyle(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextSetStrokeStyle(@Self, @AStyle))
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLGradient;
+  const ATransformMode: TBLContextStyleTransformMode);
+begin
+  _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLPattern;
+  const ATransformMode: TBLContextStyleTransformMode);
+begin
+  _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+end;
+
+procedure TBLContext.SetStrokeAlpha(const AValue: Double);
+begin
+  _BLCheck(_blContextSetStrokeAlpha(@Self, AValue));
+end;
+
+procedure TBLContext.SetStrokeCap(const APosition: TBLStrokeCapPosition;
+  const AStrokeCap: TBLStrokeCap);
+begin
+  _BLCheck(_blContextSetStrokeCap(@Self, Ord(APosition), Ord(AStrokeCap)));
+end;
+
+procedure TBLContext.SetStrokeCaps(const AStrokeCap: TBLStrokeCap);
+begin
+  _BLCheck(_blContextSetStrokeCaps(@Self, Ord(AStrokeCap)));
+end;
+
+procedure TBLContext.SetStrokeDashArray(const AValue: TBLArray<Double>);
+begin
+  _BLCheck(_blContextSetStrokeDashArray(@Self, @AValue));
+end;
+
+procedure TBLContext.SetStrokeDashOffset(const AValue: Double);
+begin
+  _BLCheck(_blContextSetStrokeDashOffset(@Self, AValue));
+end;
+
+procedure TBLContext.SetStrokeEndCap(const AValue: TBLStrokeCap);
+begin
+  _BLCheck(_blContextSetStrokeCap(@Self, Ord(TBLStrokeCapPosition.EndOfPath), Ord(AValue)));
+end;
+
+procedure TBLContext.SetStrokeJoin(const AValue: TBLStrokeJoin);
+begin
+  _BLCheck(_blContextSetStrokeJoin(@Self, Ord(AValue)));
+end;
+
+procedure TBLContext.SetStrokeMiterLimit(const AValue: Double);
+begin
+  _BLCheck(_blContextSetStrokeMiterLimit(@Self, AValue));
+end;
+
+procedure TBLContext.SetStrokeOptions(const AValue: TBLStrokeOptions);
+begin
+  _BLCheck(_blContextSetStrokeOptions(@Self, @AValue));
+end;
+
+procedure TBLContext.SetStrokeStartCap(const AValue: TBLStrokeCap);
+begin
+  _BLCheck(_blContextSetStrokeCap(@Self, Ord(TBLStrokeCapPosition.StartOfPath), Ord(AValue)));
+end;
+
+procedure TBLContext.SetStrokeStyle(const AStyle: TBLVar;
+  const ATransformMode: TBLContextStyleTransformMode);
+begin
+  _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+end;
+
+procedure TBLContext.SetStrokeTransformOrder(
+  const AValue: TBLStrokeTransformOrder);
+begin
+  _BLCheck(_blContextSetStrokeTransformOrder(@Self, Ord(AValue)));
+end;
+
+procedure TBLContext.SetStrokeWidth(const AValue: Double);
+begin
+  _BLCheck(_blContextSetStrokeWidth(@Self, AValue));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AStyle: TBLVar; const ATransformMode: TBLContextStyleTransformMode);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+  else
+    _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)));
+end;
+
+procedure TBLContext.SetStyleAlpha(const ASlot: TBLContextStyleSlot;
+  const AValue: Double);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillAlpha(@Self, AValue))
+  else
+    _BLCheck(_blContextSetStrokeAlpha(@Self, AValue));
+end;
+
+procedure TBLContext.SetTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Assign), @ATransform));
+end;
+
+procedure TBLContext.SetUserTransform(const AValue: TBLMatrix2D);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Assign), @AValue));
+end;
+
+procedure TBLContext.Skew(const AP: TBLPoint);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Skew), @AP));
+end;
+
+procedure TBLContext.Skew(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Skew), @P));
+end;
+
+procedure TBLContext.Start(const AImage: TBLImage;
+  const ACreateInfo: TBLContextCreateInfo);
+begin
+  _BLCheck(_blContextBegin(@Self, @AImage, @ACreateInfo));
+end;
+
+procedure TBLContext.Start(const AImage: TBLImage);
+begin
+  _BLCheck(_blContextBegin(@Self, @AImage, nil));
+end;
+
+function TBLContext.State: PState;
+begin
+  Result := PImpl(FBase.FImpl).State;
+end;
+
+procedure TBLContext.SwapStyles(const AMode: TBLContextStyleSwapMode);
+begin
+  _BLCheck(_blContextSwapStyles(@Self, Ord(AMode)));
+end;
+
+procedure TBLContext.Translate(const AP: TBLPointI);
+begin
+  var P := BLPoint(AP.X, AP.Y);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @P));
+end;
+
+procedure TBLContext.UserToMeta;
+begin
+  _BLCheck(_blContextUserToMeta(@Self));
+end;
+
+procedure TBLContext.Translate(const AP: TBLPoint);
+begin
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @AP));
+end;
+
+procedure TBLContext.Translate(const AX, AY: Double);
+begin
+  var P := BLPoint(AX, AY);
+  _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Translate), @P));
+end;
+
 {$ENDREGION 'Rendering'}
 
 {$REGION 'Internal'}
