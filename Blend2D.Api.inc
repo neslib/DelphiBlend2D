@@ -869,6 +869,47 @@ function _blContextBlitScaledImageD(self: Pointer; const rect: Pointer; const im
   external _LIB_BLEND2D name _PU + 'blContextBlitScaledImageD';
 {$ENDREGION 'context.h'}
 
+{$REGION 'filesystem.h'}
+function _blFileInit(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileInit';
+
+function _blFileReset(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileReset';
+
+function _blFileOpen(self: Pointer; const fileName: PUTF8Char; openFlags: Cardinal): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileOpen';
+
+function _blFileClose(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileClose';
+
+function _blFileSeek(self: Pointer; offset: Int64; seekType: Integer; positionOut: PInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSeek';
+
+function _blFileRead(self: Pointer; buffer: Pointer; n: Size_T; bytesReadOut: PSize_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileRead';
+
+function _blFileWrite(self: Pointer; const buffer: Pointer; n: Size_T; bytesWrittenOut: PSize_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileWrite';
+
+function _blFileTruncate(self: Pointer; maxSize: Int64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileTruncate';
+
+function _blFileGetInfo(self: Pointer; infoOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileGetInfo';
+
+function _blFileGetSize(self: Pointer; fileSizeOut: PUInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileGetSize';
+
+function _blFileSystemGetInfo(const fileName: PUTF8Char; infoOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSystemGetInfo';
+
+function _blFileSystemReadFile(const fileName: PUTF8Char; dst: Pointer; maxSize: Size_T; readFlags: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSystemReadFile';
+
+function _blFileSystemWriteFile(const fileName: PUTF8Char; const data: Pointer; size: Size_T; bytesWrittenOut: PSize_T): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blFileSystemWriteFile';
+{$ENDREGION 'filesystem.h'}
+
 {$REGION 'font.h'}
 function _blFontInit(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blFontInit';

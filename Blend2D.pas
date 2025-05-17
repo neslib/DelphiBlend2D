@@ -1,18 +1,7 @@
 unit Blend2D;
 { OPP wrappers for Blend2D C API.
 
-  Follows the C++ API where possible. The following C++ classes are not
-  converted because Delphi provides built-in alternatives for these:
-  * TBLBitSet: will be deprecated according to https://blend2d.com/doc/group__bl__containers.html
-
-
-  * BLArray<T>: uses TArray<T> instead
-  * BLFile: uses TFileStream instead
-  * BLString: uses String instead
-  * BLVariant: not needed
-  * BLStyle: style properties are used in another way. We may introduce a
-    TBLStyle type once Delphi has support for managed records (or use Scope
-    solution like TBLStrokeOptions). }
+  Follows the C++ API as closely as possible. }
 
 {$MINENUMSIZE 4}
 {$SCOPEDENUMS ON}
@@ -2384,6 +2373,118 @@ type
 {$REGION 'File System'}
 type
   /// <summary>
+  ///  File open flags.
+  /// </summary>
+  /// <seealso cref="TBLFile.Open"/>
+  TBLFileOpenFlag = (
+    /// <summary>
+    ///  Opens the file for reading.
+    ///
+    ///  The following system flags are used when opening the file:
+    ///    - `O_RDONLY` (Posix)
+    ///    - `GENERIC_READ` (Windows)
+    /// </summary>
+    Read = 0,
+
+    /// <summary>
+    ///  Opens the file for writing:
+    ///
+    ///  The following system flags are used when opening the file:
+    ///    - `O_WRONLY` (Posix)
+    ///    - `GENERIC_WRITE` (Windows)
+    /// </summary>
+    Write = 1,
+
+    /// <summary>
+    ///  Creates the file if it doesn't exist or opens it if it does.
+    ///
+    ///  The following system flags are used when opening the file:
+    ///    - `O_CREAT` (Posix)
+    ///    - `CREATE_ALWAYS` or `OPEN_ALWAYS` depending on other flags (Windows)
+    /// </summary>
+    Create = 2,
+
+    /// <summary>
+    ///  Opens the file for deleting or renaming (Windows).
+    ///
+    ///  Adds `DELETE` flag when opening the file to `ACCESS_MASK`.
+    /// </summary>
+    Delete = 3,
+
+    /// <summary>
+    ///  Truncates the file.
+    ///
+    ///  The following system flags are used when opening the file:
+    ///    - `O_TRUNC` (Posix)
+    ///    - `TRUNCATE_EXISTING` (Windows)
+    /// </summary>
+    Truncate = 4,
+
+    /// <summary>
+    ///  Opens the file for reading in exclusive mode (Windows).
+    ///
+    ///  Exclusive mode means to not specify the `FILE_SHARE_READ` option.
+    /// </summary>
+    ReadExclusive = 28,
+
+    /// <summary>
+    ///  Opens the file for writing in exclusive mode (Windows).
+    ///
+    ///  Exclusive mode means to not specify the `FILE_SHARE_WRITE` option.
+    /// </summary>
+    WriteExclusive = 29,
+
+    /// <summary>
+    ///  Creates the file in exclusive mode - fails if the file already exists.
+    ///
+    ///  The following system flags are used when opening the file:
+    ///    - `O_EXCL` (Posix)
+    ///    - `CREATE_NEW` (Windows)
+    /// </summary>
+    CreateExclusive = 30,
+
+    /// <summary>
+    ///  Opens the file for deleting or renaming in exclusive mode (Windows).
+    ///
+    ///  Exclusive mode means to not specify the `FILE_SHARE_DELETE` option.
+    /// </summary>
+    DeleteExclusive = 31);
+
+  /// <summary>
+  ///  File open flags.
+  /// </summary>
+  /// <seealso cref="TBLFile.Open"/>
+  TBLFileOpenFlags = set of TBLFileOpenFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLFileOpenFlags`.
+  /// </summary>
+  _TBLFileOpenFlagsHelper = record helper for TBLFileOpenFlags
+  public const
+    /// <summary>
+    ///  No flags.
+    /// </summary>
+    None = [];
+
+    /// <summary>
+    ///  Opens the file for reading & writing.
+    ///
+    ///  The following system flags are used when opening the file:
+    ///    - `O_RDWR` (Posix)
+    ///    - `GENERIC_READ or GENERIC_WRITE` (Windows)
+    /// </summary>
+    ReadWrite = [TBLFileOpenFlag.Read, TBLFileOpenFlag.Write];
+
+    /// <summary>
+    ///  Opens the file for both reading and writing (Windows).
+    ///
+    ///  This is a combination of both `BL_FILE_OPEN_READ_EXCLUSIVE` and `BL_FILE_OPEN_WRITE_EXCLUSIVE`.
+    /// </summary>
+    ReadWriteExclusive = [TBLFileOpenFlag.ReadExclusive, TBLFileOpenFlag.WriteExclusive];
+  end;
+
+type
+  /// <summary>
   ///  File read flags used by `TBLFileSystem.ReadFile`.
   /// </summary>
   /// <seealso cref="TBLFileSystem.ReadFile"/>
@@ -2422,7 +2523,404 @@ type
   /// </summary>
   _TBLFileReadFlagsHelper = record helper for TBLFileReadFlags
   public const
+    /// <summary>
+    ///  No flags.
+    /// </summary>
     None = [];
+  end;
+
+type
+  /// <summary>
+  ///  File seek mode.
+  /// </summary>
+  /// <remarks>
+  ///  Seek constants should be compatible with constants used by both POSIX
+  ///  and Windows API.
+  /// </remarks>
+  /// <seealso cref="TBLFile.Seek"/>
+  TBLFileSeekType = (
+    /// <summary>
+    ///  Seek from the beginning of the file (SEEK_SET).
+    /// </summary>
+    FromBeginning,
+
+    /// <summary>
+    ///  Seek from the current position (SEEK_CUR).
+    /// </summary>
+    FromCurrent,
+
+    /// <summary>
+    ///  Seek from the end of the file (SEEK_END).
+    /// </summary>
+    FromEnd);
+
+type
+  /// <summary>
+  ///  File information flags, used by `TBLFileInfo`.
+  /// </summary>
+  /// <seealso cref="TBLFileInfo"/>
+  TBLFileInfoFlag = (
+    /// <summary>
+    ///  File owner has read permission (compatible with 0400 octal notation).
+    /// </summary>
+    OwnerR = 8,
+
+    /// <summary>
+    ///  File owner has write permission (compatible with 0200 octal notation).
+    /// </summary>
+    OwnerW = 7,
+
+    /// <summary>
+    ///  File owner has execute permission (compatible with 0100 octal notation).
+    /// </summary>
+    OwnerX = 6,
+
+    /// <summary>
+    ///  File group owner has read permission (compatible with 040 octal notation).
+    /// </summary>
+    GroupR = 5,
+
+    /// <summary>
+    ///  File group owner has write permission (compatible with 020 octal notation).
+    /// </summary>
+    GroupW = 4,
+
+    /// <summary>
+    ///  File group owner has execute permission (compatible with 010 octal notation).
+    /// </summary>
+    GroupX = 3,
+
+      /// <summary>
+    ///  Other users have read permission (compatible with 04 octal notation).
+    /// </summary>
+    OtherR = 2,
+
+    /// <summary>
+    ///  Other users have write permission (compatible with 02 octal notation).
+    /// </summary>
+    OtherW = 1,
+
+    /// <summary>
+    ///  Other users have execute permission (compatible with 01 octal notation).
+    /// </summary>
+    OtherX = 0,
+
+    /// <summary>
+    ///  Set user ID to file owner user ID on execution (compatible with 04000
+    ///  octal notation).
+    /// </summary>
+    SetUid = 11,
+
+    /// <summary>
+    ///  Set group ID to file's user group ID on execution (compatible with
+    ///  02000 octal notation).
+    /// </summary>
+    SetGid = 10,
+
+    /// <summary>
+    ///  A flag specifying that this is a regular file.
+    /// </summary>
+    Regular = 16,
+
+    /// <summary>
+    ///  A flag specifying that this is a directory.
+    /// </summary>
+    Directory = 17,
+
+    /// <summary>
+    ///  A flag specifying that this is a symbolic link.
+    /// </summary>
+    SymLink = 18,
+
+    /// <summary>
+    ///  A flag describing a character device.
+    /// </summary>
+    CharDevice = 20,
+
+    /// <summary>
+    ///  A flag describing a block device.
+    /// </summary>
+    BlockDevice = 21,
+
+    /// <summary>
+    ///  A flag describing a FIFO (named pipe).
+    /// </summary>
+    Fifo = 22,
+
+    /// <summary>
+    ///  A flag describing a socket.
+    /// </summary>
+    Socket = 23,
+
+    /// <summary>
+    ///  A flag describing a hidden file (Windows only).
+    /// </summary>
+    Hidden = 24,
+
+    /// <summary>
+    ///  A flag describing an executable file (Windows only).
+    /// </summary>
+    Executable = 25,
+
+    /// <summary>
+    ///  A flag describing an archive (Windows only).
+    /// </summary>
+    Archive = 26,
+
+    /// <summary>
+    ///  A flag describing a system file (Windows only).
+    /// </summary>
+    System = 27,
+
+    /// <summary>
+    ///  File information is valid (the request succeeded).
+    /// </summary>
+    Valid = 31);
+
+  /// <summary>
+  ///  File information flags, used by `TBLFileInfo`.
+  /// </summary>
+  /// <seealso cref="TBLFileInfo"/>
+  TBLFileInfoFlags = set of TBLFileInfoFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLFileReadFlags`.
+  /// </summary>
+  _TBLFileInfoFlagsHelper = record helper for TBLFileInfoFlags
+  public const
+    /// <summary>
+    ///  A combination of `OwnerR`, `OwnerW` and `OwnerX`.
+    /// </summary>
+    OwnerMask = [TBLFileInfoFlag.OwnerR, TBLFileInfoFlag.OwnerW, TBLFileInfoFlag.OwnerX];
+
+    /// <summary>
+    ///  A combination of `GroupR`, `GroupW` and `GroupX`.
+    /// </summary>
+    GroupMask = [TBLFileInfoFlag.GroupR, TBLFileInfoFlag.GroupW, TBLFileInfoFlag.GroupX];
+
+    /// <summary>
+    ///  A combination of `OtherR`, `OtherW` and `OtherX`.
+    /// </summary>
+    OtherMask = [TBLFileInfoFlag.OtherR, TBLFileInfoFlag.OtherW, TBLFileInfoFlag.OtherX];
+
+    /// <summary>
+    ///  A combination of all file permission bits.
+    /// </summary>
+    PermissionMask = [
+      TBLFileInfoFlag.OwnerR, TBLFileInfoFlag.OwnerW, TBLFileInfoFlag.OwnerX,
+      TBLFileInfoFlag.GroupR, TBLFileInfoFlag.GroupW, TBLFileInfoFlag.GroupX,
+      TBLFileInfoFlag.OtherR, TBLFileInfoFlag.OtherW, TBLFileInfoFlag.OtherX,
+      TBLFileInfoFlag.SetUid, TBLFileInfoFlag.SetGid];
+  end;
+
+type
+  /// <summary>
+  ///  File information.
+  /// </summary>
+  TBLFileInfo = record
+  {$REGION 'Internal Declarations'}
+  private
+    FSize: Int64;
+    FModifiedTime: Int64;
+    FFlags: TBLFileInfoFlags;
+    FUid: UInt32;
+    FGid: UInt32;
+    FReserved: array [0..4] of UInt32;
+    function GetModifiedTime: TDateTime; inline;
+    function GetHasOwnerR: Boolean; inline;
+    function GetHasOwnerW: Boolean; inline;
+    function GetHasOwnerX: Boolean; inline;
+    function GetHasGroupR: Boolean; inline;
+    function GetHasGroupW: Boolean; inline;
+    function GetHasGroupX: Boolean; inline;
+    function GetHasOtherR: Boolean; inline;
+    function GetHasOtherW: Boolean; inline;
+    function GetHasOtherX: Boolean; inline;
+    function GetHasSetUid: Boolean; inline;
+    function GetHasSetGid: Boolean; inline;
+    function GetIsRegular: Boolean; inline;
+    function GetIsDirectory: Boolean; inline;
+    function GetIsSymLink: Boolean; inline;
+    function GetIsCharDevice: Boolean; inline;
+    function GetIsBlockDevice: Boolean; inline;
+    function GetIsFifo: Boolean; inline;
+    function GetIsSocket: Boolean; inline;
+    function GetIsHidden: Boolean; inline;
+    function GetIsExecutable: Boolean; inline;
+    function GetIsArchive: Boolean; inline;
+    function GetIsSystem: Boolean; inline;
+    function GetIsValid: Boolean; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    function HasFlag(const AFlag: TBLFileInfoFlag): Boolean; inline;
+
+    property Size: Int64 read FSize;
+    property ModifiedTime: TDateTime read GetModifiedTime;
+    property Flags: TBLFileInfoFlags read FFlags;
+    property UserId: Cardinal read FUid;
+    property GroupId: Cardinal read FGid;
+
+    property HasOwnerR: Boolean read GetHasOwnerR;
+    property HasOwnerW: Boolean read GetHasOwnerW;
+    property HasOwnerX: Boolean read GetHasOwnerX;
+
+    property HasGroupR: Boolean read GetHasGroupR;
+    property HasGroupW: Boolean read GetHasGroupW;
+    property HasGroupX: Boolean read GetHasGroupX;
+
+    property HasOtherR: Boolean read GetHasOtherR;
+    property HasOtherW: Boolean read GetHasOtherW;
+    property HasOtherX: Boolean read GetHasOtherX;
+
+    property HasSetUid: Boolean read GetHasSetUid;
+    property HasSetGid: Boolean read GetHasSetGid;
+
+    property IsRegular: Boolean read GetIsRegular;
+    property IsDirectory: Boolean read GetIsDirectory;
+    property IsSymLink: Boolean read GetIsSymLink;
+
+    property IsCharDevice: Boolean read GetIsCharDevice;
+    property IsBlockDevice: Boolean read GetIsBlockDevice;
+    property IsFifo: Boolean read GetIsFifo;
+    property IsSocket: Boolean read GetIsSocket;
+
+    property IsHidden: Boolean read GetIsHidden;
+    property IsExecutable: Boolean read GetIsExecutable;
+    property IsArchive: Boolean read GetIsArchive;
+    property IsSystem: Boolean read GetIsSystem;
+
+    property IsValid: Boolean read GetIsValid;
+  end;
+  PBLFileInfo = ^TBLFileInfo;
+
+type
+  /// <summary>
+  ///  A thin abstraction over a native OS file IO.
+  ///
+  ///  A thin wrapper around a native OS file support. The file handle is always
+  ///  `THandle` and it refers to either a file descriptor on POSIX targets and
+  ///  file handle on Windows targets.
+  /// </summary>
+  TBLFile = record
+  {$REGION 'Internal Declarations'}
+  private
+    FHandle: THandle;
+    function GetIsOpen: Boolean; inline;
+    function GetSize: Int64; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    /// <summary>
+    ///  Creates an empty file instance, which doesn't represent any open file.
+    /// </summary>
+    /// <remarks>
+    ///  The internal file handle of non-opened files is set to `THandle.MaxValue`.
+    /// <remarks>
+    class operator Initialize(out ADest: TBLFile);
+
+    /// <summary>
+    ///  Destroys this file instance - closes the file descriptor or handle when
+    ///  it's referencing an open file.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Finalize(var ADest: TBLFile);
+
+    /// <summary>
+    ///  Copying a file is not allowed. This will raise a `EBlend2DError`
+    ///  exception with result `TBLResult.NotPermitted`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    class operator Assign(var ADest: TBLFile; const [ref] ASrc: TBLFile); inline;
+
+    /// <summary>
+    ///  Creates a file instance from an existing file `AHandle`, which either
+    ///  represents a file descriptor or Windows handle.
+    /// </summary>
+    constructor Create(const AHandle: THandle);
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty file instance).
+    /// </summary>
+    class operator Equal(const ALeft: TBLFile; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Used to compare against `nil` (empty file instance).
+    /// </summary>
+    class operator NotEqual(const ALeft: TBLFile; const ARight: Pointer): Boolean; inline; static;
+
+    /// <summary>
+    ///  Attempts to open a file specified by `AFilename` with the given
+    ///  `AOpenFlags`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Open(const AFilename: String;
+      const AOpenFlags: TBLFileOpenFlags); inline;
+
+    /// <summary>
+    ///  Closes the file (if open) and sets the file handle to `THandle.MaxValue`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Close; inline;
+
+    /// <summary>
+    ///  Sets the file position of the file to the given `AOffset` by using the
+    ///  specified `ASeekType` and returns the new position.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function Seek(const AOffset: Int64; const ASeekType: TBLFileSeekType): Int64; inline;
+
+    /// <summary>
+    ///  Reads `ACount` bytes from the file into the given `ABuffer` and returns
+    ///  the number of bytes actually read.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function Read(var ABuffer; const ACount: Int64): Int64; inline;
+
+    /// <summary>
+    ///  Writes `ACount` bytes to the file from the given `ABuffer` and returns
+    ///  the number of bytes actually written.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function Write(const ABuffer; const ACount: Int64): Int64; inline;
+
+    /// <summary>
+    ///  Truncates the file to the given maximum size `AMaxSize`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure Truncate(const AMaxSize: Int64); inline;
+
+    /// <summary>
+    ///  Queries information of the file.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    function GetInfo: TBLFileInfo;
+
+    /// <summary>
+    ///  Whether the file is open.
+    /// </summary>
+    property IsOpen: Boolean read GetIsOpen;
+
+    /// <summary>
+    ///  The size of the file.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    property Size: Int64 read GetSize;
+  end;
+
+type
+  /// <summary>
+  ///  File-system utilities.
+  /// </summary>
+  TBLFileSystem = record // static
+  public
+    class function FileInfo(const AFilename: String): TBLFileInfo; inline; static;
+    class procedure ReadFile(const AFilename: String; const ADst: TBLArray<Byte>;
+      const AMaxSize: NativeInt = 0; const AReadFlags: TBLFileReadFlags = []); inline; static;
+    class function WriteFile(const AFilename: String; const AData;
+      const ASize: NativeInt): NativeInt; overload; inline; static;
+    class function WriteFile(const AFilename: String; const AData: TBLArrayView<Byte>;
+      const ASize: NativeInt): NativeInt; overload; inline; static;
+    class function WriteFile(const AFilename: String; const AData: TBLArray<Byte>): NativeInt; overload; inline; static;
+    class function WriteFile(const AFilename: String; const AData: TBytes): NativeInt; overload; inline; static;
   end;
 {$ENDREGION 'File System'}
 
@@ -19903,6 +20401,66 @@ type
       const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
+    ///  Blits source image `ASrc` at coordinates specified by `AOrigin`
+    ///  (integer coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const AOrigin: TBLPointI; const ASrc: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Blits an area in source image `ASrc` specified by `ASrcArea` at
+    ///  coordinates specified by `AOrigin` (integer coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const AOrigin: TBLPointI; const ASrc: TBLImage;
+      const ASrcArea: TBLRectI); overload; inline;
+
+    /// <summary>
+    ///  Blits source image `ASrc` at coordinates specified by `AOrigin`
+    ///  (floating point coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const AOrigin: TBLPoint; const ASrc: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Blits an area in source image `ASrc` specified by `ASrcArea` at
+    ///  coordinates specified by `AOrigin` (floating point coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const AOrigin: TBLPoint; const ASrc: TBLImage;
+      const ASrcArea: TBLRect); overload; inline;
+
+    /// <summary>
+    ///  Blits a source image `ASrc` scaled to fit into `ARect` rectangle
+    ///  (integer coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const ARect: TBLRectI; const ASrc: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Blits an area of source image `ASrc` specified by `ASrcArea` scaled to
+    ///  fit into `ARect` rectangle (integer coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const ARect: TBLRectI; const ASrc: TBLImage;
+      const ASrcArea: TBLRectI); overload; inline;
+
+    /// <summary>
+    ///  Blits a source image `ASrc` scaled to fit into `ARect` rectangle
+    ///  (floating point coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const ARect: TBLRect; const ASrc: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Blits an area of source image `ASrc` specified by `ASrcArea` scaled to
+    ///  fit into `ARect` rectangle (floating point coordinates).
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure BlitImage(const ARect: TBLRect; const ASrc: TBLImage;
+      const ASrcArea: TBLRect); overload; inline;
+
+    /// <summary>
     ///  The target size in abstract units (pixels in case of `TBLImage`).
     /// </summary>
     property TargetSize: TBLSize read GetTargetSize;
@@ -20283,7 +20841,8 @@ implementation
 
 uses
   System.Math,
-  System.TypInfo;
+  System.TypInfo,
+  System.DateUtils;
 
 {$REGION 'Error Handling'}
 
@@ -20541,6 +21100,277 @@ begin
   Self := Temp;
 end;
 {$ENDREGION 'Internal'}
+
+{$REGION 'File System'}
+
+{ TBLFileInfo }
+
+function TBLFileInfo.GetHasGroupR: Boolean;
+begin
+  Result := (TBLFileInfoFlag.GroupR in FFlags);
+end;
+
+function TBLFileInfo.GetHasGroupW: Boolean;
+begin
+  Result := (TBLFileInfoFlag.GroupW in FFlags);
+end;
+
+function TBLFileInfo.GetHasGroupX: Boolean;
+begin
+  Result := (TBLFileInfoFlag.GroupX in FFlags);
+end;
+
+function TBLFileInfo.GetHasOtherR: Boolean;
+begin
+  Result := (TBLFileInfoFlag.OtherR in FFlags);
+end;
+
+function TBLFileInfo.GetHasOtherW: Boolean;
+begin
+  Result := (TBLFileInfoFlag.OtherW in FFlags);
+end;
+
+function TBLFileInfo.GetHasOtherX: Boolean;
+begin
+  Result := (TBLFileInfoFlag.OtherX in FFlags);
+end;
+
+function TBLFileInfo.GetHasOwnerR: Boolean;
+begin
+  Result := (TBLFileInfoFlag.OwnerR in FFlags);
+end;
+
+function TBLFileInfo.GetHasOwnerW: Boolean;
+begin
+  Result := (TBLFileInfoFlag.OwnerW in FFlags);
+end;
+
+function TBLFileInfo.GetHasOwnerX: Boolean;
+begin
+  Result := (TBLFileInfoFlag.OwnerX in FFlags);
+end;
+
+function TBLFileInfo.GetHasSetGid: Boolean;
+begin
+  Result := (TBLFileInfoFlag.SetGid in FFlags);
+end;
+
+function TBLFileInfo.GetHasSetUid: Boolean;
+begin
+  Result := (TBLFileInfoFlag.SetUid in FFlags);
+end;
+
+function TBLFileInfo.GetIsArchive: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Archive in FFlags);
+end;
+
+function TBLFileInfo.GetIsBlockDevice: Boolean;
+begin
+  Result := (TBLFileInfoFlag.BlockDevice in FFlags);
+end;
+
+function TBLFileInfo.GetIsCharDevice: Boolean;
+begin
+  Result := (TBLFileInfoFlag.CharDevice in FFlags);
+end;
+
+function TBLFileInfo.GetIsDirectory: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Directory in FFlags);
+end;
+
+function TBLFileInfo.GetIsExecutable: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Executable in FFlags);
+end;
+
+function TBLFileInfo.GetIsFifo: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Fifo in FFlags);
+end;
+
+function TBLFileInfo.GetIsHidden: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Hidden in FFlags);
+end;
+
+function TBLFileInfo.GetIsRegular: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Regular in FFlags);
+end;
+
+function TBLFileInfo.GetIsSocket: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Socket in FFlags);
+end;
+
+function TBLFileInfo.GetIsSymLink: Boolean;
+begin
+  Result := (TBLFileInfoFlag.SymLink in FFlags);
+end;
+
+function TBLFileInfo.GetIsSystem: Boolean;
+begin
+  Result := (TBLFileInfoFlag.System in FFlags);
+end;
+
+function TBLFileInfo.GetIsValid: Boolean;
+begin
+  Result := (TBLFileInfoFlag.Valid in FFlags);
+end;
+
+function TBLFileInfo.GetModifiedTime: TDateTime;
+begin
+  Result := UnixToDateTime(FModifiedTime);
+end;
+
+function TBLFileInfo.HasFlag(const AFlag: TBLFileInfoFlag): Boolean;
+begin
+  Result := (AFlag in FFlags);
+end;
+
+{ TBLFile }
+
+class operator TBLFile.Assign(var ADest: TBLFile; const [ref] ASrc: TBLFile);
+begin
+  raise EBlend2DError.Create(TBLResult.NotPermitted);
+end;
+
+procedure TBLFile.Close;
+begin
+  _BLCheck(_blFileClose(@Self));
+end;
+
+constructor TBLFile.Create(const AHandle: THandle);
+begin
+  FHandle := AHandle;
+end;
+
+class operator TBLFile.Equal(const ALeft: TBLFile;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.FHandle = THandle.MaxValue) then
+    Result := (ARight = nil)
+  else
+    Result := (ARight <> nil);
+end;
+
+class operator TBLFile.Finalize(var ADest: TBLFile);
+begin
+  _BLCheck(_blFileReset(@ADest));
+end;
+
+function TBLFile.GetInfo: TBLFileInfo;
+begin
+  _BLCheck(_blFileGetInfo(@Self, @Result));
+end;
+
+function TBLFile.GetIsOpen: Boolean;
+begin
+  Result := (FHandle <> THandle.MaxValue);
+end;
+
+function TBLFile.GetSize: Int64;
+begin
+  _BLCheck(_blFileGetSize(@Self, @Result));
+end;
+
+class operator TBLFile.Initialize(out ADest: TBLFile);
+begin
+  ADest.FHandle := THandle.MaxValue;
+end;
+
+class operator TBLFile.NotEqual(const ALeft: TBLFile;
+  const ARight: Pointer): Boolean;
+begin
+  if (ALeft.FHandle = THandle.MaxValue) then
+    Result := (ARight <> nil)
+  else
+    Result := (ARight = nil);
+end;
+
+procedure TBLFile.Open(const AFilename: String;
+  const AOpenFlags: TBLFileOpenFlags);
+begin
+  _BLCheck(_blFileOpen(@Self, PUTF8Char(UTF8String(AFilename)), Cardinal(AOpenFlags)));
+end;
+
+function TBLFile.Read(var ABuffer; const ACount: Int64): Int64;
+begin
+  var BytesRead: Size_T;
+  _BLCheck(_blFileRead(@Self, @ABuffer, ACount, @BytesRead));
+  Result := BytesRead;
+end;
+
+function TBLFile.Seek(const AOffset: Int64; const ASeekType: TBLFileSeekType): Int64;
+begin
+  _BLCheck(_blFileSeek(@Self, AOffset, Ord(ASeekType), @Result));
+end;
+
+procedure TBLFile.Truncate(const AMaxSize: Int64);
+begin
+  _BLCheck(_blFileTruncate(@Self, AMaxSize));
+end;
+
+function TBLFile.Write(const ABuffer; const ACount: Int64): Int64;
+begin
+  var BytesWritten: Size_T;
+  _BLCheck(_blFileWrite(@Self, @ABuffer, ACount, @BytesWritten));
+  Result := BytesWritten;
+end;
+
+{ TBLFileSystem }
+
+class function TBLFileSystem.FileInfo(const AFilename: String): TBLFileInfo;
+begin
+  _BLCheck(_blFileSystemGetInfo(PUTF8Char(UTF8String(AFilename)), @Result));
+end;
+
+class procedure TBLFileSystem.ReadFile(const AFilename: String;
+  const ADst: TBLArray<Byte>; const AMaxSize: NativeInt;
+  const AReadFlags: TBLFileReadFlags);
+begin
+  _BLCheck(_blFileSystemReadFile(PUTF8Char(UTF8String(AFilename)), @ADst, AMaxSize, Byte(AReadFlags)));
+end;
+
+class function TBLFileSystem.WriteFile(const AFilename: String; const AData;
+  const ASize: NativeInt): NativeInt;
+begin
+  var BytesWritten: Size_T;
+  _BLCheck(_blFileSystemWriteFile(PUTF8Char(UTF8String(AFilename)), @AData,
+    ASize, @BytesWritten));
+  Result := BytesWritten;
+end;
+
+class function TBLFileSystem.WriteFile(const AFilename: String;
+  const AData: TBLArrayView<Byte>; const ASize: NativeInt): NativeInt;
+begin
+  var BytesWritten: Size_T;
+  _BLCheck(_blFileSystemWriteFile(PUTF8Char(UTF8String(AFilename)), AData.FData,
+    AData.FSize, @BytesWritten));
+  Result := BytesWritten;
+end;
+
+class function TBLFileSystem.WriteFile(const AFilename: String;
+  const AData: TBLArray<Byte>): NativeInt;
+begin
+  var BytesWritten: Size_T;
+  _BLCheck(_blFileSystemWriteFile(PUTF8Char(UTF8String(AFilename)), AData.Data,
+    AData.Size, @BytesWritten));
+  Result := BytesWritten;
+end;
+
+class function TBLFileSystem.WriteFile(const AFilename: String;
+  const AData: TBytes): NativeInt;
+begin
+  var BytesWritten: Size_T;
+  _BLCheck(_blFileSystemWriteFile(PUTF8Char(UTF8String(AFilename)), AData,
+    Length(AData), @BytesWritten));
+  Result := BytesWritten;
+end;
+
+{$ENDREGION 'File System'}
 
 {$REGION 'Geometries'}
 
@@ -29539,6 +30369,50 @@ end;
 class operator TBLContext.Assign(var ADest: TBLContext; const [ref] ASrc: TBLContext);
 begin
   _BLCheck(_blContextInitWeak(@ADest, @ASrc));
+end;
+
+procedure TBLContext.BlitImage(const AOrigin: TBLPoint; const ASrc: TBLImage;
+  const ASrcArea: TBLRect);
+begin
+  _BLCheck(_blContextBlitImageD(@Self, @AOrigin, @ASrc, @ASrcArea));
+end;
+
+procedure TBLContext.BlitImage(const AOrigin: TBLPoint; const ASrc: TBLImage);
+begin
+  _BLCheck(_blContextBlitImageD(@Self, @AOrigin, @ASrc, nil));
+end;
+
+procedure TBLContext.BlitImage(const AOrigin: TBLPointI; const ASrc: TBLImage;
+  const ASrcArea: TBLRectI);
+begin
+  _BLCheck(_blContextBlitImageI(@Self, @AOrigin, @ASrc, @ASrcArea));
+end;
+
+procedure TBLContext.BlitImage(const AOrigin: TBLPointI; const ASrc: TBLImage);
+begin
+  _BLCheck(_blContextBlitImageI(@Self, @AOrigin, @ASrc, nil));
+end;
+
+procedure TBLContext.BlitImage(const ARect: TBLRect; const ASrc: TBLImage;
+  const ASrcArea: TBLRect);
+begin
+  _BLCheck(_blContextBlitScaledImageD(@Self, @ARect, @ASrc, @ASrcArea));
+end;
+
+procedure TBLContext.BlitImage(const ARect: TBLRect; const ASrc: TBLImage);
+begin
+  _BLCheck(_blContextBlitScaledImageD(@Self, @ARect, @ASrc, nil));
+end;
+
+procedure TBLContext.BlitImage(const ARect: TBLRectI; const ASrc: TBLImage;
+  const ASrcArea: TBLRectI);
+begin
+  _BLCheck(_blContextBlitScaledImageI(@Self, @ARect, @ASrc, @ASrcArea));
+end;
+
+procedure TBLContext.BlitImage(const ARect: TBLRectI; const ASrc: TBLImage);
+begin
+  _BLCheck(_blContextBlitScaledImageI(@Self, @ARect, @ASrc, nil));
 end;
 
 procedure TBLContext.ClearAll;
