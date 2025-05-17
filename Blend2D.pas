@@ -21,7 +21,8 @@ unit Blend2D;
 interface
 
 uses
-  System.SysUtils;
+  System.SysUtils,
+  System.UITypes;
 
 {$REGION 'Common Types'}
 type
@@ -641,7 +642,8 @@ type
 
     /// <summary>
     ///  Object represents a TBLRgba32 value stored as 32-bit integer in
-    ///  `$AARRGGBB` form.
+    ///  `$AARRGGBB` form. Also compatible with Delphi's `TAlphaColor` and
+    ///  `TAlphaColorRec`.
     /// </summary>
     Rgba32 = 1,
 
@@ -1008,6 +1010,8 @@ type
     class constructor Create;
   {$ENDREGION 'Internal Declarations'}
   public
+    constructor Create(const ADataIn: P; const ASizeIn: NativeInt);
+
     /// <summary>
     ///  Creates a default empty array view
     /// </summary>
@@ -5157,6 +5161,8 @@ type
 type
   /// <summary>
   ///  32-bit RGBA color (8-bit per component) stored as `$AARRGGBB`.
+  ///  This record is compatible with Delphi's `TAlphaColor` and
+  ///  `TAlphaColorRec` and can be typecast to and from these.
   /// </summary>
   TBLRgba32 = record
   {$REGION 'Internal Declarations'}
@@ -5181,11 +5187,18 @@ type
     class function Create: TBLRgba32; overload; inline; static;
     constructor Create(const ARgba32: UInt32); overload;
     constructor Create(const AR, AG, AB: Byte; const AA: Byte = $FF); overload;
+    constructor Create(const AColor: TAlphaColorRec); overload;
 
     /// <summary>
-    ///  Implicitly converts from a packed 32-bit RGBA value to a TBLRgba32.
+    ///  Implicitly converts from a packed 32-bit RGBA value (or `TAlphaColor`)
+    ///  to a TBLRgba32.
     /// </summary>
     class operator Implicit(const AValue: UInt32): TBLRgba32; inline; static;
+
+    /// <summary>
+    ///  Implicitly converts from a `TAlphaColorRec` to a TBLRgba32.
+    /// </summary>
+    class operator Implicit(const AValue: TAlphaColorRec): TBLRgba32; inline; static;
 
     /// <summary>
     ///  Implicitly converts from a TBLRgba32 to a packed 32-bit RGBA value.
@@ -5198,6 +5211,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const ARgba32: UInt32); overload; inline;
     procedure Reset(const AR, AG, AB: Byte; const AA: Byte = $FF); overload; inline;
+    procedure Reset(const AColor: TAlphaColorRec); overload; inline;
     function Equals(const AOther: TBLRgba32): Boolean; inline;
 
     property R: Byte read GetR write SetR;
@@ -5295,6 +5309,8 @@ type
 type
   /// <summary>
   ///  128-bit RGBA color stored as 4 32-bit floating point values in [RGBA] order.
+  ///  This record is compatible with Delphi's `TAlphaColorF` and can be
+  ///  typecase to and from it.
   /// </summary>
   TBLRgba = record
   {$REGION 'Internal Declarations'}
@@ -5327,6 +5343,7 @@ type
     constructor Create(const AR, AG, AB: Single; const AA: Single = 1); overload;
     constructor Create(const ARgba32: TBLRgba32); overload;
     constructor Create(const ARgba64: TBLRgba64); overload;
+    constructor Create(const AColor: TAlphaColorF); overload;
 
     class operator Equal(const ALeft, ARight: TBLRgba): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLRgba): Boolean; inline; static;
@@ -5335,6 +5352,7 @@ type
     procedure Reset(const ARgba32: TBLRgba32); overload; inline;
     procedure Reset(const ARgba64: TBLRgba64); overload; inline;
     procedure Reset(const AR, AG, AB: Single; const AA: Single = 1); overload; inline;
+    procedure Reset(const AColor: TAlphaColorF); overload; inline;
 
     function Equals(const AOther: TBLRgba): Boolean; overload; inline;
     function Equals(const AOther: TBLRgba32): Boolean; overload; inline;
@@ -5360,6 +5378,7 @@ function BLRgba32: TBLRgba32; overload; inline;
 function BLRgba32(const ARgba32: UInt32): TBLRgba32; overload; inline;
 function BLRgba32(const ARgba64: TBLRgba64): TBLRgba32; overload; inline;
 function BLRgba32(const AR, AG, AB: Byte; const AA: Byte = $FF): TBLRgba32; overload; inline;
+function BLRgba32(const AColor: TAlphaColorRec): TBLRgba32; overload; inline;
 
 function BLRgba64: TBLRgba64; overload; inline;
 function BLRgba64(const ARgba64: UInt64): TBLRgba64; overload; inline;
@@ -5370,6 +5389,7 @@ function BLRgba: TBLRgba; overload; inline;
 function BLRgba(const ARgba32: TBLRgba32): TBLRgba; overload; inline;
 function BLRgba(const ARgba64: TBLRgba64): TBLRgba; overload; inline;
 function BLRgba(const AR, AG, AB: Single; const AA: Single = 1): TBLRgba; overload; inline;
+function BLRgba(const AColor: TAlphaColorF): TBLRgba; overload; inline;
 
 function BLMin(const AA, AB: TBLRgba32): TBLRgba32; overload; inline;
 function BLMax(const AA, AB: TBLRgba32): TBLRgba32; overload; inline;
@@ -7125,6 +7145,7 @@ type
     class function Create: TBLGradientStop; overload; inline; static;
     constructor Create(const AOffset: Double; const ARgba32: TBLRgba32); overload;
     constructor Create(const AOffset: Double; const ARgba64: TBLRgba64); overload;
+    constructor Create(const AOffset: Double; const AColor: TAlphaColor); overload;
 
     class operator Equal(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLGradientStop): Boolean; inline; static;
@@ -7132,6 +7153,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AOffset: Double; const ARgba32: TBLRgba32); overload; inline;
     procedure Reset(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
+    procedure Reset(const AOffset: Double; const AColor: TAlphaColor); overload; inline;
 
     function Equals(const AOther: TBLGradientStop): Boolean; inline;
   end;
@@ -7142,6 +7164,7 @@ type
 function BLGradientStop: TBLGradientStop; overload; inline;
 function BLGradientStop(const AOffset: Double; const ARgba32: TBLRgba32): TBLGradientStop; overload; inline;
 function BLGradientStop(const AOffset: Double; const ARgba64: TBLRgba64): TBLGradientStop; overload; inline;
+function BLGradientStop(const AOffset: Double; const AColor: TAlphaColor): TBLGradientStop; overload; inline;
 
 type
   /// <summary>
@@ -7459,6 +7482,15 @@ type
     procedure AddStop(const AOffset: Double; const ARgba64: TBLRgba64); overload; inline;
 
     /// <summary>
+    ///  Adds a color stop described as a `AColor` at the given `AOffset`.
+    /// </summary>
+    /// <remarks>
+    ///  The offset value must be in `[0, 1]` range.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure AddStop(const AOffset: Double; const AColor: TAlphaColor); overload; inline;
+
+    /// <summary>
     ///  Removes stop at the given `AIndex`.
     /// </summary>
     /// <remarks>
@@ -7504,7 +7536,7 @@ type
     ///  `AOffset` and `ARgba32`.
     ///
     ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
-    ///  by `AddStop(AOffset, Rgba32)`.
+    ///  by `AddStop(AOffset, ARgba32)`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     /// <seealso cref="RemoveStop"/>
@@ -7517,13 +7549,26 @@ type
     ///  `AOffset` and `ARgba64`.
     ///
     ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
-    ///  by `AddStop(AOffset, Rgba64)`.
+    ///  by `AddStop(AOffset, ARgba64)`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     /// <seealso cref="RemoveStop"/>
     /// <seealso cref="AddStop"/>
     procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
       const ARgba64: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Replaces stop at the given `AIndex` with a new color stop described by
+    ///  `AOffset` and `AColor`.
+    ///
+    ///  The operation leads to the same result as `RemoveStop(AIndex)` followed
+    ///  by `AddStop(AOffset, AColor)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="RemoveStop"/>
+    /// <seealso cref="AddStop"/>
+    procedure ReplaceStop(const AIndex: NativeInt; const AOffset: Double;
+      const AColor: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Returns the index of a color stop in Stops array of the given `AOffset`.
@@ -12292,6 +12337,13 @@ type
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure SetStyle(const ASlot: TBLContextStyleSlot;
+      const AColor: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Sets `AStyle` to be used with the given style `ASlot` operation.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStyle(const ASlot: TBLContextStyleSlot;
       const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
@@ -12379,6 +12431,12 @@ type
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure SetFillStyle(const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Sets fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetFillStyle(const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Sets fill style.
@@ -12474,6 +12532,12 @@ type
     ///  Sets stroke style.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure SetStrokeStyle(const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Sets stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure SetStrokeStyle(const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
@@ -12550,6 +12614,20 @@ type
     procedure SetStrokeCaps(const AStrokeCap: TBLStrokeCap); inline;
 
     /// <summary>
+    ///  Restores clipping to the last saved state or to the context default
+    ///  clipping if there is no saved state.
+    ///
+    ///  If there are no saved states then it resets clipping completely to the
+    ///  initial state that was used when the rendering context was created.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure RestoreClipping; inline;
+
+    procedure ClipToRect(const ARect: TBLRectI); overload; inline;
+    procedure ClipToRect(const ARect: TBLRect); overload; inline;
+    procedure ClipToRect(const AX, AY, AW, AH: Double); overload; inline;
+
+    /// <summary>
     ///  Clear everything to a transparent black, which is the same operation as
     ///  temporarily setting the composition operator to TBLCompOp.Clear and
     ///  then filling everything by `FillAll`.
@@ -12566,14 +12644,3068 @@ type
     procedure ClearAll; inline;
 
     /// <summary>
+    ///  Clears a rectangle `ARect` (integer coordinates) to a transparent
+    ///  black, which is the same operation as temporarily setting the
+    ///  composition operator to `TBLCompOp.Clear` and then calling
+    ///  `FillRect(ARect)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <remarks>
+    ///  If the target surface doesn't have alpha, but has X component, like
+    ///  `TBLFormat.Xrgb32`, the `X` component would be set to `1.0`, which
+    ///  would translate to `$FF` in case of \ref `TBLFormat.Xrgb32`.
+    /// </remarks>
+    /// <seealso cref="TBLCompOp"/>
+    /// <seealso cref="FillRect"/>
+    /// <seealso cref="TBLFormat"/>
+    procedure ClearRect(const ARect: TBLRectI); overload; inline;
+
+    /// <summary>
+    ///  Clears a rectangle `ARect` (floating-point coordinates) to a
+    ///  transparent black, which is the same operation as temporarily setting
+    ///  the composition operator to `TBLCompOp.Clear` and then calling
+    ///  `FillRect(ARect)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <remarks>
+    ///  If the target surface doesn't have alpha, but has X component, like
+    ///  `TBLFormat.Xrgb32`, the `X` component would be set to `1.0`, which
+    ///  would translate to `$FF` in case of \ref `TBLFormat.Xrgb32`.
+    /// </remarks>
+    /// <seealso cref="TBLCompOp"/>
+    /// <seealso cref="FillRect"/>
+    /// <seealso cref="TBLFormat"/>
+    procedure ClearRect(const ARect: TBLRect); overload; inline;
+
+    /// <summary>
+    ///  Clears a rectangle `[AX, AY, AW, AH]` (floating-point coordinates) to a
+    ///  transparent black, which is the same operation as temporarily setting
+    ///  the composition operator to 'TBLCompOp.Clear` and then calling
+    ///  `FillRect(AX, AY, AW, AH)`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <remarks>
+    ///  If the target surface doesn't have alpha, but has X component, like
+    ///  `TBLFormat.Xrgb32`, the `X` component would be set to `1.0`, which
+    ///  would translate to `$FF` in case of \ref `TBLFormat.Xrgb32`.
+    /// </remarks>
+    /// <seealso cref="TBLCompOp"/>
+    /// <seealso cref="FillRect"/>
+    /// <seealso cref="TBLFormat"/>
+    procedure ClearRect(const AX, AY, AW, AH: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll; overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll(const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll(const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll(const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll(const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll(const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll(const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills everything non-clipped with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillAll(const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates)  with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates)  with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates)  with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates)  with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates)  with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates)  with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (floating point coordinates)  with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBox; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates) with the current fill style.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates)  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates)  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates)  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates)  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates)  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates)  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a `ABox` (integer coordinates)  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `FillRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="FillRect"/>
+    procedure FillBox(const ABox: TBLBoxI; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with the
+    ///  current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit fill `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit fill `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit fill `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit fill `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit fill `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit fill `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit fill `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRectI; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with the current
+    ///  fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const ARect: TBLRect; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit fill `Atyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit fill `Atyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit fill `Atyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit fill `Atyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit fill `Atyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit fill `Atyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit fill `Atyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates)  with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates)  with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates)  with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates)  with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates)  with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates)  with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ACircle` (floating point coordinates)  with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACircle: TBLCircle; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillCircle(const ACX, ACY, AR: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AEllipse` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const AEllipse: TBLEllipse; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with the
+    ///  current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARR: TBLRoundRect; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with the
+    ///  current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AChord` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const AChord: TBLArc; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `APie` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const APie: TBLArc; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `ATriangle` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const ATriangle: TBLTriangle; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with the current
+    ///  fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with the current
+    ///  fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with the current
+    ///  fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with the current
+    ///  fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` (integer coordinates) with an explicit
+    ///  fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with the
+    ///  default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
     ///  Fills the given `APath` with the default fill style.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillPath(const APath: TBLPath); overload; inline;
 
     /// <summary>
-    ///  Fills the given `APath` with the given `AColor`.
+    ///  Fills the given `APath` with an explicit fill `AStyle`.
     /// </summary>
-    procedure FillPath(const APath: TBLPath; const AColor: TBLRgba32); overload; inline;
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const APath: TBLPath; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const APath: TBLPath; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const APath: TBLPath; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const APath: TBLPath; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const APath: TBLPath; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const APath: TBLPath; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const APath: TBLPath; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with the default fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills the given `APath` translated by `AOrigin` with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillPath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with the default fill style.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit fill `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with the default fill style.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with the default fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with the default fill style.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  The target size in abstract units (pixels in case of `TBLImage`).
@@ -15850,6 +18982,12 @@ begin
   Assert(not System.HasWeakRef(T));
 end;
 
+constructor TBLArrayView<T>.Create(const ADataIn: P; const ASizeIn: NativeInt);
+begin
+  FData := ADataIn;
+  FSize := ASizeIn;
+end;
+
 function TBLArrayView<T>.First: P;
 begin
   Result := FData;
@@ -17253,6 +20391,11 @@ begin
   Result.Reset(AR, AG, AB, AA);
 end;
 
+function BLRgba32(const AColor: TAlphaColorRec): TBLRgba32; overload; inline;
+begin
+  Result.Reset(AColor);
+end;
+
 function BLMin(const AA, AB: TBLRgba32): TBLRgba32; overload; inline;
 begin
   Result.Reset(Min(AA.R, AB.R), Min(AA.G, AB.G), Min(AA.B, AB.B), Min(AA.A, AB.A));
@@ -17276,6 +20419,11 @@ end;
 class function TBLRgba32.Create: TBLRgba32;
 begin
   Result.Value := 0;
+end;
+
+constructor TBLRgba32.Create(const AColor: TAlphaColorRec);
+begin
+  Value := AColor.Color;
 end;
 
 class operator TBLRgba32.Equal(const ALeft, ARight: TBLRgba32): Boolean;
@@ -17323,6 +20471,11 @@ begin
   Result := AValue.Value;
 end;
 
+class operator TBLRgba32.Implicit(const AValue: TAlphaColorRec): TBLRgba32;
+begin
+  Result.Value := AValue.Color;
+end;
+
 class operator TBLRgba32.Implicit(const AValue: UInt32): TBLRgba32;
 begin
   Result.Value := AValue;
@@ -17346,6 +20499,11 @@ end;
 procedure TBLRgba32.Reset(const ARgba32: UInt32);
 begin
   Value := ARgba32;
+end;
+
+procedure TBLRgba32.Reset(const AColor: TAlphaColorRec);
+begin
+  Value := AColor.Color;
 end;
 
 procedure TBLRgba32.SetA(const AValue: Byte);
@@ -17553,6 +20711,11 @@ begin
   Result.Reset(AR, AG, AB, AA);
 end;
 
+function BLRgba(const AColor: TAlphaColorF): TBLRgba; overload; inline;
+begin
+  Result.Reset(AColor);
+end;
+
 function BLMin(const AA, AB: TBLRgba): TBLRgba; overload; inline;
 begin
   Result.Reset(Min(AA.R, AB.R), Min(AA.G, AB.G), Min(AA.B, AB.B), Min(AA.A, AB.A));
@@ -17584,6 +20747,11 @@ end;
 constructor TBLRgba.Create(const ARgba64: TBLRgba64);
 begin
   Reset(ARgba64);
+end;
+
+constructor TBLRgba.Create(const AColor: TAlphaColorF);
+begin
+  Self := TBLRgba(AColor);
 end;
 
 class operator TBLRgba.Equal(const ALeft, ARight: TBLRgba): Boolean;
@@ -17661,6 +20829,11 @@ begin
   G := AG;
   B := AB;
   A := AA;
+end;
+
+procedure TBLRgba.Reset(const AColor: TAlphaColorF);
+begin
+  Self := TBLRgba(AColor);
 end;
 
 function TBLRgba.ToRgba32: TBLRgba32;
@@ -18044,6 +21217,11 @@ begin
   Result.Reset(AOffset, ARgba64);
 end;
 
+function BLGradientStop(const AOffset: Double; const AColor: TAlphaColor): TBLGradientStop; overload; inline;
+begin
+  Result.Reset(AOffset, AColor);
+end;
+
 class function TBLGradientStop.Create: TBLGradientStop;
 begin
   Result.Offset := 0;
@@ -18064,6 +21242,13 @@ begin
   Rgba := ARgba64;
 end;
 
+constructor TBLGradientStop.Create(const AOffset: Double;
+  const AColor: TAlphaColor);
+begin
+  Offset := AOffset;
+  Rgba.Reset(AColor);
+end;
+
 class operator TBLGradientStop.Equal(const ALeft,
   ARight: TBLGradientStop): Boolean;
 begin
@@ -18079,6 +21264,13 @@ class operator TBLGradientStop.NotEqual(const ALeft,
   ARight: TBLGradientStop): Boolean;
 begin
   Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLGradientStop.Reset(const AOffset: Double;
+  const AColor: TAlphaColor);
+begin
+  Offset := AOffset;
+  Rgba.Reset(AColor);
 end;
 
 procedure TBLGradientStop.Reset;
@@ -18231,14 +21423,19 @@ begin
   _BLCheck(_blGradientAddStopRgba64(@Self, AOffset, ARgba64.Value));
 end;
 
-procedure TBLGradient.ApplyTransform(const ATransform: TBLMatrix2D);
+procedure TBLGradient.AddStop(const AOffset: Double; const AColor: TAlphaColor);
 begin
-  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Transform), @ATransform));
+  _BLCheck(_blGradientAddStopRgba32(@Self, AOffset, AColor));
 end;
 
 procedure TBLGradient.AddStop(const AOffset: Double; const ARgba32: TBLRgba32);
 begin
   _BLCheck(_blGradientAddStopRgba32(@Self, AOffset, ARgba32.Value));
+end;
+
+procedure TBLGradient.ApplyTransform(const ATransform: TBLMatrix2D);
+begin
+  _BLCheck(_blGradientApplyTransformOp(@Self, Ord(TBLTransformOp.Transform), @ATransform));
 end;
 
 class operator TBLGradient.Assign(var ADest: TBLGradient;
@@ -18697,6 +21894,12 @@ procedure TBLGradient.ReplaceStop(const AIndex: NativeInt;
   const AOffset: Double; const ARgba32: TBLRgba32);
 begin
   _BLCheck(_blGradientReplaceStopRgba32(@Self, AIndex, AOffset, ARgba32.Value));
+end;
+
+procedure TBLGradient.ReplaceStop(const AIndex: NativeInt;
+  const AOffset: Double; const AColor: TAlphaColor);
+begin
+  _BLCheck(_blGradientReplaceStopRgba32(@Self, AIndex, AOffset, AColor));
 end;
 
 procedure TBLGradient.Reserve(const AMinCapacity: NativeInt);
@@ -22135,6 +25338,38 @@ begin
   _BLCheck(_blContextClearAll(@Self));
 end;
 
+procedure TBLContext.ClearRect(const ARect: TBLRectI);
+begin
+  _BLCheck(_blContextClearRectI(@Self, @ARect));
+end;
+
+procedure TBLContext.ClearRect(const ARect: TBLRect);
+begin
+  _BLCheck(_blContextClearRectD(@Self, @ARect));
+end;
+
+procedure TBLContext.ClearRect(const AX, AY, AW, AH: Double);
+begin
+  var R := BLRect(AX, AY, AW, AH);
+  _BLCheck(_blContextClearRectD(@Self, @R));
+end;
+
+procedure TBLContext.ClipToRect(const ARect: TBLRectI);
+begin
+  _BLCheck(_blContextClipToRectI(@Self, @ARect));
+end;
+
+procedure TBLContext.ClipToRect(const ARect: TBLRect);
+begin
+  _BLCheck(_blContextClipToRectD(@Self, @ARect));
+end;
+
+procedure TBLContext.ClipToRect(const AX, AY, AW, AH: Double);
+begin
+  var R := BLRect(AX, AY, AW, AH);
+  _BLCheck(_blContextClipToRectD(@Self, @R));
+end;
+
 constructor TBLContext.Create(const ATarget: TBLImage;
   const ACreateInfo: TBLContextCreateInfo);
 begin
@@ -22183,14 +25418,2384 @@ begin
   _BLCheck(_blContextInitAs(@Self, @ATarget, nil));
 end;
 
+procedure TBLContext.FillAll(const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillAllRgba64(@Self, AStyle.Value));
+end;
+
+procedure TBLContext.FillAll(const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillAllRgba32(@Self, AStyle.Value));
+end;
+
+procedure TBLContext.FillAll(const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillAllExt(@Self, @Style));
+end;
+
+procedure TBLContext.FillAll;
+begin
+  _BLCheck(_blContextFillAll(@Self));
+end;
+
+procedure TBLContext.FillAll(const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillAllExt(@Self, @AStyle));
+end;
+
+procedure TBLContext.FillAll(const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillAllExt(@Self, @AStyle));
+end;
+
+procedure TBLContext.FillAll(const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillAllExt(@Self, @AStyle));
+end;
+
+procedure TBLContext.FillAll(const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillAllRgba32(@Self, AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.BoxD), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.BoxD), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @Style));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.BoxD), @ABox));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBox; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.BoxD), @ABox, AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.BoxI), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.BoxI), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @Style));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.BoxI), @ABox));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @AStyle));
+end;
+
+procedure TBLContext.FillBox(const ABox: TBLBoxI; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.BoxI), @ABox, AStyle));
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1));
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLVar);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLGradient);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLPattern);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.FillBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @Style));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLRgba64);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLRgba32);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLRgba);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLVar);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLGradient);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLPattern);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TAlphaColor);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox;
+  const ACount: NativeInt);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  FillBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @Style));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, AStyle));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLRgba64);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLRgba32);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLRgba);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLVar);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLGradient);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLPattern);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TAlphaColor);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI;
+  const ACount: NativeInt);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  FillBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.Circle), @ACircle, AStyle.Value));
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Circle), @ACircle, AStyle.Value));
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @Style));
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.Circle), @ACircle));
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @AStyle));
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @AStyle));
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @AStyle));
+end;
+
+procedure TBLContext.FillCircle(const ACircle: TBLCircle;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Circle), @ACircle, AStyle));
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLRgba);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR));
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLVar);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLGradient);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLPattern);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.FillCircle(const ACX, ACY, AR: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.Chord), @AChord, AStyle.Value));
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Chord), @AChord, AStyle.Value));
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @Style));
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.Chord), @AChord));
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @AStyle));
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @AStyle));
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @AStyle));
+end;
+
+procedure TBLContext.FillChord(const AChord: TBLArc; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Chord), @AChord, AStyle));
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep));
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart,
+  ASweep: Double);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep));
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, AStyle.Value));
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, AStyle.Value));
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @Style));
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse));
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @AStyle));
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @AStyle));
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @AStyle));
+end;
+
+procedure TBLContext.FillEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, AStyle));
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLRgba);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY));
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLVar);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLGradient);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLPattern);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(AType), AData, AStyle.Value));
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(AType), AData, AStyle.Value));
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(AType), AData, @Style));
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(AType), AData));
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(AType), AData, @AStyle));
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(AType), AData, @AStyle));
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(AType), AData, @AStyle));
+end;
+
+procedure TBLContext.FillGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(AType), AData, AStyle));
+end;
+
+procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillPathDRgba32(@Self, @TBLPoint.Empty, @APath, AStyle.Value));
+end;
+
+procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillPathDRgba64(@Self, @TBLPoint.Empty, @APath, AStyle.Value));
+end;
+
+procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillPathDExt(@Self, @TBLPoint.Empty, @APath, @Style));
+end;
+
 procedure TBLContext.FillPath(const APath: TBLPath);
 begin
   _BLCheck(_blContextFillPathD(@Self, @TBLPoint.Empty, @APath));
 end;
 
-procedure TBLContext.FillPath(const APath: TBLPath; const AColor: TBLRgba32);
+procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TBLVar);
 begin
-  _BLCheck(_blContextFillPathDRgba32(@Self, @TBLPoint.Empty, @APath, AColor.Value));
+  _BLCheck(_blContextFillPathDExt(@Self, @TBLPoint.Empty, @APath, @AStyle));
+end;
+
+procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillPathDExt(@Self, @TBLPoint.Empty, @APath, @AStyle));
+end;
+
+procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillPathDExt(@Self, @TBLPoint.Empty, @APath, @AStyle));
+end;
+
+procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillPathDRgba32(@Self, @TBLPoint.Empty, @APath, AStyle));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillPathDRgba64(@Self, @AOrigin, @APath, AStyle));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillPathDRgba32(@Self, @AOrigin, @APath, AStyle));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillPathDExt(@Self, @AOrigin, @APath, @Style));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath);
+begin
+  _BLCheck(_blContextFillPathD(@Self, @AOrigin, @APath));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillPathDExt(@Self, @AOrigin, @APath, @AStyle));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillPathDExt(@Self, @AOrigin, @APath, @AStyle));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillPathDExt(@Self, @AOrigin, @APath, @AStyle));
+end;
+
+procedure TBLContext.FillPath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillPathDRgba32(@Self, @AOrigin, @APath, AStyle));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.Pie), @APie, AStyle.Value));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Pie), @APie, AStyle.Value));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @Style));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.Pie), @APie));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @AStyle));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @AStyle));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @AStyle));
+end;
+
+procedure TBLContext.FillPie(const APie: TBLArc; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Pie), @APie, AStyle));
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep));
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillPie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart,
+  ASweep: Double);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep));
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @Style));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.PolygonD), @APoly));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba64);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba32);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLVar);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLGradient);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLPattern);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+  const AStyle: TAlphaColor);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount));
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @Style));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.PolygonI), @APoly));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba64);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba32);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)));
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLVar);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLGradient);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLPattern);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+  const AStyle: TAlphaColor);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount));
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillRectIRgba64(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillRectIRgba32(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillRectIExt(@Self, @ARect, @Style));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI);
+begin
+  _BLCheck(_blContextFillRectI(@Self, @ARect));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillRectIExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillRectIExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillRectIExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillRectIRgba32(@Self, @ARect, AStyle));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillRectDRgba64(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @Style));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect);
+begin
+  _BLCheck(_blContextFillRectD(@Self, @ARect));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.FillRect(const ARect: TBLRect; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle));
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLRgba);
+begin
+  FillRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double);
+begin
+  FillRect(BLRect(AX, AY, AW, AH));
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLVar);
+begin
+  FillRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLGradient);
+begin
+  FillRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLPattern);
+begin
+  FillRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.FillRect(const AX, AY, AW, AH: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @Style));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLRgba64);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLRgba32);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLRgba);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLVar);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLGradient);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLPattern);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TAlphaColor);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect;
+  const ACount: NativeInt);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  FillRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @Style));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, AStyle));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLRgba64);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLRgba32);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLRgba);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLVar);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLGradient);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLPattern);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TAlphaColor);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI;
+  const ACount: NativeInt);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  FillRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.RoundRect), @ARR, AStyle.Value));
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.RoundRect), @ARR, AStyle.Value));
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @Style));
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.RoundRect), @ARR));
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @AStyle));
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @AStyle));
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @AStyle));
+end;
+
+procedure TBLContext.FillRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.RoundRect), @ARR, AStyle));
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLRgba);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR));
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLVar);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLGradient);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLPattern);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLRgba);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX,
+  ARY: Double);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY));
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLVar);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLGradient);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLPattern);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLRgba);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR));
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLVar);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLGradient);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLPattern);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLRgba);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY));
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLVar);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLGradient);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLPattern);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf16TextIRgba64(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf16TextIRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String);
+begin
+  _BLCheck(_blContextFillUtf16TextI(@Self, @AOrigin, @AFont, PChar(AText), Length(AText)));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf16TextIRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf16TextDRgba64(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf16TextDRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String);
+begin
+  _BLCheck(_blContextFillUtf16TextD(@Self, @AOrigin, @AFont, PChar(AText), Length(AText)));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf16TextDRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, AStyle.Value));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, AStyle.Value));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @Style));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle);
+begin
+  _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.Triangle), @ATriangle));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @AStyle));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @AStyle));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @AStyle));
+end;
+
+procedure TBLContext.FillTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, AStyle));
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLRgba64);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLRgba32);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLRgba);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2));
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLVar);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLGradient);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLPattern);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.FillTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TAlphaColor);
+begin
+  FillTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf8TextIRgba64(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String);
+begin
+  _BLCheck(_blContextFillUtf8TextI(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText)));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf8TextIRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView);
+begin
+  _BLCheck(_blContextFillUtf8TextI(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String);
+begin
+  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText)));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView);
+begin
+  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
 end;
 
 class operator TBLContext.Finalize(var ADest: TBLContext);
@@ -22562,6 +28167,11 @@ begin
   _BLCheck(_blContextRestore(@Self, @ACookie));
 end;
 
+procedure TBLContext.RestoreClipping;
+begin
+  _BLCheck(_blContextRestoreClipping(@Self));
+end;
+
 procedure TBLContext.Rotate(const AAngle: Double);
 begin
   _BLCheck(_blContextApplyTransformOp(@Self, Ord(TBLTransformOp.Rotate), @AAngle));
@@ -22702,6 +28312,11 @@ procedure TBLContext.SetFillStyle(const AStyle: TBLVar;
   const ATransformMode: TBLContextStyleTransformMode);
 begin
   _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
+end;
+
+procedure TBLContext.SetFillStyle(const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextSetFillStyleRgba32(@Self, AStyle))
 end;
 
 procedure TBLContext.SetFlattenMode(const AValue: TBLFlattenMode);
@@ -22917,6 +28532,11 @@ begin
   _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
 end;
 
+procedure TBLContext.SetStrokeStyle(const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextSetStrokeStyleRgba32(@Self, AStyle))
+end;
+
 procedure TBLContext.SetStrokeTransformOrder(
   const AValue: TBLStrokeTransformOrder);
 begin
@@ -22935,6 +28555,15 @@ begin
     _BLCheck(_blContextSetFillStyleWithMode(@Self, @AStyle, Ord(ATransformMode)))
   else
     _BLCheck(_blContextSetStrokeStyleWithMode(@Self, @AStyle, Ord(ATransformMode)));
+end;
+
+procedure TBLContext.SetStyle(const ASlot: TBLContextStyleSlot;
+  const AColor: TAlphaColor);
+begin
+  if (ASlot = TBLContextStyleSlot.Fill) then
+    _BLCheck(_blContextSetFillStyleRgba32(@Self, AColor))
+  else
+    _BLCheck(_blContextSetStrokeStyleRgba32(@Self, AColor));
 end;
 
 procedure TBLContext.SetStyleAlpha(const ASlot: TBLContextStyleSlot;
