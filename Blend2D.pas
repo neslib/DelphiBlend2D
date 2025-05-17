@@ -3120,6 +3120,7 @@ type
 
     procedure Reset; overload; inline;
     procedure Reset(const AX0, AY0, AX1, AY1: Double); overload; inline;
+    procedure Reset(const AP0, AP1: TBLPoint); overload; inline;
     procedure Reset(const AOther: TBLLine); overload; inline;
 
     function Equals(const AOther: TBLLine): Boolean; inline;
@@ -3135,7 +3136,8 @@ type
     Empty: TBLLine = (X0: 0; Y0: 0; X1: 0; Y1: 0);
   end;
 
-function BLLine(const AX0, AY0, AX1, AY1: Double): TBLLine; inline;
+function BLLine(const AX0, AY0, AX1, AY1: Double): TBLLine; overload; inline;
+function BLLine(const AP0, AP1: TBLPoint): TBLLine; overload; inline;
 
 type
   /// <summary>
@@ -13102,49 +13104,49 @@ type
 
     /// <summary>
     ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
-    ///  an explicit fill `Atyle`.
+    ///  an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba); overload; inline;
 
     /// <summary>
     ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
-    ///  an explicit fill `Atyle`.
+    ///  an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba32); overload; inline;
 
     /// <summary>
     ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
-    ///  an explicit fill `Atyle`.
+    ///  an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba64); overload; inline;
 
     /// <summary>
     ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
-    ///  an explicit fill `Atyle`.
+    ///  an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
-    ///  an explicit fill `Atyle`.
+    ///  an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLPattern); overload; inline;
 
     /// <summary>
     ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
-    ///  an explicit fill `Atyle`.
+    ///  an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
     ///  Fills a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
-    ///  an explicit fill `Atyle`.
+    ///  an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillRect(const AX, AY, AW, AH: Double; const AStyle: TBLVar); overload; inline;
@@ -15521,6 +15523,7 @@ type
     ///  Fills UTF-8 encoded string passed as string `AView` by using the given
     ///  `AFont` at `AOrigin` (integer coordinates) with the default fill style.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView); overload; inline;
 
@@ -15529,6 +15532,7 @@ type
     ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLRgba); overload; inline;
 
@@ -15537,6 +15541,7 @@ type
     ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLRgba32); overload; inline;
 
@@ -15545,6 +15550,7 @@ type
     ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLRgba64); overload; inline;
 
@@ -15553,6 +15559,7 @@ type
     ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TAlphaColor); overload; inline;
 
@@ -15561,6 +15568,7 @@ type
     ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLPattern); overload; inline;
 
@@ -15569,6 +15577,7 @@ type
     ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLGradient); overload; inline;
 
@@ -15577,6 +15586,7 @@ type
     ///  `AFont` at `AOrigin` (integer coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLVar); overload; inline;
 
@@ -15648,6 +15658,7 @@ type
     ///  Fills UTF-8 encoded string passed as string `AView` by using the given
     ///  `AFont` at `AOrigin` (floating point coordinates) with the default fill style.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView); overload; inline;
 
@@ -15656,6 +15667,7 @@ type
     ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLRgba); overload; inline;
 
@@ -15664,6 +15676,7 @@ type
     ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLRgba32); overload; inline;
 
@@ -15672,6 +15685,7 @@ type
     ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLRgba64); overload; inline;
 
@@ -15680,6 +15694,7 @@ type
     ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TAlphaColor); overload; inline;
 
@@ -15688,6 +15703,7 @@ type
     ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLPattern); overload; inline;
 
@@ -15696,6 +15712,7 @@ type
     ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLGradient); overload; inline;
 
@@ -15704,8 +15721,4186 @@ type
     ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit fill
     ///  `AStyle`.
     /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure FillUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
       const AView: TBLStringView; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+      const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+      const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+      const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+      const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+      const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+      const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (integer coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+      const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage;
+      const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (integer coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPointI; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with the current fill style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+      const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+      const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+      const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+      const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+      const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+      const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image at coordinates specified by `AOrigin`
+    ///  (floating point coordinates) with an explicit fill `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+      const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with the current fill
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage;
+      const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Fills a source `AMask` image specified by `AMaskArea` at coordinates
+    ///  specified by `AOrigin` (floating point coordinates) with an explicit fill
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure FillMask(const AOrigin: TBLPoint; const AMask, AMaskArea: TBLImage;
+      const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates)  with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates)  with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates)  with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates)  with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates)  with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates)  with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (floating point coordinates)  with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBox; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates) with the current stroke style.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates)  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates)  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates)  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates)  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates)  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates)  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a `ABox` (integer coordinates)  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  Box is defined as `[X0, Y0, X1, Y1]`, if you need `[X, Y, W, H]`, use
+    ///  `StrokeRect` instead.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    /// <seealso cref="StrokeRect"/>
+    procedure StrokeBox(const ABox: TBLBoxI; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with the
+    ///  current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit stroke `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit stroke `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit stroke `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit stroke `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit stroke `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit stroke `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a box [AX0, AY0, AX1, AY1] (floating point coordinates) with an
+    ///  explicit stroke `AStyle`
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBox(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with the current stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRectI; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `ARect` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const ARect: TBLRect; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rectangle `[AX, AY, AW, AH]` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRect(const AX, AY, AW, AH: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line specified as `ALine` (floating point coordinates) with
+    ///  an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const ALine: TBLLine; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `AP0` and ending at `AP1` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a line starting at `[AX0, AY0]` and ending at `[AX1, AY1]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeLine(const AX0, AY0, AX1, AY1: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates) with the current stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates)  with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates)  with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates)  with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates)  with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates)  with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates)  with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ACircle` (floating point coordinates)  with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACircle: TBLCircle; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a circle at `[ACX, ACY]` and radius `AR` (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeCircle(const ACX, ACY, AR: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with the current stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AEllipse` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const AEllipse: TBLEllipse; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an ellipse at `[ACX, ACY]` with radius `[ARX, ARY]` (floating
+    ///  point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeEllipse(const ACX, ACY, ARX, ARY: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with the
+    ///  current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle `ARR` (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARR: TBLRoundRect; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with the
+    ///  current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `AR` with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const AR: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `ARect` with radius `[ARX, ARY]`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `AR` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, AR: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a rounded rectangle bounded by `[AX, AY, AW, AH]` with radius
+    ///  `[ARX, ARY]` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with the current stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArc` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const AArc: TBLArc; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with the current stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AChord` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const AChord: TBLArc; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with the current stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `APie` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const APie: TBLArc; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `AR` at `AStart` of `ASweep`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, AR, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a chord at `[ACX, ACY]` with radius `[ARX, ARY]` at `AStart` of
+    ///  `ASweep` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with the current stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `ATriangle` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const ATriangle: TBLTriangle; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a triangle defined by `[AX0, AY0]`, `[AX1, AY1]`, `[AX2, AY2]`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPoint>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TArray<TBLPointI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polyline `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (floating point coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with the current
+    ///  stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` (integer coordinates) with an explicit
+    ///  stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes a polygon `APoly` having 'ACount' vertices (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBox>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBox>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TArray<TBLBoxI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of boxes or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRect>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (floating point coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRect>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (floating point
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TArray<TBLRectI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with the
+    ///  default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles (integer coordinates) with an
+    ///  explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: TBLArrayView<TBLRectI>; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AArray` of rectangles or size 'ACount' (integer
+    ///  coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const APath: TBLPath; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with the default stroke
+    ///  style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes the given `APath` translated by `AOrigin` with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokePath(const AOrigin: TBLPoint; const APath: TBLPath; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with the default stroke style.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes the passed geometry specified by geometry `AType` and `AData`
+    ///  with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <remarks>
+    ///  This method provides a low-level interface that can be used in cases in
+    ///  which geometry `AType` and `AData` parameters are passed to a wrapper
+    ///  function that just passes them to the rendering context. It's a good
+    ///  way of creating wrappers, but generally low-level for a general purpose
+    ///  use, so please use this with caution.
+    /// </remarks>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGeometry(const AType: TBLGeometryType; const AData: Pointer; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes string passed as `AText` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (integer coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as `AText` by using the given `AFont`
+    ///  at `AOrigin` (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AText: UTF8String; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with the default stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes UTF-8 encoded string passed as string `AView` by using the given
+    ///  `AFont` at `AOrigin` (floating point coordinates) with an explicit stroke
+    ///  `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeUtf8Text(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AView: TBLStringView; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (integer coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPointI; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with the current stroke style.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TAlphaColor); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLGradient); overload; inline;
+
+    /// <summary>
+    ///  Strokes an `AGlyphRun` by using the given `AFont` at `AOrigin`
+    ///  (floating point coordinates) with an explicit stroke `AStyle`.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure StrokeGlyphRun(const AOrigin: TBLPoint; const AFont: TBLFont;
+      const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  The target size in abstract units (pixels in case of `TBLImage`).
@@ -16487,6 +20682,11 @@ end;
 function BLLine(const AX0, AY0, AX1, AY1: Double): TBLLine; inline;
 begin
   Result.Reset(AX0, AY0, AX1, AY1);
+end;
+
+function BLLine(const AP0, AP1: TBLPoint): TBLLine; overload; inline;
+begin
+  Result.Reset(AP0, AP1);
 end;
 
 function BLTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double): TBLTriangle; inline;
@@ -17365,6 +21565,14 @@ end;
 procedure TBLLine.Reset(const AOther: TBLLine);
 begin
   Self := AOther;
+end;
+
+procedure TBLLine.Reset(const AP0, AP1: TBLPoint);
+begin
+  X0 := AP0.X;
+  Y0 := AP0.Y;
+  X1 := AP1.X;
+  Y1 := AP1.Y;
 end;
 
 procedure TBLLine.Reset(const AX0, AY0, AX1, AY1: Double);
@@ -26248,6 +30456,302 @@ begin
   _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(AType), AData, AStyle));
 end;
 
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGlyphRunIRgba64(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGlyphRunIRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @Style));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun);
+begin
+  _BLCheck(_blContextFillGlyphRunI(@Self, @AOrigin, @AFont, @AGlyphRun));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGlyphRunIRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGlyphRunDRgba64(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGlyphRunDRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @Style));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun);
+begin
+  _BLCheck(_blContextFillGlyphRunD(@Self, @AOrigin, @AFont, @AGlyphRun));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.FillGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGlyphRunDRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillMaskIRgba64(@Self, @AOrigin, @AMask, nil, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillMaskIRgba32(@Self, @AOrigin, @AMask, nil, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, nil, @Style));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage);
+begin
+  _BLCheck(_blContextFillMaskI(@Self, @AOrigin, @AMask, nil));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, nil, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, nil, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, nil, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask: TBLImage;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillMaskIRgba32(@Self, @AOrigin, @AMask, nil, AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillMaskIRgba64(@Self, @AOrigin, @AMask, @AMaskArea, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillMaskIRgba32(@Self, @AOrigin, @AMask, @AMaskArea, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, @AMaskArea, @Style));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage);
+begin
+  _BLCheck(_blContextFillMaskI(@Self, @AOrigin, @AMask, @AMaskArea));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, @AMaskArea, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, @AMaskArea, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillMaskIExt(@Self, @AOrigin, @AMask, @AMaskArea, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPointI; const AMask,
+  AMaskArea: TBLImage; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillMaskIRgba32(@Self, @AOrigin, @AMask, @AMaskArea, AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillMaskDRgba64(@Self, @AOrigin, @AMask, nil, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillMaskDRgba32(@Self, @AOrigin, @AMask, nil, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, nil, @Style));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage);
+begin
+  _BLCheck(_blContextFillMaskD(@Self, @AOrigin, @AMask, nil));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, nil, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, nil, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, nil, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask: TBLImage;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillMaskDRgba32(@Self, @AOrigin, @AMask, nil, AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillMaskDRgba64(@Self, @AOrigin, @AMask, @AMaskArea, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillMaskDRgba32(@Self, @AOrigin, @AMask, @AMaskArea, AStyle.Value));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, @AMaskArea, @Style));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage);
+begin
+  _BLCheck(_blContextFillMaskD(@Self, @AOrigin, @AMask, @AMaskArea));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, @AMaskArea, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, @AMaskArea, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillMaskDExt(@Self, @AOrigin, @AMask, @AMaskArea, @AStyle));
+end;
+
+procedure TBLContext.FillMask(const AOrigin: TBLPoint; const AMask,
+  AMaskArea: TBLImage; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillMaskDRgba32(@Self, @AOrigin, @AMask, @AMaskArea, AStyle));
+end;
+
 procedure TBLContext.FillPath(const APath: TBLPath; const AStyle: TBLRgba32);
 begin
   _BLCheck(_blContextFillPathDRgba32(@Self, @TBLPoint.Empty, @APath, AStyle.Value));
@@ -28610,6 +33114,3003 @@ end;
 function TBLContext.State: PState;
 begin
   Result := PImpl(FBase.FImpl).State;
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.Arc), @AArc, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Arc), @AArc, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Arc), @AArc, @Style));
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.Arc), @AArc));
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Arc), @AArc, @AStyle));
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Arc), @AArc, @AStyle));
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Arc), @AArc, @AStyle));
+end;
+
+procedure TBLContext.StrokeArc(const AArc: TBLArc; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Arc), @AArc, AStyle));
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep));
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeArc(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart,
+  ASweep: Double);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep));
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeArc(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeArc(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.BoxD), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.BoxD), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @Style));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.BoxD), @ABox));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxD), @ABox, @AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBox; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.BoxD), @ABox, AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.BoxI), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.BoxI), @ABox, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @Style));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.BoxI), @ABox));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.BoxI), @ABox, @AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const ABox: TBLBoxI; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.BoxI), @ABox, AStyle));
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1));
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeBox(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeBox(BLBox(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @Style));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBox>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxD), @AArray, AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLRgba64);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLRgba32);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLRgba);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLVar);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLGradient);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TBLPattern);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBox>;
+  const AStyle: TAlphaColor);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox;
+  const ACount: NativeInt);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBox; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBox>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @Style));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TBLArrayView<TBLBoxI>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewBoxI), @AArray, AStyle));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLRgba64);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLRgba32);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLRgba);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLVar);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLGradient);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TBLPattern);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: TArray<TBLBoxI>;
+  const AStyle: TAlphaColor);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI;
+  const ACount: NativeInt);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeBoxArray(const AArray: PBLBoxI; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokeBoxArray(TBLArrayView<TBLBoxI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.Chord), @AChord, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Chord), @AChord, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @Style));
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.Chord), @AChord));
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @AStyle));
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @AStyle));
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Chord), @AChord, @AStyle));
+end;
+
+procedure TBLContext.StrokeChord(const AChord: TBLArc; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Chord), @AChord, AStyle));
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep));
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeChord(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart,
+  ASweep: Double);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep));
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeChord(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeChord(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.Circle), @ACircle, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Circle), @ACircle, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @Style));
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.Circle), @ACircle));
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @AStyle));
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @AStyle));
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Circle), @ACircle, @AStyle));
+end;
+
+procedure TBLContext.StrokeCircle(const ACircle: TBLCircle;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Circle), @ACircle, AStyle));
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR));
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeCircle(const ACX, ACY, AR: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeCircle(BLCircle(ACX, ACY, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @Style));
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse));
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @AStyle));
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @AStyle));
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, @AStyle));
+end;
+
+procedure TBLContext.StrokeEllipse(const AEllipse: TBLEllipse;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Ellipse), @AEllipse, AStyle));
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY));
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeEllipse(const ACX, ACY, ARX, ARY: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeEllipse(BLEllipse(ACX, ACY, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(AType), AData, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(AType), AData, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(AType), AData, @Style));
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(AType), AData));
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(AType), AData, @AStyle));
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(AType), AData, @AStyle));
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(AType), AData, @AStyle));
+end;
+
+procedure TBLContext.StrokeGeometry(const AType: TBLGeometryType;
+  const AData: Pointer; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(AType), AData, AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGlyphRunIRgba64(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGlyphRunIRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @Style));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun);
+begin
+  _BLCheck(_blContextStrokeGlyphRunI(@Self, @AOrigin, @AFont, @AGlyphRun));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGlyphRunIExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGlyphRunIRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillGlyphRunDRgba64(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillGlyphRunDRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @Style));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun);
+begin
+  _BLCheck(_blContextFillGlyphRunD(@Self, @AOrigin, @AFont, @AGlyphRun));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillGlyphRunDExt(@Self, @AOrigin, @AFont, @AGlyphRun, @AStyle));
+end;
+
+procedure TBLContext.StrokeGlyphRun(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AGlyphRun: TBLGlyphRun;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillGlyphRunDRgba32(@Self, @AOrigin, @AFont, @AGlyphRun, AStyle));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.Line), @ALine, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Line), @ALine, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Line), @ALine, @Style));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.Line), @ALine));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Line), @ALine, @AStyle));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Line), @ALine, @AStyle));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Line), @ALine, @AStyle));
+end;
+
+procedure TBLContext.StrokeLine(const ALine: TBLLine;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Line), @ALine, AStyle));
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint;
+  const AStyle: TBLRgba64);
+begin
+  StrokeLine(BLLine(AP0, AP1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint;
+  const AStyle: TBLRgba32);
+begin
+  StrokeLine(BLLine(AP0, AP1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint;
+  const AStyle: TBLRgba);
+begin
+  StrokeLine(BLLine(AP0, AP1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint);
+begin
+  StrokeLine(BLLine(AP0, AP1));
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint; const AStyle: TBLVar);
+begin
+  StrokeLine(BLLine(AP0, AP1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint;
+  const AStyle: TBLGradient);
+begin
+  StrokeLine(BLLine(AP0, AP1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint;
+  const AStyle: TBLPattern);
+begin
+  StrokeLine(BLLine(AP0, AP1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AP0, AP1: TBLPoint;
+  const AStyle: TAlphaColor);
+begin
+  StrokeLine(BLLine(AP0, AP1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1));
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokeLine(const AX0, AY0, AX1, AY1: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeLine(BLLine(AX0, AY0, AX1, AY1), AStyle);
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokePathDRgba32(@Self, @TBLPoint.Empty, @APath, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokePathDRgba64(@Self, @TBLPoint.Empty, @APath, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokePathDExt(@Self, @TBLPoint.Empty, @APath, @Style));
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath);
+begin
+  _BLCheck(_blContextStrokePathD(@Self, @TBLPoint.Empty, @APath));
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokePathDExt(@Self, @TBLPoint.Empty, @APath, @AStyle));
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokePathDExt(@Self, @TBLPoint.Empty, @APath, @AStyle));
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokePathDExt(@Self, @TBLPoint.Empty, @APath, @AStyle));
+end;
+
+procedure TBLContext.StrokePath(const APath: TBLPath; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokePathDRgba32(@Self, @TBLPoint.Empty, @APath, AStyle));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokePathDRgba64(@Self, @AOrigin, @APath, AStyle));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokePathDRgba32(@Self, @AOrigin, @APath, AStyle));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokePathDExt(@Self, @AOrigin, @APath, @Style));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath);
+begin
+  _BLCheck(_blContextStrokePathD(@Self, @AOrigin, @APath));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokePathDExt(@Self, @AOrigin, @APath, @AStyle));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokePathDExt(@Self, @AOrigin, @APath, @AStyle));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokePathDExt(@Self, @AOrigin, @APath, @AStyle));
+end;
+
+procedure TBLContext.StrokePath(const AOrigin: TBLPoint; const APath: TBLPath;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokePathDRgba32(@Self, @AOrigin, @APath, AStyle));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.Pie), @APie, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Pie), @APie, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @Style));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.Pie), @APie));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @AStyle));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @AStyle));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Pie), @APie, @AStyle));
+end;
+
+procedure TBLContext.StrokePie(const APie: TBLArc; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Pie), @APie, AStyle));
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep));
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, AR, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokePie(BLArc(ACX, ACY, AR, AR, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart,
+  ASweep: Double);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep));
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLVar);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePie(const ACX, ACY, ARX, ARY, AStart, ASweep: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokePie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @Style));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.PolygonD), @APoly));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLVar);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLGradient);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLPattern);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPoint>;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @Style));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.PolygonI), @APoly));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLVar);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLGradient);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLPattern);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: TArray<TBLPointI>;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount));
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolygon(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.PolylineD), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolylineD), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineD), @APoly, @Style));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.PolylineD), @APoly));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineD), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPoint>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolylineD), @APoly, AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLRgba);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLVar);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLGradient);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>;
+  const AStyle: TBLPattern);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPoint>;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPoint; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolyline(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.PolylineI), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolylineI), @APoly, AStyle.Value));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineI), @APoly, @Style));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.PolylineI), @APoly));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.PolylineI), @APoly, @AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TBLArrayView<TBLPointI>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.PolylineI), @APoly, AStyle));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLRgba);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLVar);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLGradient);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>;
+  const AStyle: TBLPattern);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: TArray<TBLPointI>;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount));
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokePolyline(const APoly: PBLPointI; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokePolyline(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeRectIRgba64(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeRectIRgba32(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeRectIExt(@Self, @ARect, @Style));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI);
+begin
+  _BLCheck(_blContextStrokeRectI(@Self, @ARect));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeRectIExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeRectIExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeRectIExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRectI; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeRectIRgba32(@Self, @ARect, AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillRectDRgba64(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @Style));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect);
+begin
+  _BLCheck(_blContextFillRectD(@Self, @ARect));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle));
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH));
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRect(BLRect(AX, AY, AW, AH), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @Style));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRect>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectD), @AArray, AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLRgba);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLVar);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLGradient);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TBLPattern);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRect>;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect;
+  const ACount: NativeInt);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRect; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRectArray(TBLArrayView<TBLRect>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @Style));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, @AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TBLArrayView<TBLRectI>;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.ArrayViewRectI), @AArray, AStyle));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLRgba);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLVar);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLGradient);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TBLPattern);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: TArray<TBLRectI>;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), Length(AArray)), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLRgba);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI;
+  const ACount: NativeInt);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount));
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLVar);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLGradient);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TBLPattern);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRectArray(const AArray: PBLRectI; const ACount: NativeInt;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRectArray(TBLArrayView<TBLRectI>.Create(Pointer(AArray), ACount), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.RoundRect), @ARR, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.RoundRect), @ARR, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @Style));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.RoundRect), @ARR));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @AStyle));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @AStyle));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.RoundRect), @ARR, @AStyle));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARR: TBLRoundRect;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.RoundRect), @ARR, AStyle));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const AR: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX,
+  ARY: Double);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY));
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const ARect: TBLRect; const ARX, ARY: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRoundRect(BLRoundRect(ARect, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR));
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, AR: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, AR), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY));
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeRoundRect(const AX, AY, AW, AH, ARX, ARY: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeRoundRect(BLRoundRect(AX, AY, AW, AH, ARX, ARY), AStyle);
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeUtf16TextIRgba64(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeUtf16TextIRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String);
+begin
+  _BLCheck(_blContextStrokeUtf16TextI(@Self, @AOrigin, @AFont, PChar(AText), Length(AText)));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeUtf16TextIExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPointI; const AFont: TBLFont;
+  const AText: String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeUtf16TextIRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf16TextDRgba64(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf16TextDRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String);
+begin
+  _BLCheck(_blContextFillUtf16TextD(@Self, @AOrigin, @AFont, PChar(AText), Length(AText)));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf16TextDExt(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeText(const AOrigin: TBLPoint; const AFont: TBLFont;
+  const AText: String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf16TextDRgba32(@Self, @AOrigin, @AFont, PChar(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba64(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @Style));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle);
+begin
+  _BLCheck(_blContextStrokeGeometry(@Self, Ord(TBLGeometryType.Triangle), @ATriangle));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @AStyle));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @AStyle));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeGeometryExt(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, @AStyle));
+end;
+
+procedure TBLContext.StrokeTriangle(const ATriangle: TBLTriangle;
+  const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeGeometryRgba32(@Self, Ord(TBLGeometryType.Triangle), @ATriangle, AStyle));
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLRgba64);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLRgba32);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLRgba);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2));
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLVar);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLGradient);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TBLPattern);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.StrokeTriangle(const AX0, AY0, AX1, AY1, AX2, AY2: Double;
+  const AStyle: TAlphaColor);
+begin
+  StrokeTriangle(BLTriangle(AX0, AY0, AX1, AY1, AX2, AY2), AStyle);
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIRgba64(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String);
+begin
+  _BLCheck(_blContextStrokeUtf8TextI(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText)));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView);
+begin
+  _BLCheck(_blContextStrokeUtf8TextI(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @Style));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String);
+begin
+  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText)));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AText: UTF8String; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, PUTF8Char(AText), Length(AText), AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
+begin
+  var Style: TBLVar := AStyle;
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView);
+begin
+  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
+begin
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+end;
+
+procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
+  const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
+begin
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
 end;
 
 procedure TBLContext.SwapStyles(const AMode: TBLContextStyleSwapMode);
