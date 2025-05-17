@@ -6,6 +6,7 @@ program blGettingStarted01;
 
 uses
   System.SysUtils,
+  System.UITypes,
   Blend2D in '..\..\..\Blend2D.pas';
 
 procedure Run;
@@ -28,14 +29,14 @@ begin
   Path.CubicTo(642, 132, 587, -136, 25, 464);
   Path.CubicTo(882, 404, 144, 267, 27, 31);
 
-  { Fill a path with opaque white - $AARRGGBB. }
-  Context.FillPath(Path, $FFFFFFFF);
+  { Fill a path with opaque black - $AARRGGBB. }
+  Context.FillPath(Path, $FF000000);
 
   { Detach the rendering context from `AImg`.}
   Context.Finish;
 
   { Let's use some built-in codecs provided by Blend2D. }
-  Image.WriteToFile('bl_sample_1.png');
+  Image.WriteToFile('blGettingStarted01.png');
 end;
 
 begin

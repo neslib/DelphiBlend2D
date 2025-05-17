@@ -6,59 +6,49 @@ program blGettingStarted08;
 
 uses
   System.SysUtils,
-  Blend2D in '..\..\..\Blend2D.pas',
-  Blend2D.Api in '..\..\..\Blend2D.Api.pas';
+  System.UITypes,
+  Blend2D in '..\..\..\Blend2D.pas';
 
 procedure Run;
 const
   TEXTS: array [0..2] of String = (
     'Hello Blend2D!',
     'I''m a simple multiline text example',
-    'that uses IBLGlyphBuffer and FillGlyphRun!');
-var
-  Image: IBLImage;
-  Context: IBLContext;
-  Face: IBLFontFace;
-  Font: IBLFont;
-  FontMetrics: TBLFontMetrics;
-  TextMetrics: TBLTextMetrics;
-  GlyphBuffer: IBLGlyphBuffer;
-  P: TBLPoint;
-  I: Integer;
+    'that uses GlyphBuffer and GlyphRun!');
 begin
   ReportMemoryLeaksOnShutdown := True;
-  Image := TBLImage.Create(480, 480);
+  var Image := TBLImage.Create(480, 480, TBLFormat.Prgb32);
+  var Context := TBLContext.Create(Image);
 
-  Context := TBLContext.Create(Image);
-  Context.CompOp := TBLCompOp.SrcCopy;
-  Context.FillAll;
-  Context.FillColor := $FFFFFFFF;
+  var Face: TBLFontFace;
+  Face.MakeFromFile('Resources/ABeeZee-Regular.ttf');
 
-  Face := TBLFontFace.Create;
-  Face.InitializeFromFile('Resources/NotoSans-Regular.ttf');
+  var Font: TBLFont;
+  Font.MakeFromFace(Face, 20);
 
-  Font := TBLFont.Create;
-  Font.InitializeFromFace(Face, 20);
+  var GlyphBuffer: TBLGlyphBuffer;
+  var TextMetrics: TBLTextMetrics;
+  var FontMetrics := Font.Metrics;
+  var Y: Double := 190 + FontMetrics.Ascent;
 
-  FontMetrics := Font.Metrics;
-  GlyphBuffer := TBLGlyphBuffer.Create;
+  Context.ClearAll;
 
-  P.Reset(20, 180 + FontMetrics.Ascent);
-
-  for I := 0 to Length(TEXTS) - 1 do
+  for var I := 0 to Length(TEXTS) - 1 do
   begin
     GlyphBuffer.SetText(TEXTS[I]);
     Font.Shape(GlyphBuffer);
-    TextMetrics := Font.GetTextMetrics(GlyphBuffer);
+    Font.GetTextMetrics(GlyphBuffer, TextMetrics);
 
-    P.X := (480 - TextMetrics.BoundingBox.Width) / 2;
-    Context.FillGlyphRun(P, Font, GlyphBuffer.GlyphRun);
-    P.Y := P.Y + FontMetrics.Ascent + FontMetrics.Descent + FontMetrics.LineGap;
+    var X: Double := (TextMetrics.BoundingBox.X1 - TextMetrics.BoundingBox.X0);
+    Context.FillGlyphRun(BLPoint((480 - X) / 2, Y), Font,
+      GlyphBuffer.GlyphRun, $FF000000);
+
+    Y := Y + FontMetrics.Ascent + FontMetrics.Descent + FontMetrics.LineGap;
   end;
 
   Context.Finish;
 
-  Image.WriteToFile('blGettingStarted08.bmp');
+  Image.WriteToFile('blGettingStarted08.png');
 end;
 
 begin

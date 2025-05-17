@@ -6,41 +6,37 @@ program blGettingStarted06;
 
 uses
   System.SysUtils,
+  System.UITypes,
   Blend2D in '..\..\..\Blend2D.pas';
 
 procedure Run;
-var
-  Image: IBLImage;
-  Context: IBLContext;
-  Linear: IBLGradient;
-  Path: IBLPath;
 begin
   ReportMemoryLeaksOnShutdown := True;
-  Image := TBLImage.Create(480, 480);
+  var Image := TBLImage.Create(480, 480, TBLFormat.Prgb32);
+  var Context := TBLContext.Create(Image);
 
-  Context := TBLContext.Create(Image);
-  Context.CompOp := TBLCompOp.SrcCopy;
-  Context.FillAll;
+  Context.ClearAll;
 
-  Linear := TBLGradient.Create(BLLinearGradientValues(0, 0, 0, 480));
+  var Linear := TBLGradient.Create(
+    BLLinearGradientValues(0, 0, 0, 480));
   Linear.AddStop(0.0, $FFFFFFFF);
+  Linear.AddStop(0.5, $FFFF1F7F);
   Linear.AddStop(1.0, $FF1F7FFF);
 
-  Path := TBLPath.Create;
+  var Path: TBLPath;
   Path.MoveTo(119, 49);
   Path.CubicTo(259, 29, 99, 279, 275, 267);
   Path.CubicTo(537, 245, 300, -170, 274, 430);
 
-  Context.CompOp := TBLCompOp.SrcOver;
-  Context.StrokeGradient := Linear;
+  { Change stroke options. }
   Context.StrokeWidth := 15;
   Context.StrokeStartCap := TBLStrokeCap.Round;
   Context.StrokeEndCap := TBLStrokeCap.Butt;
-  Context.StrokePath(Path);
+  Context.StrokePath(Path, Linear);
 
   Context.Finish;
 
-  Image.WriteToFile('blGettingStarted06.bmp');
+  Image.WriteToFile('blGettingStarted06.png');
 end;
 
 begin

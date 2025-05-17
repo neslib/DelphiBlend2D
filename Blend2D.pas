@@ -11,7 +11,8 @@ interface
 
 uses
   System.SysUtils,
-  System.UITypes;
+  System.UITypes,
+  System.Math;
 
 {$REGION 'Common Types'}
 type
@@ -21291,7 +21292,6 @@ implementation
 {$RANGECHECKS OFF}
 
 uses
-  System.Math,
   System.TypInfo,
   System.DateUtils;
 
@@ -26275,23 +26275,19 @@ begin
 end;
 
 procedure TBLRgba.Reset(const ARgba32: TBLRgba32);
-const
-  FACTOR: Single = 1 / $FF;
 begin
-  R := ARgba32.R * FACTOR;
-  G := ARgba32.G * FACTOR;
-  B := ARgba32.B * FACTOR;
-  A := ARgba32.A * FACTOR;
+  R := ARgba32.R * (1 / $FF);
+  G := ARgba32.G * (1 / $FF);
+  B := ARgba32.B * (1 / $FF);
+  A := ARgba32.A * (1 / $FF);
 end;
 
 procedure TBLRgba.Reset(const ARgba64: TBLRgba64);
-const
-  FACTOR: Single = 1 / $FFFF;
 begin
-  R := ARgba64.R * FACTOR;
-  G := ARgba64.G * FACTOR;
-  B := ARgba64.B * FACTOR;
-  A := ARgba64.A * FACTOR;
+  R := ARgba64.R * (1 / $FFFF);
+  G := ARgba64.G * (1 / $FFFF);
+  B := ARgba64.B * (1 / $FFFF);
+  A := ARgba64.A * (1 / $FFFF);
 end;
 
 procedure TBLRgba.Reset(const AR, AG, AB, AA: Single);
@@ -33879,7 +33875,7 @@ end;
 
 procedure TBLContext.PostRotate(const AAngle, AX, AY: Double);
 var
-  Values: array [0..2] of Single;
+  Values: array [0..2] of Double;
 begin
   Values[0] := AAngle;
   Values[1] := AX;
@@ -33889,7 +33885,7 @@ end;
 
 procedure TBLContext.PostRotate(const AAngle: Double; const AOrigin: TBLPointI);
 var
-  Values: array [0..2] of Single;
+  Values: array [0..2] of Double;
 begin
   Values[0] := AAngle;
   Values[1] := AOrigin.X;
@@ -33899,7 +33895,7 @@ end;
 
 procedure TBLContext.PostRotate(const AAngle: Double; const AOrigin: TBLPoint);
 var
-  Values: array [0..2] of Single;
+  Values: array [0..2] of Double;
 begin
   Values[0] := AAngle;
   Values[1] := AOrigin.X;
@@ -33990,7 +33986,7 @@ end;
 
 procedure TBLContext.Rotate(const AAngle, AX, AY: Double);
 var
-  Values: array [0..2] of Single;
+  Values: array [0..2] of Double;
 begin
   Values[0] := AAngle;
   Values[1] := AX;
@@ -34000,7 +33996,7 @@ end;
 
 procedure TBLContext.Rotate(const AAngle: Double; const AOrigin: TBLPoint);
 var
-  Values: array [0..2] of Single;
+  Values: array [0..2] of Double;
 begin
   Values[0] := AAngle;
   Values[1] := AOrigin.X;
@@ -34010,7 +34006,7 @@ end;
 
 procedure TBLContext.Rotate(const AAngle: Double; const AOrigin: TBLPointI);
 var
-  Values: array [0..2] of Single;
+  Values: array [0..2] of Double;
 begin
   Values[0] := AAngle;
   Values[1] := AOrigin.X;
@@ -37702,6 +37698,7 @@ initialization
   Assert(SizeOf(TBLImage) = 16);
   Assert(SizeOf(TBLStrokeOptions.TValues) = 8);
   _blRuntimeInit;
+  BLSetExceptionErrorHandler;
 
 finalization
   _blRuntimeShutdown;
