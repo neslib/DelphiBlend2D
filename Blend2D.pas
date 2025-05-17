@@ -901,7 +901,7 @@ type
   /// <summary>
   /// Base "class" used by all Blend2D objects.
   /// </summary>
-  TBLObjectCore = record
+  TBLObjectCore = packed record
   {$REGION 'Internal Declarations'}
   private const
     P_SHIFT    = 0;
@@ -933,26 +933,23 @@ type
     STATIC_DATA_SIZE = 12;
   private
     FImpl: Pointer;
+    {$HINTS OFF}
     {$IFDEF CPU32BITS}
     FData: UInt64;
     {$ELSE}
     FData: UInt32;
     {$ENDIF}
+    {$HINTS ON}
     FInfo: UInt32;
-//  private
-//    class function PackTypeWithMarker(const AType: TBLObjectType): UInt32; inline; static;
-//    class function PackAbcp(const AA: UInt32; const AB: UInt32 = 0;
-//      const AC: UInt32 = 0; const AP: UInt32 = 0): UInt32; inline; static;
   private
-//    procedure InitStatic(const AInfo: UInt32); inline;
     function NeedsCleanup: Boolean; inline;
     procedure Swap(var AOther: TBLObjectCore); inline;
   private
     function AField: UInt32; inline;
-    function BField: UInt32; inline;
-    function CField: UInt32; inline;
-    function PField: UInt32; inline;
-    function QField: UInt32; inline;
+//    function BField: UInt32; inline;
+//    function CField: UInt32; inline;
+//    function PField: UInt32; inline;
+//    function QField: UInt32; inline;
   {$ENDREGION 'Internal Declarations'}
   end;
 
@@ -2725,7 +2722,9 @@ type
     FFlags: TBLFileInfoFlags;
     FUid: UInt32;
     FGid: UInt32;
+    {$HINTS OFF}
     FReserved: array [0..4] of UInt32;
+    {$HINTS ON}
     function GetModifiedTime: TDateTime; inline;
     function GetHasOwnerR: Boolean; inline;
     function GetHasOwnerW: Boolean; inline;
@@ -4411,7 +4410,9 @@ type
   private
     FFlattenMode: UInt8;
     FOffsetMode: UInt8;
+    {$HINTS OFF}
     FReservedFlags: array [0..5] of UInt8;
+    {$HINTS ON}
     FFlattenTolerance: Double;
     FSimplifyTolerance: Double;
     FOffsetParameter: Double;
@@ -6323,7 +6324,9 @@ type
     FPlaneCount: Int16;
     FFrameCount: Int64;
     FRepeatCount: Int32;
+    {$HINTS OFF}
     FReserved: array [0..2] of UInt32;
+    {$HINTS ON}
     FFormat: array [0..15] of UTF8Char;
     FCompression: array [0..15] of UTF8Char;
     function GetFlags: TBLImageInfoFlags; inline;
@@ -8412,7 +8415,9 @@ type
     FGlyphData: Pointer;
     FPlacementData: Pointer;
     FSize: Size_T;
+    {$HINTS OFF}
     FReserved: UInt8;
+    {$HINTS ON}
     FPlacementType: UInt8;
     FGlyphAdvance: Int8;
     FPlacementAdvance: Int8;
@@ -9423,13 +9428,17 @@ type
   private
     FFaceType: UInt8;
     FOutlineType: UInt8;
+    {$HINTS OFF}
     FReserved8: array [0..1] of UInt8;
+    {$HINTS ON}
     FGlyphCount: Int32;
     FRevision: UInt32;
     FFaceIndex: Int32;
     FFaceFlags: UInt32;
     FDiagFlags: UInt32;
+    {$HINTS OFF}
     FReserved: array [0..1] of UInt32;
+    {$HINTS ON}
     function GetFaceType: TBLFontFaceType; inline;
     function GetOutlineType: TBLFontOutlineType; inline;
     function GetFaceFlags: TBLFontFaceFlags; inline;
@@ -10351,7 +10360,9 @@ type
   private
     FData: PBLFontFeatureItem;
     FSize: Size_T;
+    {$HINTS OFF}
     FSsoData: array [0..35] of TBLFontFeatureItem;
+    {$HINTS ON}
     function GetIsEmpty: Boolean; inline;
     function GetSize: NativeInt; inline;
     function GetItem(const AIndex: NativeInt): TBLFontFeatureItem;
@@ -10593,7 +10604,9 @@ type
   private
     FData: PBLFontVariationItem;
     FSize: Size_T;
+    {$HINTS OFF}
     FSsoData: array [0..3] of TBLFontVariationItem;
+    {$HINTS ON}
     function GetIsEmpty: Boolean; inline;
     function GetSize: NativeInt; inline;
     function GetItem(const AIndex: NativeInt): TBLFontVariationItem;
@@ -20815,6 +20828,444 @@ type
   end;
 {$ENDREGION 'Rendering'}
 
+{$REGION 'Runtime'}
+type
+  /// <summary>
+  ///  Blend2D runtime limits.
+  /// </summary>
+  /// <remarks>
+  ///  These constants are used across Blend2D, but they are not designed to be
+  ///  ABI stable. New versions of Blend2D can increase certain limits without
+  ///  notice. Use `TBLRuntimeBuildInfo` to query the limits dynamically.
+  /// </remarks>
+  /// <seealso cref="TBLRuntimeBuildInfo"/>
+  TBLRuntimeLimits = record // static
+  public const
+    /// <summary>
+    ///  Maximum width and height of an image.
+    /// </summary>
+    MaxImageSize = 65535;
+
+    /// <summary>
+    ///  Maximum number of threads for asynchronous operations (including rendering).
+    /// </summary>
+    MaxThreadCount = 32;
+  end;
+
+type
+  /// <summary>
+  ///  Blend2D runtime build type.
+  /// </summary>
+  TBLRuntimeBuildType = (
+    /// <summary>
+    ///  Describes a Blend2D debug build.
+    /// </summary>
+    Debug,
+
+    /// <summary>
+    ///  Describes a Blend2D release build.
+    /// </summary>
+    Release);
+
+type
+  /// <summary>
+  ///  CPU architecture that can be queried by `TBLRuntime.QuerySystemInfo`.
+  /// </summary>
+  /// <seealso cref="TBLRuntime.QuerySystemInfo"/>
+  TBLRuntimeCpuArch = (
+    /// <summary>
+    ///  Unknown architecture.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    ///  32-bit or 64-bit X86 architecture.
+    /// </summary>
+    X86,
+
+    /// <summary>
+    ///  32-bit or 64-bit ARM architecture.
+    /// </summary>
+    Arm,
+
+    /// <summary>
+    ///  32-bit or 64-bit MIPS architecture.
+    /// </summary>
+    Mips);
+
+type
+  /// <summary>
+  ///  CPU features Blend2D supports.
+  /// </summary>
+  TBLRuntimeCpuFeature = (
+    X86Sse2 = 0,
+    X86Sse3 = 1,
+    X86Ssse3 = 2,
+    X86Sse4_1 = 3,
+    X86Sse4_2 = 4,
+    X86Avx = 5,
+    X86Avx2 = 6,
+    X86Avx512 = 7,
+
+    ArmAsimd = 0,
+    ArmCrc32 = 1,
+    ArmPmull = 2,
+
+    _Reserved = 31);
+
+  /// <summary>
+  ///  CPU features Blend2D supports.
+  /// </summary>
+  TBLRuntimeCpuFeatures = set of TBLRuntimeCpuFeature;
+
+type
+  /// <summary>
+  ///  Runtime cleanup flags that can be used through `TBLRuntime.Cleanup`.
+  /// </summary>
+  /// <seealso cref="TBLRuntime.TBLRuntime.Cleanup"/>
+  TBLRuntimeCleanupFlag = (
+    /// <summary>
+    ///  Cleanup object memory pool.
+    /// </summary>
+    ObjectPool = 0,
+
+    /// <summary>
+    ///  Cleanup zeroed memory pool.
+    /// </summary>
+    ZeroedPool = 1,
+
+    /// <summary>
+    ///  Cleanup thread pool (would join unused threads).
+    /// </summary>
+    ThreadPool = 4);
+
+  /// <summary>
+  ///  Runtime cleanup flags that can be used through `TBLRuntime.Cleanup`.
+  /// </summary>
+  /// <seealso cref="TBLRuntime.TBLRuntime.Cleanup"/>
+  TBLRuntimeCleanupFlags = set of TBLRuntimeCleanupFlag;
+
+  /// <summary>
+  ///  Adds functionality to `TBLFileOpenFlags`.
+  /// </summary>
+  PTBLRuntimeCleanupFlagsHelper = record helper for TBLRuntimeCleanupFlags
+  public const
+    /// <summary>
+    ///  No flags.
+    /// </summary>
+    None = [];
+
+    /// <summary>
+    ///  Cleanup everything.
+    /// </summary>
+    Everything = [TBLRuntimeCleanupFlag.ObjectPool,
+                  TBLRuntimeCleanupFlag.ZeroedPool,
+                  TBLRuntimeCleanupFlag.ThreadPool];
+  end;
+
+type
+  /// <summary>
+  ///  Blend2D build information.
+  /// </summary>
+  TBLRuntimeBuildInfo = record
+  {$REGION 'Internal Declarations'}
+  private
+    FMajorVersion: Int32;
+    FMinorVersion: Int32;
+    FPatchVersion: Int32;
+    FBuildType: TBLRuntimeBuildType;
+    FBaselineCpuFeatures: TBLRuntimeCpuFeatures;
+    FSupportedCpuFeatures: TBLRuntimeCpuFeatures;
+    FMaxImageSize: Int32;
+    FMaxThreadCount: Int32;
+    {$HINTS OFF}
+    FReserved: array [0..1] of UInt32;
+    {$HINTS ON}
+    FCompilerInfo: array [0..31] of UTF8Char;
+    function GetCompilerInfo: String; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Major version number.
+    /// </summary>
+    property MajorVersion: Integer read FMajorVersion;
+
+    /// <summary>
+    ///  Minor version number.
+    /// </summary>
+    property MinorVersion: Integer read FMinorVersion;
+
+    /// <summary>
+    ///  Patch version number.
+    /// </summary>
+    property PatchVersion: Integer read FPatchVersion;
+
+    /// <summary>
+    ///  Blend2D build type.
+    /// </summary>
+    property BuildType: TBLRuntimeBuildType read FBuildType;
+
+    /// <summary>
+    ///  Baseline CPU features.
+    ///
+    ///  These features describe CPU features that were detected at compile-time.
+    ///  Baseline features are used to compile all source files so they
+    ///  represent the minimum feature-set the target CPU must support to run
+    ///  Blend2D.
+    ///
+    ///  Official Blend2D builds set baseline at SSE2 on X86 target and NEON on
+    ///  ARM target. Custom builds can set use a different baseline, which can
+    ///  be read through `TBLRuntimeBuildInfo`.
+    /// </summary>
+    property BaselineCpuFeatures: TBLRuntimeCpuFeatures read FBaselineCpuFeatures;
+
+    /// <summary>
+    ///  Supported CPU features.
+    ///
+    ///  These features do not represent the features that the host CPU must
+    ///  support, instead, they represent all features that Blend2D can take
+    ///  advantage of in C++ code that uses instruction intrinsics. For example
+    ///  if AVX2 is part of `SupportedCpuFeatures` it means that Blend2D can
+    ///  take advantage of it if there is a specialized code-path.
+    /// </summary>
+    property SupportedCpuFeatures: TBLRuntimeCpuFeatures read FSupportedCpuFeatures;
+
+    /// <summary>
+    ///  Maximum size of an image (both width and height).
+    /// </summary>
+    property MaxImageSize: Integer read FMaxImageSize;
+
+    /// <summary>
+    ///  Maximum number of threads for asynchronous operations, including rendering.
+    /// </summary>
+    property MaxThreadCount: Integer read FMaxThreadCount;
+
+    /// <summary>
+    ///  Identification of the C++ compiler used to build Blend2D.
+    /// </summary>
+    property CompilerInfo: String read GetCompilerInfo;
+  end;
+  PBLRuntimeBuildInfo = ^TBLRuntimeBuildInfo;
+
+type
+  /// <summary>
+  ///  System information queried by the runtime.
+  /// </summary>
+  TBLRuntimeSystemInfo = record
+  {$REGION 'Internal Declarations'}
+  private
+    FCpuArch: TBLRuntimeCpuArch;
+    FCpuFeatures: TBLRuntimeCpuFeatures;
+    FCoreCount: Int32;
+    FThreadCount: Int32;
+    FThreadStackSize: Int32;
+    {$HINTS OFF}
+    FRemoved: Int32;
+    {$HINTS ON}
+    FAllocationGranularity: Int32;
+    {$HINTS OFF}
+    FReserved: array [0..4] of UInt32;
+    {$HINTS ON}
+    FCpuVendor: array [0..15] of UTF8Char;
+    FCpuBrand: array [0..63] of UTF8Char;
+    function GetCpuVendor: String; inline;
+    function GetCpuBrand: String; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Host CPU architecture.
+    /// </summary>
+    property CpuArch: TBLRuntimeCpuArch read FCpuArch;
+
+    /// <summary>
+    ///  Host CPU features.
+    /// </summary>
+    property CpuFeatures: TBLRuntimeCpuFeatures read FCpuFeatures;
+
+    /// <summary>
+    ///  Number of cores of the host CPU/CPUs.
+    /// </summary>
+    property CoreCount: Integer read FCoreCount;
+
+    /// <summary>
+    ///  Number of threads of the host CPU/CPUs.
+    /// </summary>
+    property ThreadCount: Integer read FThreadCount;
+
+    /// <summary>
+    ///  Minimum stack size of a worker thread used by Blend2D.
+    /// </summary>
+    property ThreadStackSize: Integer read FThreadStackSize;
+
+    /// <summary>
+    ///  Allocation granularity of virtual memory (includes thread's stack).
+    /// </summary>
+    property AllocationGranularity: Integer read FAllocationGranularity;
+
+    /// <summary>
+    ///  Host CPU vendor string such 'AMD', 'APPLE', 'INTEL', 'SAMSUNG', etc...
+    /// </summary>
+    property CpuVendor: String read GetCpuVendor;
+
+    /// <summary>
+    ///  Host CPU brand string or empty string if not detected properly.
+    /// </summary>
+    property CpuBrand: String read GetCpuBrand;
+  end;
+  PBLRuntimeSystemInfo = ^TBLRuntimeSystemInfo;
+
+type
+  /// <summary>
+  ///  Provides information about resources allocated by Blend2D.
+  /// </summary>
+  TBLRuntimeResourceInfo = record
+  {$REGION 'Internal Declarations'}
+  private
+    FVMUsed: Size_T;
+    FVMReserved: Size_T;
+    FVMOverhead: Size_T;
+    FVMBlockCount: Size_T;
+    FZMUsed: Size_T;
+    FZMReserved: Size_T;
+    FZMOverhead: Size_T;
+    FZMBlockCount: Size_T;
+    FDynamicPipelineCount: Size_T;
+    {$HINTS OFF}
+    FReserved: array [0..6] of Size_T;
+    {$HINTS ON}
+    function GetVMUsed: NativeInt; inline;
+    function GetVMReserved: NativeInt; inline;
+    function GetVMOverhead: NativeInt; inline;
+    function GetVMBlockCount: NativeInt; inline;
+    function GetZMUsed: NativeInt; inline;
+    function GetZMReserved: NativeInt; inline;
+    function GetZMOverhead: NativeInt; inline;
+    function GetZMBlockCount: NativeInt; inline;
+    function GetDynamicPipelineCount: NativeInt; inline;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    procedure Reset; inline;
+
+    /// <summary>
+    ///  Virtual memory used at this time.
+    /// </summary>
+    property VMUsed: NativeInt read GetVMUsed;
+
+    /// <summary>
+    ///  Virtual memory reserved (allocated internally).
+    /// </summary>
+    property VMReserved: NativeInt read GetVMReserved;
+
+    /// <summary>
+    ///  Overhead required to manage virtual memory allocations.
+    /// </summary>
+    property VMOverhead: NativeInt read GetVMOverhead;
+
+    /// <summary>
+    ///  Number of blocks of virtual memory allocated.
+    /// </summary>
+    property VMBlockCount: NativeInt read GetVMBlockCount;
+
+    /// <summary>
+    ///  Zeroed memory used at this time.
+    /// </summary>
+    property ZMUsed: NativeInt read GetZMUsed;
+
+    /// <summary>
+    ///  Zeroed memory reserved (allocated internally).
+    /// </summary>
+    property ZMReserved: NativeInt read GetZMReserved;
+
+    /// <summary>
+    ///  Overhead required to manage zeroed memory allocations.
+    /// </summary>
+    property ZMOverhead: NativeInt read GetZMOverhead;
+
+    /// <summary>
+    ///  Number of blocks of zeroed memory allocated.
+    /// </summary>
+    property ZMBlockCount: NativeInt read GetZMBlockCount;
+
+    /// <summary>
+    ///  Count of dynamic pipelines created and cached.
+    /// </summary>
+    property DynamicPipelineCount: NativeInt read GetDynamicPipelineCount;
+  end;
+  PBLRuntimeResourceInfo = ^TBLRuntimeResourceInfo;
+
+type
+  /// <summary>
+  ///  Interface to access Blend2D runtime.
+  /// </summary>
+  TBLRuntime = record // static
+  public
+    class procedure Cleanup(const ACleanupFlags: TBLRuntimeCleanupFlags); inline; static;
+    class function QueryBuildInfo: TBLRuntimeBuildInfo; inline; static;
+    class function QuerySystemInfo: TBLRuntimeSystemInfo; inline; static;
+    class function QueryResourceInfo: TBLRuntimeResourceInfo; inline; static;
+    class procedure Message(const AMsg: String); overload; inline; static;
+    class procedure Message(const AMsg: String; const AArgs: array of const); overload; static;
+  end;
+
+{$ENDREGION 'Runtime'}
+
+{$REGION 'Miscellaneous'}
+type
+  /// <summary>
+  ///  Simple pseudo random number generator based on `XORSHIFT+`, which has
+  ///  64-bit seed, 128 bits of state, and full period `2^128 - 1`.
+  ///
+  ///  Based on a paper by Sebastiano Vigna:
+  ///  <see href="http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">XORSHIFT+</see>.
+  /// </summary>
+  TBLRandom = record
+  {$REGION 'Internal Declarations'}
+  private
+    FData: array [0..1] of UInt64;
+  {$ENDREGION 'Internal Declarations'}
+  public
+    class function Create: TBLRandom; overload; inline; static;
+    constructor Create(const ASeed: UInt64); overload;
+
+    class operator Equal(const ALeft, ARight: TBLRandom): Boolean; inline; static;
+    class operator NotEqual(const ALeft, ARight: TBLRandom): Boolean; inline; static;
+
+    /// <summary>
+    ///  Tests whether the random number generator is equivalent to `Ather`.
+    /// </summary>
+    /// <remarks>
+    ///  It would return True only when its internal state matches `AOther`'s
+    ///  internal state.
+    /// </remarks>
+    function Equals(const AOther: TBLRandom): Boolean; inline;
+
+    /// <summary>
+    ///  Resets the random number generator to the given `ASeed`.
+    /// </summary>
+    procedure Reset(const ASeed: UInt64 = 0);
+
+    /// <summary>
+    ///  Returns the next pseudo-random `UInt64` value and advances PRNG state.
+    /// </summary>
+    function NextUInt64: UInt64; inline;
+
+    /// <summary>
+    ///  Returns the next pseudo-random `UInt32` value and advances PRNG state.
+    /// </summary>
+    function NextUInt32: UInt32; inline;
+
+    /// <summary>
+    ///  Returns the next pseudo-random `Double` precision floating point in
+    ///  [0..1) range and advances PRNG state.
+    /// </summary>
+    function NextDouble: Double; inline;
+  end;
+{$ENDREGION 'Miscellaneous'}
+
 {$REGION 'Internal'}
 type
   _TBLGenericUtils<T> = record // static
@@ -21050,7 +21501,7 @@ begin
   Result := (FInfo shr A_SHIFT) and (A_MASK shr A_SHIFT);
 end;
 
-function TBLObjectCore.BField: UInt32;
+{function TBLObjectCore.BField: UInt32;
 begin
   Result := (FInfo shr B_SHIFT) and (B_MASK shr B_SHIFT);
 end;
@@ -21058,21 +21509,14 @@ end;
 function TBLObjectCore.CField: UInt32;
 begin
   Result := (FInfo shr C_SHIFT) and (C_MASK shr C_SHIFT);
-end;
-
-//procedure TBLObjectCore.InitStatic(const AInfo: UInt32);
-//begin
-//  FImpl := nil;
-//  FData := 0;
-//  FInfo := AInfo;
-//end;
+end;}
 
 function TBLObjectCore.NeedsCleanup: Boolean;
 begin
   Result := (FInfo >= MDR_FLAGS);
 end;
 
-function TBLObjectCore.PField: UInt32;
+{function TBLObjectCore.PField: UInt32;
 begin
   Result := (FInfo shr P_SHIFT) and (P_MASK shr P_SHIFT);
 end;
@@ -21080,18 +21524,7 @@ end;
 function TBLObjectCore.QField: UInt32;
 begin
   Result := (FInfo shr Q_SHIFT) and (Q_MASK shr Q_SHIFT);
-end;
-
-//class function TBLObjectCore.PackAbcp(const AA, AB, AC, AP: UInt32): UInt32;
-//begin
-//  Result := (AA shl A_SHIFT) or (AB shl B_SHIFT) or (AC shl C_SHIFT) or (AP shl P_SHIFT);
-//end;
-//
-//class function TBLObjectCore.PackTypeWithMarker(
-//  const AType: TBLObjectType): UInt32;
-//begin
-//  Result := (UInt32(Ord(AType)) shl TYPE_SHIFT) or M_FLAG;
-//end;
+end;}
 
 procedure TBLObjectCore.Swap(var AOther: TBLObjectCore);
 begin
@@ -37096,11 +37529,182 @@ begin
 end;
 {$ENDREGION 'Internal'}
 
+{$REGION 'Runtime'}
+
+{ TBLRuntimeBuildInfo }
+
+function TBLRuntimeBuildInfo.GetCompilerInfo: String;
+begin
+  Result := String(UTF8String(PUTF8Char(@FCompilerInfo)));
+end;
+
+procedure TBLRuntimeBuildInfo.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLRuntimeSystemInfo }
+
+function TBLRuntimeSystemInfo.GetCpuBrand: String;
+begin
+  Result := String(UTF8String(PUTF8Char(@FCpuBrand)));
+end;
+
+function TBLRuntimeSystemInfo.GetCpuVendor: String;
+begin
+  Result := String(UTF8String(PUTF8Char(@FCpuVendor)));
+end;
+
+procedure TBLRuntimeSystemInfo.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLRuntimeResourceInfo }
+
+function TBLRuntimeResourceInfo.GetDynamicPipelineCount: NativeInt;
+begin
+  Result := FDynamicPipelineCount;
+end;
+
+function TBLRuntimeResourceInfo.GetVMBlockCount: NativeInt;
+begin
+  Result := FVMBlockCount;
+end;
+
+function TBLRuntimeResourceInfo.GetVMOverhead: NativeInt;
+begin
+  Result := FVMOverhead;
+end;
+
+function TBLRuntimeResourceInfo.GetVMReserved: NativeInt;
+begin
+  Result := FVMReserved;
+end;
+
+function TBLRuntimeResourceInfo.GetVMUsed: NativeInt;
+begin
+  Result := FVMUsed;
+end;
+
+function TBLRuntimeResourceInfo.GetZMBlockCount: NativeInt;
+begin
+  Result := FZMBlockCount;
+end;
+
+function TBLRuntimeResourceInfo.GetZMOverhead: NativeInt;
+begin
+  Result := FZMOverhead;
+end;
+
+function TBLRuntimeResourceInfo.GetZMReserved: NativeInt;
+begin
+  Result := FZMReserved;
+end;
+
+function TBLRuntimeResourceInfo.GetZMUsed: NativeInt;
+begin
+  Result := FZMUsed;
+end;
+
+procedure TBLRuntimeResourceInfo.Reset;
+begin
+  FillChar(Self, SizeOf(Self), 0);
+end;
+
+{ TBLRuntime }
+
+class procedure TBLRuntime.Cleanup(const ACleanupFlags: TBLRuntimeCleanupFlags);
+begin
+  _BLCheck(_blRuntimeCleanup(Byte(ACleanupFlags)));
+end;
+
+class procedure TBLRuntime.Message(const AMsg: String;
+  const AArgs: array of const);
+begin
+  Message(AMsg, AArgs);
+end;
+
+class procedure TBLRuntime.Message(const AMsg: String);
+begin
+  _BLCheck(_blRuntimeMessageOut(PUTF8Char(UTF8String(AMsg))));
+end;
+
+class function TBLRuntime.QueryBuildInfo: TBLRuntimeBuildInfo;
+begin
+  _BLCheck(_blRuntimeQueryInfo(0, @Result));
+end;
+
+class function TBLRuntime.QueryResourceInfo: TBLRuntimeResourceInfo;
+begin
+  _BLCheck(_blRuntimeQueryInfo(2, @Result));
+end;
+
+class function TBLRuntime.QuerySystemInfo: TBLRuntimeSystemInfo;
+begin
+  _BLCheck(_blRuntimeQueryInfo(1, @Result));
+end;
+{$ENDREGION 'Runtime'}
+
+{$REGION 'Miscellaneous'}
+{ TBLRandom }
+
+class function TBLRandom.Create: TBLRandom;
+begin
+  Result.Reset(0);
+end;
+
+constructor TBLRandom.Create(const ASeed: UInt64);
+begin
+  Reset(ASeed);
+end;
+
+class operator TBLRandom.Equal(const ALeft, ARight: TBLRandom): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLRandom.Equals(const AOther: TBLRandom): Boolean;
+begin
+  Result := (FData[0] = AOther.FData[0]) and (FData[1] = AOther.FData[1]);
+end;
+
+function TBLRandom.NextDouble: Double;
+begin
+  Result := _blRandomNextDouble(@Self);
+end;
+
+function TBLRandom.NextUInt32: UInt32;
+begin
+  Result := _blRandomNextUInt32(@Self);
+end;
+
+function TBLRandom.NextUInt64: UInt64;
+begin
+  Result := _blRandomNextUInt64(@Self);
+end;
+
+class operator TBLRandom.NotEqual(const ALeft, ARight: TBLRandom): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+procedure TBLRandom.Reset(const ASeed: UInt64);
+begin
+  _blRandomReset(@Self, ASeed);
+end;
+
+{$ENDREGION 'Miscellaneous'}
+
 {$REGION 'Initialization'}
 initialization
   Assert(SizeOf(TBLObjectCore) = 16);
   Assert(SizeOf(TBLImage) = 16);
   Assert(SizeOf(TBLStrokeOptions.TValues) = 8);
+  _blRuntimeInit;
+
+finalization
+  _blRuntimeShutdown;
 {$ENDREGION 'Initialization'}
 
 end.

@@ -2017,6 +2017,62 @@ function _blPixelConverterConvert(const self: Pointer; dstData: Pointer; dstStri
   external _LIB_BLEND2D name _PU + 'blPixelConverterConvert';
 {$ENDREGION 'pixelconverter.h'}
 
+{$REGION 'random.h'}
+function _blRandomReset(self: Pointer; seed: UInt64): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRandomReset';
+
+function _blRandomNextUInt32(self: Pointer): UInt32; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRandomNextUInt32';
+
+function _blRandomNextUInt64(self: Pointer): UInt64; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRandomNextUInt64';
+
+function _blRandomNextDouble(self: Pointer): Double; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRandomNextDouble';
+{$ENDREGION 'random.h'}
+
+{$REGION 'runtime.h'}
+function _blRuntimeInit(): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeInit';
+
+function _blRuntimeShutdown(): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeShutdown';
+
+function _blRuntimeCleanup(cleanupFlags: Cardinal): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeCleanup';
+
+function _blRuntimeQueryInfo(infoType: Integer; infoOut: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeQueryInfo';
+
+function _blRuntimeMessageOut(const msg: PUTF8Char): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeMessageOut';
+
+function _blRuntimeMessageFmt(const fmt: PUTF8Char): Integer varargs; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeMessageFmt';
+
+function _blRuntimeMessageVFmt(const fmt: PUTF8Char; ap: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeMessageVFmt';
+
+{$IF Defined(MSWINDOWS)}
+function _blResultFromWinError(e: UInt32): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blResultFromWinError';
+{$ELSEIF Defined(POSIX)}
+function _blResultFromPosixError(e: Integer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + '_blResultFromPosixError';
+{$ENDIF}
+{$ENDREGION 'runtime.h'}
+
+{$REGION 'runtimescope.h'}
+function _blRuntimeScopeBegin(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeScopeBegin';
+
+function _blRuntimeScopeEnd(self: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeScopeEnd';
+
+function _blRuntimeScopeIsActive(const self: Pointer): Boolean; cdecl;
+  external _LIB_BLEND2D name _PU + 'blRuntimeScopeIsActive';
+{$ENDREGION 'runtimescope.h'}
+
 {$REGION 'string.h'}
 function _blStringInit(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blStringInit';
