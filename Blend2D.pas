@@ -1097,7 +1097,6 @@ type
   {$REGION 'Internal Declarations'}
   private class var
     FArrayType: TBLObjectType;
-//    FSsoEmptySignature: UInt32;
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
@@ -1427,7 +1426,7 @@ type
     /// <summary>
     ///  Prepends a number of items passed in `AItems` to the array.
     /// </summary>
-    /// </remarks>
+    /// <remarks>
     ///  The data in `AItems` cannot point to the same data that the array holds
     ///  as the function that prepares the prepend operation has no way to know
     ///  about the source (it only makes space for new data). It's an undefined
@@ -24449,7 +24448,6 @@ end;
 
 class constructor TBLArrayView<T>.Create;
 begin
-  Assert(not IsManagedType(T));
   Assert(not System.HasWeakRef(T));
 end;
 
@@ -24598,7 +24596,6 @@ end;
 
 class constructor TBLArray<T>.Create;
 begin
-  Assert(not IsManagedType(T));
   Assert(not System.HasWeakRef(T));
 
   FArrayType := TBLObjectType.Null;
@@ -24641,43 +24638,40 @@ begin
           8: FArrayType := TBLObjectType.ArrayStruct8;
          10: FArrayType := TBLObjectType.ArrayStruct10;
          12: FArrayType := TBLObjectType.ArrayStruct12;
-         16: begin
-               { Assume array of 16-byte record }
-               FArrayType := TBLObjectType.ArrayStruct16;
-
-               { Check if this record is compatible with TBLObject. That is, it
-                 has a single field with name 'FBase' of type TBLObjectCore. }
-               var P := PByte(Data.ManagedFldCount);
-               Inc(P, SizeOf(Integer)); // Skip ManagedFldCount field
-
-               // Skip ManagedFields
-               var Count := Data.ManagedFldCount;
-               Inc(P, Count * SizeOf(TManagedField));
-
-               Count := P^; // NumOps
-               Inc(P); // Skip NumOps field
-               Inc(P, Count * SizeOf(Pointer)); // Skip RecOps
-
-               Count := PInteger(P)^; // RecFldCnt
-               if (Count = 1) then
-               begin
-                 Inc(P, SizeOf(Integer)); // Skip RecFldCnt
-                 var RecType := PRecordTypeField(P);
-                 if (RecType.NameFld.ToString = 'FBase') then
-                   FArrayType := TBLObjectType.ArrayObject;
-               end;
-             end;
+         16: FArrayType := TBLObjectType.ArrayStruct16;
          20: FArrayType := TBLObjectType.ArrayStruct20;
          24: FArrayType := TBLObjectType.ArrayStruct24;
          32: FArrayType := TBLObjectType.ArrayStruct32;
         end;
       end;
-  end;
-  Assert(FArrayType <> TBLObjectType.Null);
 
-//  var SsoCapacity := TBLObjectCore.STATIC_DATA_SIZE div SizeOf(T);
-//  FSsoEmptySignature := TBLObjectCore.PackTypeWithMarker(FArrayType)
-//    or TBLObjectCore.PackAbcp(0, SsoCapacity);
+    tkMRecord:
+      if (SizeOf(T) = 16) then
+      begin
+         { Check if this record is compatible with TBLObject. That is, it
+           has a single field with name 'FBase' of type TBLObjectCore. }
+         var P := PByte(@Data.ManagedFldCount);
+         Inc(P, SizeOf(Integer)); // Skip ManagedFldCount field
+
+         // Skip ManagedFields
+         var Count := Data.ManagedFldCount;
+         Inc(P, Count * SizeOf(TManagedField));
+
+         Count := P^; // NumOps
+         Inc(P); // Skip NumOps field
+         Inc(P, Count * SizeOf(Pointer)); // Skip RecOps
+
+         Count := PInteger(P)^; // RecFldCnt
+         if (Count = 1) then
+         begin
+           Inc(P, SizeOf(Integer)); // Skip RecFldCnt
+           var RecType := PRecordTypeField(P);
+           if (RecType.NameFld.ToString = 'FBase') then
+             FArrayType := TBLObjectType.ArrayObject;
+         end;
+      end;
+  end;
+  Assert(FArrayType <> TBLObjectType.Null, 'Unsupported array element type: ' + String(Info.Name));
 end;
 
 class operator TBLArray<T>.Equal(const ALeft: TBLArray<T>;

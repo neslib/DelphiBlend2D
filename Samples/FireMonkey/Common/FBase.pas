@@ -22,9 +22,8 @@ uses
   FMX.Layouts,
   FMX.Objects,
   {$IFDEF USE_SKIA}
-  Neslib.Skia,
+  System.Skia,
   {$ENDIF}
-  Blend2D.Api,
   Blend2D;
 
 type
@@ -56,18 +55,18 @@ type
     FNextFrame: Int64;
     FNextSecond: Int64;
   protected
-    FBlend2DImage: IBLImage;
+    FBlend2DImage: TBLImage;
     FBlend2DBitmapData: TBitmapData;
-    FBlend2DContext: IBLContext;
+    FBlend2DContext: TBLContext;
     {$IFNDEF MSWINDOWS}
-    FBlend2DConverter: IBLPixelConverter;
+    FBlend2DConverter:TIBLPixelConverter;
     {$ENDIF}
   protected
     {$IFDEF USE_SKIA}
-    FSkiaSurface: ISKSurface;
-    FSkiaCanvas: ISKCanvas;
-    FSkiaFill: ISKPaint;
-    FSkiaStroke: ISKPaint;
+    FSkiaSurface: ISkSurface;
+    FSkiaCanvas: ISkCanvas;
+    FSkiaFill: ISkPaint;
+    FSkiaStroke: ISkPaint;
     FSkiaBitmapData: TBitmapData;
     {$ENDIF}
   private
@@ -84,9 +83,9 @@ type
     procedure AfterRender; virtual;
     procedure RenderNotSupported;
     procedure RenderFireMonkey(const ACanvas: TCanvas); virtual; abstract;
-    procedure RenderBlend2D(const AContext: IBLContext); virtual; abstract;
+    procedure RenderBlend2D(const AContext: TBLContext); virtual; abstract;
     {$IFDEF USE_SKIA}
-    procedure RenderSkia(const ACanvas: ISKCanvas); virtual; abstract;
+    procedure RenderSkia(const ACanvas: ISkCanvas); virtual; abstract;
     {$ENDIF}
   public
     { Public declarations }
@@ -149,10 +148,8 @@ end;
 procedure TFormBase.FormCreate(Sender: TObject);
 
   procedure AddItem(const AText: String; const ATag: Integer);
-  var
-    Item: TListBoxItem;
   begin
-    Item := TListBoxItem.Create(Self);
+    var Item := TListBoxItem.Create(Self);
     Item.Text := AText;
     Item.Tag := ATag;
     ComboBoxRenderer.AddObject(Item);
@@ -181,8 +178,6 @@ begin
   FPixelScale := Handle.Scale;
 
   FBitmap := TBitmap.Create;
-  FBlend2DImage := TBLImage.Create;
-  FBlend2DContext := TBLContext.Create;
 
   {$IFNDEF MSWINDOWS}
   { We need to convert ARGB to ABGR on non-Windows platforms. }
@@ -190,13 +185,13 @@ begin
   {$ENDIF}
 
   {$IFDEF USE_SKIA}
-  FSkiaFill := TSKPaint.Create;
-  FSkiaFill.Style := TSKPaintStyle.Fill;
-  FSkiaFill.IsAntialias := True;
+  FSkiaFill := TSkPaint.Create;
+  FSkiaFill.Style := TSkPaintStyle.Fill;
+  FSkiaFill.AntiAlias := True;
 
-  FSkiaStroke := TSKPaint.Create;
-  FSkiaStroke.Style := TSKPaintStyle.Stroke;
-  FSkiaStroke.IsAntialias := True;
+  FSkiaStroke := TSkPaint.Create;
+  FSkiaStroke.Style := TSkPaintStyle.Stroke;
+  FSkiaStroke.Antialias := True;
   {$ENDIF}
 
   Application.OnIdle := ApplicationIdle;
@@ -213,12 +208,11 @@ begin
 end;
 
 procedure TFormBase.PaintBoxPaint(Sender: TObject; Canvas: TCanvas);
-var
-  SrcSize, DstSize: TSize;
 begin
   if (FBitmap = nil) or (ComboBoxRenderer.Selected = nil) then
     Exit;
 
+  var SrcSize, DstSize: TSize;
   DstSize.Width := Trunc(PaintBox.Width);
   DstSize.Height := Trunc(PaintBox.Height);
   if (DstSize <> FDstSize) then
@@ -260,20 +254,19 @@ begin
 end;
 
 procedure TFormBase.RenderBlend2DInternal(const AThreadCount: Integer);
-var
-  Data: TBitmapData;
-  CreateInfo: TBLContextCreateInfo;
 begin
+  var Data: TBitmapData;
   if (FBitmap.Map(TMapAccess.Write, Data)) then
   try
     if (Data.Data <> FBlend2DBitmapData.Data) or (Data.Pitch <> FBlend2DBitmapData.Pitch) then
     begin
-      FBlend2DImage.InitializeFromData(Data.Width, Data.Height,
+      FBlend2DImage.MakeFromData(Data.Width, Data.Height,
         TBLFormat.PRGB32, Data.Data, Data.Pitch);
       FBlend2DBitmapData.Data := Data.Data;
       FBlend2DBitmapData.Pitch := Data.Pitch;
     end;
 
+    var CreateInfo: TBLContextCreateInfo;
     CreateInfo.Reset;
     CreateInfo.ThreadCount := AThreadCount;
 
@@ -295,10 +288,8 @@ begin
 end;
 
 procedure TFormBase.RenderFireMonkeyInternal;
-var
-  Canvas: TCanvas;
 begin
-  Canvas := FBitmap.Canvas;
+  var Canvas := FBitmap.Canvas;
   Canvas.BeginScene;
   try
     Canvas.SetMatrix(TMatrix.CreateScaling(FPixelScale, FPixelScale));
@@ -334,10 +325,8 @@ end;
 
 {$IFDEF USE_SKIA}
 procedure TFormBase.RenderSkiaInternal;
-var
-  Data: TBitmapData;
-  Info: TSKImageInfo;
 begin
+  var Data: TBitmapData;
   if (FBitmap.Map(TMapAccess.Write, Data)) then
   try
     if (Data.Data <> FSkiaBitmapData.Data) or (Data.Pitch <> FSkiaBitmapData.Pitch) then
@@ -345,19 +334,18 @@ begin
       FSkiaCanvas := nil;
       FSkiaSurface := nil;
 
-      Info := TSKImageInfo.Create(Data.Width, Data.Height,
-        TSKImageInfo.PlatformColorType, TSKAlphaType.Premul);
-      FSkiaSurface := TSKSurface.Create(Info, Data.Data, Data.Pitch);
+      var Info := TSkImageInfo.Create(Data.Width, Data.Height,
+        SkNative32ColorType, TSkAlphaType.Premul);
+      FSkiaSurface := TSkSurface.MakeRasterDirect(Info, Data.Data, Data.Pitch);
       FSkiaCanvas := FSkiaSurface.Canvas;
 
       FSkiaBitmapData.Data := Data.Data;
       FSkiaBitmapData.Pitch := Data.Pitch;
     end;
 
-    FSkiaCanvas.Scale(FPixelScale);
+    FSkiaCanvas.Scale(FPixelScale, FPixelScale);
     RenderSkia(FSkiaCanvas);
     FSkiaCanvas.ResetMatrix;
-    FSkiaCanvas.Flush;
   finally
     FBitmap.Unmap(Data);
   end;

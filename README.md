@@ -82,7 +82,7 @@ Features planned for future releases include:
 
 ## Version
 
-Based on Blend2D beta 14 (https://github.com/blend2d/blend2d/tree/841360f653d8f2a749e40d4e31807dfac3d6df29). New version on https://blend2d.com/download/blend2d-0.12.0-all.zip
+Based on Blend2D beta 14 (5/3/2020: https://github.com/blend2d/blend2d/tree/841360f653d8f2a749e40d4e31807dfac3d6df29 and https://github.com/blend2d/blend2d-apps/tree/8697414f0080f670f145af4532f7291bd99ccfc2). New version on https://blend2d.com/download/blend2d-0.12.0-all.zip (state as of 3/10/2025:  https://github.com/blend2d/blend2d/tree/c79b36dc06d969fc6157202c66caa1a1877403e9 and https://github.com/blend2d/blend2d-apps/tree/6170956f1480ca5df006318c7b8f338eb1d45a46)
 
 ## License
 

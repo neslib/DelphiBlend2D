@@ -34,11 +34,11 @@ type
     procedure CheckBoxLowResClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Blend2DPaintBoxPaint(const ASender: TObject;
-      const AContext: IBLContext);
+      const AContext: TBLContext);
   private
     { Private declarations }
-    FRadial: IBLGradient;
-    FLinear: IBLGradient;
+    FRadial: TBLGradient;
+    FLinear: TBLGradient;
   public
     { Public declarations }
   end;
@@ -51,7 +51,7 @@ implementation
 {$R *.dfm}
 
 procedure TFormMain.Blend2DPaintBoxPaint(const ASender: TObject;
-  const AContext: IBLContext);
+  const AContext: TBLContext);
 begin
   { Apply trackbar settings }
   AContext.Rotate(DegToRad(TrackBarRotate.Position), 120, 120);
@@ -59,20 +59,17 @@ begin
   AContext.Translate(-TrackBarX.Position, -TrackBarY.Position);
 
   { Fill background with black }
-  AContext.CompOp := TBLCompOp.SrcCopy;
-  AContext.FillColor := TAlphaColors.Black;
-  AContext.FillAll;
+  AContext.SetFillStyle(TAlphaColors.Black);
+  AContext.ClearAll;
 
   { Draw circle with radial gradient }
   AContext.CompOp := TBLCompOp.SrcOver;
-  AContext.FillGradient := FRadial;
-  AContext.FillCircle(90, 90, 80);
+  AContext.FillCircle(90, 90, 80, FRadial);
 
   { Draw rounded rectangle with linear gradient.
     Use Difference composition where circle and rectangle overlap. }
   AContext.CompOp := TBLCompOp.Difference;
-  AContext.FillGradient := FLinear;
-  AContext.FillRoundRect(97.5, 97.5, 135, 135, 12.5);
+  AContext.FillRoundRect(97.5, 97.5, 135, 135, 12.5, FLinear);
 end;
 
 procedure TFormMain.CheckBoxLowResClick(Sender: TObject);

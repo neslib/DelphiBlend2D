@@ -1,0 +1,127 @@
+site_name: DelphiBlend2D
+site_url: https://github.com/neslib/DelphiBlend2D
+nav: 
+  - Home: 
+    - index.md
+  - Reference:
+    - Blend2D.Fmx.PaintBox:
+      - Reference/Blend2D.Fmx.PaintBox/index.md
+      - Classes & Records:
+        - TBlend2DPaintBox: Reference/Blend2D.Fmx.PaintBox/classes/TBlend2DPaintBox.md
+      - Types:
+        - TBlend2DPaintEvent: Reference/Blend2D.Fmx.PaintBox/types/TBlend2DPaintEvent.md
+      - Routines:
+        - Register: Reference/Blend2D.Fmx.PaintBox/routines/Register.md
+    - Blend2D.Vcl.PaintBox:
+      - Reference/Blend2D.Vcl.PaintBox/index.md
+      - Classes & Records:
+        - TBlend2DPaintBox: Reference/Blend2D.Vcl.PaintBox/classes/TBlend2DPaintBox.md
+      - Types:
+        - TBlend2DPaintEvent: Reference/Blend2D.Vcl.PaintBox/types/TBlend2DPaintEvent.md
+      - Routines:
+        - Register: Reference/Blend2D.Vcl.PaintBox/routines/Register.md
+theme:
+  name: material
+#  logo: assets/logo.png # shows in toolbar
+#  favicon: assets/logo.png
+#  icon:
+#    annotation: material/arrow-right-circle 
+  features:
+    - content.code.copy
+#    - content.code.annotate
+#    - content.tooltips  
+    # - header.autohide # auto-hide header after certain scroll threshold
+    - navigation.instant # intercept internal links without full reloading
+    - navigation.instant.progress # show progress on slow connections
+    - navigation.tabs # show top-level menu as (auto-hide) tabs
+    # - navigation.tabs.sticky # don't auto-hide tabs
+    # - navigation.sections # show top-level menu in navbar (unless also navigation.tabs, then 2nd level menu)
+    # - navigation.expand # expand all sidebar menus
+    - navigation.prune # reduce size by including only visible nav items
+    - navigation.top # show "Back to top" button when scrolling upwards
+    - navigation.footer # show footer with previous and next buttons and social links (if enabled with extra | social)
+    - navigation.indexes # attach documents to sections
+    # - toc.integrate # integrate TOC in left sidebar instead of separate to the right
+    - search.suggest # Enable search suggestions (auto-complete)
+#    - search.highlight # Highlight all found occurences
+    - search.share # Show share button in search bar
+  palette: 
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple # primary color for toolbars, focused links etc.
+      #accent: green   # accent color for hovered links etc. 
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      #accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+plugins:
+  - search
+markdown_extensions:
+#  - abbr
+  - admonition
+  - attr_list
+#  - def_list
+#  - footnotes
+#  - md_in_html
+#  - pymdownx.blocks.caption
+#  - pymdownx.caret
+#  - pymdownx.critic
+  - pymdownx.details
+#  - pymdownx.keys
+  - pymdownx.inlinehilite
+#  - pymdownx.mark
+  - pymdownx.snippets
+#  - pymdownx.tilde
+#  - pymdownx.arithmatex:
+#      generic: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences:
+#      custom_fences:
+#        - name: mermaid
+#          class: mermaid
+#          format: !!python/name:pymdownx.superfences.fence_code_format
+#  - pymdownx.tabbed:
+#      alternate_style: true
+#  - pymdownx.tasklist:
+#      custom_checkbox: true
+#  - tables
+  - toc:
+      toc_depth: 2
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/neslib/DelphiBlend2D
+      name: GitHub neslib
+    - icon: /fontawesome/brands/wordpress
+      link: https://blog.grijjy.com/author/erikvanbilsen/
+      name: Blog
+  # generator: false # hide the "Made with Material for MkDocs" notice
+copyright: Copyright &copy; 2025 Erik van Bilsen
+repo_url: https://github.com/neslib/DelphiBlend2D
+repo_name: DelphiBlend2D
+#extra_css:
+#  - stylesheets/extra.css
+#  - https://unpkg.com/katex@0/dist/katex.min.css
+#extra_javascript:
+#  - javascripts/katex.js
+#  - https://unpkg.com/katex@0/dist/katex.min.js
+#  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js

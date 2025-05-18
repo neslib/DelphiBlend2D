@@ -1,0 +1,1 @@
+mkdocs build --site-dir ..\..\Neslib.Github.io\DelphiBlend2D
