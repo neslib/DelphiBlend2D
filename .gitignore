@@ -12,6 +12,7 @@ OSX32/
 OSX64/
 Win32/
 Win64/
+Docs/Docs/Reference/
 #ignore Delphi build files
 *.obj
 *.exe

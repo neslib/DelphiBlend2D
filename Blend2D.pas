@@ -11675,7 +11675,7 @@ type
   ///  This value specifies the type of the parameter passed to the text
   ///  rendering API.
   /// </summary>
-  /// </remarks>
+  /// <remarks>
   ///  In most cases this should not be required to use by Blend2D users since
   ///  the API provides functions that use `TBLContextRenderTextOp` internally.
   /// </remarks>

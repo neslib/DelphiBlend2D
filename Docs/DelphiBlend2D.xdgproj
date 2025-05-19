@@ -6,3 +6,4 @@ MkDocs=mkdocs.yml
 RootNamespace=Sample
 FullNav=1
 MinVisibility=protected
+IncludeFiles=0
