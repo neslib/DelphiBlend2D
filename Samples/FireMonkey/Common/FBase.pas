@@ -89,6 +89,7 @@ type
     {$ENDIF}
   public
     { Public declarations }
+    class function BackgroundForCompOp(const ACompOp: TBLCompOp): TAlphaColor; static;
   end;
 
 implementation
@@ -118,6 +119,43 @@ end;
 procedure TFormBase.ApplicationIdle(Sender: TObject; var Done: Boolean);
 begin
   CheckRepaint;
+end;
+
+class function TFormBase.BackgroundForCompOp(
+  const ACompOp: TBLCompOp): TAlphaColor;
+const
+  COLORS: array [TBLCompOp] of TAlphaColor = (
+    $FF000000, // SrcOver
+    $FF000000, // SrcCopy
+    $FFFFFFFF, // SrcIn
+    $00000000, // SrcOut
+    $FFFFFFFF, // SrcAtop
+    $FFFFFFFF, // DstOver
+    $FF000000, // DstCopy
+    $FF000000, // DstIn
+    $FF000000, // DstOut
+    $FF000000, // DstAtop
+    $FF000000, // ExclusiveOr
+    $FF000000, // Clear
+    $FF000000, // Plus
+    $FF000000, // Minus
+    $FF000000, // Modulate
+    $FFFFFFFF, // Multiply
+    $FF000000, // Screen
+    $00000000, // Overlay
+    $FFFFFFFF, // Darken
+    $FF000000, // Lighten
+    $00000000, // ColorDodge
+    $00000000, // ColorBurn
+    $FF000000, // LinearBurn
+    $FF000000, // LinearLight
+    $FF000000, // PinLight
+    $FF000000, // HardLight
+    $00000000, // SoftLight
+    $FF000000, // Difference
+    $FFFFFFFF);// Exclusion
+begin
+  Result := COLORS[ACompOp];
 end;
 
 procedure TFormBase.BeforeRender;
@@ -159,7 +197,11 @@ begin
   ReportMemoryLeaksOnShutdown := True;
   ComboBoxRenderer.BeginUpdate;
   try
-    AddItem('FireMonkey', TAG_FIREMONKEY);
+    var CanvasName := Canvas.ClassName;
+    if (CanvasName.StartsWith('TCanvas')) then
+      CanvasName := CanvasName.Substring(7);
+    AddItem('FMX (' + CanvasName + ')', TAG_FIREMONKEY);
+
     AddItem('Blend2D', TAG_BLEND2D_DEF);
     AddItem('Blend2D 1T', TAG_BLEND2D_1T);
     AddItem('Blend2D 2T', TAG_BLEND2D_2T);

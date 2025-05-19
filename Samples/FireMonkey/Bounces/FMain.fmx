@@ -1,7 +1,10 @@
 inherited FormMain: TFormMain
   Caption = 'Bounces'
+  ClientHeight = 520
+  ClientWidth = 580
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
+    Size.Width = 580.000000000000000000
     Size.Height = 48.000000000000000000
     inherited LabelRenderer: TLabel
       Size.Height = 48.000000000000000000
@@ -19,13 +22,64 @@ inherited FormMain: TFormMain
       end
     end
     inherited CheckBoxLimitFPS: TCheckBox
+      Position.X = 508.000000000000000000
       Size.Height = 48.000000000000000000
     end
     inherited LabelFPS: TLabel
+      Position.X = 428.000000000000000000
       Size.Height = 48.000000000000000000
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Height = 432.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 424.000000000000000000
+  end
+  object ToolBar1: TToolBar
+    Position.Y = 48.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+    object LabelStyle: TLabel
+      Align = Left
+      AutoSize = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 28.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Style:'
+      TabOrder = 0
+    end
+    object LayoutCompOp: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 36.000000000000000000
+      Size.Width = 133.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxStyle: TComboBox
+        Align = VertCenter
+        DropDownCount = 20
+        Items.Strings = (
+          'Solid Color'
+          'Linear Gradient'
+          'Radial Gradient'
+          'Conic Gradient')
+        ItemIndex = 1
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Position.Y = 8.000000000000000000
+        Size.Width = 129.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnChange = ComboBoxStyleChange
+      end
+    end
   end
 end

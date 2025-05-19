@@ -27,7 +27,7 @@ uses
   FBase;
 
 type
-  TShapeType = (Rect, RectPath, RoundRect, Polygon);
+  TShapeType = (RectA, RectU, RectPath, RoundRect, Polygon);
 
 type
   TFormMain = class(TFormBase)
@@ -112,15 +112,21 @@ end;
 
 procedure TFormMain.ComboBoxCompOpChange(Sender: TObject);
 const
-  BLEND2D_COMP_OPS: array [0..8] of TBLCompOp = (TBLCompOp.SrcOver, TBLCompOp.SrcCopy,
-    TBLCompOp.DstAtop, TBLCompOp.ExclusiveOr, TBLCompOp.Plus, TBLCompOp.Screen,
-    TBLCompOp.Lighten, TBLCompOp.HardLight, TBLCompOp.Difference);
+  BLEND2D_COMP_OPS: array [0..16] of TBLCompOp = (TBLCompOp.SrcOver,
+    TBLCompOp.SrcCopy, TBLCompOp.SrcAtop, TBLCompOp.DstAtop,
+    TBLCompOp.ExclusiveOr, TBLCompOp.Plus, TBLCompOp.Multiply, TBLCompOp.Screen,
+    TBLCompOp.Overlay, TBLCompOp.Darken, TBLCompOp.Lighten,
+    TBLCompOp.ColorDodge, TBLCompOp.ColorBurn, TBLCompOp.HardLight,
+    TBLCompOp.SoftLight, TBLCompOp.Difference, TBLCompOp.Exclusion);
 
   {$IFDEF USE_SKIA}
-  SKIA_BLEND_MODES: array [0..8] of TSkBlendMode = (TSkBlendMode.SrcOver,
-    TSkBlendMode.Src, TSkBlendMode.DestATop, TSkBlendMode.Xor,
-    TSkBlendMode.Plus, TSkBlendMode.Screen, TSkBlendMode.Lighten,
-    TSkBlendMode.HardLight, TSkBlendMode.Difference);
+  SKIA_BLEND_MODES: array [0..16] of TSkBlendMode = (TSkBlendMode.SrcOver,
+    TSkBlendMode.Src, TSkBlendMode.SrcATop, TSkBlendMode.DestATop,
+    TSkBlendMode.Xor, TSkBlendMode.Plus, TSkBlendMode.Multiply,
+    TSkBlendMode.Screen, TSkBlendMode.Overlay, TSkBlendMode.Darken,
+    TSkBlendMode.Lighten, TSkBlendMode.ColorDodge, TSkBlendMode.ColorBurn,
+    TSkBlendMode.HardLight, TSkBlendMode.SoftLight, TSkBlendMode.Difference,
+    TSkBlendMode.Exclusion);
   {$ENDIF}
 begin
   inherited;
@@ -143,7 +149,7 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
-  FRandom.Reset($1234);
+  FRandom.Reset($123456789ABCDEF);
   FBlend2DCompOp := TBLCompOp.SrcOver;
   {$IFDEF USE_SKIA}
   FSkiaBlender := TSkBlender.MakeMode(TSkBlendMode.SrcOver);
@@ -167,9 +173,8 @@ end;
 
 procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  AContext.SetFillStyle(TAlphaColors.Black);
-  AContext.ClearAll;
-
+  AContext.CompOp := TBLCompOp.SrcCopy;
+  AContext.FillAll(BackgroundForCompOp(FBlend2DCompOp));
   AContext.CompOp := FBlend2DCompOp;
 
   var RectSize: Double := FRectSize;
@@ -179,7 +184,19 @@ begin
   var P: TPointF;
   var Path: TBLPath;
   case FShapeType of
-    TShapeType.Rect:
+    TShapeType.RectA:
+      begin
+        var RectSizeI := Trunc(FRectSize);
+        for I := 0 to Length(FCoords) - 1 do
+        begin
+          P := FCoords[I];
+          var X := Trunc(P.X - HalfSize);
+          var Y := Trunc(P.Y - HalfSize);
+          AContext.FillRect(BLRectI(X, Y, RectSizeI, RectSizeI), FColors[I]);
+        end;
+      end;
+
+    TShapeType.RectU:
       for I := 0 to Length(FCoords) - 1 do
       begin
         P := FCoords[I];
@@ -244,7 +261,8 @@ begin
   var Path: TPathData;
 
   case FShapeType of
-    TShapeType.Rect:
+    TShapeType.RectA,
+    TShapeType.RectU:
       for I := 0 to Length(FCoords) - 1 do
       begin
         P := FCoords[I];
@@ -314,7 +332,7 @@ end;
 {$IFDEF USE_SKIA}
 procedure TFormMain.RenderSkia(const ACanvas: ISkCanvas);
 begin
-  ACanvas.Clear(TAlphaColors.Black);
+  ACanvas.Clear(BackgroundForCompOp(FBlend2DCompOp));
   FSkiaFill.Blender := FSkiaBlender;
 
   var RectSize: Single := FRectSize;
@@ -324,7 +342,8 @@ begin
   var PathBuilder: ISkPathBuilder;
 
   case FShapeType of
-    TShapeType.Rect:
+    TShapeType.RectA,
+    TShapeType.RectU:
       for I := 0 to Length(FCoords) - 1 do
       begin
         P := FCoords[I];
@@ -394,8 +413,8 @@ begin
   while (I < AValue) do
   begin
     FCoords[I] := PointF(Random * W, Random * H);
-    FSteps[I] := PointF(((Random * 0.5) + 0.05) * RandomSign,
-                        ((Random * 0.5) + 0.05) * RandomSign);
+    FSteps[I] := PointF(((Random * 0.5) + 0.04) * RandomSign,
+                        ((Random * 0.5) + 0.04) * RandomSign);
     FColors[I] := RandomColor;
     Inc(I);
   end;

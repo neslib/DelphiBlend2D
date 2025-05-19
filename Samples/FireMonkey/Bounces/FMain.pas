@@ -21,14 +21,22 @@ uses
   FMX.ListBox,
   FMX.Layouts,
   {$IFDEF USE_SKIA}
-  Neslib.Skia,
+  System.Skia,
   {$ENDIF}
   Blend2D,
   FBase;
 
 type
+  TStyleId = (Solid, Linear, Radial, Conic);
+
+type
   TFormMain = class(TFormBase)
+    ToolBar1: TToolBar;
+    LabelStyle: TLabel;
+    LayoutCompOp: TLayout;
+    ComboBoxStyle: TComboBox;
     procedure FormCreate(Sender: TObject);
+    procedure ComboBoxStyleChange(Sender: TObject);
   private const
     MARGIN_SIZE = 7;
     SQUARE_SIZE = 45;
@@ -36,13 +44,13 @@ type
     HALF_SIZE   = 0.5 * FULL_SIZE;
   private
     FTime: Double;
-    FBlend2DGradient: IBLGradient;
+    FStyleId: TStyleId;
   protected
     procedure BeforeRender; override;
     procedure RenderFireMonkey(const ACanvas: TCanvas); override;
-    procedure RenderBlend2D(const AContext: IBLContext); override;
+    procedure RenderBlend2D(const AContext: TBLContext); override;
     {$IFDEF USE_SKIA}
-    procedure RenderSkia(const ACanvas: ISKCanvas); override;
+    procedure RenderSkia(const ACanvas: ISkCanvas); override;
     {$ENDIF}
   public
   end;
@@ -66,55 +74,98 @@ begin
   FTime := FTime + 2;
 end;
 
+procedure TFormMain.ComboBoxStyleChange(Sender: TObject);
+begin
+  inherited;
+  FStyleId := TStyleId(ComboBoxStyle.ItemIndex);
+end;
+
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
-  FBlend2DGradient := TBLGradient.Create;
-  FBlend2DGradient.GradientType := TBLGradientType.Linear;
+  FStyleId := TStyleId.Linear;
 end;
 
-procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
-var
-  I, W, H, Count: Integer;
-  IX, IY, Start, Now, X, Y, Dur, Pos, BouncePos, R, B, Rotation, Radius: Double;
+procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  AContext.FillColor := TAlphaColors.Black;
-  AContext.FillAll;
+  AContext.FillAll(TAlphaColors.Black);
 
-  W := Trunc(PaintBox.Width + FULL_SIZE - 1) div FULL_SIZE;
-  H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
-  Count := W * H;
+  var W := Trunc(PaintBox.Width + FULL_SIZE - 1) div FULL_SIZE;
+  var H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
+  var Count := W * H;
 
-  IX := 0;
-  IY := 0;
-  Start := 0;
-  Now := FTime;
+  var IX: Double := 0;
+  var IY: Double := 0;
+  var Start: Double := 0;
+  var Now: Double := FTime;
 
-  for I := 0 to Count - 1 do
+  var Gradient: TBLGradient;
+
+  case FStyleId of
+    TStyleId.Linear:
+      begin
+        Gradient.Kind := TBLGradientKind.Linear;
+        Gradient.SetValues(
+          BLLinearGradientValues(0, MARGIN_SIZE, 0, MARGIN_SIZE + SQUARE_SIZE));
+      end;
+
+    TStyleId.Radial:
+      begin
+        Gradient.Kind := TBLGradientKind.Radial;
+        Gradient.SetValues(
+          BLRadialGradientValues(HALF_SIZE, HALF_SIZE, HALF_SIZE, HALF_SIZE - 15, HALF_SIZE));
+      end;
+
+    TStyleId.Conic:
+      begin
+        Gradient.Kind := TBLGradientKind.Conic;
+        Gradient.SetValues(
+          BLConicGradientValues(HALF_SIZE, HALF_SIZE, Pi / -2, 1));
+      end;
+  end;
+  for var I := 0 to Count - 1 do
   begin
-    X := IX * FULL_SIZE;
-    Y := IY * FULL_SIZE;
+    var X: Double := IX * FULL_SIZE;
+    var Y: Double := IY * FULL_SIZE;
 
-    Dur := (Now - Start) + (I * 50);
-    Pos := FMod(Dur, 3000) / 3000;
-    BouncePos := Abs((Pos * 2) - 1);
-    R := ((BouncePos * 50) + 50) / 100;
-    B := ((1 - BouncePos) * 50) / 100;
+    var Dur: Double := (Now - Start) + (I * 50);
+    var Pos: Double := FMod(Dur, 3000) / 3000;
+    var BouncePos: Double := Abs((Pos * 2) - 1);
+    var R: Double := ((BouncePos * 50) + 50) / 100;
+    var B: Double := ((1 - BouncePos) * 50) / 100;
 
-    Rotation := Pos * (Pi * 2);
-    Radius := BouncePos * 25;
+    var Rotation: Double := Pos * (Pi * 2);
+    var Radius: Double := BouncePos * 25;
 
     AContext.Save;
     AContext.Rotate(Rotation, X + HALF_SIZE, Y + HALF_SIZE);
     AContext.Translate(X, Y);
 
-    FBlend2DGradient.ResetStops;
-    FBlend2DGradient.AddStop(0.0, $FFFF7F00);
-    FBlend2DGradient.AddStop(1.0, BLRgba32(Trunc(R * 255), 0, Trunc(B * 255)));
-    FBlend2DGradient.SetValues(BLLinearGradientValues(0, MARGIN_SIZE, 0, MARGIN_SIZE + SQUARE_SIZE));
+    var RoundRect := BLRoundRect(MARGIN_SIZE, MARGIN_SIZE, SQUARE_SIZE,
+      SQUARE_SIZE, Radius, Radius);
 
-    AContext.SetFillStyle(FBlend2DGradient);
-    AContext.FillRoundRect(MARGIN_SIZE, MARGIN_SIZE, SQUARE_SIZE, SQUARE_SIZE, Radius, Radius);
+    case FStyleId of
+      TStyleId.Solid:
+        AContext.FillRoundRect(RoundRect, BLRgba32(Trunc(R * 255), 0, Trunc(B * 255)));
+
+      TStyleId.Linear,
+      TStyleId.Radial:
+        begin
+          Gradient.ResetStops;
+          Gradient.AddStop(0.0, $FFFF7F00);
+          Gradient.AddStop(1.0, BLRgba32(Trunc(R * 255), 0, Trunc(B * 255)));
+          AContext.FillRoundRect(RoundRect, Gradient);
+        end;
+
+      TStyleId.Conic:
+        begin
+          Gradient.ResetStops;
+          Gradient.AddStop(0.0, $FFFF7F00);
+          Gradient.AddStop(0.5, BLRgba32(Trunc(R * 255), 0, Trunc(B * 255)));
+          Gradient.AddStop(1.0, $FFFF7F00);
+          AContext.FillRoundRect(RoundRect, Gradient);
+        end;
+    end;
     AContext.Restore;
 
     IX := IX + 1;
@@ -127,51 +178,74 @@ begin
 end;
 
 procedure TFormMain.RenderFireMonkey(const ACanvas: TCanvas);
-var
-  I, W, H, Count: Integer;
-  IX, IY, Start, Now, X, Y, Dur, Pos, BouncePos, R, B, Rotation, Radius: Double;
-  OrigMatrix, Matrix: TMatrix;
-  C: TAlphaColorRec;
 begin
   ACanvas.Clear(TAlphaColors.Black);
 
-  W := Trunc(PaintBox.Width + FULL_SIZE - 1) div FULL_SIZE;
-  H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
-  Count := W * H;
+  if (FStyleId = TStyleId.Conic) then
+  begin
+    RenderNotSupported;
+    Exit;
+  end;
 
-  IX := 0;
-  IY := 0;
-  Start := 0;
-  Now := FTime;
+  var W := Trunc(PaintBox.Width + FULL_SIZE - 1) div FULL_SIZE;
+  var H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
+  var Count := W * H;
+
+  var IX: Double := 0;
+  var IY: Double := 0;
+  var Start: Double := 0;
+  var Now: Double := FTime;
+
+  var C: TAlphaColorRec;
   C.G := 0;
   C.A := 255;
 
-  for I := 0 to Count - 1 do
+  for var I := 0 to Count - 1 do
   begin
-    X := IX * FULL_SIZE;
-    Y := IY * FULL_SIZE;
+    var X: Double := IX * FULL_SIZE;
+    var Y: Double := IY * FULL_SIZE;
 
-    Dur := (Now - Start) + (I * 50);
-    Pos := FMod(Dur, 3000) / 3000;
-    BouncePos := Abs((Pos * 2) - 1);
-    R := ((BouncePos * 50) + 50) / 100;
-    B := ((1 - BouncePos) * 50) / 100;
+    var Dur: Double := (Now - Start) + (I * 50);
+    var Pos: Double := FMod(Dur, 3000) / 3000;
+    var BouncePos: Double := Abs((Pos * 2) - 1);
+    var R: Double := ((BouncePos * 50) + 50) / 100;
+    var B: Double := ((1 - BouncePos) * 50) / 100;
 
-    Rotation := Pos * (Pi * 2);
-    Radius := BouncePos * 25;
+    var Rotation: Double := Pos * (Pi * 2);
+    var Radius: Double := BouncePos * 25;
 
-    OrigMatrix := ACanvas.Matrix;
-    Matrix := TMatrix.CreateTranslation(X + HALF_SIZE, Y + HALF_SIZE) * OrigMatrix;
+    var OrigMatrix := ACanvas.Matrix;
+    var Matrix := TMatrix.CreateTranslation(X + HALF_SIZE, Y + HALF_SIZE) * OrigMatrix;
     Matrix := TMatrix.CreateRotation(Rotation) * Matrix;
     Matrix := TMatrix.CreateTranslation(-HALF_SIZE, -HALF_SIZE) * Matrix;
     ACanvas.SetMatrix(Matrix);
 
     C.R := Trunc(R * 255);
     C.B := Trunc(B * 255);
-    ACanvas.Fill.Kind := TBrushKind.Gradient;
-    ACanvas.Fill.Gradient.Style := TGradientStyle.Linear;
-    ACanvas.Fill.Gradient.Color := $FFFF7F00;
-    ACanvas.Fill.Gradient.Color1 := C.Color;
+
+    case FStyleId of
+      TStyleId.Solid:
+        begin
+          ACanvas.Fill.Kind := TBrushKind.Solid;
+          ACanvas.Fill.Color := C.Color;
+        end;
+
+      TStyleId.Linear:
+        begin
+          ACanvas.Fill.Kind := TBrushKind.Gradient;
+          ACanvas.Fill.Gradient.Style := TGradientStyle.Linear;
+          ACanvas.Fill.Gradient.Color := $FFFF7F00;
+          ACanvas.Fill.Gradient.Color1 := C.Color;
+        end;
+
+      TStyleId.Radial:
+        begin
+          ACanvas.Fill.Kind := TBrushKind.Gradient;
+          ACanvas.Fill.Gradient.Style := TGradientStyle.Radial;
+          ACanvas.Fill.Gradient.Color := C.Color;
+          ACanvas.Fill.Gradient.Color1 := $FFFF7F00;
+        end;
+    end;
 
     ACanvas.FillRect(RectF(MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE + SQUARE_SIZE,
       MARGIN_SIZE + SQUARE_SIZE), Radius, Radius, AllCorners, 1);
@@ -187,49 +261,67 @@ begin
 end;
 
 {$IFDEF USE_SKIA}
-procedure TFormMain.RenderSkia(const ACanvas: ISKCanvas);
-var
-  I, W, H, Count: Integer;
-  IX, IY, Start, Now, X, Y, Dur, Pos, BouncePos, R, B, Rotation, Radius: Double;
-  Shader: ISKShader;
+procedure TFormMain.RenderSkia(const ACanvas: ISkCanvas);
 begin
   ACanvas.Clear(TAlphaColors.Black);
 
-  W := Trunc(PaintBox.Width + FULL_SIZE - 1) div FULL_SIZE;
-  H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
-  Count := W * H;
+  var W := Trunc(PaintBox.Width + FULL_SIZE - 1) div FULL_SIZE;
+  var H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
+  var Count := W * H;
 
-  IX := 0;
-  IY := 0;
-  Start := 0;
-  Now := FTime;
+  var IX: Double := 0;
+  var IY: Double := 0;
+  var Start: Double := 0;
+  var Now: Double := FTime;
 
-  for I := 0 to Count - 1 do
+  for var I := 0 to Count - 1 do
   begin
-    X := IX * FULL_SIZE;
-    Y := IY * FULL_SIZE;
+    var X: Double := IX * FULL_SIZE;
+    var Y: Double := IY * FULL_SIZE;
 
-    Dur := (Now - Start) + (I * 50);
-    Pos := FMod(Dur, 3000) / 3000;
-    BouncePos := Abs((Pos * 2) - 1);
-    R := ((BouncePos * 50) + 50) / 100;
-    B := ((1 - BouncePos) * 50) / 100;
+    var Dur: Double := (Now - Start) + (I * 50);
+    var Pos: Double := FMod(Dur, 3000) / 3000;
+    var BouncePos: Double := Abs((Pos * 2) - 1);
+    var R: Double := ((BouncePos * 50) + 50) / 100;
+    var B: Double := ((1 - BouncePos) * 50) / 100;
 
-    Rotation := Pos * (Pi * 2);
-    Radius := BouncePos * 25;
+    var Rotation: Double := Pos * (Pi * 2);
+    var Radius: Double := BouncePos * 25;
 
     ACanvas.Save;
-    ACanvas.RotateRadians(Rotation, X + HALF_SIZE, Y + HALF_SIZE);
+    ACanvas.Rotate(RadToDeg(Rotation), X + HALF_SIZE, Y + HALF_SIZE);
     ACanvas.Translate(X, Y);
 
-    Shader := TSKShader.CreateLinearGradient(
-      TSKPoint.Create(0, MARGIN_SIZE),
-      TSKPoint.Create(0, MARGIN_SIZE + SQUARE_SIZE),
-      [$FFFF7F00, TSKColor.Create(Trunc(R * 255), 0, Trunc(B * 255))],
-      [0, 1], TSKShaderTileMode.Clamp);
+    var C: TAlphaColorRec;
+    C.R := Trunc(R * 255);
+    C.G := 0;
+    C.B := Trunc(B * 255);
+    C.A := 255;
+
+    var Shader: ISkShader := nil;
+    case FStyleId of
+      TStyleId.Solid:
+        FSkiaFill.Color := C.Color;
+
+      TStyleId.Linear:
+        Shader := TSkShader.MakeGradientLinear(
+          PointF(0, MARGIN_SIZE), PointF(0, MARGIN_SIZE + SQUARE_SIZE),
+          $FFFF7F00, C.Color, TSkTileMode.Clamp);
+
+      TStyleId.Radial:
+        Shader := TSkShader.MakeGradientRadial(
+          PointF(HALF_SIZE, HALF_SIZE - 15), HALF_SIZE,
+          $FFFF7F00, C.Color, TSkTileMode.Clamp);
+
+      TStyleId.Conic:
+        Shader := TSkShader.MakeGradientSweep(
+          PointF(HALF_SIZE, HALF_SIZE), [$FFFF7F00, C.Color, $FFFF7F00],
+          [0.0, 0.5, 1.0], TSkTileMode.Clamp);
+    end;
 
     FSkiaFill.Shader := Shader;
-    ACanvas.DrawRoundRect(MARGIN_SIZE, MARGIN_SIZE, SQUARE_SIZE, SQUARE_SIZE,
+    ACanvas.DrawRoundRect(
+      RectF(MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE + SQUARE_SIZE, MARGIN_SIZE + SQUARE_SIZE),
       Radius, Radius, FSkiaFill);
     ACanvas.Restore;
 

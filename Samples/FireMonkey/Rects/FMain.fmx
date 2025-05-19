@@ -1,7 +1,10 @@
 inherited FormMain: TFormMain
   Caption = 'Rectangles'
+  ClientHeight = 520
+  ClientWidth = 580
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
+    Size.Width = 580.000000000000000000
     Size.Height = 48.000000000000000000
     inherited LabelRenderer: TLabel
       Size.Height = 48.000000000000000000
@@ -19,21 +22,24 @@ inherited FormMain: TFormMain
       end
     end
     inherited CheckBoxLimitFPS: TCheckBox
+      Position.X = 508.000000000000000000
       Size.Height = 48.000000000000000000
     end
     inherited LabelFPS: TLabel
+      Position.X = 428.000000000000000000
       Size.Height = 48.000000000000000000
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Height = 336.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 376.000000000000000000
   end
   object ToolBar1: TToolBar
     Position.Y = 48.000000000000000000
-    Size.Width = 360.000000000000000000
+    Size.Width = 580.000000000000000000
     Size.Height = 48.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 2
+    TabOrder = 5
     object LabelCompOp: TLabel
       Align = Left
       AutoSize = True
@@ -50,30 +56,38 @@ inherited FormMain: TFormMain
       Align = Left
       Margins.Left = 4.000000000000000000
       Position.X = 62.000000000000000000
-      Size.Width = 90.000000000000000000
+      Size.Width = 100.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 2
       object ComboBoxCompOp: TComboBox
         Align = VertCenter
-        DropDownCount = 15
+        DropDownCount = 20
         Items.Strings = (
           'SrcOver'
           'SrcCopy'
+          'SrcAtop'
           'DstAtop'
           'Xor'
           'Plus'
+          'Multiply'
           'Screen'
+          'Overlay'
+          'Darken'
           'Lighten'
+          'Color Dodge'
+          'Color Burn'
           'Hard Light'
-          'Difference')
+          'Soft Light'
+          'Difference'
+          'Exclusion')
         ItemIndex = 0
         Margins.Left = 4.000000000000000000
         Margins.Top = 4.000000000000000000
         Margins.Bottom = 4.000000000000000000
         Position.X = 4.000000000000000000
         Position.Y = 8.000000000000000000
-        Size.Width = 86.000000000000000000
+        Size.Width = 96.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
@@ -83,14 +97,14 @@ inherited FormMain: TFormMain
     object TrackBarRectCount: TTrackBar
       Align = VertCenter
       CanParentFocus = True
-      Max = 10000.000000000000000000
+      Max = 20000.000000000000000000
       Min = 1.000000000000000000
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 195.000000000000000000
+      Position.X = 205.000000000000000000
       Position.Y = 14.000000000000000000
-      Size.Width = 161.000000000000000000
+      Size.Width = 371.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 3
@@ -101,7 +115,7 @@ inherited FormMain: TFormMain
       Align = Left
       AutoSize = True
       Margins.Left = 4.000000000000000000
-      Position.X = 156.000000000000000000
+      Position.X = 166.000000000000000000
       Size.Width = 35.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
@@ -112,7 +126,7 @@ inherited FormMain: TFormMain
   end
   object ToolBar2: TToolBar
     Position.Y = 96.000000000000000000
-    Size.Width = 360.000000000000000000
+    Size.Width = 580.000000000000000000
     Size.Height = 48.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
@@ -121,7 +135,7 @@ inherited FormMain: TFormMain
       AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 36.000000000000000000
+      Size.Width = 35.500000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
@@ -131,7 +145,7 @@ inherited FormMain: TFormMain
     object Layout1: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 44.000000000000000000
+      Position.X = 43.500000000000000000
       Size.Width = 90.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
@@ -140,7 +154,8 @@ inherited FormMain: TFormMain
         Align = VertCenter
         DropDownCount = 15
         Items.Strings = (
-          'Rect'
+          'RectA'
+          'RectU'
           'RectPath'
           'RoundRect'
           'Polygon')
@@ -161,13 +176,13 @@ inherited FormMain: TFormMain
       Align = VertCenter
       CanParentFocus = True
       Max = 128.000000000000000000
-      Min = 8.000000000000000000
+      Min = 1.000000000000000000
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 166.000000000000000000
+      Position.X = 165.500000000000000000
       Position.Y = 14.000000000000000000
-      Size.Width = 190.000000000000000000
+      Size.Width = 410.500000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 3
@@ -178,7 +193,7 @@ inherited FormMain: TFormMain
       Align = Left
       AutoSize = True
       Margins.Left = 4.000000000000000000
-      Position.X = 138.000000000000000000
+      Position.X = 137.500000000000000000
       Size.Width = 24.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False

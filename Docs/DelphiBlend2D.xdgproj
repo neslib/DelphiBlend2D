@@ -1,5 +1,6 @@
 [Source.0]
 PasDir=..\
+Exclude=Blend2D.Fmx.PaintBox,Blend2D.Vcl.PaintBox
 
 [Options]
 MkDocs=mkdocs.yml

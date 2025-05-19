@@ -1304,7 +1304,6 @@ type
     ///  responsible for initializing the returned data.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    /// <seealso cref="MakeMutable"/>
     function ModifyOp(const AOp: TBLModifyOp; const ASize: NativeInt): P; inline;
 
     /// <summary>
@@ -1315,7 +1314,6 @@ type
     ///  The caller is responsible for initializing the returned data.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    /// <seealso cref="ModifyOp"/>
     function InsertOp(const AIndex, ASize: NativeInt): P; inline;
 
     /// <summary>
@@ -1323,7 +1321,6 @@ type
     /// given after the `AOp` argument.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    /// <seealso cref="ModifyOp"/>
     procedure Modify(const AOp: TBLModifyOp; const AItems: array of T);
 
     /// <summary>
@@ -7920,6 +7917,9 @@ type
     procedure SetValues(const AIndex: NativeInt; const AValues: TArray<Double>); overload; inline;
     procedure SetValues(const AIndex: NativeInt; const AValues: PDouble;
       const ACount: NativeInt); overload; inline;
+    procedure SetValues(const AValues: TBLLinearGradientValues); overload; inline;
+    procedure SetValues(const AValues: TBLRadialGradientValues); overload; inline;
+    procedure SetValues(const AValues: TBLConicGradientValues); overload; inline;
 
     /// <summary>
     ///  Reserves the capacity of gradient for at least `AMinCapacity` stops.
@@ -9385,9 +9385,9 @@ type
     ///
     ///  It doesn't matter if the content is a single font or a collection. In
     ///  any case the `FaceType` would always return the type of the font face
-    ///  that will be created by `TBLFontFace.CreateFromData`.
+    ///  that will be created by `TBLFontFace.MakeFromData`.
     /// </summary>
-    /// <seealso cref="TBLFontFace.CreateFromData"/>
+    /// <seealso cref="TBLFontFace.MakeFromData"/>
     property FaceType: TBLFontFaceType read GetFaceType;
 
     /// <summary>
@@ -20922,7 +20922,7 @@ type
   /// <summary>
   ///  Runtime cleanup flags that can be used through `TBLRuntime.Cleanup`.
   /// </summary>
-  /// <seealso cref="TBLRuntime.TBLRuntime.Cleanup"/>
+  /// <seealso cref="TBLRuntime.Cleanup"/>
   TBLRuntimeCleanupFlag = (
     /// <summary>
     ///  Cleanup object memory pool.
@@ -20942,7 +20942,7 @@ type
   /// <summary>
   ///  Runtime cleanup flags that can be used through `TBLRuntime.Cleanup`.
   /// </summary>
-  /// <seealso cref="TBLRuntime.TBLRuntime.Cleanup"/>
+  /// <seealso cref="TBLRuntime.Cleanup"/>
   TBLRuntimeCleanupFlags = set of TBLRuntimeCleanupFlag;
 
   /// <summary>
@@ -27505,6 +27505,21 @@ procedure TBLGradient.SetValue(const AIndex: NativeInt; const AValue: Double);
 begin
   Assert(NativeUInt(AIndex) <= NativeUInt(High(TBLGradientValue)));
   _BLCheck(_blGradientSetValue(@Self, AIndex, AValue));
+end;
+
+procedure TBLGradient.SetValues(const AValues: TBLLinearGradientValues);
+begin
+  _BLCheck(_blGradientSetValues(@Self, 0, @AValues, SizeOf(TBLLinearGradientValues) div SizeOf(Double)));
+end;
+
+procedure TBLGradient.SetValues(const AValues: TBLRadialGradientValues);
+begin
+  _BLCheck(_blGradientSetValues(@Self, 0, @AValues, SizeOf(TBLRadialGradientValues) div SizeOf(Double)));
+end;
+
+procedure TBLGradient.SetValues(const AValues: TBLConicGradientValues);
+begin
+  _BLCheck(_blGradientSetValues(@Self, 0, @AValues, SizeOf(TBLConicGradientValues) div SizeOf(Double)));
 end;
 
 procedure TBLGradient.SetValues(const AIndex: NativeInt; const AValues: PDouble;
