@@ -1,74 +1,167 @@
 inherited FormMain: TFormMain
   Caption = 'Text'
+  ClientHeight = 520
+  ClientWidth = 580
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
-    Size.Height = 48.000000000000000000
-    inherited LabelRenderer: TLabel
-      Size.Height = 48.000000000000000000
-    end
+    Size.Width = 580.000000000000000000
+    TabOrder = 2
     inherited LayoutRenderer: TLayout
-      Size.Height = 48.000000000000000000
+      Size.Width = 121.000000000000000000
       inherited ComboBoxRenderer: TComboBox
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 106.000000000000000000
-        Size.Height = 32.000000000000000000
+        Size.Width = 121.000000000000000000
       end
     end
     inherited CheckBoxLimitFPS: TCheckBox
-      Size.Height = 48.000000000000000000
+      Position.X = 524.000000000000000000
+      TabOrder = 3
     end
     inherited LabelFPS: TLabel
-      Size.Height = 48.000000000000000000
+      Position.X = 444.000000000000000000
+      TabOrder = 4
+    end
+    object CheckBoxDebug: TCheckBox
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 189.000000000000000000
+      Size.Width = 108.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'OpenType Dbg'
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Height = 392.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 418.000000000000000000
   end
-  object ToolBar: TToolBar
-    Position.Y = 48.000000000000000000
-    Size.Width = 360.000000000000000000
-    Size.Height = 40.000000000000000000
+  object ToolBar2: TToolBar
+    Position.Y = 68.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 2
-    object TrackBarFontSize: TTrackBar
-      Align = VertCenter
-      CanParentFocus = True
-      Max = 200.000000000000000000
-      Min = 5.000000000000000000
-      Orientation = Horizontal
-      Margins.Left = 4.000000000000000000
-      Margins.Right = 4.000000000000000000
-      Position.X = 165.000000000000000000
-      Position.Y = 10.000000000000000000
-      Size.Width = 191.000000000000000000
-      Size.Height = 19.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 1
-      Value = 20.000000000000000000
-      OnChange = TrackBarFontSizeChange
-    end
+    TabOrder = 4
     object LayoutText: TLayout
-      Align = Left
-      Size.Width = 161.000000000000000000
-      Size.Height = 40.000000000000000000
+      Align = Client
+      Margins.Left = 4.000000000000000000
+      Size.Width = 516.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 2
       object EditText: TEdit
         Touch.InteractiveGestures = [LongTap, DoubleTap]
         Align = VertCenter
         TabOrder = 0
-        Text = 'Sample Text'
-        Position.X = 4.000000000000000000
-        Position.Y = 9.000000000000000000
-        Margins.Left = 4.000000000000000000
-        Size.Width = 157.000000000000000000
-        Size.Height = 22.000000000000000000
+        Text = 'Blend2D & OpenType "fi"'
+        Position.Y = 2.000000000000000000
+        Size.Width = 452.000000000000000000
+        Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
       end
+      object LabelMS: TLabel
+        Align = Right
+        Margins.Right = 4.000000000000000000
+        Position.X = 452.000000000000000000
+        Size.Width = 60.000000000000000000
+        Size.Height = 34.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.HorzAlign = Trailing
+        Text = '0.000 ms'
+        TabOrder = 4
+      end
+    end
+    object LabelText: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Text:'
+      TabOrder = 1
+    end
+  end
+  object ToolBar1: TToolBar
+    Position.Y = 34.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object LabelStyle: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Style:'
+      TabOrder = 1
+    end
+    object Layout1: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 64.000000000000000000
+      Size.Width = 121.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object ComboBoxStyle: TComboBox
+        Align = VertCenter
+        DropDownCount = 10
+        Items.Strings = (
+          'Solid Color'
+          'Linear Gradient'
+          'Radial Gradient'
+          'Conic Gradient')
+        ItemIndex = 0
+        Position.Y = 2.000000000000000000
+        Size.Width = 121.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+    end
+    object LabelFontSizeHeader: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 189.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Size:'
+      TabOrder = 2
+    end
+    object TrackBarFontSize: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 400.000000000000000000
+      Min = 5.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 225.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 311.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 5
+      Value = 40.000000000000000000
+      OnChange = TrackBarFontSizeChange
+    end
+    object LabelFontSize: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 540.000000000000000000
+      Size.Width = 36.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '40'
+      TabOrder = 0
     end
   end
 end

@@ -5,61 +5,42 @@ inherited FormMain: TFormMain
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
     Size.Width = 580.000000000000000000
-    Size.Height = 48.000000000000000000
-    inherited LabelRenderer: TLabel
-      Size.Height = 48.000000000000000000
-    end
-    inherited LayoutRenderer: TLayout
-      Size.Height = 48.000000000000000000
-      inherited ComboBoxRenderer: TComboBox
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 106.000000000000000000
-        Size.Height = 32.000000000000000000
-      end
-    end
     inherited CheckBoxLimitFPS: TCheckBox
-      Position.X = 508.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 524.000000000000000000
     end
     inherited LabelFPS: TLabel
-      Position.X = 428.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 444.000000000000000000
     end
   end
   inherited PaintBox: TPaintBox
     Size.Width = 580.000000000000000000
-    Size.Height = 376.000000000000000000
+    Size.Height = 418.000000000000000000
   end
   object ToolBar1: TToolBar
-    Position.Y = 48.000000000000000000
+    Position.Y = 34.000000000000000000
     Size.Width = 580.000000000000000000
-    Size.Height = 48.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 5
+    TabOrder = 6
     object LabelCompOp: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 54.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Comp Op:'
-      TabOrder = 1
+      TabOrder = 2
     end
     object LayoutCompOp: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 62.000000000000000000
-      Size.Width = 100.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 64.000000000000000000
+      Size.Width = 110.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
+      TabOrder = 3
       object ComboBoxCompOp: TComboBox
         Align = VertCenter
         DropDownCount = 20
@@ -82,13 +63,9 @@ inherited FormMain: TFormMain
           'Difference'
           'Exclusion')
         ItemIndex = 0
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 96.000000000000000000
-        Size.Height = 32.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 110.000000000000000000
+        Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
         OnChange = ComboBoxCompOpChange
@@ -102,54 +79,64 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 205.000000000000000000
-      Position.Y = 14.000000000000000000
-      Size.Width = 371.000000000000000000
+      Position.X = 222.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 314.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 3
+      TabOrder = 4
       Value = 200.000000000000000000
       OnChange = TrackBarRectCountChange
     end
-    object LabelCount: TLabel
+    object LabelCountHeader: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
-      Position.X = 166.000000000000000000
-      Size.Width = 35.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 178.000000000000000000
+      Size.Width = 40.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Count:'
+      TabOrder = 1
+    end
+    object LabelCount: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 540.000000000000000000
+      Size.Width = 36.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '200'
       TabOrder = 0
     end
   end
   object ToolBar2: TToolBar
-    Position.Y = 96.000000000000000000
+    Position.Y = 68.000000000000000000
     Size.Width = 580.000000000000000000
-    Size.Height = 48.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
     object LabelShape: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 35.500000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Shape:'
-      TabOrder = 1
+      TabOrder = 2
     end
     object Layout1: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 43.500000000000000000
-      Size.Width = 90.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 64.000000000000000000
+      Size.Width = 110.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
+      TabOrder = 3
       object ComboBoxShape: TComboBox
         Align = VertCenter
         DropDownCount = 15
@@ -160,13 +147,9 @@ inherited FormMain: TFormMain
           'RoundRect'
           'Polygon')
         ItemIndex = 0
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 86.000000000000000000
-        Size.Height = 32.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 110.000000000000000000
+        Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
         OnChange = ComboBoxShapeChange
@@ -180,25 +163,36 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 165.500000000000000000
-      Position.Y = 14.000000000000000000
-      Size.Width = 410.500000000000000000
+      Position.X = 222.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 314.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 3
+      TabOrder = 4
       Value = 64.000000000000000000
       OnChange = TrackBarSizeChange
     end
-    object LabelSize: TLabel
+    object LabelSizeHeader: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
-      Position.X = 137.500000000000000000
-      Size.Width = 24.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 178.000000000000000000
+      Size.Width = 40.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Size:'
+      TabOrder = 1
+    end
+    object LabelSize: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 540.000000000000000000
+      Size.Width = 36.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '64'
       TabOrder = 0
     end
   end

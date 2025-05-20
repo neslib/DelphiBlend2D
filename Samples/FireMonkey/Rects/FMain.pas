@@ -36,12 +36,14 @@ type
     LayoutCompOp: TLayout;
     ComboBoxCompOp: TComboBox;
     TrackBarRectCount: TTrackBar;
-    LabelCount: TLabel;
+    LabelCountHeader: TLabel;
     ToolBar2: TToolBar;
     LabelShape: TLabel;
     Layout1: TLayout;
     ComboBoxShape: TComboBox;
     TrackBarSize: TTrackBar;
+    LabelSizeHeader: TLabel;
+    LabelCount: TLabel;
     LabelSize: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ComboBoxCompOpChange(Sender: TObject);
@@ -423,13 +425,17 @@ end;
 procedure TFormMain.TrackBarRectCountChange(Sender: TObject);
 begin
   inherited;
-  SetRectCount(Trunc(TrackBarRectCount.Value));
+  var Count := Trunc(TrackBarRectCount.Value);
+  LabelCount.Text := Count.ToString;
+  SetRectCount(Count);
 end;
 
 procedure TFormMain.TrackBarSizeChange(Sender: TObject);
 begin
   inherited;
-  FRectSize := TrackBarSize.Value;
+  var Size := Trunc(TrackBarSize.Value);
+  LabelSize.Text := Size.ToString;
+  FRectSize := Size;
 end;
 
 end.

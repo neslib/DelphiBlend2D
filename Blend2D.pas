@@ -962,6 +962,12 @@ type
   /// </summary>
   TBLDestroyExternalDataFunc = procedure(AImpl, AExternalData, AUserData: Pointer); cdecl;
 
+type
+  /// <summary>
+  ///  A sink that can be used to debug various parts of Blend2D.
+  /// </summary>
+  TBLDebugMessageSinkFunc = procedure (const AMessage: PUTF8Char;
+    ASize: Size_T; AUserData: Pointer); cdecl;
 {$ENDREGION 'Objects'}
 
 {$REGION 'Containers'}
@@ -1075,16 +1081,17 @@ type
   ///  Generic array container.
   /// </summary>
   /// <remarks>
-  ///  'T' must be of one of the following types:
-  ///    * A signed or unsigned 8-, 16-, 32- or 64-bit integer.
-  ///    * Enumerated types.
-  ///    * A 32- or 64-bit floating-point value (Single or Double).
-  ///    * An unmanaged record that does not contain any [weak] references.
+  ///  `T` must be of one of the following types:
+  ///
+  ///    - A signed or unsigned 8-, 16-, 32- or 64-bit integer.
+  ///    - Enumerated types.
+  ///    - A 32- or 64-bit floating-point value (Single or Double).
+  ///    - An unmanaged record that does not contain any [weak] references.
   ///      So the record cannot contain reference-counted values like Strings,
   ///      Interfaces or dynamic arrays. Also, only small records of certain
-  ///      sizes <= 32 bytes are supported.
+  ///      sizes (32 bytes or less) bytes are supported.
   ///
-  ///  These conditions are checked with an assertion/
+  ///  These conditions are checked with an assertion.
   /// </remarks>
   TBLArray<T> = record
   public type
@@ -1277,16 +1284,16 @@ type
     ///  to the beginning of mutable data in `dataOut`.
     ///
     ///  ```Delphi
-    ///  var A: TBLArray<Byte>;
+    ///  var A: TBLArray&lt;Byte>;
     ///  A.Append([0, 1, 2, 3, 4, 5, 6, 7]);
     ///
     ///  var Data := A.MakeMutable;
     ///
-    ///  // `Data` is a mutable pointer to array content of 8 items.
+    ///  // Data is a mutable pointer to array content of 8 items.
     ///  Data[0] = 100;
     ///
-    ///  // Calling array member functions could invalidate `Data`.
-    ///  A.Append(9); // You shouldn't use `Data` afterwards.
+    ///  // Calling array member functions could invalidate Data.
+    ///  A.Append(9); // You shouldn't use Data afterwards.
     ///  ```
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
@@ -4392,7 +4399,7 @@ type
   ///
   ///  Example of using `TBLApproximationOptions`:
   ///
-  ///  ```
+  ///  ```Delphi
   ///  // Initialize with defaults first.
   ///  var Approx := TBLApproximationOptions.Default;
   ///
@@ -6027,7 +6034,9 @@ type
     FSizes: TBLFourBytes;
     FShifts: TBLFourBytes;
     function GetShift(const AIndex: Integer): Byte; inline;
+    procedure SetShift(const AIndex: Integer; const AValue: Byte); inline;
     function GetSize(const AIndex: Integer): Byte; inline;
+    procedure SetSize(const AIndex: Integer; const AValue: Byte); inline;
     function GetPalette: PBLRgba32; inline;
   {$ENDREGION 'Internal Declarations'}
   public
@@ -6067,18 +6076,18 @@ type
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure Sanitize; inline;
 
-    property Depth: Integer read FDepth;
-    property Flags: TBLFormatFlags read FFlags;
-    property Sizes[const AIndex: Integer]: Byte read GetSize;
-    property Shifts[const AIndex: Integer]: Byte read GetShift;
-    property RSize: Byte read FSizes[0];
-    property GSize: Byte read FSizes[1];
-    property BSize: Byte read FSizes[2];
-    property ASize: Byte read FSizes[3];
-    property RShift: Byte read FShifts[0];
-    property GShift: Byte read FShifts[1];
-    property BShift: Byte read FShifts[2];
-    property AShift: Byte read FShifts[3];
+    property Depth: Integer read FDepth write FDepth;
+    property Flags: TBLFormatFlags read FFlags write FFlags;
+    property Sizes[const AIndex: Integer]: Byte read GetSize write SetSize;
+    property Shifts[const AIndex: Integer]: Byte read GetShift write SetShift;
+    property RSize: Byte read FSizes[0] write FSizes[0];
+    property GSize: Byte read FSizes[1] write FSizes[1];
+    property BSize: Byte read FSizes[2] write FSizes[2];
+    property ASize: Byte read FSizes[3] write FSizes[3];
+    property RShift: Byte read FShifts[0] write FShifts[0];
+    property GShift: Byte read FShifts[1] write FShifts[1];
+    property BShift: Byte read FShifts[2] write FShifts[2];
+    property AShift: Byte read FShifts[3] write FShifts[3];
     property Palette: PBLRgba32 read GetPalette;
   end;
   PBLFormatInfo = ^TBLFormatInfo;
@@ -6241,6 +6250,23 @@ type
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure Make(const ADstInfo, ASrcInfo: TBLFormatInfo;
       const ACreateFlags: TBLPixelConverterCreateFlags = []); inline;
+
+    /// <summary>
+    ///  Creates a pixel converter appropriate for the current platform. This is
+    ///  useful for platforms where the display format does not match the
+    ///  internal Blend2D format. For example, on macOS, iOS and Android, the
+    ///  red and blue color channels need to be swapped. On Windows, Blend2D's
+    ///  internal format matches the display format and no conversion is needed.
+    ///
+    ///  On Windows, it returns a converter that doesn't convert, but just
+    ///  copies the data. However, it is more efficient to not use a pixel
+    ///  converter at all on Windows.
+    ///
+    ///  On other platforms, it creates a converter that swaps Red and Blue in
+    ///  the given AFormat.
+    /// </summary>
+    /// <exception name="EBlend2DError">Raised on failure.</exception>
+    procedure MakePlatformConverter(const AFormat: TBLFormat);
 
     /// <summary>
     ///  Converts a single span of pixels of `AWidth`.
@@ -8766,6 +8792,10 @@ type
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure SetGlyphsFromRecord(const AGlyphData: Pointer; const ASize,
       AGlyphIdSize, AGlyphAdvance: NativeInt); inline;
+
+    procedure SetDebugSink(const ASink: TBLDebugMessageSinkFunc;
+      const AUserData: Pointer = nil); inline;
+    procedure ResetDebugSink; inline;
 
     property IsEmpty: Boolean read GetIsEmpty;
     property Size: NativeInt read GetSize;
@@ -11350,6 +11380,19 @@ type
     class operator Equal(const ALeft: TBLVar; const ARight: TBLRgba): Boolean; inline; static;
     class operator Equal(const ALeft: TBLVar; const ARight: TBLRgba32): Boolean; inline; static;
     class operator Equal(const ALeft: TBLVar; const ARight: TBLRgba64): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLBitArray): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLFont): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLFontData): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLFontFace): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLFontManager): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLGradient): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLImage): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLImageCodec): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLImageDecoder): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLImageEncoder): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLPath): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLPattern): Boolean; inline; static;
+    class operator Equal(const ALeft: TBLVar; const ARight: TBLString): Boolean; inline; static;
 
     /// <summary>
     ///  Returns True if two variants are not equal (do not have the same contents).
@@ -11364,20 +11407,46 @@ type
     class operator NotEqual(const ALeft: TBLVar; const ARight: TBLRgba): Boolean; inline; static;
     class operator NotEqual(const ALeft: TBLVar; const ARight: TBLRgba32): Boolean; inline; static;
     class operator NotEqual(const ALeft: TBLVar; const ARight: TBLRgba64): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLBitArray): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLFont): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLFontData): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLFontFace): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLFontManager): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLGradient): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLImage): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLImageCodec): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLImageDecoder): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLImageEncoder): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLPath): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLPattern): Boolean; inline; static;
+    class operator NotEqual(const ALeft: TBLVar; const ARight: TBLString): Boolean; inline; static;
 
     /// <summary>
-    ///  Tests whether this and `AOther` font managers are equal.
+    ///  Tests whether this and `AOther` variants are equal.
     /// </summary>
     function Equals(const AOther: TBLVar): Boolean; overload; inline;
-    function Equals(const AValue: Boolean): Boolean; overload; inline;
-    function Equals(const AValue: Integer): Boolean; overload; inline;
-    function Equals(const AValue: Cardinal): Boolean; overload; inline;
-    function Equals(const AValue: Int64): Boolean; overload; inline;
-    function Equals(const AValue: UInt64): Boolean; overload; inline;
-    function Equals(const AValue: Double): Boolean; overload; inline;
-    function Equals(const AValue: TBLRgba): Boolean; overload; inline;
-    function Equals(const AValue: TBLRgba32): Boolean; overload; inline;
-    function Equals(const AValue: TBLRgba64): Boolean; overload; inline;
+    function Equals(const AOther: Boolean): Boolean; overload; inline;
+    function Equals(const AOther: Integer): Boolean; overload; inline;
+    function Equals(const AOther: Cardinal): Boolean; overload; inline;
+    function Equals(const AOther: Int64): Boolean; overload; inline;
+    function Equals(const AOther: UInt64): Boolean; overload; inline;
+    function Equals(const AOther: Double): Boolean; overload; inline;
+    function Equals(const AOther: TBLRgba): Boolean; overload; inline;
+    function Equals(const AOther: TBLRgba32): Boolean; overload; inline;
+    function Equals(const AOther: TBLRgba64): Boolean; overload; inline;
+    function Equals(const AOther: TBLBitArray): Boolean; overload; inline;
+    function Equals(const AOther: TBLFont): Boolean; overload; inline;
+    function Equals(const AOther: TBLFontData): Boolean; overload; inline;
+    function Equals(const AOther: TBLFontFace): Boolean; overload; inline;
+    function Equals(const AOther: TBLFontManager): Boolean; overload; inline;
+    function Equals(const AOther: TBLGradient): Boolean; overload; inline;
+    function Equals(const AOther: TBLImage): Boolean; overload; inline;
+    function Equals(const AOther: TBLImageCodec): Boolean; overload; inline;
+    function Equals(const AOther: TBLImageDecoder): Boolean; overload; inline;
+    function Equals(const AOther: TBLImageEncoder): Boolean; overload; inline;
+    function Equals(const AOther: TBLPath): Boolean; overload; inline;
+    function Equals(const AOther: TBLPattern): Boolean; overload; inline;
+    function Equals(const AOther: TBLString): Boolean; overload; inline;
 
     function StrictEquals(const AOther: TBLVar): Boolean; inline;
 
@@ -11390,6 +11459,19 @@ type
     class operator Implicit(const AValue: TBLRgba): TBLVar; inline; static;
     class operator Implicit(const AValue: TBLRgba32): TBLVar; inline; static;
     class operator Implicit(const AValue: TBLRgba64): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLBitArray): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLFont): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLFontData): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLFontFace): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLFontManager): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLGradient): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLImage): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLImageCodec): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLImageDecoder): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLImageEncoder): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLPath): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLPattern): TBLVar; inline; static;
+    class operator Implicit(const AValue: TBLString): TBLVar; inline; static;
 
     /// <summary>
     ///  Converts this value to `Boolean`.
@@ -27900,6 +27982,17 @@ begin
   _BLCheck(_blGlyphBufferReset(@Self));
 end;
 
+procedure TBLGlyphBuffer.ResetDebugSink;
+begin
+  _BLCheck(_blGlyphBufferResetDebugSink(@Self));
+end;
+
+procedure TBLGlyphBuffer.SetDebugSink(const ASink: TBLDebugMessageSinkFunc;
+  const AUserData: Pointer);
+begin
+  _BLCheck(_blGlyphBufferSetDebugSink(@Self, ASink, AUserData));
+end;
+
 procedure TBLGlyphBuffer.SetGlyphs(const AGlyphData: PUInt32;
   const ASize: NativeInt);
 begin
@@ -29467,12 +29560,24 @@ begin
   _BLCheck(_blFormatInfoSanitize(@Self));
 end;
 
+procedure TBLFormatInfo.SetShift(const AIndex: Integer; const AValue: Byte);
+begin
+  Assert(Cardinal(AIndex) < 4);
+  FShifts[AIndex] := AValue;
+end;
+
 procedure TBLFormatInfo.SetShifts(const AR, AG, AB, AA: Byte);
 begin
   FShifts[0] := AR;
   FShifts[1] := AG;
   FShifts[2] := AB;
   FShifts[3] := AA;
+end;
+
+procedure TBLFormatInfo.SetSize(const AIndex: Integer; const AValue: Byte);
+begin
+  Assert(Cardinal(AIndex) < 4);
+  FSizes[AIndex] := AValue;
 end;
 
 procedure TBLFormatInfo.SetSizes(const AR, AG, AB, AA: Byte);
@@ -29546,6 +29651,23 @@ procedure TBLPixelConverter.Make(const ADstInfo, ASrcInfo: TBLFormatInfo;
   const ACreateFlags: TBLPixelConverterCreateFlags);
 begin
   _BLCheck(_blPixelConverterCreate(@Self, @ADstInfo, @ASrcInfo, Byte(ACreateFlags)));
+end;
+
+procedure TBLPixelConverter.MakePlatformConverter(const AFormat: TBLFormat);
+begin
+  var SrcInfo, DstInfo: TBLFormatInfo;
+
+  SrcInfo.Reset;
+  SrcInfo.Query(AFormat);
+  DstInfo := SrcInfo;
+
+  {$IFNDEF MSWINDOWS}
+  DstInfo.RShift := SrcInfo.BShift;
+  DstInfo.BShift := SrcInfo.RShift;
+  {$ENDIF}
+
+  var Flags: TBLPixelConverterCreateFlags := [TBLPixelConverterCreateFlag.NoMultiStep];
+  _BLCheck(_blPixelConverterCreate(@Self, @DstInfo, @SrcInfo, Byte(Flags)));
 end;
 
 procedure TBLPixelConverter.Reset;
@@ -30314,31 +30436,6 @@ begin
   Result := ALeft.Equals(ARight);
 end;
 
-function TBLVar.Equals(const AValue: Int64): Boolean;
-begin
-  Result := _blVarEqualsInt64(@Self, AValue);
-end;
-
-function TBLVar.Equals(const AValue: Cardinal): Boolean;
-begin
-  Result := _blVarEqualsUInt64(@Self, AValue);
-end;
-
-function TBLVar.Equals(const AValue: Integer): Boolean;
-begin
-  Result := _blVarEqualsInt64(@Self, AValue);
-end;
-
-function TBLVar.Equals(const AValue: Boolean): Boolean;
-begin
-  Result := _blVarEqualsBool(@Self, AValue);
-end;
-
-function TBLVar.Equals(const AValue: UInt64): Boolean;
-begin
-  Result := _blVarEqualsUInt64(@Self, AValue);
-end;
-
 class operator TBLVar.Equal(const ALeft: TBLVar; const ARight: Int64): Boolean;
 begin
   Result := ALeft.Equals(ARight);
@@ -30390,27 +30487,195 @@ begin
   Result := ALeft.Equals(ARight);
 end;
 
-function TBLVar.Equals(const AValue: TBLRgba64): Boolean;
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLFontFace): Boolean;
 begin
-  Result := _blVarEqualsRgba64(@Self, AValue.Value);
+  Result := ALeft.Equals(ARight);
 end;
 
-function TBLVar.Equals(const AValue: TBLRgba32): Boolean;
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLFontManager): Boolean;
 begin
-  Result := _blVarEqualsRgba32(@Self, AValue.Value);
+  Result := ALeft.Equals(ARight);
 end;
 
-function TBLVar.Equals(const AValue: TBLRgba): Boolean;
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLGradient): Boolean;
 begin
-  Result := _blVarEqualsRgba(@Self, @AValue);
+  Result := ALeft.Equals(ARight);
 end;
 
-function TBLVar.Equals(const AValue: Double): Boolean;
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLBitArray): Boolean;
 begin
-  Result := _blVarEqualsDouble(@Self, AValue);
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLFont): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLFontData): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLImage): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLPath): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLPattern): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLString): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLImageCodec): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLImageDecoder): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.Equal(const ALeft: TBLVar;
+  const ARight: TBLImageEncoder): Boolean;
+begin
+  Result := ALeft.Equals(ARight);
+end;
+
+function TBLVar.Equals(const AOther: Int64): Boolean;
+begin
+  Result := _blVarEqualsInt64(@Self, AOther);
+end;
+
+function TBLVar.Equals(const AOther: Cardinal): Boolean;
+begin
+  Result := _blVarEqualsUInt64(@Self, AOther);
+end;
+
+function TBLVar.Equals(const AOther: Integer): Boolean;
+begin
+  Result := _blVarEqualsInt64(@Self, AOther);
+end;
+
+function TBLVar.Equals(const AOther: Boolean): Boolean;
+begin
+  Result := _blVarEqualsBool(@Self, AOther);
+end;
+
+function TBLVar.Equals(const AOther: UInt64): Boolean;
+begin
+  Result := _blVarEqualsUInt64(@Self, AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLRgba64): Boolean;
+begin
+  Result := _blVarEqualsRgba64(@Self, AOther.Value);
+end;
+
+function TBLVar.Equals(const AOther: TBLRgba32): Boolean;
+begin
+  Result := _blVarEqualsRgba32(@Self, AOther.Value);
+end;
+
+function TBLVar.Equals(const AOther: TBLRgba): Boolean;
+begin
+  Result := _blVarEqualsRgba(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: Double): Boolean;
+begin
+  Result := _blVarEqualsDouble(@Self, AOther);
 end;
 
 function TBLVar.Equals(const AOther: TBLVar): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLFontFace): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLFontManager): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLGradient): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLBitArray): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLFont): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLFontData): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLImage): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLPath): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLPattern): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLString): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLImageCodec): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLImageDecoder): Boolean;
+begin
+  Result := _blVarEquals(@Self, @AOther);
+end;
+
+function TBLVar.Equals(const AOther: TBLImageEncoder): Boolean;
 begin
   Result := _blVarEquals(@Self, @AOther);
 end;
@@ -30598,6 +30863,71 @@ begin
   _BLCheck(_blVarAssignDouble(@Result, AValue));
 end;
 
+class operator TBLVar.Implicit(const AValue: TBLFontFace): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLFontManager): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLGradient): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLBitArray): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLFont): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLFontData): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLImage): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLPath): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLPattern): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLString): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLImageCodec): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLImageDecoder): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
+class operator TBLVar.Implicit(const AValue: TBLImageEncoder): TBLVar;
+begin
+  _BLCheck(_blVarAssignWeak(@Result, @AValue));
+end;
+
 class operator TBLVar.Initialize(out ADest: TBLVar);
 begin
   _BLCheck(_blVarInitNull(@ADest));
@@ -30658,6 +30988,84 @@ begin
 end;
 
 class operator TBLVar.NotEqual(const ALeft, ARight: TBLVar): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLFontFace): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLFontManager): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLGradient): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLBitArray): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLFont): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLFontData): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLImage): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLPath): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLPattern): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLString): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLImageCodec): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLImageDecoder): Boolean;
+begin
+  Result := not ALeft.Equals(ARight);
+end;
+
+class operator TBLVar.NotEqual(const ALeft: TBLVar;
+  const ARight: TBLImageEncoder): Boolean;
 begin
   Result := not ALeft.Equals(ARight);
 end;

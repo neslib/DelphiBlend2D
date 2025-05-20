@@ -191,10 +191,10 @@ begin
   var H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
   var Count := W * H;
 
-  var IX: Double := 0;
-  var IY: Double := 0;
-  var Start: Double := 0;
-  var Now: Double := FTime;
+  var IX: Single := 0;
+  var IY: Single := 0;
+  var Start: Single := 0;
+  var Now: Single := FTime;
 
   var C: TAlphaColorRec;
   C.G := 0;
@@ -202,17 +202,17 @@ begin
 
   for var I := 0 to Count - 1 do
   begin
-    var X: Double := IX * FULL_SIZE;
-    var Y: Double := IY * FULL_SIZE;
+    var X: Single := IX * FULL_SIZE;
+    var Y: Single := IY * FULL_SIZE;
 
-    var Dur: Double := (Now - Start) + (I * 50);
-    var Pos: Double := FMod(Dur, 3000) / 3000;
-    var BouncePos: Double := Abs((Pos * 2) - 1);
-    var R: Double := ((BouncePos * 50) + 50) / 100;
-    var B: Double := ((1 - BouncePos) * 50) / 100;
+    var Dur: Single := (Now - Start) + (I * 50);
+    var Pos: Single := FMod(Dur, 3000) / 3000;
+    var BouncePos: Single := Abs((Pos * 2) - 1);
+    var R: Single := ((BouncePos * 50) + 50) / 100;
+    var B: Single := ((1 - BouncePos) * 50) / 100;
 
-    var Rotation: Double := Pos * (Pi * 2);
-    var Radius: Double := BouncePos * 25;
+    var Rotation: Single := Pos * (Pi * 2);
+    var Radius: Single := BouncePos * 25;
 
     var OrigMatrix := ACanvas.Matrix;
     var Matrix := TMatrix.CreateTranslation(X + HALF_SIZE, Y + HALF_SIZE) * OrigMatrix;
@@ -269,24 +269,24 @@ begin
   var H := Trunc(PaintBox.Height + FULL_SIZE - 1) div FULL_SIZE;
   var Count := W * H;
 
-  var IX: Double := 0;
-  var IY: Double := 0;
-  var Start: Double := 0;
-  var Now: Double := FTime;
+  var IX: Single := 0;
+  var IY: Single := 0;
+  var Start: Single := 0;
+  var Now: Single := FTime;
 
   for var I := 0 to Count - 1 do
   begin
-    var X: Double := IX * FULL_SIZE;
-    var Y: Double := IY * FULL_SIZE;
+    var X: Single := IX * FULL_SIZE;
+    var Y: Single := IY * FULL_SIZE;
 
-    var Dur: Double := (Now - Start) + (I * 50);
-    var Pos: Double := FMod(Dur, 3000) / 3000;
-    var BouncePos: Double := Abs((Pos * 2) - 1);
-    var R: Double := ((BouncePos * 50) + 50) / 100;
-    var B: Double := ((1 - BouncePos) * 50) / 100;
+    var Dur: Single := (Now - Start) + (I * 50);
+    var Pos: Single := FMod(Dur, 3000) / 3000;
+    var BouncePos: Single := Abs((Pos * 2) - 1);
+    var R: Single := ((BouncePos * 50) + 50) / 100;
+    var B: Single := ((1 - BouncePos) * 50) / 100;
 
-    var Rotation: Double := Pos * (Pi * 2);
-    var Radius: Double := BouncePos * 25;
+    var Rotation: Single := Pos * (Pi * 2);
+    var Radius: Single := BouncePos * 25;
 
     ACanvas.Save;
     ACanvas.Rotate(RadToDeg(Rotation), X + HALF_SIZE, Y + HALF_SIZE);

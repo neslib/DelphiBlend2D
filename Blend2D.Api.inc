@@ -6,9 +6,8 @@ const
   _LIB_BLEND2D = 'blend2d_win64.dll';
   _PU = '';
   {$ELSEIF Defined(MACOS64) and not Defined(IOS)}
-    {$MESSAGE Error 'Blend2D for macOS not available yet'}
-//  LIB_BLEND2D = 'libblend2d_mac64.a';
-//  _PU = '';
+  _LIB_BLEND2D = 'libblend2d_macos.a';
+  _PU = '';
   {$ELSEIF Defined(IOS64)}
     {$MESSAGE Error 'Blend2D for iOS not available yet'}
   {$ELSEIF Defined(ANDROID)}
@@ -1342,8 +1341,8 @@ function _blGlyphBufferSetGlyphs(self: Pointer; const glyphData: PUInt32; size: 
 function _blGlyphBufferSetGlyphsFromStruct(self: Pointer; const glyphData: Pointer; size: Size_T; glyphIdSize: Size_T; glyphIdAdvance: IntPtr): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blGlyphBufferSetGlyphsFromStruct';
 
-//function _blGlyphBufferSetDebugSink(self: Pointer; sink: _BLDebugMessageSinkFunc; userData: Pointer): Integer; cdecl;
-//  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetDebugSink';
+function _blGlyphBufferSetDebugSink(self: Pointer; sink: TBLDebugMessageSinkFunc; userData: Pointer): Integer; cdecl;
+  external _LIB_BLEND2D name _PU + 'blGlyphBufferSetDebugSink';
 
 function _blGlyphBufferResetDebugSink(self: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name _PU + 'blGlyphBufferResetDebugSink';

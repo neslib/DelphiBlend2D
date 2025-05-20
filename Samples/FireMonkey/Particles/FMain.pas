@@ -22,7 +22,7 @@ uses
   FMX.ListBox,
   FMX.Layouts,
   {$IFDEF USE_SKIA}
-  Neslib.Skia,
+  System.Skia,
   {$ENDIF}
   Blend2D,
   FBase;
@@ -41,28 +41,33 @@ type
   TFormMain = class(TFormBase)
     ToolBar: TToolBar;
     TrackBarCount: TTrackBar;
-    CheckBoxColors: TCheckBox;
-    LabelCount: TLabel;
+    LabelCountHeader: TLabel;
     ToolBar1: TToolBar;
     TrackBarRotation: TTrackBar;
+    LabelRotationHeader: TLabel;
+    CheckBoxColors: TCheckBox;
+    LabelCount: TLabel;
     LabelRotation: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure TrackBarCountChange(Sender: TObject);
+    procedure TrackBarRotationChange(Sender: TObject);
   private const
     MAX_AGE        = 650;
     RADIUS_SCALE   = 6;
-    CATEGORY_COUNT = 3;
+    CATEGORY_COUNT = 8;
     COLORS: array [0..CATEGORY_COUNT - 1] of TAlphaColor = (
-      $FFFF7F00, $FFFF3F9F, $FF7F4FFF);
+      $FF4F00FF, $FFFF004F, $FFFF7F00, $FFFF3F9F,
+      $FF7F4FFF, $FFFF9F3F, $FFFFFF00, $FFAF3F00);
   private
     FParticles: TList<TParticle>;
     FRandom: TBLRandom;
   protected
     procedure BeforeRender; override;
     procedure RenderFireMonkey(const ACanvas: TCanvas); override;
-    procedure RenderBlend2D(const AContext: IBLContext); override;
+    procedure RenderBlend2D(const AContext: TBLContext); override;
     {$IFDEF USE_SKIA}
-    procedure RenderSkia(const ACanvas: ISKCanvas); override;
+    procedure RenderSkia(const ACanvas: ISkCanvas); override;
     {$ENDIF}
   public
   end;
@@ -80,19 +85,16 @@ uses
 { TFormMain }
 
 procedure TFormMain.BeforeRender;
-var
-  I, J, N, Count, MaxParticles: Integer;
-  Angle, Speed, ASin, ACos, Rot: Double;
-  P: TParticle;
-  M: TBLMatrix2D;
 begin
   inherited;
-  Count := FParticles.Count;
-  Rot := TrackBarRotation.Value;
-  M.ResetToRotation(Rot);
+  var Count := FParticles.Count;
+  var Rot: Double := TrackBarRotation.Value * 0.02 / 1000;
+  var M := TBLMatrix2D.MakeRotation(Rot);
 
-  J := 0;
-  for I := 0 to Count - 1 do
+  var P: TParticle;
+  var J := 0;
+
+  for var I := 0 to Count - 1 do
   begin
     P := FParticles[I];
     P.P := P.P + P.V;
@@ -106,16 +108,17 @@ begin
   end;
   FParticles.Count := J;
 
-  MaxParticles := Trunc(TrackBarCount.Value);
-  N := Trunc((FRandom.NextDouble * MaxParticles / 60) + 0.95);
+  var MaxParticles := Trunc(TrackBarCount.Value);
+  var N := Trunc((FRandom.NextDouble * MaxParticles / 60) + 0.95);
 
-  for I := 0 to N - 1 do
+  for var I := 0 to N - 1 do
   begin
     if (FParticles.Count >= MaxParticles) then
       Break;
 
-    Angle := FRandom.NextDouble * Pi * 2;
-    Speed := Max(FRandom.NextDouble * 2, 0.2);
+    var Angle: Double := FRandom.NextDouble * Pi * 2;
+    var Speed: Double := Max(FRandom.NextDouble * 2, 0.05);
+    var ASin, ACos: Double;
     SinCos(Angle, ASin, ACos);
 
     P.P.Reset;
@@ -139,25 +142,18 @@ begin
   FParticles.Free;
 end;
 
-procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
-var
-  CX, CY: Double;
-  Paths: array [0..CATEGORY_COUNT - 1] of IBLPath;
-  Path: IBLPath;
-  P: TParticle;
-  I: Integer;
+procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  AContext.FillColor := TAlphaColors.Black;
-  AContext.FillAll;
+  AContext.FillAll(TAlphaColors.Black);
 
-  CX := PaintBox.Width / 2;
-  CY := PaintBox.Height / 2;
+  var CX: Double := PaintBox.Width / 2;
+  var CY: Double := PaintBox.Height / 2;
+  var I: Integer;
+  var P: TParticle;
 
   if (CheckBoxColors.IsChecked) then
   begin
-    for I := 0 to CATEGORY_COUNT - 1 do
-      Paths[I] := TBLPath.Create;
-
+    var Paths: array [0..CATEGORY_COUNT - 1] of TBLPath;
     for I := 0 to FParticles.Count - 1 do
     begin
       P := FParticles[I];
@@ -168,14 +164,11 @@ begin
     AContext.CompOp := TBLCompOp.Plus;
 
     for I := 0 to CATEGORY_COUNT - 1 do
-    begin
-      AContext.FillColor := COLORS[I];
-      AContext.FillPath(Paths[I]);
-    end;
+      AContext.FillPath(Paths[I], COLORS[I]);
   end
   else
   begin
-    Path := TBLPath.Create;
+    var Path: TBLPath;
 
     for I := 0 to FParticles.Count - 1 do
     begin
@@ -185,23 +178,21 @@ begin
     end;
 
     AContext.CompOp := TBLCompOp.SrcOver;
-    AContext.FillColor := TAlphaColors.White;
-    AContext.FillPath(Path);
+    AContext.FillPath(Path, TAlphaColors.White);
   end;
 end;
 
 procedure TFormMain.RenderFireMonkey(const ACanvas: TCanvas);
 { When using FireMonkey, it is (much) faster to draw ellipsis directly instead
   of using a path. }
-var
-  CX, CY, X, Y, R: Single;
-  P: TParticle;
-  I: Integer;
 begin
   ACanvas.Clear(TAlphaColors.Black);
 
-  CX := PaintBox.Width / 2;
-  CY := PaintBox.Height / 2;
+  var CX: Single := PaintBox.Width / 2;
+  var CY: Single := PaintBox.Height / 2;
+  var X, Y, R: Single;
+  var I: Integer;
+  var P: TParticle;
 
   if (CheckBoxColors.IsChecked) then
   begin
@@ -231,54 +222,65 @@ begin
   end;
 end;
 
+procedure TFormMain.TrackBarCountChange(Sender: TObject);
+begin
+  inherited;
+  var Count := Trunc(TrackBarCount.Value);
+  LabelCount.Text := Count.ToString;
+end;
+
+procedure TFormMain.TrackBarRotationChange(Sender: TObject);
+begin
+  inherited;
+  var Rotation := Trunc(TrackBarRotation.Value);
+  LabelRotation.Text := Rotation.ToString;
+end;
+
 {$IFDEF USE_SKIA}
-procedure TFormMain.RenderSkia(const ACanvas: ISKCanvas);
-var
-  CX, CY: Single;
-  Paths: array [0..CATEGORY_COUNT - 1] of ISKPath;
-  Path: ISKPath;
-  P: TParticle;
-  I: Integer;
+procedure TFormMain.RenderSkia(const ACanvas: ISkCanvas);
 begin
   ACanvas.Clear(TAlphaColors.Black);
 
-  CX := PaintBox.Width / 2;
-  CY := PaintBox.Height / 2;
+  var CX: Single := PaintBox.Width / 2;
+  var CY: Single := PaintBox.Height / 2;
+  var I: Integer;
+  var P: TParticle;
 
   if (CheckBoxColors.IsChecked) then
   begin
+    var PathBuilders: array [0..CATEGORY_COUNT - 1] of ISkPathBuilder;
     for I := 0 to CATEGORY_COUNT - 1 do
-      Paths[I] := TSKPath.Create;
+      PathBuilders[I] := TSkPathBuilder.Create;
 
     for I := 0 to FParticles.Count - 1 do
     begin
       P := FParticles[I];
-      Paths[P.Category].AddCircle(CX + P.P.X, CY + P.P.Y,
+      PathBuilders[P.Category].AddCircle(CX + P.P.X, CY + P.P.Y,
         (MAX_AGE - P.Age) / MAX_AGE * RADIUS_SCALE);
     end;
 
-    FSkiaFill.BlendMode := TSKBlendMode.Plus;
+    FSkiaFill.Blender := TSkBlender.MakeMode(TSkBlendMode.Plus);
 
     for I := 0 to CATEGORY_COUNT - 1 do
     begin
       FSkiaFill.Color := COLORS[I];
-      ACanvas.DrawPath(Paths[I], FSkiaFill);
+      ACanvas.DrawPath(PathBuilders[I].Detach, FSkiaFill);
     end;
   end
   else
   begin
-    Path := TSKPath.Create;
+    var PathBuilder: ISkPathBuilder := TSkPathBuilder.Create;
 
     for I := 0 to FParticles.Count - 1 do
     begin
       P := FParticles[I];
-      Path.AddCircle(CX + P.P.X, CY + P.P.Y,
+      PathBuilder.AddCircle(CX + P.P.X, CY + P.P.Y,
         (MAX_AGE - P.Age) / MAX_AGE * RADIUS_SCALE);
     end;
 
-    FSkiaFill.BlendMode := TSKBlendMode.SrcOver;
+    FSkiaFill.Blender := nil;
     FSkiaFill.Color := TAlphaColors.White;
-    ACanvas.DrawPath(Path, FSkiaFill);
+    ACanvas.DrawPath(PathBuilder.Detach, FSkiaFill);
   end;
 end;
 {$ENDIF}

@@ -5,48 +5,35 @@ inherited FormMain: TFormMain
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
     Size.Width = 580.000000000000000000
-    Size.Height = 48.000000000000000000
-    inherited LabelRenderer: TLabel
-      Size.Height = 48.000000000000000000
-    end
     inherited LayoutRenderer: TLayout
-      Size.Height = 48.000000000000000000
+      Size.Width = 121.000000000000000000
       inherited ComboBoxRenderer: TComboBox
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 106.000000000000000000
-        Size.Height = 32.000000000000000000
+        Size.Width = 121.000000000000000000
       end
     end
     inherited CheckBoxLimitFPS: TCheckBox
-      Position.X = 508.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 524.000000000000000000
     end
     inherited LabelFPS: TLabel
-      Position.X = 428.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 444.000000000000000000
     end
   end
   inherited PaintBox: TPaintBox
     Size.Width = 580.000000000000000000
-    Size.Height = 424.000000000000000000
+    Size.Height = 452.000000000000000000
   end
   object ToolBar1: TToolBar
-    Position.Y = 48.000000000000000000
+    Position.Y = 34.000000000000000000
     Size.Width = 580.000000000000000000
-    Size.Height = 48.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 5
     object LabelStyle: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 28.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Style:'
@@ -55,9 +42,9 @@ inherited FormMain: TFormMain
     object LayoutCompOp: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 36.000000000000000000
-      Size.Width = 133.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 64.000000000000000000
+      Size.Width = 121.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       object ComboBoxStyle: TComboBox
@@ -69,13 +56,9 @@ inherited FormMain: TFormMain
           'Radial Gradient'
           'Conic Gradient')
         ItemIndex = 1
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 129.000000000000000000
-        Size.Height = 32.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 121.000000000000000000
+        Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
         OnChange = ComboBoxStyleChange

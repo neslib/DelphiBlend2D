@@ -1,2 +1,2 @@
-# DelphiBlend2D
+# DelphiBlend2D - Documentation Index
 

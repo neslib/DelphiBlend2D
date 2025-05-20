@@ -36,6 +36,7 @@ type
     PaintBox: TPaintBox;
     LabelFPS: TLabel;
     TimerRepaint: TTimer;
+    StyleBook: TStyleBook;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject; Canvas: TCanvas);
@@ -59,7 +60,7 @@ type
     FBlend2DBitmapData: TBitmapData;
     FBlend2DContext: TBLContext;
     {$IFNDEF MSWINDOWS}
-    FBlend2DConverter:TIBLPixelConverter;
+    FBlend2DConverter: TBLPixelConverter;
     {$ENDIF}
   protected
     {$IFDEF USE_SKIA}
@@ -223,7 +224,7 @@ begin
 
   {$IFNDEF MSWINDOWS}
   { We need to convert ARGB to ABGR on non-Windows platforms. }
-  FBlend2DConverter := TBLPixelConverter.CreatePlatformConverter;
+  FBlend2DConverter.MakePlatformConverter(TBLFormat.Prgb32);
   {$ENDIF}
 
   {$IFDEF USE_SKIA}
