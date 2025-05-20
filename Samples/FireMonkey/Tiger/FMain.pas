@@ -22,7 +22,7 @@ uses
   FMX.ListBox,
   FMX.Layouts,
   {$IFDEF USE_SKIA}
-  Neslib.Skia,
+  System.Skia,
   {$ENDIF}
   Blend2D,
   FBase;
@@ -30,15 +30,15 @@ uses
 type
   TTigerPath = class
   public
-    BLPath: IBLPath;
-    BLStrokedPath: IBLPath;
+    BLPath: TBLPath;
+    BLStrokedPath: TBLPath;
     BLStrokeOptions: TBLStrokeOptions;
     BLFillRule: TBLFillRule;
 
     {$IFDEF USE_SKIA}
-    SKPath: ISKPath;
-    SKStrokeCap: TSKStrokeCap;
-    SKStrokeJoin: TSKStrokeJoin;
+    SKPath: ISkPath;
+    SKStrokeCap: TSkStrokeCap;
+    SKStrokeJoin: TSkStrokeJoin;
     {$ENDIF}
 
     FillColor: TAlphaColor;
@@ -68,6 +68,7 @@ type
     LabelCaching: TLabel;
     LayoutCaching: TLayout;
     ComboBoxCaching: TComboBox;
+    LabelZoomHeader: TLabel;
     LabelZoom: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -84,9 +85,9 @@ type
   protected
     procedure BeforeRender; override;
     procedure RenderFireMonkey(const ACanvas: TCanvas); override;
-    procedure RenderBlend2D(const AContext: IBLContext); override;
+    procedure RenderBlend2D(const AContext: TBLContext); override;
     {$IFDEF USE_SKIA}
-    procedure RenderSkia(const ACanvas: ISKCanvas); override;
+    procedure RenderSkia(const ACanvas: ISkCanvas); override;
     {$ENDIF}
   public
   end;
@@ -101,6 +102,7 @@ implementation
 
 uses
   System.Math,
+  System.Math.Vectors,
   Tiger;
 
 { TFormMain }
@@ -126,52 +128,42 @@ begin
   FTiger.Free;
 end;
 
-procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
-var
-  S: Double;
-  M: TBLMatrix2D;
-  I: Integer;
-  TP: TTigerPath;
-  CacheStroke: Boolean;
+procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  AContext.FillColor := $FF00007F;
-  AContext.FillAll;
+  AContext.FillAll($FF00007F);
 
-  CacheStroke := (ComboBoxCaching.ItemIndex = 1);
+  var CacheStroke := (ComboBoxCaching.ItemIndex = 1);
 
-  S := Min(PaintBox.Width / (MAX_X - MIN_X), PaintBox.Height / (MAX_Y - MIN_Y)) * FScale;
-  M.Reset;
-  M.Rotate((FRot / 180) * Pi, MIN_X + (MAX_X / 2), MIN_Y + (MAX_Y / 2));
-  M.PostTranslate(-MAX_X / 2, -MAX_Y / 2);
+  var S: Double := Min(PaintBox.Width / (MAX_X - MIN_X), PaintBox.Height / (MAX_Y - MIN_Y)) * FScale;
+
+  var Transform: TBLMatrix2D;
+  Transform.Reset;
+  Transform.Rotate((FRot / 180) * Pi, MIN_X + (MAX_X / 2), MIN_Y + (MAX_Y / 2));
+  Transform.PostTranslate(-MAX_X / 2, -MAX_Y / 2);
 
   AContext.Save;
   AContext.Translate(PaintBox.Width / 2, PaintBox.Height / 2);
   AContext.Scale(S);
-  AContext.Transform(M);
+  AContext.ApplyTransform(Transform);
 
-  for I := 0 to FTiger.Paths.Count - 1 do
+  for var I := 0 to FTiger.Paths.Count - 1 do
   begin
-    TP := FTiger.Paths[I];
+    var TP := FTiger.Paths[I];
 
     if (TP.Fill) then
     begin
-      AContext.FillColor := TP.FillColor;
       AContext.FillRule := TP.BLFillRule;
-      AContext.FillPath(TP.BLPath);
+      AContext.FillPath(TP.BLPath, TP.FillColor);
     end;
 
     if (TP.Stroke) then
     begin
       if CacheStroke then
-      begin
-        AContext.FillColor := TP.StrokeColor;
-        AContext.FillPath(TP.BLStrokedPath);
-      end
+        AContext.FillPath(TP.BLStrokedPath, TP.StrokeColor)
       else
       begin
-        AContext.StrokeColor := TP.StrokeColor;
         AContext.StrokeOptions := TP.BLStrokeOptions;
-        AContext.StrokePath(TP.BLPath);
+        AContext.StrokePath(TP.BLPath, TP.StrokeColor);
       end;
     end;
   end;
@@ -187,28 +179,22 @@ end;
 
 {$IFDEF USE_SKIA}
 procedure TFormMain.RenderSkia(const ACanvas: ISKCanvas);
-var
-  S: Double;
-  M, Matrix: TSKMatrix;
-  I: Integer;
-  TP: TTigerPath;
 begin
   ACanvas.Clear($FF00007F);
 
-  S := Min(PaintBox.Width / (MAX_X - MIN_X), PaintBox.Height / (MAX_Y - MIN_Y)) * FScale;
-  M := TSKMatrix.MakeRotationDegrees(FRot, MIN_X + (MAX_X / 2), MIN_Y + (MAX_Y / 2));
-  TSKMatrix.PostConcat(M, TSKMatrix.MakeTranslation(-MAX_X / 2, -MAX_Y / 2));
+  var S: Single := Min(PaintBox.Width / (MAX_X - MIN_X), PaintBox.Height / (MAX_Y - MIN_Y)) * FScale;
 
-  Matrix := TSKMatrix.MakeTranslation(PaintBox.Width / 2, PaintBox.Height / 2);
-  TSKMatrix.PreConcat(Matrix, TSKMatrix.MakeScale(S, S));
-  TSKMatrix.PreConcat(Matrix, M);
+  var Transform := TMatrix.CreateRotation((FRot / 180) * Pi);
+  Transform := TMatrix.CreateTranslation(-MAX_X / 2, -MAX_Y / 2) * Transform;
 
   ACanvas.Save;
-  ACanvas.Concat(Matrix);
+  ACanvas.Translate(PaintBox.Width / 2, PaintBox.Height / 2);
+  ACanvas.Scale(S, S);
+  ACanvas.Concat(Transform);
 
-  for I := 0 to FTiger.Paths.Count - 1 do
+  for var I := 0 to FTiger.Paths.Count - 1 do
   begin
-    TP := FTiger.Paths[I];
+    var TP := FTiger.Paths[I];
 
     if (TP.Fill) then
     begin
@@ -233,6 +219,7 @@ procedure TFormMain.TrackBarScaleChange(Sender: TObject);
 begin
   inherited;
   FScale := TrackBarScale.Value;
+  LabelZoom.Text := Format('%.3f', [FScale]);
 end;
 
 { TTigerPath }
@@ -240,47 +227,38 @@ end;
 constructor TTigerPath.Create;
 begin
   inherited;
-  BLPath := TBLPath.Create;
-  BLStrokedPath := TBLPath.Create;
   BLStrokeOptions.Reset;
-
-  {$IFDEF USE_SKIA}
-  SKPath := TSKPath.Create;
-  {$ENDIF}
 end;
 
 { TTiger }
 
 constructor TTiger.Create;
-var
-  C, CEnd: PUTF8Char;
-  P: PSingle;
-  H: Single;
-  TP: TTigerPath;
-  Color: TAlphaColorRec;
-  I, Count: Integer;
 begin
   inherited;
   FPaths := TObjectList<TTigerPath>.Create;
-  C := @TTigerData.COMMANDS[0];
-  CEnd := C;
+  var C := PUTF8Char(@TTigerData.COMMANDS[0]);
+  var CEnd := C;
   Inc(CEnd, Length(TTigerData.COMMANDS));
-  P := @TTigerData.POINTS[0];
-  H := TTigerData.HEIGHT;
+  var P := PSingle(@TTigerData.POINTS[0]);
+  var H: Single := TTigerData.HEIGHT;
+  var Color: TAlphaColorRec;
   Color.A := 255;
 
   while (C < CEnd) do
   begin
-    TP := TTigerPath.Create;
+    var TP := TTigerPath.Create;
     FPaths.Add(TP);
 
+    {$IFDEF USE_SKIA}
+    var PathBuilder: ISkPathBuilder := TSkPathBuilder.Create;
+    {$ENDIF}
     { Fill params }
     case C^ of
       'F': begin
              TP.Fill := True;
              TP.BLFillRule := TBLFillRule.NonZero;
              {$IFDEF USE_SKIA}
-             TP.SKPath.FillType := TSKPathFillType.Winding;
+             PathBuilder.FillType := TSKPathFillType.Winding;
              {$ENDIF}
            end;
 
@@ -288,7 +266,7 @@ begin
              TP.Fill := True;
              TP.BLFillRule := TBLFillRule.EvenOdd;
              {$IFDEF USE_SKIA}
-             TP.SKPath.FillType := TSKPathFillType.EvenOdd;
+             PathBuilder.FillType := TSKPathFillType.EvenOdd;
              {$ENDIF}
            end;
     end;
@@ -360,29 +338,29 @@ begin
     TP.FillColor := Color.Color;
 
     { Path }
-    Count := Trunc(P^);
+    var Count := Trunc(P^);
     Inc(P);
-    for I := 0 to Count - 1 do
+    for var I := 0 to Count - 1 do
     begin
       case C^ of
         'M': begin
                TP.BLPath.MoveTo(P[0], H - P[1]);
                {$IFDEF USE_SKIA}
-               TP.SKPath.MoveTo(P[0], H - P[1]);
+               PathBuilder.MoveTo(P[0], H - P[1]);
                {$ENDIF}
                Inc(P, 2);
              end;
         'L': begin
                TP.BLPath.LineTo(P[0], H - P[1]);
                {$IFDEF USE_SKIA}
-               TP.SKPath.LineTo(P[0], H - P[1]);
+               PathBuilder.LineTo(P[0], H - P[1]);
                {$ENDIF}
                Inc(P, 2);
              end;
         'C': begin
                TP.BLPath.CubicTo(P[0], H - P[1], P[2], H - P[3], P[4], H - P[5]);
                {$IFDEF USE_SKIA}
-               TP.SKPath.CubicTo(P[0], H - P[1], P[2], H - P[3], P[4], H - P[5]);
+               PathBuilder.CubicTo(P[0], H - P[1], P[2], H - P[3], P[4], H - P[5]);
                {$ENDIF}
                Inc(P, 6);
              end;
@@ -401,6 +379,10 @@ begin
         TBLApproximationOptions.Default);
       TP.BLStrokedPath.Shrink;
     end;
+
+    {$IFDEF USE_SKIA}
+    TP.SKPath := PathBuilder.Detach;
+    {$ENDIF}
   end;
 end;
 

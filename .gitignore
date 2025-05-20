@@ -13,6 +13,7 @@ OSXARM64/
 Win32/
 Win64/
 Docs/Docs/Reference/
+C/blend2d.pas
 #ignore Delphi build files
 *.obj
 *.exe
