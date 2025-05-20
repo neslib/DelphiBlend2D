@@ -30,9 +30,9 @@ begin
   Path.CubicTo(882, 404, 144, 267, 27, 31);
 
   { Fill a path with opaque black - $AARRGGBB. }
-  Context.FillPath(Path, $FF000000);
+  Context.FillPath(Path, TAlphaColors.Black);
 
-  { Detach the rendering context from `AImg`.}
+  { Detach the rendering context from `Image`.}
   Context.Finish;
 
   { Let's use some built-in codecs provided by Blend2D. }

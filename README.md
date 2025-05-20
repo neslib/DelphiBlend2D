@@ -29,7 +29,7 @@ From an experiment that originally only targeted X86 architecture to a portable 
 
 ## Easy to Use API
 
-The primary goal of the Delphi API is to make the Blend2D library easy-to-use without the need of managing resources manually. The binding uses [Custom Managed Records](https://docwiki.embarcadero.com/RADStudio/Athens/en/Custom_Managed_Records) as lightweight "classes" that automatically manages memory and other resources, while still being very efficient and light-weight.
+The primary goal of the Delphi API is to make the Blend2D library easy-to-use without the need of managing resources manually. The binding uses [Custom Managed Records](https://docwiki.embarcadero.com/RADStudio/Athens/en/Custom_Managed_Records) as lightweight "classes" that automatically manages memory and other resources, while still being very efficient and lightweight.
 
 The DelphiBlend2D OOP framework follows the [Blend2D C++ API](https://blend2d.com/doc/index.html) as closely as possible. It uses interfaces for automatic resource management. The snippet below is taken from the `blGettingStarted05` sample project. 
 

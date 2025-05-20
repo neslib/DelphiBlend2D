@@ -5,6 +5,7 @@ program blGettingStarted04;
 {$R *.res}
 
 uses
+  System.Math,
   System.SysUtils,
   Blend2D in '..\..\..\Blend2D.pas';
 
@@ -21,12 +22,12 @@ begin
   Texture.ReadFromFile('Resources/Leaves.jpeg');
 
   { Rotate by 45 degrees about a point at [240, 240]. }
-  Context.Rotate(0.785398, 240, 240);
+  Context.Rotate(DegToRad(45), 240, 240);
 
   { Create a pattern and use it to fill a rounded-rect. }
   var Pattern := TBLPattern.Create(Texture);
 
-  Context.FillRoundRect(40, 40, 400, 400, 45.5, Pattern);
+  Context.FillRoundRect(50, 50, 380, 380, 80.5, Pattern);
   Context.Finish;
 
   Image.WriteToFile('blGettingStarted04.png');
