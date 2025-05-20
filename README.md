@@ -94,9 +94,15 @@ Blend2D supports all Porter & Duff compositing operators and a wide range of ble
 
 Blend2D quickstart and interactive applications are available in the Samples subdirectory. These samples provide either interactive demonstrations of some Blend2D features like stroking or animated demonstrations that can use the Blend2D, FireMonkey or Skia rendering engine for both performance and quality comparison.
 
+| ![Rectangles](Docs\example-rects.jpg) | ![Bounces](Docs\example-bounces.jpg) |
+| -------------------------------- | -------------------------------- |
+| ![Circles](Docs\example-circles.jpg) | ![Particles](Docs\example-particles.jpg) |
+| ![Text](Docs\example-text.jpg) | ![Tiger](Docs\example-tiger.jpg) |
+| ![Gradients](Docs\example-gradients.jpg) | ![Gradients](Docs\example-gradients.jpg) |
+
 ## Documentation
 
-DelphiBlend2D is [documented on github.io](https://neslib.github.io/DelphiBlend2D/). use the [Documentation Index](https://neslib.github.io/DelphiBlend2D/Index/) page as a starting point, or the [API Reference](https://neslib.github.io/DelphiBlend2D/Reference/DelphiBlend2D/) pages for complete API documentation by. This documentation is extracted from the source code, so you can use the (XML) documentation in the source code as well. Delphi's CodeInsight will also show this documentation when you hover the mouse over an SDL declaration.
+DelphiBlend2D is [documented on github.io](https://neslib.github.io/DelphiBlend2D/). use the [Documentation Index](https://neslib.github.io/DelphiBlend2D/) page as a starting point, or the [API Reference](https://neslib.github.io/DelphiBlend2D/Reference/DelphiBlend2D/) pages for complete API documentation by. This documentation is extracted from the source code, so you can use the (XML) documentation in the source code as well. Delphi's CodeInsight will also show this documentation when you hover the mouse over an SDL declaration.
 
 Since the framework matches the original C++ API where possible, you can also use the original [Blend2D documentation](https://blend2d.com/doc/index.html).
 

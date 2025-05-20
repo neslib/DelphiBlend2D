@@ -15,7 +15,6 @@ inherited FormMain: TFormMain
     end
     inherited CheckBoxLimitFPS: TCheckBox
       Position.X = 524.000000000000000000
-      TabOrder = 3
     end
     inherited LabelFPS: TLabel
       Position.X = 444.000000000000000000
@@ -265,6 +264,7 @@ inherited FormMain: TFormMain
         Size.PlatformDefault = False
         TabOrder = 9
         UseAlpha = False
+        OnChange = ComboColorBoxChange
       end
     end
     object LayoutColor2: TLayout
@@ -284,6 +284,7 @@ inherited FormMain: TFormMain
         Size.PlatformDefault = False
         TabOrder = 9
         UseAlpha = False
+        OnChange = ComboColorBoxChange
       end
     end
     object LayoutColor3: TLayout
@@ -303,6 +304,7 @@ inherited FormMain: TFormMain
         Size.PlatformDefault = False
         TabOrder = 9
         UseAlpha = False
+        OnChange = ComboColorBoxChange
       end
     end
   end

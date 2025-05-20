@@ -63,6 +63,7 @@ type
     procedure PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Single);
     procedure ButtonRandomClick(Sender: TObject);
+    procedure ComboColorBoxChange(Sender: TObject);
   private
     FPts: array [0..1] of TBLPoint;
     FGradientKind: TBLGradientKind;
@@ -121,11 +122,16 @@ begin
   PaintBox.Repaint;
 end;
 
+procedure TFormMain.ComboColorBoxChange(Sender: TObject);
+begin
+  inherited;
+  PaintBox.Repaint;
+end;
+
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
-  { Disable animation and FPS testing }
-  Application.OnIdle := nil;
+  DisableAnimation;
 
   FPts[0].Reset(350, 300);
   FPts[1].Reset(200, 150);

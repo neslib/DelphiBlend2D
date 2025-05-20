@@ -80,8 +80,11 @@ type
     procedure UpdateStats;
     procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
   protected
+    class function BackgroundForCompOp(const ACompOp: TBLCompOp): TAlphaColor; static;
+  protected
     procedure BeforeRender; virtual;
     procedure AfterRender; virtual;
+    procedure DisableAnimation;
     procedure RenderNotSupported;
     procedure RenderFireMonkey(const ACanvas: TCanvas); virtual; abstract;
     procedure RenderBlend2D(const AContext: TBLContext); virtual; abstract;
@@ -89,8 +92,6 @@ type
     procedure RenderSkia(const ACanvas: ISkCanvas); virtual; abstract;
     {$ENDIF}
   public
-    { Public declarations }
-    class function BackgroundForCompOp(const ACompOp: TBLCompOp): TAlphaColor; static;
   end;
 
 implementation
@@ -182,6 +183,12 @@ begin
   end;
 
   PaintBox.Repaint;
+end;
+
+procedure TFormBase.DisableAnimation;
+begin
+  Application.OnIdle := nil;
+  TimerRepaint.Enabled := False;
 end;
 
 procedure TFormBase.FormCreate(Sender: TObject);
