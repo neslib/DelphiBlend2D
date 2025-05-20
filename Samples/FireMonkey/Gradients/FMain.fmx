@@ -1,165 +1,125 @@
 inherited FormMain: TFormMain
   Caption = 'Gradients'
-  ClientWidth = 400
+  ClientHeight = 650
+  ClientWidth = 700
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
-    Size.Height = 48.000000000000000000
+    Size.Width = 580.000000000000000000
     Visible = False
     inherited LabelRenderer: TLabel
-      Size.Height = 48.000000000000000000
+      AutoSize = True
+      Size.Width = 50.500000000000000000
     end
     inherited LayoutRenderer: TLayout
-      Size.Height = 48.000000000000000000
-      inherited ComboBoxRenderer: TComboBox
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 106.000000000000000000
-        Size.Height = 32.000000000000000000
-      end
+      Position.X = 58.500000000000000000
     end
     inherited CheckBoxLimitFPS: TCheckBox
-      Size.Height = 48.000000000000000000
+      Position.X = 524.000000000000000000
+      TabOrder = 3
     end
     inherited LabelFPS: TLabel
-      Size.Height = 48.000000000000000000
+      Position.X = 444.000000000000000000
+      TabOrder = 6
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Width = 400.000000000000000000
-    Size.Height = 384.000000000000000000
+    Size.Width = 700.000000000000000000
+    Size.Height = 514.000000000000000000
     OnMouseDown = PaintBoxMouseDown
     OnMouseMove = PaintBoxMouseMove
     OnMouseUp = PaintBoxMouseUp
   end
-  object ToolBarRadius: TToolBar
-    Position.Y = 48.000000000000000000
-    Size.Width = 400.000000000000000000
-    Size.Height = 48.000000000000000000
+  object ToolBarParam1: TToolBar
+    Position.Y = 34.000000000000000000
+    Size.Width = 700.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 2
-    object TrackBarRadius: TTrackBar
+    TabOrder = 4
+    object TrackBarParam1: TTrackBar
       Align = VertCenter
       CanParentFocus = True
-      Max = 500.000000000000000000
-      Min = 1.000000000000000000
+      Max = 720.000000000000000000
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 46.000000000000000000
-      Position.Y = 14.000000000000000000
-      Size.Width = 174.000000000000000000
+      Position.X = 72.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 516.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
-      Value = 250.000000000000000000
-      OnChange = TrackBarRadiusChange
+      Value = 360.000000000000000000
+      OnChange = TrackBarParam1Change
     end
-    object LabelRadius: TLabel
+    object LabelParam1Header: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 38.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
-      Text = 'Radius:'
+      Text = 'Param1:'
       TabOrder = 2
     end
-    object ButtonRandom: TButton
+    object LabelParam1: TLabel
       Align = Right
-      Margins.Top = 4.000000000000000000
-      Margins.Right = 8.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 312.000000000000000000
-      Position.Y = 4.000000000000000000
-      Size.Width = 80.000000000000000000
-      Size.Height = 36.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 592.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 4
-      Text = 'Random'
-      OnClick = ButtonRandomClick
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '360'
+      TabOrder = 0
     end
-    object ButtonColors: TButton
+    object CheckBoxControl: TCheckBox
       Align = Right
-      Margins.Top = 4.000000000000000000
-      Margins.Right = 8.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 224.000000000000000000
-      Position.Y = 4.000000000000000000
-      Size.Width = 80.000000000000000000
-      Size.Height = 36.000000000000000000
+      IsChecked = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 632.000000000000000000
+      Size.Width = 68.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 3
-      Text = 'Colors'
-      OnClick = ButtonColorsClick
+      Text = 'Control'
     end
   end
   object ToolBarGradient: TToolBar
-    Size.Width = 400.000000000000000000
-    Size.Height = 48.000000000000000000
+    Size.Width = 700.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 3
-    object LabelGradient: TLabel
-      Align = Left
-      AutoSize = True
-      Margins.Left = 4.000000000000000000
-      Position.X = 4.000000000000000000
-      Size.Width = 49.000000000000000000
-      Size.Height = 48.000000000000000000
-      Size.PlatformDefault = False
-      TextSettings.WordWrap = False
-      Text = 'Gradient:'
-      TabOrder = 2
-    end
-    object LayoutGradient: TLayout
-      Align = Left
-      Margins.Left = 4.000000000000000000
-      Position.X = 57.000000000000000000
-      Size.Width = 79.000000000000000000
-      Size.Height = 48.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 3
-      object ComboBoxGradient: TComboBox
-        Align = VertCenter
-        Items.Strings = (
-          'Linear'
-          'Radial'
-          'Conical')
-        ItemIndex = 0
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 75.000000000000000000
-        Size.Height = 32.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 0
-        OnChange = ComboBoxGradientChange
-      end
-    end
+    TabOrder = 5
     object LabelExtend: TLabel
       Align = Left
       AutoSize = True
       Margins.Left = 4.000000000000000000
-      Position.X = 140.000000000000000000
+      Position.X = 156.000000000000000000
       Size.Width = 73.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Extend Mode:'
       TabOrder = 0
     end
+    object LabelGradient: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Gradient:'
+      TabOrder = 5
+    end
     object LayoutExtend: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 217.000000000000000000
-      Size.Width = 79.000000000000000000
-      Size.Height = 48.000000000000000000
+      Position.X = 233.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       object ComboBoxExtend: TComboBox
@@ -169,16 +129,180 @@ inherited FormMain: TFormMain
           'Repeat'
           'Reflect')
         ItemIndex = 0
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 75.000000000000000000
-        Size.Height = 32.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 80.000000000000000000
+        Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
         OnChange = ComboBoxExtendChange
+      end
+    end
+    object LayoutGradient: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object ComboBoxGradient: TComboBox
+        Align = VertCenter
+        Items.Strings = (
+          'Linear'
+          'Radial'
+          'Conic')
+        ItemIndex = 0
+        Position.Y = 2.000000000000000000
+        Size.Width = 80.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnChange = ComboBoxGradientChange
+      end
+    end
+    object ButtonRandom: TButton
+      Align = Right
+      Margins.Top = 2.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Margins.Bottom = 2.000000000000000000
+      Position.X = 616.000000000000000000
+      Position.Y = 2.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 30.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      Text = 'Random'
+      TextSettings.Trimming = None
+      OnClick = ButtonRandomClick
+    end
+  end
+  object ToolBarParam2: TToolBar
+    Position.Y = 68.000000000000000000
+    Size.Width = 700.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    object TrackBarParam2: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 720.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 72.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 516.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      OnChange = TrackBarParam1Change
+    end
+    object LabelParam2Header: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Param2:'
+      TabOrder = 2
+    end
+    object LabelParam2: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 592.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '0'
+      TabOrder = 0
+    end
+    object CheckBoxDither: TCheckBox
+      Align = Right
+      Margins.Left = 4.000000000000000000
+      Position.X = 632.000000000000000000
+      Size.Width = 68.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      Text = 'Dither'
+    end
+  end
+  object ToolBarColors: TToolBar
+    Position.Y = 102.000000000000000000
+    Size.Width = 700.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object LabelColors: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Colors:'
+      TabOrder = 0
+    end
+    object LayoutColor1: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 10
+      object ComboColorBox1: TComboColorBox
+        Align = VertCenter
+        Color = claBlack
+        Position.Y = 2.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 9
+        UseAlpha = False
+      end
+    end
+    object LayoutColor2: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 176.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 9
+      object ComboColorBox2: TComboColorBox
+        Align = VertCenter
+        Color = claRed
+        Position.Y = 2.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 9
+        UseAlpha = False
+      end
+    end
+    object LayoutColor3: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 280.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 8
+      object ComboColorBox3: TComboColorBox
+        Align = VertCenter
+        Color = claWhite
+        Position.Y = 2.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 9
+        UseAlpha = False
       end
     end
   end
