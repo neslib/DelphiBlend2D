@@ -2,6 +2,13 @@
 
 This is internal documentation. It gives a short bullet point descriptions for building the Blend2D libraries. For details information, see https://blend2d.com/doc/build-instructions.html.
 
+## Version
+
+https://blend2d.com/download/blend2d-0.12.0-all.zip, containing state as of 3/10/2025:
+
+* https://github.com/blend2d/blend2d/tree/717cbf4bc0f2ca164cf2f0c48f0497779241b6c5
+* https://github.com/blend2d/blend2d-apps/tree/c3ded4bf5426fe7f3b8e383dc15c52d436d3f646
+
 ## Windows
 
 Use CMake with default options.

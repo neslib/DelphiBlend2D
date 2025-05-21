@@ -83,6 +83,7 @@ inherited FormMain: TFormMain
       Size.PlatformDefault = False
       TabOrder = 3
       Text = 'Control'
+      OnChange = CheckBoxChange
     end
   end
   object ToolBarGradient: TToolBar
@@ -228,6 +229,7 @@ inherited FormMain: TFormMain
       Size.PlatformDefault = False
       TabOrder = 3
       Text = 'Dither'
+      OnChange = CheckBoxChange
     end
   end
   object ToolBarColors: TToolBar

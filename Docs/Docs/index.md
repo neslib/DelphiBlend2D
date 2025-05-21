@@ -6,15 +6,15 @@ If you are new to Blend2D please checkout out the following links:
 
 * [Getting Started](GettingStarted.md) - introduction to Blend2D with code samples and outputs
 
-* Multithreaded Rendering - introduction to multi-threaded rendering
+* [Multithreaded Rendering](MultithreadedRendering.md) - introduction to multi-threaded rendering
 
 ## Groups
 
 The documentation is split into the following groups:
 
-* Globals - Global functions, constants, and classes used universally across the library
-* Containers - Containers and views used by Blend2D
-* Geometries - Geometries, paths, and transformations
+* [Globals](Globals.md) - Global functions, constants, and classes used universally across the library
+* [Containers](Containers.md) - Containers and views used by Blend2D
+* [Geometries](Geometries.md) - Geometries, paths, and transformations
 * Imaging - Images and image codecs
 * Styling - Colors, gradients, and patterns
 * Text - Fonts & Text support

@@ -126,7 +126,7 @@ begin
   FBitmap := TBitmap.Create;
 
   {$IFNDEF MSWINDOWS}
-  FConverter := TBLPixelConverter.CreatePlatformConverter;
+  FConverter.MakePlatformConverter(TBLFormat.Prgb32);
   {$ENDIF}
 end;
 
@@ -175,7 +175,7 @@ begin
   try
     if (Data.Data <> FBitmapData.Data) or (Data.Pitch <> FBitmapData.Pitch) then
     begin
-      FImage.MakeFromData(Data.Width, Data.Height, TBLFormat.PRGB32,
+      FImage.MakeFromData(Data.Width, Data.Height, TBLFormat.Prgb32,
         Data.Data, Data.Pitch);
       FBitmapData.Data := Data.Data;
       FBitmapData.Pitch := Data.Pitch;

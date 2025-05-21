@@ -64,6 +64,7 @@ type
       Y: Single);
     procedure ButtonRandomClick(Sender: TObject);
     procedure ComboColorBoxChange(Sender: TObject);
+    procedure CheckBoxChange(Sender: TObject);
   private
     FPts: array [0..1] of TBLPoint;
     FGradientKind: TBLGradientKind;
@@ -99,6 +100,12 @@ begin
   FPts[0].Y := Random(Trunc(PaintBox.Height)) + 0.5;
   FPts[1].X := Random(Trunc(PaintBox.Width)) + 0.5;
   FPts[1].Y := Random(Trunc(PaintBox.Height)) + 0.5;
+  PaintBox.Repaint;
+end;
+
+procedure TFormMain.CheckBoxChange(Sender: TObject);
+begin
+  inherited;
   PaintBox.Repaint;
 end;
 

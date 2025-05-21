@@ -1,7 +1,7 @@
 inherited FormMain: TFormMain
   Caption = 'Elliptic Arcs'
-  ClientHeight = 620
-  ClientWidth = 400
+  ClientHeight = 520
+  ClientWidth = 580
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
     Size.Height = 48.000000000000000000
@@ -29,19 +29,23 @@ inherited FormMain: TFormMain
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Width = 400.000000000000000000
-    Size.Height = 476.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 396.000000000000000000
     OnMouseDown = PaintBoxMouseDown
     OnMouseMove = PaintBoxMouseMove
     OnMouseUp = PaintBoxMouseUp
   end
   inherited TimerRepaint: TTimer
-    Left = 24
-    Top = 16
+    Left = 144
+    Top = 144
+  end
+  inherited StyleBook: TStyleBook
+    Left = 144
+    Top = 200
   end
   object ToolBarXRadius: TToolBar
-    Size.Width = 400.000000000000000000
-    Size.Height = 48.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
     object TrackBarXRadius: TTrackBar
@@ -52,21 +56,21 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 57.000000000000000000
-      Position.Y = 14.000000000000000000
-      Size.Width = 243.000000000000000000
+      Position.X = 72.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 408.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       Value = 131.000000000000000000
+      OnChange = ControlChange
     end
     object LabelXRadius: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 49.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'X Radius:'
@@ -74,18 +78,19 @@ inherited FormMain: TFormMain
     end
     object CheckBoxLargeArc: TCheckBox
       Align = Right
-      Position.X = 304.000000000000000000
+      Position.X = 484.000000000000000000
       Size.Width = 96.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 2
       Text = 'Large Arc'
+      OnChange = ControlChange
     end
   end
   object ToolBarYRadius: TToolBar
-    Position.Y = 48.000000000000000000
-    Size.Width = 400.000000000000000000
-    Size.Height = 48.000000000000000000
+    Position.Y = 34.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
     object TrackBarYRadius: TTrackBar
@@ -96,21 +101,21 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 56.000000000000000000
-      Position.Y = 14.000000000000000000
-      Size.Width = 244.000000000000000000
+      Position.X = 72.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 408.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       Value = 143.000000000000000000
+      OnChange = ControlChange
     end
     object LabelYRadius: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 48.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Y Radius:'
@@ -118,18 +123,19 @@ inherited FormMain: TFormMain
     end
     object CheckBoxSweepArc: TCheckBox
       Align = Right
-      Position.X = 304.000000000000000000
+      Position.X = 484.000000000000000000
       Size.Width = 96.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 2
       Text = 'Sweep Arc'
+      OnChange = ControlChange
     end
   end
   object ToolBarAngle: TToolBar
-    Position.Y = 96.000000000000000000
-    Size.Width = 400.000000000000000000
-    Size.Height = 48.000000000000000000
+    Position.Y = 68.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
     object TrackBarAngle: TTrackBar
@@ -140,23 +146,40 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 42.000000000000000000
-      Position.Y = 14.000000000000000000
-      Size.Width = 354.000000000000000000
+      Position.X = 72.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 504.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
+      OnChange = ControlChange
     end
     object LabelAngle: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 34.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Angle:'
+      TabOrder = 0
+    end
+  end
+  object StatusBar: TStatusBar
+    Position.Y = 498.000000000000000000
+    ShowSizeGrip = True
+    Size.Width = 580.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 7
+    object LabelStatus: TLabel
+      Align = Client
+      Margins.Left = 4.000000000000000000
+      Size.Width = 576.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
       TabOrder = 0
     end
   end

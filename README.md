@@ -98,7 +98,8 @@ Blend2D quickstart and interactive applications are available in the Samples sub
 | -------------------------------- | -------------------------------- |
 | ![Circles](Docs\example-circles.jpg) | ![Particles](Docs\example-particles.jpg) |
 | ![Text](Docs\example-text.jpg) | ![Tiger](Docs\example-tiger.jpg) |
-| ![Gradients](Docs\example-gradients.jpg) | ![Gradients](Docs\example-gradients.jpg) |
+| ![Gradients](Docs\example-gradients.jpg) | ![Elliptic Arcs](Docs\example-elliptic-arc.jpg) |
+| ![Stroke](Docs\example-stroke.jpg) | ![Paths](Docs\example-paths.jpg) |
 
 ## Documentation
 

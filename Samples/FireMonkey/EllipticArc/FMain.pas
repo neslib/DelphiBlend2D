@@ -36,6 +36,8 @@ type
     ToolBarAngle: TToolBar;
     TrackBarAngle: TTrackBar;
     LabelAngle: TLabel;
+    StatusBar: TStatusBar;
+    LabelStatus: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Single);
@@ -43,15 +45,17 @@ type
       Shift: TShiftState; X, Y: Single);
     procedure PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Single);
+    procedure ControlChange(Sender: TObject);
   private
     FPts: array [0..1] of TBLPoint;
     FClosestVertex: Integer;
     FGrabbedVertex: Integer;
-    procedure RenderPathPoints(const AContext: IBLContext; const APath: IBLPath;
+    FStatus: String;
+    procedure RenderPathPoints(const AContext: TBLContext; const APath: TBLPath;
       const AColor: TBLRgba32);
     function GetClosestVertex(const AP: TBLPoint; const AMaxDistance: Double): Integer;
   protected
-    procedure RenderBlend2D(const AContext: IBLContext); override;
+    procedure RenderBlend2D(const AContext: TBLContext); override;
   public
   end;
 
@@ -67,9 +71,16 @@ uses
 
 { TFormMain }
 
+procedure TFormMain.ControlChange(Sender: TObject);
+begin
+  inherited;
+  PaintBox.Repaint;
+end;
+
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
+  DisableAnimation;
   FPts[0].Reset(124, 180);
   FPts[1].Reset(296, 284);
   FClosestVertex := -1;
@@ -78,17 +89,14 @@ end;
 
 function TFormMain.GetClosestVertex(const AP: TBLPoint;
   const AMaxDistance: Double): Integer;
-var
-  ClosestDistance, D, DX, DY: Double;
-  I: Integer;
 begin
   Result := -1;
-  ClosestDistance := Double.MaxValue;
-  for I := 0 to Length(FPts) - 1 do
+  var ClosestDistance: Double := Double.MaxValue;
+  for var I := 0 to Length(FPts) - 1 do
   begin
-    DX := AP.X - FPts[I].X;
-    DY := AP.Y - FPts[I].Y;
-    D := Sqrt((DX * DX) + (DY * DY));
+    var DX: Double := AP.X - FPts[I].X;
+    var DY: Double := AP.Y - FPts[I].Y;
+    var D: Double := Sqrt((DX * DX) + (DY * DY));
     if (D < ClosestDistance) and (D < AMaxDistance) then
     begin
       Result := I;
@@ -113,13 +121,11 @@ end;
 
 procedure TFormMain.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Single);
-var
-  P: TBLPoint;
 begin
   inherited;
-  P.Reset(X, Y);
+  var P := BLPoint(X, Y);
   if (FGrabbedVertex < 0) then
-    FClosestVertex := GetClosestVertex(P, 5)
+    FClosestVertex := GetClosestVertex(P, {$IFDEF MOBILE}20{$ELSE}5{$ENDIF})
   else
     FPts[FGrabbedVertex] := P;
   PaintBox.Repaint;
@@ -139,23 +145,17 @@ begin
   end;
 end;
 
-procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
-var
-  Radius, Start, Stop: TBLPoint;
-  Angle: Double;
-  P: IBLPath;
-  I: Integer;
+procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  AContext.FillColor := TAlphaColors.Black;
-  AContext.FillAll;
+  AContext.FillAll(TAlphaColors.Black);
 
-  Radius.Reset(TrackBarXRadius.Value, TrackBarYRadius.Value);
-  Start := FPts[0];
-  Stop := FPts[1];
-  Angle := TrackBarAngle.Value / 180 * Pi;
+  var Radius := BLPoint(TrackBarXRadius.Value, TrackBarYRadius.Value);
+  var Start := FPts[0];
+  var Stop := FPts[1];
+  var Angle: Double := TrackBarAngle.Value / 180 * Pi;
 
   { Render all arcs before rendering the one that is selected. }
-  P := TBLPath.Create;
+  var P: TBLPath;
 
   P.MoveTo(Start);
   P.EllipticArcTo(Radius, Angle, False, False, Stop);
@@ -169,8 +169,7 @@ begin
   P.MoveTo(Start);
   P.EllipticArcTo(Radius, Angle, True, True, Stop);
 
-  AContext.StrokeColor := $40FFFFFF;
-  AContext.StrokePath(P);
+  AContext.StrokePath(P, $40FFFFFF);
 
   { Render elliptic arc based on the given parameters. }
   P.Clear;
@@ -178,35 +177,41 @@ begin
   P.EllipticArcTo(Radius, Angle, CheckBoxLargeArc.IsChecked,
     CheckBoxSweepArc.IsChecked, Stop);
 
-  AContext.StrokeColor := $FFFFFFFF;
-  AContext.StrokePath(P);
+  AContext.StrokePath(P, $FFFFFFFF);
 
   { Render all points of the path (as the arc was split into segments). }
   RenderPathPoints(AContext, P, $FF808080);
 
   { Render the rest of the UI (draggable points). }
-  for I := 0 to Length(FPts) - 1 do
+  for var I := 0 to Length(FPts) - 1 do
   begin
+    var Color: TAlphaColor := $FF007FFF;
     if (I = FClosestVertex) then
-      AContext.FillColor := $FF00FFFF
-    else
-      AContext.FillColor := $FF007FFF;
+      Color := $FF00FFFF;
 
-    AContext.FillCircle(FPts[I].X, FPts[I].Y, 2.5);
+    AContext.FillCircle(FPts[I].X, FPts[I].Y, 2.5, Color);
   end;
+
+  FStatus := Format('<path d="M%.1f %.1f A%.1f %.1f %.3f %d %d %.1f %.1f" />',
+    [Start.X, Start.Y, Radius.X, Radius.Y, Angle * Pi / 180,
+     Ord(CheckBoxLargeArc.IsChecked), Ord(CheckBoxSweepArc.IsChecked),
+     Stop.X, Stop.Y]);
+
+  TThread.ForceQueue(nil,
+    procedure
+    begin
+      LabelStatus.Text := FStatus;
+    end);
 end;
 
-procedure TFormMain.RenderPathPoints(const AContext: IBLContext;
-  const APath: IBLPath; const AColor: TBLRgba32);
-var
-  I, Count: Integer;
-  Vtx: PBLPoint;
+procedure TFormMain.RenderPathPoints(const AContext: TBLContext;
+  const APath: TBLPath; const AColor: TBLRgba32);
 begin
-  Count := APath.Count;
-  Vtx := APath.VertexData;
+  var Count := APath.Size;
+  var Vtx := APath.VertexData;
 
-  AContext.FillColor := AColor;
-  for I := 0 to Count - 1 do
+  AContext.SetFillStyle(AColor);
+  for var I := 0 to Count - 1 do
   begin
     if (not Vtx.X.IsInfinity) then
       AContext.FillCircle(Vtx.X, Vtx.Y, 2);

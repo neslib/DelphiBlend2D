@@ -996,14 +996,14 @@ type
   {$REGION 'Internal Declarations'}
   private
     FData: P;
-    FSize: NativeInt;
+    FCount: NativeInt;
     function GetItem(const AIndex: NativeInt): T; inline;
     function GetRef(const AIndex: NativeInt): P; inline;
   public
     class constructor Create;
   {$ENDREGION 'Internal Declarations'}
   public
-    constructor Create(const ADataIn: P; const ASizeIn: NativeInt);
+    constructor Create(const ADataIn: P; const ACountIn: NativeInt);
 
     /// <summary>
     ///  Creates a default empty array view
@@ -1011,12 +1011,12 @@ type
     class operator Initialize(out ADest: TBLArrayView<T>);
 
     procedure Reset; overload; inline;
-    procedure Reset(const ADataIn: P; const ASizeIn: NativeInt); overload; inline;
+    procedure Reset(const ADataIn: P; const ACountIn: NativeInt); overload; inline;
 
     function First: P; inline;
     function Last: P; inline;
 
-    property Size: NativeInt read FSize;
+    property Count: NativeInt read FCount;
     property Items[const AIndex: NativeInt]: T read GetItem; default;
     property Refs[const AIndex: NativeInt]: P read GetRef;
   end;
@@ -1107,7 +1107,7 @@ type
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetCapacity: NativeInt; inline;
     function GetItem(const AIndex: NativeInt): T; inline;
     procedure SetItem(const AIndex: NativeInt; const AValue: T); inline;
@@ -1261,22 +1261,22 @@ type
     procedure Reserve(const AMinCapacity: NativeInt); inline;
 
     /// <summary>
-    ///  Truncates the length of the array to maximum `AMaxSize` items.
+    ///  Truncates the length of the array to maximum `AMaxCount` items.
     ///
-    ///  If the length of the array is less than `AMaxSize` then truncation
+    ///  If the length of the array is less than `AMaxCount` then truncation
     ///  does nothing.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure Truncate(const AMaxSize: NativeInt); inline;
+    procedure Truncate(const AMaxCount: NativeInt); inline;
 
     /// <summary>
-    ///  Resizes the array to `ASize` items.
+    ///  Resizes the array to `ACount` items.
     ///
-    ///  If `ASize` is greater than the array length then all new items will be
+    ///  If `ACount` is greater than the array length then all new items will be
     ///  initialized by `AFill` item.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure Resize(const ASize: NativeInt; const AFill: T); inline;
+    procedure Resize(const ACount: NativeInt; const AFill: T); inline;
 
     /// <summary>
     ///  Makes the array mutable by possibly creating a deep copy of the data if
@@ -1301,27 +1301,27 @@ type
 
     /// <summary>
     ///  Modify operation is similar to `MakeMutable`, however, the `AOp`
-    ///  argument specifies the desired array operation, and `ASize` specified
+    ///  argument specifies the desired array operation, and `ACount` specified
     ///  the number of items to assign or append. Returns a pointer to the first
     ///  item to be either assigned or appended and it points to an
     ///  uninitialized memory.
     ///
     ///  Please note that assignments mean to wipe out the whole array content
-    ///  and to set the length of the array to `ASize`. The caller is
+    ///  and to set the length of the array to `ACount`. The caller is
     ///  responsible for initializing the returned data.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    function ModifyOp(const AOp: TBLModifyOp; const ASize: NativeInt): P; inline;
+    function ModifyOp(const AOp: TBLModifyOp; const ACount: NativeInt): P; inline;
 
     /// <summary>
     ///  Insert operation, the semantics is similar to `ModifyOp`, however,
-    ///  ASize items are inserted at the given `AIndex` instead of assigned or
+    ///  ACount items are inserted at the given `AIndex` instead of assigned or
     ///  appended.
     ///
     ///  The caller is responsible for initializing the returned data.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    function InsertOp(const AIndex, ASize: NativeInt): P; inline;
+    function InsertOp(const AIndex, ACount: NativeInt): P; inline;
 
     /// <summary>
     /// Similar to `ModifyOp`, but the items to assign/append to the array are
@@ -1354,23 +1354,23 @@ type
     procedure AssignData(const AView: TBLArrayView<T>); overload; inline;
 
     /// <summary>
-    ///  Replaces the content of the array `AItems` of length `ASize`.
+    ///  Replaces the content of the array `AItems` of length `ACount`.
     /// </summary>
     /// <remarks>
     ///  The implementation can handle items pointing to the array's data as
     ///  well, so it's possible to create a slice of the array if required.
     /// </remarks>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AssignData(const AItems: P; const ASize: NativeInt); overload; inline;
+    procedure AssignData(const AItems: P; const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Assign an external buffer to the array, which would replace the
     ///  existing content.
     ///
     /// <param name="AData">External data buffer to use (cannot be nil).</param>
-    /// <param name="ASize">Size of the data buffer in items.</param>
+    /// <param name="ACount">Size of the data buffer in items.</param>
     /// <param name="ACapacity">Capacity of the buffer, cannot be zero or
-    ///  smaller than `ASize`.</param>
+    ///  smaller than `ACount`.</param>
     /// <param name="AAccessFlags">Flags that describe whether the data is
     ///  read-only or read-write.</param>
     /// <param name="ADestroyFunc">(Optional) function that would be called when
@@ -1378,7 +1378,7 @@ type
     /// <param name="AUserData">(Optional) user data passed to `ADestroyFunc`.</param>
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AssignExternalData(const AData: P; const ASize,
+    procedure AssignExternalData(const AData: P; const ACount,
       ACapacity: NativeInt; const AAccessFlags: TBLDataAccessFlags;
       const ADestroyFunc: TBLDestroyExternalDataFunc = nil;
       const AUserData: Pointer = nil); inline;
@@ -1412,14 +1412,14 @@ type
     procedure AppendData(const AView: TBLArrayView<T>); overload; inline;
 
     /// <summary>
-    ///  Appends `AItems` to the array of length `ASize`.
+    ///  Appends `AItems` to the array of length `ACount`.
     /// </summary>
     /// <remarks>
     ///  The implementation guarantees that a `AItems` pointing to the array
     ///  data itself would work.
     /// </remarks>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure AppendData(const AItems: P; const ASize: NativeInt); overload; inline;
+    procedure AppendData(const AItems: P; const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Prepends `AItem` to the array.
@@ -1450,14 +1450,14 @@ type
     procedure PrependData(const AView: TBLArrayView<T>); overload; inline;
 
     /// <summary>
-    ///  Prepends `AItems` to the array of length `ASize`.
+    ///  Prepends `AItems` to the array of length `ACount`.
     /// </summary>
     /// <remarks>
     ///  The implementation guarantees that a `AItems` pointing to the array
     ///  data itself would work.
     /// </remarks>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure PrependData(const AItems: P; const ASize: NativeInt); overload; inline;
+    procedure PrependData(const AItems: P; const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Inserts `AItem` at the given `AIndex`.
@@ -1489,7 +1489,7 @@ type
     procedure InsertData(const AIndex: NativeInt; const AView: TBLArrayView<T>); overload; inline;
 
     /// <summary>
-    ///  Prepends `AItems` to the array of length `ASize` at the given `AIndex`.
+    ///  Prepends `AItems` to the array of length `ACount` at the given `AIndex`.
     /// </summary>
     /// <remarks>
     ///  The implementation guarantees that a `AItems` pointing to the array
@@ -1497,7 +1497,7 @@ type
     /// </remarks>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure InsertData(const AIndex: NativeInt; const AItems: P;
-      const ASize: NativeInt); overload; inline;
+      const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Replaces an item at the given `AIndex` by `AItem`.
@@ -1512,11 +1512,11 @@ type
     procedure ReplaceData(const ARange: TBLRange; const AView: TBLArrayView<T>); overload; inline;
 
     /// <summary>
-    ///  Replaces the given `ARange` of items by `AItems` of length `ASize`.
+    ///  Replaces the given `ARange` of items by `AItems` of length `ACount`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure ReplaceData(const ARange: TBLRange; const AItems: P;
-      const ASize: NativeInt); overload; inline;
+      const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Removes an item at the given `Andex`.
@@ -1562,7 +1562,7 @@ type
     /// <summary>
     ///  The size of the array (number of items).
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  The capacity of the array (number of items).
@@ -1616,7 +1616,7 @@ type
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetLength: NativeInt; inline;
     function GetCapacity: NativeInt; inline;
     function GetData: PUTF8Char; inline;
     function GetChar(const AIndex: NativeInt): UTF8Char; inline;
@@ -1650,7 +1650,7 @@ type
 
     /// <summary>
     ///  Constructor that creates a string from the given UTF8 data specified by
-    ///  `AStr` and `ASize`. If `ASize` is -1 the string is assumed to be null
+    ///  `AStr` and `ALength`. If `ALength` is -1 the string is assumed to be null
     ///  terminated.
     ///
     ///  This is a convenience function that doesn't provide error handling. If
@@ -1658,7 +1658,7 @@ type
     ///  default empty string would be constructed.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    constructor Create(const AStr: PUTF8Char; const ASize: NativeInt = -1); overload;
+    constructor Create(const AStr: PUTF8Char; const ALength: NativeInt = -1); overload;
 
     /// <summary>
     ///  Constructor that creates a string from a Delphi (Unicode) String.
@@ -1756,9 +1756,9 @@ type
 
     /// <summary>
     ///  Returns whether this string and the given string data `AStr` of length
-    ///  `ASize` are equal.
+    ///  `ALength` are equal.
     /// </summary>
-    function Equals(const AOther: PUTF8Char; const ASize: NativeInt = -1): Boolean; overload; inline;
+    function Equals(const AOther: PUTF8Char; const ALength: NativeInt = -1): Boolean; overload; inline;
 
     /// <summary>
     ///  Returns whether this string and the given UTF8 string data `AStr` are
@@ -1790,7 +1790,7 @@ type
     ///  Compares this string with other string data and returns either
     ///  `-1`, `0`, or `1`.
     /// </summary>
-    function Compare(const AOther: PUTF8Char; const ASize: NativeInt = -1): Integer; overload; inline;
+    function Compare(const AOther: PUTF8Char; const ALength: NativeInt = -1): Integer; overload; inline;
 
     /// <summary>
     ///  Compares this string with other string data and returns either
@@ -1854,11 +1854,11 @@ type
     procedure Reserve(const AMinSize: NativeInt); inline;
 
     /// <summary>
-    ///  Resizes the string to `ASize` and fills the additional data by
+    ///  Resizes the string to `ALength` and fills the additional data by
     ///  `AFill` pattern.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure Resize(const ASize: NativeInt; const AFill: UTF8Char = #0); inline;
+    procedure Resize(const ALength: NativeInt; const AFill: UTF8Char = #0); inline;
 
     /// <summary>
     ///  Makes the string mutable.
@@ -1878,8 +1878,8 @@ type
     /// <seealso cref="InsertOp"/>
     function MakeMutable: PUTF8Char; inline;
 
-    function ModifyOp(const AOp: TBLModifyOp; const ASize: NativeInt): PUTF8Char; inline;
-    function InsertOp(const AIndex, ASize: NativeInt): PUTF8Char; inline;
+    function ModifyOp(const AOp: TBLModifyOp; const ALength: NativeInt): PUTF8Char; inline;
+    function InsertOp(const AIndex, ALength: NativeInt): PUTF8Char; inline;
 
     /// <summary>
     ///  Replaces the content of the string by `AChar` character or multiple
@@ -1895,14 +1895,14 @@ type
     procedure Assign(const AView: TBLStringView); overload; inline;
 
     /// <summary>
-    ///  Replaces the string by `AStr` data of the given length `ASize`.
+    ///  Replaces the string by `AStr` data of the given length `ALength`.
     /// </summary>
     /// <remarks>
-    ///  The implementation assumes null terminated string if `ASize` equals to
+    ///  The implementation assumes null terminated string if `ALength` equals to
     ///  `-1`.
     /// </remarks>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure Assign(const AStr: PUTF8Char; const ASize: NativeInt = -1); overload; inline;
+    procedure Assign(const AStr: PUTF8Char; const ALength: NativeInt = -1); overload; inline;
 
     /// <summary>
     ///  Copy assignment, but creates a deep copy of the `AOther` string instead
@@ -1922,17 +1922,17 @@ type
     procedure AssignFormat(const AFmt: String; const AArgs: array of const);
 
     /// <summary>
-    ///  Truncates the string length to `ASize`.
+    ///  Truncates the string length to `ALength`.
     ///
-    ///  It does nothing if the the string length is less than `ASize`.
+    ///  It does nothing if the the string length is less than `ALength`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure Truncate(const ASize: NativeInt); inline;
+    procedure Truncate(const ALength: NativeInt); inline;
 
     procedure Append(const AChar: UTF8Char; const ACount: NativeInt = 1); overload; inline;
     procedure Append(const AOther: TBLString); overload; inline;
     procedure Append(const AView: TBLStringView); overload; inline;
-    procedure Append(const AStr: PUTF8Char; const ASize: NativeInt = -1); overload; inline;
+    procedure Append(const AStr: PUTF8Char; const ALength: NativeInt = -1); overload; inline;
     procedure Append(const AStr: UTF8String); overload; inline;
     procedure Append(const AStr: String); overload; inline;
 
@@ -1941,7 +1941,7 @@ type
     procedure Prepend(const AChar: UTF8Char; const ACount: NativeInt = 1); overload; inline;
     procedure Prepend(const AOther: TBLString); overload; inline;
     procedure Prepend(const AView: TBLStringView); overload; inline;
-    procedure Prepend(const AStr: PUTF8Char; const ASize: NativeInt = -1); overload; inline;
+    procedure Prepend(const AStr: PUTF8Char; const ALength: NativeInt = -1); overload; inline;
     procedure Prepend(const AStr: UTF8String); overload; inline;
     procedure Prepend(const AStr: String); overload; inline;
 
@@ -1950,7 +1950,7 @@ type
     procedure Insert(const AIndex: NativeInt; const AOther: TBLString); overload; inline;
     procedure Insert(const AIndex: NativeInt; const AView: TBLStringView); overload; inline;
     procedure Insert(const AIndex: NativeInt; const AStr: PUTF8Char;
-      const ASize: NativeInt = -1); overload; inline;
+      const ALength: NativeInt = -1); overload; inline;
     procedure Insert(const AIndex: NativeInt; const AStr: UTF8String); overload; inline;
     procedure Insert(const AIndex: NativeInt; const AStr: String); overload; inline;
 
@@ -1995,7 +1995,7 @@ type
     /// <summary>
     ///  The size of the string [in bytes or number of UTF8 characters].
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Length: NativeInt read GetLength;
 
     /// <summary>
     ///  The capacity of the string [in bytes or number of UTF8 characters].
@@ -2030,7 +2030,7 @@ type
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: Integer; inline;
+    function GetCount: Integer; inline;
     function GetWordCount: Integer; inline;
     function GetCapacity: Integer; inline;
     function GetCardinality: Integer; inline;
@@ -2338,9 +2338,9 @@ type
     property IsEmpty: Boolean read GetIsEmpty;
 
     /// <summary>
-    ///  The size of the bit array in bits.
+    ///  The number of bits of the bit array.
     /// </summary>
-    property Size: Integer read GetSize;
+    property Count: Integer read GetCount;
 
     /// <summary>
     ///  The bits in the bit array.
@@ -2919,9 +2919,9 @@ type
     class procedure ReadFile(const AFilename: String; const ADst: TBLArray<Byte>;
       const AMaxSize: NativeInt = 0; const AReadFlags: TBLFileReadFlags = []); inline; static;
     class function WriteFile(const AFilename: String; const AData;
-      const ASize: NativeInt): NativeInt; overload; inline; static;
-    class function WriteFile(const AFilename: String; const AData: TBLArrayView<Byte>;
-      const ASize: NativeInt): NativeInt; overload; inline; static;
+      const ACount: NativeInt): NativeInt; overload; inline; static;
+    class function WriteFile(const AFilename: String;
+      const AData: TBLArrayView<Byte>): NativeInt; overload; inline; static;
     class function WriteFile(const AFilename: String; const AData: TBLArray<Byte>): NativeInt; overload; inline; static;
     class function WriteFile(const AFilename: String; const AData: TBytes): NativeInt; overload; inline; static;
   end;
@@ -4480,16 +4480,16 @@ type
   private
     FCommandData: PByte;
     FVertexData: PBLPoint;
-    FSize: NativeInt;
+    FCount: NativeInt;
   {$ENDREGION 'Internal Declarations'}
   public
     procedure Reset; overload; inline;
     procedure Reset(const ACommandDataIn: PByte; const AVertexDataIn: PBLPoint;
-      const ASizeIn: NativeInt); overload; inline;
+      const ACountIn: NativeInt); overload; inline;
 
     property CommandData: PByte read FCommandData;
     property VertexData: PBLPoint read FVertexData;
-    property Size: NativeInt read FSize;
+    property Count: NativeInt read FCount;
   end;
 
 type
@@ -4501,7 +4501,7 @@ type
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetCapacity: NativeInt; inline;
     function GetVertexData: PBLPoint; inline;
     function GetVertexDataEnd: PBLPoint; inline;
@@ -4586,7 +4586,7 @@ type
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure Reserve(const AMinCapacity: NativeInt); inline;
 
-    procedure ModifyOp(const AOp: TBLModifyOp; const ASize: NativeInt;
+    procedure ModifyOp(const AOp: TBLModifyOp; const ACount: NativeInt;
       out ACmdDataOut: PByte; out AVertexDataOut: PBLPoint); inline;
 
     procedure AssignDeep(const AOther: TBLPath); inline;
@@ -5578,7 +5578,7 @@ type
     /// <summary>
     ///  Path size (number of vertices used).
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  Path capacity (number of allocated vertices).
@@ -7819,7 +7819,7 @@ type
     function GetConicRepeat: Double; inline;
     procedure SetConicRepeat(const AValue: Double); inline;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetCapacity: NativeInt; inline;
     function GetStopData: PBLGradientStop; inline;
     function GetStop(const AIndex: NativeInt): TBLGradientStop; inline;
@@ -8193,7 +8193,7 @@ type
     /// <summary>
     ///  The number of stops the gradient has.
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  The gradient capacity [in stops].
@@ -8440,7 +8440,7 @@ type
   private
     FGlyphData: Pointer;
     FPlacementData: Pointer;
-    FSize: Size_T;
+    FCount: Size_T;
     {$HINTS OFF}
     FReserved: UInt8;
     {$HINTS ON}
@@ -8453,7 +8453,7 @@ type
     function GetPlacementDataAsPoints: PBLPoint; inline;
     function GetFlags: TBLGlyphRunFlags; inline;
     function GetPlacementType: TBLGlyphPlacementType; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetIsEmpty: Boolean; inline;
   {$ENDREGION 'Internal Declarations'}
   public
@@ -8486,7 +8486,7 @@ type
     /// <summary>
     ///  Size of the glyph-run in glyph units.
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  Type of placement.
@@ -8554,7 +8554,7 @@ type
   {$REGION 'Internal Declarations'}
   private
     FIndex: NativeInt;
-    FSize: NativeInt;
+    FCount: NativeInt;
     FGlyphData: Pointer;
     FPlacementData: Pointer;
     FGlyphAdvance: NativeInt;
@@ -8635,7 +8635,7 @@ type
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetFlags: TBLGlyphRunFlags; inline;
     function GetContent: PUInt32; inline;
     function GetInfoData: PBLGlyphInfo; inline;
@@ -8780,7 +8780,7 @@ type
     ///  `AGlyphData`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure SetGlyphs(const AGlyphData: PUInt32; const ASize: NativeInt); overload; inline;
+    procedure SetGlyphs(const AGlyphData: PUInt32; const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Assigns a glyph content of this `TBLGlyphBuffer` from an array of
@@ -8790,7 +8790,7 @@ type
     ///  many bytes to advance after a glyph value is read.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure SetGlyphsFromRecord(const AGlyphData: Pointer; const ASize,
+    procedure SetGlyphsFromRecord(const AGlyphData: Pointer; const ACount,
       AGlyphIdSize, AGlyphAdvance: NativeInt); inline;
 
     procedure SetDebugSink(const ASink: TBLDebugMessageSinkFunc;
@@ -8798,7 +8798,7 @@ type
     procedure ResetDebugSink; inline;
 
     property IsEmpty: Boolean read GetIsEmpty;
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
     property Flags: TBLGlyphRunFlags read GetFlags;
     property Content: PUInt32 read GetContent;
     property InfoData: PBLGlyphInfo read GetInfoData;
@@ -10389,12 +10389,12 @@ type
   {$REGION 'Internal Declarations'}
   private
     FData: PBLFontFeatureItem;
-    FSize: Size_T;
+    FCount: Size_T;
     {$HINTS OFF}
     FSsoData: array [0..35] of TBLFontFeatureItem;
     {$HINTS ON}
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetItem(const AIndex: NativeInt): TBLFontFeatureItem;
   {$ENDREGION 'Internal Declarations'}
   public
@@ -10412,7 +10412,7 @@ type
     /// <summary>
     ///  Count of items in `Data`.
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  The font feature items, where each item describes a tag and its value.
@@ -10430,7 +10430,7 @@ type
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetCapacity: NativeInt; inline;
   {$ENDREGION 'Internal Declarations'}
   public
@@ -10576,7 +10576,7 @@ type
     /// <summary>
     ///  The number of feature tag/value pairs stored in the container.
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  The container capacity.
@@ -10633,12 +10633,12 @@ type
   {$REGION 'Internal Declarations'}
   private
     FData: PBLFontVariationItem;
-    FSize: Size_T;
+    FCount: Size_T;
     {$HINTS OFF}
     FSsoData: array [0..3] of TBLFontVariationItem;
     {$HINTS ON}
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetItem(const AIndex: NativeInt): TBLFontVariationItem;
   {$ENDREGION 'Internal Declarations'}
   public
@@ -10656,7 +10656,7 @@ type
     /// <summary>
     ///  Count of items in `Data`.
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  The font variation items, where each item describes a tag and its value.
@@ -10674,7 +10674,7 @@ type
   private
     FBase: TBLObjectCore;
     function GetIsEmpty: Boolean; inline;
-    function GetSize: NativeInt; inline;
+    function GetCount: NativeInt; inline;
     function GetCapacity: NativeInt; inline;
   {$ENDREGION 'Internal Declarations'}
   public
@@ -10777,7 +10777,7 @@ type
     /// <summary>
     ///  The number of variation tag/value pairs stored in the container.
     /// </summary>
-    property Size: NativeInt read GetSize;
+    property Count: NativeInt read GetCount;
 
     /// <summary>
     ///  The container capacity.
@@ -14701,336 +14701,336 @@ type
     ///  fill style.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLPattern); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPoint>; const AStyle: TBLVar); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPoint>; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with the current
     ///  fill style.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba32); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLRgba64); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLPattern); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLPattern); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLGradient); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (floating point coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLVar); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPoint>; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with the current fill style.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (floating point
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+    procedure FillPolygon(const APoly: PBLPoint; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with the current
     ///  fill style.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLPattern); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TArray<TBLPointI>; const AStyle: TBLVar); overload; inline;
+    procedure FillPolygon(const APoly: TArray<TBLPointI>; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with the current
     ///  fill style.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba32); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLRgba64); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLPattern); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLPattern); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLGradient); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` (integer coordinates) with an explicit
     ///  fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLVar); overload; inline;
+    procedure FillPolygon(const APoly: TBLArrayView<TBLPointI>; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with the current fill style.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba32); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLRgba64); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TAlphaColor); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLPattern); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLGradient); overload; inline;
 
     /// <summary>
     ///  Fills a polygon `APoly` having 'ACount' vertices (integer
     ///  coordinates) with an explicit fill `AStyle`.
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
-    procedure FillPoly(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
+    procedure FillPolygon(const APoly: PBLPointI; const ACount: NativeInt; const AStyle: TBLVar); overload; inline;
 
     /// <summary>
     ///  Fills an `AArray` of boxes (floating point coordinates) with the
@@ -21849,20 +21849,20 @@ begin
 end;
 
 class function TBLFileSystem.WriteFile(const AFilename: String; const AData;
-  const ASize: NativeInt): NativeInt;
+  const ACount: NativeInt): NativeInt;
 begin
   var BytesWritten: Size_T;
   _BLCheck(_blFileSystemWriteFile(PUTF8Char(UTF8String(AFilename)), @AData,
-    ASize, @BytesWritten));
+    ACount, @BytesWritten));
   Result := BytesWritten;
 end;
 
 class function TBLFileSystem.WriteFile(const AFilename: String;
-  const AData: TBLArrayView<Byte>; const ASize: NativeInt): NativeInt;
+  const AData: TBLArrayView<Byte>): NativeInt;
 begin
   var BytesWritten: Size_T;
   _BLCheck(_blFileSystemWriteFile(PUTF8Char(UTF8String(AFilename)), AData.FData,
-    AData.FSize, @BytesWritten));
+    AData.FCount, @BytesWritten));
   Result := BytesWritten;
 end;
 
@@ -21871,7 +21871,7 @@ class function TBLFileSystem.WriteFile(const AFilename: String;
 begin
   var BytesWritten: Size_T;
   _BLCheck(_blFileSystemWriteFile(PUTF8Char(UTF8String(AFilename)), AData.Data,
-    AData.Size, @BytesWritten));
+    AData.Count, @BytesWritten));
   Result := BytesWritten;
 end;
 
@@ -23543,18 +23543,18 @@ end;
 { TBLPathView }
 
 procedure TBLPathView.Reset(const ACommandDataIn: PByte;
-  const AVertexDataIn: PBLPoint; const ASizeIn: NativeInt);
+  const AVertexDataIn: PBLPoint; const ACountIn: NativeInt);
 begin
   FCommandData := ACommandDataIn;
   FVertexData := AVertexDataIn;
-  FSize := ASizeIn;
+  FCount := ACountIn;
 end;
 
 procedure TBLPathView.Reset;
 begin
   FCommandData := nil;
   FVertexData := nil;
-  FSize := 0;
+  FCount := 0;
 end;
 
 { TBLPath }
@@ -24323,12 +24323,17 @@ end;
 function TBLPath.GetCommandDataEnd: PByte;
 begin
   Result := _blPathGetCommandData(@Self);
-  Inc(Result, Size);
+  Inc(Result, Count);
 end;
 
 function TBLPath.GetControlBox: TBLBox;
 begin
   _BLCheck(_blPathGetControlBox(@Self, @Result));
+end;
+
+function TBLPath.GetCount: NativeInt;
+begin
+  Result := _blPathGetSize(@Self);
 end;
 
 function TBLPath.GetFigureRange(const AIndex: Integer): TBLRange;
@@ -24343,17 +24348,12 @@ end;
 
 function TBLPath.GetIsEmpty: Boolean;
 begin
-  Result := (Size = 0);
+  Result := (Count = 0);
 end;
 
 function TBLPath.GetLastVertex: TBLPoint;
 begin
   _BLCheck(_blPathGetLastVertex(@Self, @Result));
-end;
-
-function TBLPath.GetSize: NativeInt;
-begin
-  Result := _blPathGetSize(@Self);
 end;
 
 function TBLPath.GetVertexData: PBLPoint;
@@ -24364,7 +24364,7 @@ end;
 function TBLPath.GetVertexDataEnd: PBLPoint;
 begin
   Result := _blPathGetVertexData(@Self);
-  Inc(Result, Size);
+  Inc(Result, Count);
 end;
 
 function TBLPath.HitTest(const AP: TBLPoint;
@@ -24388,10 +24388,10 @@ begin
   _BLCheck(_blPathLineTo(@Self, AP1.X, AP1.Y));
 end;
 
-procedure TBLPath.ModifyOp(const AOp: TBLModifyOp; const ASize: NativeInt;
+procedure TBLPath.ModifyOp(const AOp: TBLModifyOp; const ACount: NativeInt;
   out ACmdDataOut: PByte; out AVertexDataOut: PBLPoint);
 begin
-  _BLCheck(_blPathModifyOp(@Self, Ord(AOp), ASize, @ACmdDataOut, @AVertexDataOut));
+  _BLCheck(_blPathModifyOp(@Self, Ord(AOp), ACount, @ACmdDataOut, @AVertexDataOut));
 end;
 
 procedure TBLPath.MoveTo(const AP0: TBLPoint);
@@ -24533,10 +24533,10 @@ begin
   Assert(not System.HasWeakRef(T));
 end;
 
-constructor TBLArrayView<T>.Create(const ADataIn: P; const ASizeIn: NativeInt);
+constructor TBLArrayView<T>.Create(const ADataIn: P; const ACountIn: NativeInt);
 begin
   FData := ADataIn;
-  FSize := ASizeIn;
+  FCount := ACountIn;
 end;
 
 function TBLArrayView<T>.First: P;
@@ -24546,37 +24546,37 @@ end;
 
 function TBLArrayView<T>.GetItem(const AIndex: NativeInt): T;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(FSize));
+  Assert(NativeUInt(AIndex) < NativeUInt(FCount));
   Result := FData[AIndex];
 end;
 
 function TBLArrayView<T>.GetRef(const AIndex: NativeInt): P;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(FSize));
+  Assert(NativeUInt(AIndex) < NativeUInt(FCount));
   Result := FData + AIndex;
 end;
 
 class operator TBLArrayView<T>.Initialize(out ADest: TBLArrayView<T>);
 begin
   ADest.FData := nil;
-  ADest.FSize := 0;
+  ADest.FCount := 0;
 end;
 
 function TBLArrayView<T>.Last: P;
 begin
-  Result := FData + FSize - 1;
+  Result := FData + FCount - 1;
 end;
 
 procedure TBLArrayView<T>.Reset;
 begin
   FData := nil;
-  FSize := 0;
+  FCount := 0;
 end;
 
-procedure TBLArrayView<T>.Reset(const ADataIn: P; const ASizeIn: NativeInt);
+procedure TBLArrayView<T>.Reset(const ADataIn: P; const ACountIn: NativeInt);
 begin
   FData := ADataIn;
-  FSize := ASizeIn;
+  FCount := ACountIn;
 end;
 
 { TBLRange }
@@ -24621,14 +24621,14 @@ begin
   Modify(TBLModifyOp.AppendGrow, AItems);
 end;
 
-procedure TBLArray<T>.AppendData(const AItems: P; const ASize: NativeInt);
+procedure TBLArray<T>.AppendData(const AItems: P; const ACount: NativeInt);
 begin
-  _BLCheck(_blArrayAppendData(@Self, AItems, ASize));
+  _BLCheck(_blArrayAppendData(@Self, AItems, ACount));
 end;
 
 procedure TBLArray<T>.AppendData(const AView: TBLArrayView<T>);
 begin
-  _BLCheck(_blArrayAppendData(@Self, AView.FData, AView.FSize));
+  _BLCheck(_blArrayAppendData(@Self, AView.FData, AView.FCount));
 end;
 
 procedure TBLArray<T>.Append(const AItem: T);
@@ -24643,12 +24643,12 @@ end;
 
 procedure TBLArray<T>.AssignData(const AView: TBLArrayView<T>);
 begin
-  _BLCheck(_blArrayAssignData(@Self, AView.FData, AView.FSize));
+  _BLCheck(_blArrayAssignData(@Self, AView.FData, AView.FCount));
 end;
 
-procedure TBLArray<T>.AssignData(const AItems: P; const ASize: NativeInt);
+procedure TBLArray<T>.AssignData(const AItems: P; const ACount: NativeInt);
 begin
-  _BLCheck(_blArrayAssignData(@Self, AItems, ASize));
+  _BLCheck(_blArrayAssignData(@Self, AItems, ACount));
 end;
 
 procedure TBLArray<T>.AssignDeep(const AOther: TBLArray<T>);
@@ -24656,17 +24656,17 @@ begin
   _BLCheck(_blArrayAssignDeep(@Self, @AOther));
 end;
 
-procedure TBLArray<T>.AssignExternalData(const AData: P; const ASize,
+procedure TBLArray<T>.AssignExternalData(const AData: P; const ACount,
   ACapacity: NativeInt; const AAccessFlags: TBLDataAccessFlags;
   const ADestroyFunc: TBLDestroyExternalDataFunc; const AUserData: Pointer);
 begin
-  _BLCheck(_blArrayAssignExternalData(@Self, AData, ASize, ACapacity,
+  _BLCheck(_blArrayAssignExternalData(@Self, AData, ACount, ACapacity,
     Ord(AAccessFlags), ADestroyFunc, AUserData));
 end;
 
 function TBLArray<T>.At(const AIndex: NativeInt): T;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(Size));
+  Assert(NativeUInt(AIndex) < NativeUInt(Count));
   var Data := P(_blArrayGetData(@Self));
   Result := Data[AIndex];
 end;
@@ -24759,7 +24759,7 @@ end;
 class operator TBLArray<T>.Equal(const ALeft: TBLArray<T>;
   const ARight: Pointer): Boolean;
 begin
-  if (ALeft.Size = 0) then
+  if (ALeft.Count = 0) then
     Result := (ARight = nil)
   else
     Result := (ARight <> nil);
@@ -24791,6 +24791,11 @@ begin
   Result := _blArrayGetCapacity(@Self);
 end;
 
+function TBLArray<T>.GetCount: NativeInt;
+begin
+  Result := _blArrayGetSize(@Self);
+end;
+
 function TBLArray<T>.GetData: P;
 begin
   Result := _blArrayGetData(@Self);
@@ -24798,7 +24803,7 @@ end;
 
 function TBLArray<T>.GetIsEmpty: Boolean;
 begin
-  Result := (Size = 0);
+  Result := (Count = 0);
 end;
 
 function TBLArray<T>.GetItem(const AIndex: NativeInt): T;
@@ -24811,11 +24816,6 @@ begin
   Result := RefAt(AIndex);
 end;
 
-function TBLArray<T>.GetSize: NativeInt;
-begin
-  Result := _blArrayGetSize(@Self);
-end;
-
 function TBLArray<T>.IndexOf(const AItem: T): NativeInt;
 begin
   Result := IndexOf(AItem, 0);
@@ -24825,7 +24825,7 @@ function TBLArray<T>.IndexOf(const AItem: T;
   const AFromIndex: NativeInt): NativeInt;
 begin
   var P := GetData;
-  var IEnd := GetSize;
+  var IEnd := GetCount;
   for var I: NativeInt := AFromIndex to IEnd - 1 do
   begin
     if (_TBLGenericUtils<T>.AreEqual(P^, AItem)) then
@@ -24848,15 +24848,15 @@ begin
 end;
 
 procedure TBLArray<T>.InsertData(const AIndex: NativeInt; const AItems: P;
-  const ASize: NativeInt);
+  const ACount: NativeInt);
 begin
-  _BLCheck(_blArrayInsertData(@Self, AIndex, AItems, ASize));
+  _BLCheck(_blArrayInsertData(@Self, AIndex, AItems, ACount));
 end;
 
 procedure TBLArray<T>.InsertData(const AIndex: NativeInt;
   const AView: TBLArrayView<T>);
 begin
-  _BLCheck(_blArrayInsertData(@Self, AIndex, AView.FData, AView.FSize));
+  _BLCheck(_blArrayInsertData(@Self, AIndex, AView.FData, AView.FCount));
 end;
 
 procedure TBLArray<T>.Insert(const AIndex: NativeInt; const AItem: T);
@@ -24864,21 +24864,21 @@ begin
   _BLCheck(_blArrayInsertItem(@Self, AIndex, @AItem));
 end;
 
-function TBLArray<T>.InsertOp(const AIndex, ASize: NativeInt): P;
+function TBLArray<T>.InsertOp(const AIndex, ACount: NativeInt): P;
 begin
-  _BLCheck(_blArrayInsertOp(@Self, AIndex, ASize, @Result));
+  _BLCheck(_blArrayInsertOp(@Self, AIndex, ACount, @Result));
 end;
 
 function TBLArray<T>.Last: P;
 begin
-  Result := RefAt(Size - 1);
+  Result := RefAt(Count - 1);
 end;
 
 function TBLArray<T>.LastIndexOf(const AItem: T;
   const AFromIndex: NativeInt): NativeInt;
 begin
   var P := GetData;
-  var I := GetSize - 1;
+  var I := GetCount - 1;
   if (I < 0) then
     Exit(-1);
 
@@ -24896,7 +24896,7 @@ end;
 function TBLArray<T>.LastIndexOf(const AItem: T): NativeInt;
 begin
   var P := GetData;
-  var Count := GetSize;
+  var Count := GetCount;
   Inc(P, Count - 1);
   for var I: NativeInt := Count - 1 downto 0 do
   begin
@@ -24920,15 +24920,15 @@ begin
 end;
 
 function TBLArray<T>.ModifyOp(const AOp: TBLModifyOp;
-  const ASize: NativeInt): P;
+  const ACount: NativeInt): P;
 begin
-  _BLCheck(_blArrayModifyOp(@Self, Ord(AOp), ASize, @Result));
+  _BLCheck(_blArrayModifyOp(@Self, Ord(AOp), ACount, @Result));
 end;
 
 class operator TBLArray<T>.NotEqual(const ALeft: TBLArray<T>;
   const ARight: Pointer): Boolean;
 begin
-  if (ALeft.Size = 0) then
+  if (ALeft.Count = 0) then
     Result := (ARight <> nil)
   else
     Result := (ARight = nil);
@@ -24949,19 +24949,19 @@ begin
   Insert(0, AItems);
 end;
 
-procedure TBLArray<T>.PrependData(const AItems: P; const ASize: NativeInt);
+procedure TBLArray<T>.PrependData(const AItems: P; const ACount: NativeInt);
 begin
-  _BLCheck(_blArrayInsertData(@Self, 0, AItems, ASize));
+  _BLCheck(_blArrayInsertData(@Self, 0, AItems, ACount));
 end;
 
 procedure TBLArray<T>.PrependData(const AView: TBLArrayView<T>);
 begin
-  _BLCheck(_blArrayInsertData(@Self, 0, AView.FData, AView.FSize));
+  _BLCheck(_blArrayInsertData(@Self, 0, AView.FData, AView.FCount));
 end;
 
 function TBLArray<T>.RefAt(const AIndex: NativeInt): P;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(Size));
+  Assert(NativeUInt(AIndex) < NativeUInt(Count));
   var Data := P(_blArrayGetData(@Self));
   Result := Data + AIndex;
 end;
@@ -24982,15 +24982,15 @@ begin
 end;
 
 procedure TBLArray<T>.ReplaceData(const ARange: TBLRange; const AItems: P;
-  const ASize: NativeInt);
+  const ACount: NativeInt);
 begin
-  _BLCheck(_blArrayReplaceData(@Self, ARange.Start, ARange.Stop, AItems, ASize));
+  _BLCheck(_blArrayReplaceData(@Self, ARange.Start, ARange.Stop, AItems, ACount));
 end;
 
 procedure TBLArray<T>.ReplaceData(const ARange: TBLRange;
   const AView: TBLArrayView<T>);
 begin
-  _BLCheck(_blArrayReplaceData(@Self, ARange.Start, ARange.Stop, AView.FData, AView.FSize));
+  _BLCheck(_blArrayReplaceData(@Self, ARange.Start, ARange.Stop, AView.FData, AView.FCount));
 end;
 
 procedure TBLArray<T>.Reserve(const AMinCapacity: NativeInt);
@@ -25003,9 +25003,9 @@ begin
   _BLCheck(_blArrayReset(@Self));
 end;
 
-procedure TBLArray<T>.Resize(const ASize: NativeInt; const AFill: T);
+procedure TBLArray<T>.Resize(const ACount: NativeInt; const AFill: T);
 begin
-  _BLCheck(_blArrayResize(@Self, ASize, @AFill));
+  _BLCheck(_blArrayResize(@Self, ACount, @AFill));
 end;
 
 procedure TBLArray<T>.SetItem(const AIndex: NativeInt; const AValue: T);
@@ -25025,7 +25025,7 @@ end;
 
 function TBLArray<T>.ToArray: TArray<T>;
 begin
-  SetLength(Result, Size);
+  SetLength(Result, Count);
   if (FArrayType = TBLObjectType.ArrayObject) then
   begin
     { Call CMR operators }
@@ -25040,14 +25040,14 @@ begin
     Move(Data^, Result[0], Length(Result) * SizeOf(T));
 end;
 
-procedure TBLArray<T>.Truncate(const AMaxSize: NativeInt);
+procedure TBLArray<T>.Truncate(const AMaxCount: NativeInt);
 begin
-  _BLCheck(_blArrayResize(@Self, Min(Size, AMaxSize), nil));
+  _BLCheck(_blArrayResize(@Self, Min(Count, AMaxCount), nil));
 end;
 
 function TBLArray<T>.View: TBLArrayView<T>;
 begin
-  Result.Reset(Data, Size);
+  Result.Reset(Data, Count);
 end;
 
 { TBLString }
@@ -25059,12 +25059,12 @@ end;
 
 constructor TBLString.Create(const AView: TBLStringView);
 begin
-  _BLCheck(_blStringInitWithData(@Self, Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blStringInitWithData(@Self, Pointer(AView.FData), AView.FCount));
 end;
 
-constructor TBLString.Create(const AStr: PUTF8Char; const ASize: NativeInt);
+constructor TBLString.Create(const AStr: PUTF8Char; const ALength: NativeInt);
 begin
-  _BLCheck(_blStringInitWithData(@Self, AStr, ASize));
+  _BLCheck(_blStringInitWithData(@Self, AStr, ALength));
 end;
 
 function TBLString.Compare(const AOther: TBLString): Integer;
@@ -25074,18 +25074,18 @@ end;
 
 function TBLString.Compare(const AOther: TBLStringView): Integer;
 begin
-  Result := _blStringCompareData(@Self, Pointer(AOther.FData), AOther.FSize);
+  Result := _blStringCompareData(@Self, Pointer(AOther.FData), AOther.FCount);
 end;
 
 function TBLString.Compare(const AOther: PUTF8Char;
-  const ASize: NativeInt): Integer;
+  const ALength: NativeInt): Integer;
 begin
-  Result := _blStringCompareData(@Self, AOther, ASize);
+  Result := _blStringCompareData(@Self, AOther, ALength);
 end;
 
 function TBLString.Compare(const AOther: UTF8String): Integer;
 begin
-  Result := Compare(PUTF8Char(AOther), Length(AOther));
+  Result := Compare(PUTF8Char(AOther), System.Length(AOther));
 end;
 
 procedure TBLString.Assign(const AChar: UTF8Char; const ACount: NativeInt);
@@ -25095,7 +25095,7 @@ end;
 
 procedure TBLString.Assign(const AView: TBLStringView);
 begin
-  _BLCheck(_blStringAssignData(@Self, Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blStringAssignData(@Self, Pointer(AView.FData), AView.FCount));
 end;
 
 procedure TBLString.Append(const AChar: UTF8Char; const ACount: NativeInt);
@@ -25110,17 +25110,17 @@ end;
 
 procedure TBLString.Append(const AView: TBLStringView);
 begin
-  _BLCheck(_blStringApplyOpData(@Self, Ord(TBLModifyOp.AppendGrow), Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blStringApplyOpData(@Self, Ord(TBLModifyOp.AppendGrow), Pointer(AView.FData), AView.FCount));
 end;
 
-procedure TBLString.Append(const AStr: PUTF8Char; const ASize: NativeInt);
+procedure TBLString.Append(const AStr: PUTF8Char; const ALength: NativeInt);
 begin
-  _BLCheck(_blStringApplyOpData(@Self, Ord(TBLModifyOp.AppendGrow), AStr, ASize));
+  _BLCheck(_blStringApplyOpData(@Self, Ord(TBLModifyOp.AppendGrow), AStr, ALength));
 end;
 
 procedure TBLString.Append(const AStr: UTF8String);
 begin
-  _BLCheck(_blStringApplyOpData(@Self, Ord(TBLModifyOp.AppendGrow), PUTF8Char(AStr), Length(AStr)));
+  _BLCheck(_blStringApplyOpData(@Self, Ord(TBLModifyOp.AppendGrow), PUTF8Char(AStr), System.Length(AStr)));
 end;
 
 procedure TBLString.Append(const AStr: String);
@@ -25134,9 +25134,9 @@ begin
   Append(Format(AFmt, AArgs));
 end;
 
-procedure TBLString.Assign(const AStr: PUTF8Char; const ASize: NativeInt);
+procedure TBLString.Assign(const AStr: PUTF8Char; const ALength: NativeInt);
 begin
-  _BLCheck(_blStringAssignData(@Self, AStr, ASize));
+  _BLCheck(_blStringAssignData(@Self, AStr, ALength));
 end;
 
 procedure TBLString.AssignDeep(const AOther: TBLString);
@@ -25149,12 +25149,12 @@ procedure TBLString.AssignFormat(const AFmt: String;
 begin
   var Formatted := Format(AFmt, AArgs);
   var S := UTF8String(Formatted);
-  _BLCheck(_blStringAssignData(@Self, PUTF8Char(S), Length(S)));
+  _BLCheck(_blStringAssignData(@Self, PUTF8Char(S), System.Length(S)));
 end;
 
 function TBLString.At(const AIndex: NativeInt): UTF8Char;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(GetSize));
+  Assert(NativeUInt(AIndex) < NativeUInt(GetLength));
   Result := Data[AIndex];
 end;
 
@@ -25166,18 +25166,18 @@ end;
 function TBLString.Compare(const AOther: String): Integer;
 begin
   var S := UTF8String(AOther);
-  Result := Compare(PUTF8Char(S), Length(S));
+  Result := Compare(PUTF8Char(S), System.Length(S));
 end;
 
 constructor TBLString.Create(const AStr: UTF8String);
 begin
-  _BLCheck(_blStringInitWithData(@Self, Pointer(AStr), Length(AStr)));
+  _BLCheck(_blStringInitWithData(@Self, Pointer(AStr), System.Length(AStr)));
 end;
 
 constructor TBLString.Create(const AStr: String);
 begin
   var S := UTF8String(AStr);
-  _BLCheck(_blStringInitWithData(@Self, Pointer(S), Length(S)));
+  _BLCheck(_blStringInitWithData(@Self, Pointer(S), System.Length(S)));
 end;
 
 class operator TBLString.Equal(const ALeft: TBLString;
@@ -25219,14 +25219,14 @@ begin
 end;
 
 function TBLString.Equals(const AOther: PUTF8Char;
-  const ASize: NativeInt): Boolean;
+  const ALength: NativeInt): Boolean;
 begin
-  Result := _blStringEqualsData(@Self, AOther, ASize);
+  Result := _blStringEqualsData(@Self, AOther, ALength);
 end;
 
 function TBLString.Equals(const AOther: TBLStringView): Boolean;
 begin
-  Result := _blStringEqualsData(@Self, Pointer(AOther.FData), AOther.FSize);
+  Result := _blStringEqualsData(@Self, Pointer(AOther.FData), AOther.FCount);
 end;
 
 function TBLString.Equals(const AOther: TBLString): Boolean;
@@ -25236,13 +25236,13 @@ end;
 
 function TBLString.Equals(const AOther: UTF8String): Boolean;
 begin
-  Result := Equals(PUTF8Char(AOther), Length(AOther));
+  Result := Equals(PUTF8Char(AOther), System.Length(AOther));
 end;
 
 function TBLString.Equals(const AOther: String): Boolean;
 begin
   var S := UTF8String(AOther);
-  Result := Equals(PUTF8Char(S), Length(S));
+  Result := Equals(PUTF8Char(S), System.Length(S));
 end;
 
 class operator TBLString.Finalize(var ADest: TBLString);
@@ -25268,10 +25268,10 @@ end;
 
 function TBLString.GetIsEmpty: Boolean;
 begin
-  Result := (Size = 0);
+  Result := (Length = 0);
 end;
 
-function TBLString.GetSize: NativeInt;
+function TBLString.GetLength: NativeInt;
 begin
   Result := _blStringGetSize(@Self);
 end;
@@ -25338,12 +25338,12 @@ end;
 class operator TBLString.Implicit(const AStr: String): TBLString;
 begin
   var S := UTF8String(AStr);
-  _BLCheck(_blStringInitWithData(@Result, Pointer(S), Length(S)));
+  _BLCheck(_blStringInitWithData(@Result, Pointer(S), System.Length(S)));
 end;
 
 class operator TBLString.Implicit(const AStr: UTF8String): TBLString;
 begin
-  _BLCheck(_blStringInitWithData(@Result, Pointer(AStr), Length(AStr)));
+  _BLCheck(_blStringInitWithData(@Result, Pointer(AStr), System.Length(AStr)));
 end;
 
 function TBLString.IndexOf(const AChar: UTF8Char): NativeInt;
@@ -25354,7 +25354,7 @@ end;
 function TBLString.IndexOf(const AChar: UTF8Char;
   const AFromIndex: NativeInt): NativeInt;
 begin
-  var IEnd := GetSize;
+  var IEnd := GetLength;
   var P := GetData;
 
   for var I := AFromIndex to IEnd - 1 do
@@ -25373,7 +25373,7 @@ end;
 
 procedure TBLString.Insert(const AIndex: NativeInt; const AView: TBLStringView);
 begin
-  _BLCheck(_blStringInsertData(@Self, AIndex, PUTF8Char(AView.FData), AView.FSize));
+  _BLCheck(_blStringInsertData(@Self, AIndex, PUTF8Char(AView.FData), AView.FCount));
 end;
 
 procedure TBLString.Insert(const AIndex: NativeInt; const AOther: TBLString);
@@ -25394,18 +25394,18 @@ end;
 
 procedure TBLString.Insert(const AIndex: NativeInt; const AStr: UTF8String);
 begin
-  _BLCheck(_blStringInsertData(@Self, AIndex, PUTF8Char(AStr), Length(AStr)));
+  _BLCheck(_blStringInsertData(@Self, AIndex, PUTF8Char(AStr), System.Length(AStr)));
 end;
 
 procedure TBLString.Insert(const AIndex: NativeInt; const AStr: PUTF8Char;
-  const ASize: NativeInt);
+  const ALength: NativeInt);
 begin
-  _BLCheck(_blStringInsertData(@Self, AIndex, AStr, ASize));
+  _BLCheck(_blStringInsertData(@Self, AIndex, AStr, ALength));
 end;
 
-function TBLString.InsertOp(const AIndex, ASize: NativeInt): PUTF8Char;
+function TBLString.InsertOp(const AIndex, ALength: NativeInt): PUTF8Char;
 begin
-  _BLCheck(_blStringInsertOp(@Self, AIndex, ASize, @Result));
+  _BLCheck(_blStringInsertOp(@Self, AIndex, ALength, @Result));
 end;
 
 class operator TBLString.LessThan(const ALeft, ARight: TBLString): Boolean;
@@ -25433,7 +25433,7 @@ end;
 
 function TBLString.LastIndexOf(const AChar: UTF8Char): NativeInt;
 begin
-  var I := GetSize - 1;
+  var I := GetLength - 1;
   var P := GetData;
 
   while (I >= 0) and (P[I] <> AChar) do
@@ -25445,7 +25445,7 @@ end;
 function TBLString.LastIndexOf(const AChar: UTF8Char;
   const AFromIndex: NativeInt): NativeInt;
 begin
-  var I := GetSize - 1;
+  var I := GetLength - 1;
   var P := GetData;
 
   if (I < 0) then
@@ -25500,9 +25500,9 @@ begin
 end;
 
 function TBLString.ModifyOp(const AOp: TBLModifyOp;
-  const ASize: NativeInt): PUTF8Char;
+  const ALength: NativeInt): PUTF8Char;
 begin
-  _BLCheck(_blStringModifyOp(@Self, Ord(AOp), ASize, @Result));
+  _BLCheck(_blStringModifyOp(@Self, Ord(AOp), ALength, @Result));
 end;
 
 class operator TBLString.NotEqual(const ALeft: TBLString;
@@ -25545,7 +25545,7 @@ end;
 
 procedure TBLString.Prepend(const AView: TBLStringView);
 begin
-  _BLCheck(_blStringInsertData(@Self, 0, Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blStringInsertData(@Self, 0, Pointer(AView.FData), AView.FCount));
 end;
 
 procedure TBLString.Prepend(const AOther: TBLString);
@@ -25565,12 +25565,12 @@ end;
 
 procedure TBLString.Prepend(const AStr: UTF8String);
 begin
-  _BLCheck(_blStringInsertData(@Self, 0, PUTF8Char(AStr), Length(AStr)));
+  _BLCheck(_blStringInsertData(@Self, 0, PUTF8Char(AStr), System.Length(AStr)));
 end;
 
-procedure TBLString.Prepend(const AStr: PUTF8Char; const ASize: NativeInt);
+procedure TBLString.Prepend(const AStr: PUTF8Char; const ALength: NativeInt);
 begin
-  _BLCheck(_blStringInsertData(@Self, 0, AStr, ASize));
+  _BLCheck(_blStringInsertData(@Self, 0, AStr, ALength));
 end;
 
 procedure TBLString.Remove(const AIndex: NativeInt);
@@ -25593,9 +25593,9 @@ begin
   _BLCheck(_blStringReset(@Self));
 end;
 
-procedure TBLString.Resize(const ASize: NativeInt; const AFill: UTF8Char);
+procedure TBLString.Resize(const ALength: NativeInt; const AFill: UTF8Char);
 begin
-  _BLCheck(_blStringResize(@Self, ASize, AFill));
+  _BLCheck(_blStringResize(@Self, ALength, AFill));
 end;
 
 procedure TBLString.Shrink;
@@ -25611,18 +25611,18 @@ end;
 function TBLString.ToString: String;
 begin
   var S: UTF8String;
-  SetString(S, Data, Size);
+  SetString(S, Data, Length);
   Result := String(S);
 end;
 
-procedure TBLString.Truncate(const ASize: NativeInt);
+procedure TBLString.Truncate(const ALength: NativeInt);
 begin
-  _BLCheck(_blStringResize(@Self, ASize, #0));
+  _BLCheck(_blStringResize(@Self, ALength, #0));
 end;
 
 function TBLString.View: TBLStringView;
 begin
-  Result.Reset(Pointer(Data), Size);
+  Result.Reset(Pointer(Data), Length);
 end;
 
 { TBLBitArray }
@@ -25766,6 +25766,11 @@ begin
   Result := _blBitArrayGetCardinality(@Self);
 end;
 
+function TBLBitArray.GetCount: Integer;
+begin
+  Result := _blBitArrayGetSize(@Self);
+end;
+
 function TBLBitArray.GetData: PUInt32;
 begin
   Result := _blBitArrayGetData(@Self);
@@ -25774,11 +25779,6 @@ end;
 function TBLBitArray.GetIsEmpty: Boolean;
 begin
   Result := _blBitArrayIsEmpty(@Self);
-end;
-
-function TBLBitArray.GetSize: Integer;
-begin
-  Result := _blBitArrayGetSize(@Self);
 end;
 
 function TBLBitArray.GetWordCount: Integer;
@@ -27065,7 +27065,7 @@ end;
 
 procedure TBLGradient.AssignStops(const AStops: TBLArrayView<TBLGradientStop>);
 begin
-  _BLCheck(_blGradientAssignStops(@Self, AStops.FData, AStops.FSize));
+  _BLCheck(_blGradientAssignStops(@Self, AStops.FData, AStops.FCount));
 end;
 
 constructor TBLGradient.Create(const AValues: TBLConicGradientValues;
@@ -27132,6 +27132,11 @@ begin
   Result := PImpl(FBase.FImpl).Values[TBLGradientValue.ConicRepeat];
 end;
 
+function TBLGradient.GetCount: NativeInt;
+begin
+  Result := PImpl(FBase.FImpl).Size;
+end;
+
 function TBLGradient.GetExtendMode: TBLExtendMode;
 begin
   Result := TBLExtendMode(_blGradientGetExtendMode(@Self));
@@ -27172,14 +27177,9 @@ begin
   Result := PImpl(FBase.FImpl).Radial;
 end;
 
-function TBLGradient.GetSize: NativeInt;
-begin
-  Result := PImpl(FBase.FImpl).Size;
-end;
-
 function TBLGradient.GetStop(const AIndex: NativeInt): TBLGradientStop;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(GetSize));
+  Assert(NativeUInt(AIndex) < NativeUInt(GetCount));
   Result := PImpl(FBase.FImpl).Stops[AIndex];
 end;
 
@@ -27699,6 +27699,11 @@ end;
 
 { TBLGlyphRun }
 
+function TBLGlyphRun.GetCount: NativeInt;
+begin
+  Result := FCount;
+end;
+
 function TBLGlyphRun.GetFlags: TBLGlyphRunFlags;
 begin
   Cardinal(Result) := FFlags;
@@ -27711,7 +27716,7 @@ end;
 
 function TBLGlyphRun.GetIsEmpty: Boolean;
 begin
-  Result := (FSize = 0);
+  Result := (FCount = 0);
 end;
 
 function TBLGlyphRun.GetPlacementDataAsGlyphPlacements: PBLGlyphPlacement;
@@ -27727,11 +27732,6 @@ end;
 function TBLGlyphRun.GetPlacementType: TBLGlyphPlacementType;
 begin
   Result := TBLGlyphPlacementType(FPlacementType);
-end;
-
-function TBLGlyphRun.GetSize: NativeInt;
-begin
-  Result := FSize;
 end;
 
 procedure TBLGlyphRun.Reset;
@@ -27795,7 +27795,7 @@ end;
 
 function TBLGlyphRunIterator.AtEnd: Boolean;
 begin
-  Result := (FIndex = FSize);
+  Result := (FIndex = FCount);
 end;
 
 constructor TBLGlyphRunIterator.Create(const AGlyphRun: TBLGlyphRun);
@@ -27815,7 +27815,7 @@ end;
 
 function TBLGlyphRunIterator.GetIsEmpty: Boolean;
 begin
-  Result := (FSize = 0);
+  Result := (FCount = 0);
 end;
 
 function TBLGlyphRunIterator.GetPlacementAsGlyphPlacement: TBLGlyphPlacement;
@@ -27843,7 +27843,7 @@ end;
 procedure TBLGlyphRunIterator.Reset(const AGlyphRun: TBLGlyphRun);
 begin
   FIndex := 0;
-  FSize := AGlyphRun.FSize;
+  FCount := AGlyphRun.FCount;
   FGlyphData := AGlyphRun.FGlyphData;
   FPlacementData := AGlyphRun.FPlacementData;
   FGlyphAdvance := AGlyphRun.FGlyphAdvance;
@@ -27903,6 +27903,11 @@ begin
   Result := PImpl(FBase.FImpl).Content;
 end;
 
+function TBLGlyphBuffer.GetCount: NativeInt;
+begin
+  Result := PImpl(FBase.FImpl).Size;
+end;
+
 function TBLGlyphBuffer.GetFlags: TBLGlyphRunFlags;
 begin
   Cardinal(Result) := PImpl(FBase.FImpl).Flags;
@@ -27953,11 +27958,6 @@ begin
   Result := PImpl(FBase.FImpl).PlacementData;
 end;
 
-function TBLGlyphBuffer.GetSize: NativeInt;
-begin
-  Result := PImpl(FBase.FImpl).Size;
-end;
-
 function TBLGlyphBuffer.HasFlag(const AFlag: TBLGlyphRunFlag): Boolean;
 begin
   Result := (AFlag in GetFlags);
@@ -27994,15 +27994,15 @@ begin
 end;
 
 procedure TBLGlyphBuffer.SetGlyphs(const AGlyphData: PUInt32;
-  const ASize: NativeInt);
+  const ACount: NativeInt);
 begin
-  _BLCheck(_blGlyphBufferSetGlyphs(@Self, AGlyphData, ASize));
+  _BLCheck(_blGlyphBufferSetGlyphs(@Self, AGlyphData, ACount));
 end;
 
 procedure TBLGlyphBuffer.SetGlyphsFromRecord(const AGlyphData: Pointer;
-  const ASize, AGlyphIdSize, AGlyphAdvance: NativeInt);
+  const ACount, AGlyphIdSize, AGlyphAdvance: NativeInt);
 begin
-  _BLCheck(_blGlyphBufferSetGlyphsFromStruct(@Self, AGlyphData, ASize,
+  _BLCheck(_blGlyphBufferSetGlyphsFromStruct(@Self, AGlyphData, ACount,
     AGlyphIdSize, AGlyphAdvance));
 end;
 
@@ -28772,21 +28772,21 @@ end;
 
 { TBLFontFeatureSettingsView }
 
+function TBLFontFeatureSettingsView.GetCount: NativeInt;
+begin
+  Result := FCount;
+end;
+
 function TBLFontFeatureSettingsView.GetIsEmpty: Boolean;
 begin
-  Result := (FSize = 0);
+  Result := (FCount = 0);
 end;
 
 function TBLFontFeatureSettingsView.GetItem(
   const AIndex: NativeInt): TBLFontFeatureItem;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(FSize));
+  Assert(NativeUInt(AIndex) < NativeUInt(FCount));
   Result := FData[AIndex];
-end;
-
-function TBLFontFeatureSettingsView.GetSize: NativeInt;
-begin
-  Result := FSize;
 end;
 
 { TBLFontFeatureSettings }
@@ -28835,14 +28835,14 @@ begin
   Result := _blFontFeatureSettingsGetCapacity(@Self);
 end;
 
-function TBLFontFeatureSettings.GetIsEmpty: Boolean;
-begin
-  Result := (Size = 0);
-end;
-
-function TBLFontFeatureSettings.GetSize: NativeInt;
+function TBLFontFeatureSettings.GetCount: NativeInt;
 begin
   Result := _blFontFeatureSettingsGetSize(@Self);
+end;
+
+function TBLFontFeatureSettings.GetIsEmpty: Boolean;
+begin
+  Result := (Count = 0);
 end;
 
 function TBLFontFeatureSettings.GetValue(const AFeatureTag: TBLTag): Integer;
@@ -28912,21 +28912,21 @@ end;
 
 { TBLFontVariationSettingsView }
 
+function TBLFontVariationSettingsView.GetCount: NativeInt;
+begin
+  Result := FCount;
+end;
+
 function TBLFontVariationSettingsView.GetIsEmpty: Boolean;
 begin
-  Result := (FSize = 0);
+  Result := (FCount = 0);
 end;
 
 function TBLFontVariationSettingsView.GetItem(
   const AIndex: NativeInt): TBLFontVariationItem;
 begin
-  Assert(NativeUInt(AIndex) < NativeUInt(FSize));
+  Assert(NativeUInt(AIndex) < NativeUInt(FCount));
   Result := FData[AIndex];
-end;
-
-function TBLFontVariationSettingsView.GetSize: NativeInt;
-begin
-  Result := FSize;
 end;
 
 { TBLFontVariationSettings }
@@ -28976,14 +28976,14 @@ begin
   Result := _blFontVariationSettingsGetCapacity(@Self);
 end;
 
-function TBLFontVariationSettings.GetIsEmpty: Boolean;
-begin
-  Result := (Size = 0);
-end;
-
-function TBLFontVariationSettings.GetSize: NativeInt;
+function TBLFontVariationSettings.GetCount: NativeInt;
 begin
   Result := _blFontVariationSettingsGetSize(@Self);
+end;
+
+function TBLFontVariationSettings.GetIsEmpty: Boolean;
+begin
+  Result := (Count = 0);
 end;
 
 function TBLFontVariationSettings.GetValue(const AVariationTag: TBLTag): Single;
@@ -29412,7 +29412,7 @@ end;
 
 function TBLFontManager.QueryFace(const AName: TBLStringView): TBLFontFace;
 begin
-  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FSize,
+  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FCount,
     nil, @Result));
 end;
 
@@ -29427,7 +29427,7 @@ end;
 function TBLFontManager.QueryFace(const AName: TBLStringView;
   const AProperties: TBLFontQueryProperties): TBLFontFace;
 begin
-  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FSize,
+  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FCount,
     @AProperties, @Result));
 end;
 
@@ -29454,7 +29454,7 @@ function TBLFontManager.QueryFacesByFamilyName(
 begin
   var Faces: TBLArray<TBLFontFace>;
   _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData),
-    AName.FSize, @Faces));
+    AName.FCount, @Faces));
   Result := Faces.ToArray;
 end;
 
@@ -29462,7 +29462,7 @@ procedure TBLFontManager.QueryFacesByFamilyName(const AName: TBLStringView;
   const AOut: TBLArray<TBLFontFace>);
 begin
   _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData),
-    AName.FSize, @AOut));
+    AName.FCount, @AOut));
 end;
 
 class operator TBLFontManager.NotEqual(const ALeft: TBLFontManager;
@@ -29774,7 +29774,7 @@ end;
 procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo;
   const ABuffer: TBLArray<Byte>);
 begin
-  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, ABuffer.Data, ABuffer.Size));
+  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, ABuffer.Data, ABuffer.Count));
 end;
 
 procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo;
@@ -29786,7 +29786,7 @@ end;
 procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo;
   const AView: TBLArrayView<Byte>);
 begin
-  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, AView.FData, AView.FSize));
+  _BLCheck(_blImageDecoderReadInfo(@Self, @ADst, AView.FData, AView.FCount));
 end;
 
 procedure TBLImageDecoder.ReadInfo(out ADst: TBLImageInfo; const AData: Pointer;
@@ -29820,7 +29820,7 @@ end;
 procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
   const ABuffer: TBLArray<Byte>);
 begin
-  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, ABuffer.Data, ABuffer.Size));
+  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, ABuffer.Data, ABuffer.Count));
 end;
 
 procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
@@ -29832,7 +29832,7 @@ end;
 procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
   const AView: TBLArrayView<Byte>);
 begin
-  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, AView.FData, AView.FSize));
+  _BLCheck(_blImageDecoderReadFrame(@Self, @ADst, AView.FData, AView.FCount));
 end;
 
 procedure _TBLImageDecoderHelper.ReadFrame(out ADst: TBLImage;
@@ -29947,8 +29947,8 @@ function _TBLImageEncoderHelper.WriteFrame(const AImage: TBLImage): TBytes;
 begin
   var Dst: TBLArray<Byte>;
   _BLCheck(_blImageEncoderWriteFrame(@Self, @Dst, @AImage));
-  SetLength(Result, Dst.Size);
-  Move(Dst.Data^, Result[0], Dst.Size);
+  SetLength(Result, Dst.Count);
+  Move(Dst.Data^, Result[0], Dst.Count);
 end;
 
 { TBLImageCodec }
@@ -30002,12 +30002,12 @@ end;
 procedure TBLImageCodec.FindByData(const AView: TBLArrayView<Byte>;
   const ACodecs: TBLArray<TBLImageCodec>);
 begin
-  _BLCheck(_blImageCodecFindByData(@Self, AView.FData, AView.FSize, @ACodecs));
+  _BLCheck(_blImageCodecFindByData(@Self, AView.FData, AView.FCount, @ACodecs));
 end;
 
 procedure TBLImageCodec.FindByData(const AView: TBLArrayView<Byte>);
 begin
-  _BLCheck(_blImageCodecFindByData(@Self, AView.FData, AView.FSize, nil));
+  _BLCheck(_blImageCodecFindByData(@Self, AView.FData, AView.FCount, nil));
 end;
 
 procedure TBLImageCodec.FindByData(const AData: Pointer; const ASize: NativeInt;
@@ -30036,12 +30036,12 @@ end;
 procedure TBLImageCodec.FindByData(const ABuffer: TBLArray<Byte>;
   const ACodecs: TBLArray<TBLImageCodec>);
 begin
-  _BLCheck(_blImageCodecFindByData(@Self, ABuffer.Data, ABuffer.Size, @ACodecs));
+  _BLCheck(_blImageCodecFindByData(@Self, ABuffer.Data, ABuffer.Count, @ACodecs));
 end;
 
 procedure TBLImageCodec.FindByData(const ABuffer: TBLArray<Byte>);
 begin
-  _BLCheck(_blImageCodecFindByData(@Self, ABuffer.Data, ABuffer.Size, nil));
+  _BLCheck(_blImageCodecFindByData(@Self, ABuffer.Data, ABuffer.Count, nil));
 end;
 
 procedure TBLImageCodec.FindByExtension(const AExt: String;
@@ -30060,12 +30060,12 @@ end;
 procedure TBLImageCodec.FindByExtension(const AExt: TBLStringView;
   const ACodecs: TBLArray<TBLImageCodec>);
 begin
-  _BLCheck(_blImageCodecFindByExtension(@Self, Pointer(AExt.FData), AExt.FSize, @ACodecs));
+  _BLCheck(_blImageCodecFindByExtension(@Self, Pointer(AExt.FData), AExt.FCount, @ACodecs));
 end;
 
 procedure TBLImageCodec.FindByExtension(const AExt: TBLStringView);
 begin
-  _BLCheck(_blImageCodecFindByExtension(@Self, Pointer(AExt.FData), AExt.FSize, nil));
+  _BLCheck(_blImageCodecFindByExtension(@Self, Pointer(AExt.FData), AExt.FCount, nil));
 end;
 
 procedure TBLImageCodec.FindByName(const AName: String;
@@ -30084,12 +30084,12 @@ end;
 procedure TBLImageCodec.FindByName(const AName: TBLStringView;
   const ACodecs: TBLArray<TBLImageCodec>);
 begin
-  _BLCheck(_blImageCodecFindByName(@Self, Pointer(AName.FData), AName.FSize, @ACodecs));
+  _BLCheck(_blImageCodecFindByName(@Self, Pointer(AName.FData), AName.FCount, @ACodecs));
 end;
 
 procedure TBLImageCodec.FindByName(const AName: TBLStringView);
 begin
-  _BLCheck(_blImageCodecFindByName(@Self, Pointer(AName.FData), AName.FSize, nil));
+  _BLCheck(_blImageCodecFindByName(@Self, Pointer(AName.FData), AName.FCount, nil));
 end;
 
 class function TBLImageCodec.GetBuiltInCodecs: TBLArray<TBLImageCodec>;
@@ -30142,7 +30142,7 @@ end;
 
 function TBLImageCodec.InspectData(const ABuffer: TBLArray<Byte>): Cardinal;
 begin
-  Result := _blImageCodecInspectData(@Self, ABuffer.Data, ABuffer.Size);
+  Result := _blImageCodecInspectData(@Self, ABuffer.Data, ABuffer.Count);
 end;
 
 function TBLImageCodec.InspectData(const ABuffer: TBytes): Cardinal;
@@ -30152,7 +30152,7 @@ end;
 
 function TBLImageCodec.InspectData(const AView: TBLArrayView<Byte>): Cardinal;
 begin
-  Result := _blImageCodecInspectData(@Self, AView.FData, AView.FSize);
+  Result := _blImageCodecInspectData(@Self, AView.FData, AView.FCount);
 end;
 
 function TBLImageCodec.InspectData(const AData: Pointer;
@@ -30319,12 +30319,12 @@ end;
 procedure TBLImage.ReadFromData(const AArray: TBLArray<Byte>;
   const ACodecs: TBLArray<TBLImageCodec>);
 begin
-  _BLCheck(_blImageReadFromData(@Self, AArray.Data, AArray.Size, @ACodecs));
+  _BLCheck(_blImageReadFromData(@Self, AArray.Data, AArray.Count, @ACodecs));
 end;
 
 procedure TBLImage.ReadFromData(const AArray: TBLArray<Byte>);
 begin
-  _BLCheck(_blImageReadFromData(@Self, AArray.Data, AArray.Size, nil));
+  _BLCheck(_blImageReadFromData(@Self, AArray.Data, AArray.Count, nil));
 end;
 
 procedure TBLImage.ReadFromData(const AData: Pointer; const ASize: NativeInt;
@@ -30341,12 +30341,12 @@ end;
 procedure TBLImage.ReadFromData(const AView: TBLArrayView<Byte>;
   const ACodecs: TBLArray<TBLImageCodec>);
 begin
-  _BLCheck(_blImageReadFromData(@Self, AView.FData, AView.FSize, @ACodecs));
+  _BLCheck(_blImageReadFromData(@Self, AView.FData, AView.FCount, @ACodecs));
 end;
 
 procedure TBLImage.ReadFromData(const AView: TBLArrayView<Byte>);
 begin
-  _BLCheck(_blImageReadFromData(@Self, AView.FData, AView.FSize, nil));
+  _BLCheck(_blImageReadFromData(@Self, AView.FData, AView.FCount, nil));
 end;
 
 procedure TBLImage.ReadFromData(const AArray: TBytes;
@@ -30391,8 +30391,8 @@ function TBLImage.WriteToData(const ACodec: TBLImageCodec): TBytes;
 begin
   var Dst: TBLArray<Byte>;
   _BLCheck(_blImageWriteToData(@Self, @Dst, @ACodec));
-  SetLength(Result, Dst.Size);
-  Move(Dst.Data^, Result[0], Dst.Size);
+  SetLength(Result, Dst.Count);
+  Move(Dst.Data^, Result[0], Dst.Count);
 end;
 
 procedure TBLImage.WriteToData(const ADst: TBLArray<Byte>;
@@ -32697,288 +32697,288 @@ begin
   FillPie(BLArc(ACX, ACY, ARX, ARY, AStart, ASweep), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>;
   const AStyle: TBLRgba64);
 begin
   _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle.Value));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>;
   const AStyle: TBLRgba32);
 begin
   _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle.Value));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>;
   const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @Style));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>);
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>);
 begin
   _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.PolygonD), @APoly));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>;
   const AStyle: TBLVar);
 begin
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>;
   const AStyle: TBLGradient);
 begin
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>;
   const AStyle: TBLPattern);
 begin
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonD), @APoly, @AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPoint>;
   const AStyle: TAlphaColor);
 begin
   _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonD), @APoly, AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>;
   const AStyle: TBLRgba64);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>;
   const AStyle: TBLRgba32);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>;
   const AStyle: TBLRgba);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>);
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)));
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>;
   const AStyle: TBLVar);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>;
   const AStyle: TBLGradient);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>;
   const AStyle: TBLPattern);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPoint>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPoint>;
   const AStyle: TAlphaColor);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt;
   const AStyle: TBLRgba64);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt;
   const AStyle: TBLRgba32);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt;
   const AStyle: TBLRgba);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt);
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount));
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount));
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt;
   const AStyle: TBLVar);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt;
   const AStyle: TBLGradient);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt;
   const AStyle: TBLPattern);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPoint; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPoint; const ACount: NativeInt;
   const AStyle: TAlphaColor);
 begin
-  FillPoly(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPoint>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>;
   const AStyle: TBLRgba64);
 begin
   _BLCheck(_blContextFillGeometryRgba64(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle.Value));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>;
   const AStyle: TBLRgba32);
 begin
   _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle.Value));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>;
   const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @Style));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>);
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>);
 begin
   _BLCheck(_blContextFillGeometry(@Self, Ord(TBLGeometryType.PolygonI), @APoly));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>;
   const AStyle: TBLVar);
 begin
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>;
   const AStyle: TBLGradient);
 begin
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>;
   const AStyle: TBLPattern);
 begin
   _BLCheck(_blContextFillGeometryExt(@Self, Ord(TBLGeometryType.PolygonI), @APoly, @AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TBLArrayView<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TBLArrayView<TBLPointI>;
   const AStyle: TAlphaColor);
 begin
   _BLCheck(_blContextFillGeometryRgba32(@Self, Ord(TBLGeometryType.PolygonI), @APoly, AStyle));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>;
   const AStyle: TBLRgba64);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>;
   const AStyle: TBLRgba32);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>;
   const AStyle: TBLRgba);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>);
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)));
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)));
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>;
   const AStyle: TBLVar);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>;
   const AStyle: TBLGradient);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>;
   const AStyle: TBLPattern);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: TArray<TBLPointI>;
+procedure TBLContext.FillPolygon(const APoly: TArray<TBLPointI>;
   const AStyle: TAlphaColor);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), Length(APoly)), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt;
   const AStyle: TBLRgba64);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt;
   const AStyle: TBLRgba32);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt;
   const AStyle: TBLRgba);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt);
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount));
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount));
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt;
   const AStyle: TBLVar);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt;
   const AStyle: TBLGradient);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt;
   const AStyle: TBLPattern);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
-procedure TBLContext.FillPoly(const APoly: PBLPointI; const ACount: NativeInt;
+procedure TBLContext.FillPolygon(const APoly: PBLPointI; const ACount: NativeInt;
   const AStyle: TAlphaColor);
 begin
-  FillPoly(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
+  FillPolygon(TBLArrayView<TBLPointI>.Create(Pointer(APoly), ACount), AStyle);
 end;
 
 procedure TBLContext.FillRect(const ARect: TBLRectI; const AStyle: TBLRgba64);
@@ -33878,50 +33878,50 @@ end;
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
 begin
-  _BLCheck(_blContextFillUtf8TextIRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextFillUtf8TextIRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
 begin
-  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
-  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @Style));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView);
 begin
-  _BLCheck(_blContextFillUtf8TextI(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blContextFillUtf8TextI(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
 begin
-  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
 begin
-  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
 begin
-  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
 begin
-  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
+  _BLCheck(_blContextFillUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
@@ -33976,50 +33976,50 @@ end;
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
 begin
-  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
 begin
-  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @Style));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView);
 begin
-  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
 begin
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
 begin
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
 begin
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.FillUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
 begin
-  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle));
 end;
 
 class operator TBLContext.Finalize(var ADest: TBLContext);
@@ -37689,50 +37689,50 @@ end;
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
 begin
-  _BLCheck(_blContextStrokeUtf8TextIRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextStrokeUtf8TextIRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
 begin
-  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
-  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @Style));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView);
 begin
-  _BLCheck(_blContextStrokeUtf8TextI(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blContextStrokeUtf8TextI(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
 begin
-  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
 begin
-  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
 begin
-  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextStrokeUtf8TextIExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPointI;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
 begin
-  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
+  _BLCheck(_blContextStrokeUtf8TextIRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
@@ -37787,50 +37787,50 @@ end;
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba64);
 begin
-  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextFillUtf8TextDRgba64(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba32);
 begin
-  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle.Value));
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @Style));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @Style));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView);
 begin
-  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize));
+  _BLCheck(_blContextFillUtf8TextD(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLVar);
 begin
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLGradient);
 begin
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TBLPattern);
 begin
-  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, @AStyle));
+  _BLCheck(_blContextFillUtf8TextDExt(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, @AStyle));
 end;
 
 procedure TBLContext.StrokeUtf8Text(const AOrigin: TBLPoint;
   const AFont: TBLFont; const AView: TBLStringView; const AStyle: TAlphaColor);
 begin
-  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FSize, AStyle));
+  _BLCheck(_blContextFillUtf8TextDRgba32(@Self, @AOrigin, @AFont, Pointer(AView.FData), AView.FCount, AStyle));
 end;
 
 procedure TBLContext.SwapStyles(const AMode: TBLContextStyleSwapMode);

@@ -32,4 +32,6 @@ C/blend2d.pas
 *.delphilsp.json
 *.tvsconfig
 *.rsm
+*.TemplateiOS.xml
+*.Template.xml
 Bin/*.png
