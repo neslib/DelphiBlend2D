@@ -5,6 +5,12 @@ inherited FormMain: TFormMain
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
     Size.Width = 580.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Width = 64.000000000000000000
+    end
+    inherited LayoutRenderer: TLayout
+      Position.X = 72.000000000000000000
+    end
     inherited CheckBoxLimitFPS: TCheckBox
       Position.X = 524.000000000000000000
     end
@@ -30,9 +36,9 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 216.000000000000000000
+      Position.X = 224.000000000000000000
       Position.Y = 7.000000000000000000
-      Size.Width = 320.000000000000000000
+      Size.Width = 312.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 4
@@ -43,7 +49,7 @@ inherited FormMain: TFormMain
       Align = Left
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 56.000000000000000000
+      Size.Width = 64.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
@@ -53,7 +59,7 @@ inherited FormMain: TFormMain
     object LayoutCaching: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 64.000000000000000000
+      Position.X = 72.000000000000000000
       Size.Width = 110.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
@@ -75,7 +81,7 @@ inherited FormMain: TFormMain
       Align = Left
       AutoSize = True
       Margins.Left = 4.000000000000000000
-      Position.X = 178.000000000000000000
+      Position.X = 186.000000000000000000
       Size.Width = 34.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False

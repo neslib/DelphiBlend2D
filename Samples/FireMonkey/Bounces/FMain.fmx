@@ -5,10 +5,14 @@ inherited FormMain: TFormMain
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
     Size.Width = 580.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Width = 64.000000000000000000
+    end
     inherited LayoutRenderer: TLayout
-      Size.Width = 121.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 133.000000000000000000
       inherited ComboBoxRenderer: TComboBox
-        Size.Width = 121.000000000000000000
+        Size.Width = 133.000000000000000000
       end
     end
     inherited CheckBoxLimitFPS: TCheckBox
@@ -32,7 +36,7 @@ inherited FormMain: TFormMain
       Align = Left
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 56.000000000000000000
+      Size.Width = 64.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
@@ -42,8 +46,8 @@ inherited FormMain: TFormMain
     object LayoutCompOp: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 64.000000000000000000
-      Size.Width = 121.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 133.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
@@ -57,7 +61,7 @@ inherited FormMain: TFormMain
           'Conic Gradient')
         ItemIndex = 1
         Position.Y = 2.000000000000000000
-        Size.Width = 121.000000000000000000
+        Size.Width = 133.000000000000000000
         Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0

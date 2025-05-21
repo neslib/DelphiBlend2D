@@ -5,13 +5,18 @@ const
   {$ELSEIF Defined(WIN64)}
   _LIB_BLEND2D = 'blend2d_win64.dll';
   _PU = '';
-  {$ELSEIF Defined(MACOS64) and not Defined(IOS)}
+  {$ELSEIF Defined(IOS64)}
+  _LIB_BLEND2D = 'libblend2d_ios.a';
+  _PU = '';
+  {$ELSEIF Defined(MACOS64)}
   _LIB_BLEND2D = 'libblend2d_macos.a';
   _PU = '';
-  {$ELSEIF Defined(IOS64)}
-    {$MESSAGE Error 'Blend2D for iOS not available yet'}
-  {$ELSEIF Defined(ANDROID)}
-    {$MESSAGE Error 'Blend2D for Android not available yet'}
+  {$ELSEIF Defined(ANDROID32)}
+  _LIB_BLEND2D = 'libblend2d_android32.a';
+  _PU = '';
+  {$ELSEIF Defined(ANDROID64)}
+  _LIB_BLEND2D = 'libblend2d_android64.a';
+  _PU = '';
   {$ELSE}
     {$MESSAGE Error 'Unsupported platform'}
   {$ENDIF}

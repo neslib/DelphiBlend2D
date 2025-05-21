@@ -11,7 +11,7 @@ DelphiBlend2D opens up Blend2D for Delphi developers. It can be used stand-alone
 
 > Note that Blend2D (and thus DelphiBlend2D) is still in beta. The API and framework is subject to change.
 
-DelphiBlend2D currently supports Windows (32- and 64-bit) and macOS (Intel and ARM). Support for iOS and Android is planned for future versions.
+DelphiBlend2D currently supports Windows (32- and 64-bit) and macOS (Intel and ARM), iOS (device only, no simulator) and Android (32- and 64-bit).
 
 > The Blend2D libraries that are currently used are not fully optimized yet. Although performance is already excellent, and usually (much) faster than competing libraries like Skia, you expect even better performance once Blend2D goes out of beta.
 

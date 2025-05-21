@@ -4,6 +4,7 @@
 Thumbs.db
 #ignore Delphi build directories
 Android/
+Android64/
 iOSDevice/
 iOSDevice32/
 iOSDevice64/
@@ -13,6 +14,7 @@ OSXARM64/
 Win32/
 Win64/
 Docs/Docs/Reference/
+LaunchScreen.TemplateiOS/
 C/blend2d.pas
 #ignore Delphi build files
 *.obj

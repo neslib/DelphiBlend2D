@@ -59,6 +59,7 @@ type
     FBlend2DImage: TBLImage;
     FBlend2DBitmapData: TBitmapData;
     FBlend2DContext: TBLContext;
+    FBlend2DLastError: TBLResult;
     {$IFNDEF MSWINDOWS}
     FBlend2DConverter: TBLPixelConverter;
     {$ENDIF}
@@ -80,6 +81,8 @@ type
     procedure UpdateStats;
     procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
   protected
+    class procedure HandleBlend2DErrorStatic(const AResultCode: TBLResult;
+      const AUserData: Pointer); static;
     class function BackgroundForCompOp(const ACompOp: TBLCompOp): TAlphaColor; static;
   protected
     procedure BeforeRender; virtual;
@@ -203,6 +206,10 @@ procedure TFormBase.FormCreate(Sender: TObject);
 
 begin
   ReportMemoryLeaksOnShutdown := True;
+
+  { Install our own Blend2D error handler instead of using exceptions. }
+  BLSetErrorHandler(HandleBlend2DErrorStatic, Self);
+
   ComboBoxRenderer.BeginUpdate;
   try
     var CanvasName := Canvas.ClassName;
@@ -257,6 +264,12 @@ begin
   FBitmap.Free;
 end;
 
+class procedure TFormBase.HandleBlend2DErrorStatic(const AResultCode: TBLResult;
+  const AUserData: Pointer);
+begin
+  TFormBase(AUserData).FBlend2DLastError := AResultCode;
+end;
+
 procedure TFormBase.PaintBoxPaint(Sender: TObject; Canvas: TCanvas);
 begin
   if (FBitmap = nil) or (ComboBoxRenderer.Selected = nil) then
@@ -292,6 +305,19 @@ begin
   AfterRender;
 
   Canvas.DrawBitmap(FBitmap, FSrcRect, FDstRect, 1, True);
+
+  if (ComboBoxRenderer.Selected.Tag >= 0) and (FBlend2DLastError <> TBLResult.Success) then
+  begin
+    Canvas.Fill.Kind := TBrushKind.Solid;
+    Canvas.Fill.Color := TAlphaColors.Black;
+    Canvas.FillRect(RectF(0, 0, PaintBox.Width, PaintBox.Height), 1);
+
+    Canvas.Font.Size := 16;
+    Canvas.Fill.Color := TAlphaColors.White;
+    Canvas.FillText(RectF(0, 0, PaintBox.Width, PaintBox.Height),
+      'Blend2D error: ' + FBlend2DLastError.ToString, True, 1, [], TTextAlign.Center);
+    FBlend2DLastError := TBLResult.Success;
+  end;
 
   Inc(FFrameCount);
   if (FTicks >= FNextSecond) then

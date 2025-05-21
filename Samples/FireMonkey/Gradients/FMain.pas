@@ -185,7 +185,7 @@ begin
   inherited;
   P.Reset(X, Y);
   if (FGrabbedVertex < 0) then
-    FClosestVertex := GetClosestVertex(P, 5)
+    FClosestVertex := GetClosestVertex(P, {$IFDEF MOBILE}20{$ELSE}5{$ENDIF})
   else
     FPts[FGrabbedVertex] := P;
   PaintBox.Repaint;

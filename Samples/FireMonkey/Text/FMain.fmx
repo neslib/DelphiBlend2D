@@ -5,8 +5,12 @@ inherited FormMain: TFormMain
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
     Size.Width = 580.000000000000000000
-    TabOrder = 2
+    TabOrder = 3
+    inherited LabelRenderer: TLabel
+      Size.Width = 64.000000000000000000
+    end
     inherited LayoutRenderer: TLayout
+      Position.X = 72.000000000000000000
       Size.Width = 121.000000000000000000
       inherited ComboBoxRenderer: TComboBox
         Size.Width = 121.000000000000000000
@@ -18,12 +22,12 @@ inherited FormMain: TFormMain
     end
     inherited LabelFPS: TLabel
       Position.X = 444.000000000000000000
-      TabOrder = 4
+      TabOrder = 5
     end
     object CheckBoxDebug: TCheckBox
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 189.000000000000000000
+      Position.X = 197.000000000000000000
       Size.Width = 108.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
@@ -40,11 +44,11 @@ inherited FormMain: TFormMain
     Size.Width = 580.000000000000000000
     Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 4
+    TabOrder = 5
     object LayoutText: TLayout
       Align = Client
       Margins.Left = 4.000000000000000000
-      Size.Width = 516.000000000000000000
+      Size.Width = 508.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 2
@@ -54,14 +58,14 @@ inherited FormMain: TFormMain
         TabOrder = 0
         Text = 'Blend2D & OpenType "fi"'
         Position.Y = 2.000000000000000000
-        Size.Width = 452.000000000000000000
+        Size.Width = 444.000000000000000000
         Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
       end
       object LabelMS: TLabel
         Align = Right
         Margins.Right = 4.000000000000000000
-        Position.X = 452.000000000000000000
+        Position.X = 444.000000000000000000
         Size.Width = 60.000000000000000000
         Size.Height = 34.000000000000000000
         Size.PlatformDefault = False
@@ -74,7 +78,7 @@ inherited FormMain: TFormMain
       Align = Left
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 56.000000000000000000
+      Size.Width = 64.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
@@ -92,7 +96,7 @@ inherited FormMain: TFormMain
       Align = Left
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 56.000000000000000000
+      Size.Width = 64.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
@@ -102,7 +106,7 @@ inherited FormMain: TFormMain
     object Layout1: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 64.000000000000000000
+      Position.X = 72.000000000000000000
       Size.Width = 121.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
@@ -126,7 +130,7 @@ inherited FormMain: TFormMain
     object LabelFontSizeHeader: TLabel
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 189.000000000000000000
+      Position.X = 197.000000000000000000
       Size.Width = 32.000000000000000000
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
@@ -142,9 +146,9 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 225.000000000000000000
+      Position.X = 233.000000000000000000
       Position.Y = 7.000000000000000000
-      Size.Width = 311.000000000000000000
+      Size.Width = 303.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 5
