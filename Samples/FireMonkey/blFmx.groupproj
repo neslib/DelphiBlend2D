@@ -33,6 +33,9 @@
         <Projects Include="Paths\blFmxPaths.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="Bubbles\blFmxBubbles.dproj">
+            <Dependencies/>
+        </Projects>
         <Projects Include="PaintBox\blFmxPaintBox.dproj">
             <Dependencies/>
         </Projects>
@@ -134,6 +137,15 @@
     <Target Name="blFmxPaths:Make">
         <MSBuild Projects="Paths\blFmxPaths.dproj" Targets="Make"/>
     </Target>
+    <Target Name="blFmxBubbles">
+        <MSBuild Projects="Bubbles\blFmxBubbles.dproj"/>
+    </Target>
+    <Target Name="blFmxBubbles:Clean">
+        <MSBuild Projects="Bubbles\blFmxBubbles.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="blFmxBubbles:Make">
+        <MSBuild Projects="Bubbles\blFmxBubbles.dproj" Targets="Make"/>
+    </Target>
     <Target Name="blFmxPaintBox">
         <MSBuild Projects="PaintBox\blFmxPaintBox.dproj"/>
     </Target>
@@ -144,13 +156,13 @@
         <MSBuild Projects="PaintBox\blFmxPaintBox.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="blFmxRects;blFmxBounces;blFmxCircles;blFmxParticles;blFmxText;blFmxTiger;blFmxGradients;blFmxEllipticArc;blFmxStroke;blFmxPaths;blFmxPaintBox"/>
+        <CallTarget Targets="blFmxRects;blFmxBounces;blFmxCircles;blFmxParticles;blFmxText;blFmxTiger;blFmxGradients;blFmxEllipticArc;blFmxStroke;blFmxPaths;blFmxBubbles;blFmxPaintBox"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="blFmxRects:Clean;blFmxBounces:Clean;blFmxCircles:Clean;blFmxParticles:Clean;blFmxText:Clean;blFmxTiger:Clean;blFmxGradients:Clean;blFmxEllipticArc:Clean;blFmxStroke:Clean;blFmxPaths:Clean;blFmxPaintBox:Clean"/>
+        <CallTarget Targets="blFmxRects:Clean;blFmxBounces:Clean;blFmxCircles:Clean;blFmxParticles:Clean;blFmxText:Clean;blFmxTiger:Clean;blFmxGradients:Clean;blFmxEllipticArc:Clean;blFmxStroke:Clean;blFmxPaths:Clean;blFmxBubbles:Clean;blFmxPaintBox:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="blFmxRects:Make;blFmxBounces:Make;blFmxCircles:Make;blFmxParticles:Make;blFmxText:Make;blFmxTiger:Make;blFmxGradients:Make;blFmxEllipticArc:Make;blFmxStroke:Make;blFmxPaths:Make;blFmxPaintBox:Make"/>
+        <CallTarget Targets="blFmxRects:Make;blFmxBounces:Make;blFmxCircles:Make;blFmxParticles:Make;blFmxText:Make;blFmxTiger:Make;blFmxGradients:Make;blFmxEllipticArc:Make;blFmxStroke:Make;blFmxPaths:Make;blFmxBubbles:Make;blFmxPaintBox:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

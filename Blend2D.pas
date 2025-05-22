@@ -396,8 +396,8 @@ function BLGetLastError: TBLResult;
    [Error Handling - Internal]
   ============================================================================ }
 
-procedure _BLCheck(const AResult: Integer); overload;
-procedure _BLCheck(const AResult: TBLResult); overload;
+procedure _BLCheck(const AResult: Integer); overload; inline;
+procedure _BLCheck(const AResult: TBLResult); overload; inline;
 {$ENDREGION 'Error Handling'}
 
 {$REGION 'Globals'}
@@ -5779,6 +5779,7 @@ type
     class operator NotEqual(const ALeft, ARight: TBLRgba64): Boolean; inline; static;
 
     procedure Reset; overload; inline;
+    procedure Reset(const ARgba32: UInt32); overload; inline;
     procedure Reset(const ARgba64: UInt64); overload; inline;
     procedure Reset(const ARgba32: TBLRgba32); overload; inline;
     procedure Reset(const AR, AG, AB: Word; const AA: Word = $FFFF); overload; inline;
@@ -5886,6 +5887,7 @@ function BLRgba32(const AR, AG, AB: Byte; const AA: Byte = $FF): TBLRgba32; over
 function BLRgba32(const AColor: TAlphaColorRec): TBLRgba32; overload; inline;
 
 function BLRgba64: TBLRgba64; overload; inline;
+function BLRgba64(const ARgba32: UInt32): TBLRgba64; overload; inline;
 function BLRgba64(const ARgba64: UInt64): TBLRgba64; overload; inline;
 function BLRgba64(const ARgba32: TBLRgba32): TBLRgba64; overload; inline;
 function BLRgba64(const AR, AG, AB: Word; const AA: Word = $FFFF): TBLRgba64; overload; inline;
@@ -21364,6 +21366,10 @@ type
     class function AreEqual(const ALeft, ARight: T): Boolean; static;
   end;
 
+var
+  _GErrorHandler: TBLErrorHandler = nil;
+  _GErrorUserData: Pointer = nil;
+
 {$INCLUDE 'Blend2D.Api.inc'}
 {$ENDREGION 'Internal'}
 
@@ -21484,15 +21490,13 @@ begin
 end;
 
 var
-  GErrorHandler: TBLErrorHandler = nil;
-  GErrorUserData: Pointer = nil;
   GLastError: TBLResult = TBLResult.Success;
 
 procedure BLSetErrorHandler(const AHandler: TBLErrorHandler;
   const AUserData: Pointer);
 begin
-  GErrorHandler := AHandler;
-  GErrorUserData := AUserData;
+  _GErrorHandler := AHandler;
+  _GErrorUserData := AUserData;
 end;
 
 procedure ExceptionErrorHandler(const AResult: TBLResult;
@@ -21503,8 +21507,8 @@ end;
 
 procedure BLSetExceptionErrorHandler;
 begin
-  GErrorHandler := ExceptionErrorHandler;
-  GErrorUserData := nil;
+  _GErrorHandler := ExceptionErrorHandler;
+  _GErrorUserData := nil;
 end;
 
 procedure GetLastErrorHandler(const AResult: TBLResult;
@@ -21521,20 +21525,20 @@ end;
 
 procedure BLSetGetLastErrorHandler;
 begin
-  GErrorHandler := GetLastErrorHandler;
-  GErrorUserData := nil;
+  _GErrorHandler := GetLastErrorHandler;
+  _GErrorUserData := nil;
 end;
 
 procedure _BLCheck(const AResult: Integer);
 begin
-  if (AResult <> 0) and Assigned(GErrorHandler) then
-    GErrorHandler(TBLResult(AResult), GErrorUserData);
+  if (AResult <> 0) and Assigned(_GErrorHandler) then
+    _GErrorHandler(TBLResult(AResult), _GErrorUserData);
 end;
 
 procedure _BLCheck(const AResult: TBLResult);
 begin
-  if (AResult <> TBLResult.Success) and Assigned(GErrorHandler) then
-    GErrorHandler(AResult, GErrorUserData);
+  if (AResult <> TBLResult.Success) and Assigned(_GErrorHandler) then
+    _GErrorHandler(AResult, _GErrorUserData);
 end;
 
 {$ENDREGION 'Error Handling'}
@@ -26095,6 +26099,11 @@ begin
   Result.Reset;
 end;
 
+function BLRgba64(const ARgba32: UInt32): TBLRgba64; overload; inline;
+begin
+  Result.Reset(ARgba32);
+end;
+
 function BLRgba64(const ARgba64: UInt64): TBLRgba64; overload; inline;
 begin
   Result.Reset(ARgba64);
@@ -26132,7 +26141,7 @@ end;
 
 constructor TBLRgba64.Create(const AR, AG, AB, AA: Word);
 begin
-  Value := (UInt64(AA) shl 48) or (AR shl 32) or (AG shl 16) or AB;
+  Value := (UInt64(AA) shl 48) or (UInt64(AR) shl 32) or (UInt64(AG) shl 16) or UInt64(AB);
 end;
 
 class function TBLRgba64.Create: TBLRgba64;
@@ -26197,12 +26206,20 @@ end;
 
 procedure TBLRgba64.Reset(const AR, AG, AB, AA: Word);
 begin
-  Value := (UInt64(AA) shl 48) or (AR shl 32) or (AG shl 16) or AB;
+  Value := (UInt64(AA) shl 48) or (UInt64(AR) shl 32) or (UInt64(AG) shl 16) or UInt64(AB);
+end;
+
+procedure TBLRgba64.Reset(const ARgba32: UInt32);
+var
+  C: TAlphaColorRec absolute ARgba32;
+begin
+  Value := (UInt64(C.A) shl 48) or (UInt64(C.R) shl 32) or (UInt64(C.G) shl 16) or UInt64(C.B);
+  Value := Value * $0101;
 end;
 
 procedure TBLRgba64.Reset(const ARgba32: TBLRgba32);
 begin
-  Value := (UInt64(ARgba32.A) shl 48) or (ARgba32.R shl 32) or (ARgba32.G shl 16) or ARgba32.B;
+  Value := (UInt64(ARgba32.A) shl 48) or (UInt64(ARgba32.R) shl 32) or (UInt64(ARgba32.G) shl 16) or UInt64(ARgba32.B);
   Value := Value * $0101;
 end;
 
@@ -26223,17 +26240,17 @@ end;
 
 procedure TBLRgba64.SetB(const AValue: Word);
 begin
-  Value := (Value and $FFFFFFFFFFFF0000) or AValue;
+  Value := (Value and $FFFFFFFFFFFF0000) or UInt64(AValue);
 end;
 
 procedure TBLRgba64.SetG(const AValue: Word);
 begin
-  Value := (Value and $FFFFFFFF0000FFFF) or (AValue shl 16);
+  Value := (Value and $FFFFFFFF0000FFFF) or (UInt64(AValue) shl 16);
 end;
 
 procedure TBLRgba64.SetR(const AValue: Word);
 begin
-  Value := (Value and $FFFF0000FFFFFFFF) or (AValue shl 32);
+  Value := (Value and $FFFF0000FFFFFFFF) or (UInt64(AValue) shl 32);
 end;
 
 { TBLRgba }
