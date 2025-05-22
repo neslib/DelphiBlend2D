@@ -207,7 +207,7 @@ end;
 procedure TFormMain.RenderPathPoints(const AContext: TBLContext;
   const APath: TBLPath; const AColor: TBLRgba32);
 begin
-  var Count := APath.Size;
+  var Count := APath.Count;
   var Vtx := APath.VertexData;
 
   AContext.SetFillStyle(AColor);

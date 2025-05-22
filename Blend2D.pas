@@ -7388,7 +7388,7 @@ type
     /// <summary>
     ///  Alias of `Repeating`.
     /// </summary>
-    RepeatXRepeat = Repeating,
+    RepeatXRepeatY = Repeating,
 
     /// <summary>
     ///  Repeat X and pad Y.

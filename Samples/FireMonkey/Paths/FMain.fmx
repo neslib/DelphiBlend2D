@@ -31,7 +31,7 @@ inherited FormMain: TFormMain
     Size.Width = 580.000000000000000000
     Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 8
+    TabOrder = 10
     object LabelOp: TLabel
       Align = Left
       Margins.Left = 4.000000000000000000

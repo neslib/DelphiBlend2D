@@ -119,10 +119,6 @@ begin
     var Y: Single := CY + (S * D);
     var R: Single := Min((T * 8) + 0.5, 10);
 
-    T := I * 1.01 / 1000;
-    D := (T * 1000 * 0.4) + 10;
-    A := BaseAngle + (T * Pi * 2 * 20);
-
     ACanvas.FillEllipse(RectF(X - R, Y - R, X + R, Y + R), 1);
   end;
 end;
@@ -156,10 +152,6 @@ begin
     var X: Single := CX + (C * D);
     var Y: Single := CY + (S * D);
     var R: Single := Min((T * 8) + 0.5, 10);
-
-    T := I * 1.01 / 1000;
-    D := (T * 1000 * 0.4) + 10;
-    A := BaseAngle + (T * Pi * 2 * 20);
 
     PathBuilder.AddCircle(X, Y, R);
   end;

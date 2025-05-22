@@ -50,6 +50,7 @@ type
     FDstRect: TRectF;
     FPixelScale: Single;
     FFrameCount: Integer;
+    FLastFPS: Integer;
     FFPS: Integer;
     FTicksPerFrame: Int64;
     FTicks: Int64;
@@ -78,7 +79,6 @@ type
     procedure RenderSkiaInternal;
     {$ENDIF}
     procedure CheckRepaint;
-    procedure UpdateStats;
     procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
   protected
     class procedure HandleBlend2DErrorStatic(const AResultCode: TBLResult;
@@ -232,7 +232,7 @@ begin
     ComboBoxRenderer.EndUpdate;
   end;
 
-  FPixelScale := Handle.Scale;
+  FPixelScale := 1;
 
   FBitmap := TBitmap.Create;
 
@@ -281,7 +281,11 @@ begin
   if (DstSize <> FDstSize) then
   begin
     FDstSize := DstSize;
+    {$IFNDEF ANDROID}
+    { Disable high-dpi on Android to improve performance.
+      With Blend2D's anti-aliasing, this isn't that important anyway. }
     FPixelScale := Handle.Scale;
+    {$ENDIF}
     SrcSize.Width := Trunc(FDstSize.Width * FPixelScale);
     SrcSize.Height := Trunc(FDstSize.Height * FPixelScale);
     FBitmap.SetSize(SrcSize);
@@ -325,7 +329,6 @@ begin
     Inc(FNextSecond, TStopwatch.Frequency);
     FFPS := FFrameCount;
     FFrameCount := 0;
-    UpdateStats;
   end;
 end;
 
@@ -397,6 +400,12 @@ end;
 procedure TFormBase.TimerRepaintTimer(Sender: TObject);
 begin
   CheckRepaint;
+
+  if (FFPS <> FLastFPS) then
+  begin
+    FLastFPS := FFPS;
+    LabelFPS.Text := Format('%d fps', [FFPS]);
+  end;
 end;
 
 {$IFDEF USE_SKIA}
@@ -427,11 +436,5 @@ begin
   end;
 end;
 {$ENDIF}
-
-procedure TFormBase.UpdateStats;
-begin
-  LabelFPS.Text := Format('%d fps', [FFPS]);
-  Invalidate;
-end;
 
 end.

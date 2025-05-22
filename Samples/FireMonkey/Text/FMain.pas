@@ -189,9 +189,9 @@ begin
 
     var I := 0;
     var Pos := BLPoint(10, 10 + (FBlend2DFont.Size * 1.2) + SmallFont.Size);
-    while (I < Output.Size) do
+    while (I < Output.Length) do
     begin
-      var Stop := Min(Output.IndexOf(#10, I), Output.Size);
+      var Stop := Min(Output.IndexOf(#10, I), Output.Length);
 
       var Color := TAlphaColors.White;
       if ((Stop - I) > 0) and (Output.Data[I] = '[') then
