@@ -10,6 +10,7 @@ uses
   System.UITypes,
   System.Classes,
   System.Variants,
+  System.Math.Vectors,
   FMX.Types,
   FMX.Controls,
   FMX.Forms,
@@ -45,6 +46,9 @@ type
     FRandom: TBLRandom;
     FPoly: TArray<TBLPoint>;
     FStep: TArray<TBLPoint>;
+    FPolygon: TPolygon;
+    FPolyF: TArray<TPointF>;
+    FStepF: TArray<TPointF>;
     procedure SetPolyCount(const ACount: Integer);
     function RandomSign: Double;
   protected
@@ -78,6 +82,9 @@ begin
   var Count := Length(FPoly);
   var Vertex := PBLPoint(FPoly);
   var Step := PBLPoint(FStep);
+  var VertexPoly := PPointF(FPolygon);
+  var VertexF := PPointF(FPolyF);
+  var StepF := PPointF(FStepF);
 
   for var I := 0 to Count - 1 do
   begin
@@ -95,8 +102,18 @@ begin
       Vertex.Y := Min(Vertex.Y + Step.Y, H);
     end;
 
+    VertexPoly.X := Vertex.X;
+    VertexPoly.Y := Vertex.Y;
+    VertexF.X := Vertex.X;
+    VertexF.Y := Vertex.Y;
+    StepF.X := Step.X;
+    StepF.Y := Step.Y;
+
     Inc(Vertex);
     Inc(Step);
+    Inc(VertexPoly);
+    Inc(VertexF);
+    Inc(StepF);
   end;
 end;
 
@@ -138,9 +155,9 @@ begin
     2: begin
          var R: Double := Min(W, H);
          G.Make(BLRadialGradientValues(W * 0.5, H * 0.5, W * 0.5, H * 0.5, R * 0.5));
-         G.AddStop(0.0, $FFFF0000);
+         G.AddStop(0.0, $FF0000FF);
          G.AddStop(0.5, $FFAF00AF);
-         G.AddStop(1.0, $FF0000FF);
+         G.AddStop(1.0, $FFFF0000);
 
          AContext.SetFillStyle(G);
          AContext.SetStrokeStyle(G);
@@ -217,88 +234,203 @@ end;
 
 procedure TFormMain.RenderFireMonkey(const ACanvas: TCanvas);
 begin
-//  ACanvas.Clear(TAlphaColors.Black);
-//
-//  if (FBlend2DCompOp <> TBLCompOp.SrcOver) then
-//  begin
-//    RenderNotSupported;
-//    Exit;
-//  end;
-//
-//  var RectSize: Single := FRectSize;
-//  var HalfSize: Single := 0.5 * RectSize;
-//  var I: Integer;
-//  var P: TPointF;
-//  var Path: TPathData;
-//
-//  case FShapeType of
-//    TShapeType.RectA,
-//    TShapeType.RectU:
-//      for I := 0 to Length(FCoords) - 1 do
-//      begin
-//        P := FCoords[I];
-//        ACanvas.Fill.Color := FColors[I];
-//        ACanvas.FillRect(
-//          RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize),
-//          0, 0, [], 1);
-//      end;
-//
-//    TShapeType.RectPath:
-//      begin
-//        Path := TPathData.Create;
-//        try
-//          for I := 0 to Length(FCoords) - 1 do
-//          begin
-//            P := FCoords[I];
-//
-//            Path.Clear;
-//            Path.AddRectangle(RectF(P.X - HalfSize, P.Y - HalfSize,
-//              P.X + HalfSize, P.Y + HalfSize), 0, 0, []);
-//
-//            ACanvas.Fill.Color := FColors[I];
-//            ACanvas.FillPath(Path, 1);
-//          end;
-//        finally
-//          Path.Free;
-//        end;
-//      end;
-//
-//    TShapeType.Polygon:
-//      begin
-//        Path := TPathData.Create;
-//        try
-//          for I := 0 to Length(FCoords) - 1 do
-//          begin
-//            P := FCoords[I];
-//            var X: Single := P.X - HalfSize;
-//            var Y: Single := P.Y - HalfSize;
-//
-//            Path.Clear;
-//            Path.MoveTo(PointF(X + HalfSize, Y));
-//            Path.LineTo(PointF(X + RectSize, Y + RectSize * (1 / 3)));
-//            Path.LineTo(PointF(X + RectSize * (2 / 3), Y + RectSize));
-//            Path.LineTo(PointF(X + RectSize * (1 / 3), Y + RectSize));
-//            Path.LineTo(PointF(X, Y + RectSize * (1 / 3)));
-//
-//            ACanvas.Fill.Color := FColors[I];
-//            ACanvas.FillPath(Path, 1);
-//          end;
-//        finally
-//          Path.Free;
-//        end;
-//      end;
-//
-//    TShapeType.RoundRect:
-//      for I := 0 to Length(FCoords) - 1 do
-//      begin
-//        P := FCoords[I];
-//        ACanvas.Fill.Color := FColors[I];
-//        ACanvas.FillRect(
-//          RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize),
-//          10, 10, AllCorners, 1);
-//      end;
-//  end;
+  ACanvas.Clear(TAlphaColors.Black);
+  if (ComboBoxStyle.ItemIndex = 3) then
+  begin
+    RenderNotSupported;
+    Exit;
+  end;
+
+  var Poly := FPolygon;
+  var Gradient := ACanvas.Fill.Gradient;
+
+  case ComboBoxStyle.ItemIndex of
+    1,
+    2: begin
+         ACanvas.Fill.Kind := TBrushKind.Gradient;
+
+         if (ComboBoxStyle.ItemIndex = 1) then
+           Gradient.Style := TGradientStyle.Linear
+         else
+           Gradient.Style := TGradientStyle.Radial;
+
+         while (Gradient.Points.Count < 3) do
+           Gradient.Points.Add;
+
+         Gradient.Points[0].Offset := 0;
+         Gradient.Points[0].Color := $FFFF0000;
+         Gradient.Points[1].Offset := 0.5;
+         Gradient.Points[1].Color := $FFAF00AF;
+         Gradient.Points[2].Offset := 1;
+         Gradient.Points[2].Color := $FF0000FF;
+
+         ACanvas.Stroke.Gradient.Assign(Gradient);
+       end;
+  else
+    ACanvas.Fill.Kind := TBrushKind.Solid;
+    ACanvas.Fill.Color := TAlphaColors.White;
+    ACanvas.Stroke.Kind := TBrushKind.Solid;
+    ACanvas.Stroke.Color := TAlphaColors.White;
+  end;
+
+  var I, N: Integer;
+  var Path: TPathData;
+
+  var Op := ComboBoxOp.ItemIndex;
+  case Op of
+    0: ACanvas.FillPolygon(Poly, 1);
+
+    1, 2, 3:
+      begin
+        ACanvas.Stroke.Thickness := ((Op - 1) * 2) + 1;
+        ACanvas.DrawPolygon(Poly, 1);
+      end;
+
+    4, 5, 6, 7:
+      begin
+        N := Length(Poly);
+        Path := TPathData.Create;
+        try
+          Path.MoveTo(Poly[0]);
+          I := 3;
+          while (I <= N) do
+          begin
+            Path.SmoothCurveTo(Poly[I - 2], Poly[I - 1]);
+            Inc(I, 2);
+          end;
+
+          if (Op = 4) then
+            ACanvas.FillPath(Path, 1)
+          else
+          begin
+            ACanvas.Stroke.Thickness := ((Op - 5) * 2) + 1;
+            ACanvas.DrawPath(Path, 1);
+          end;
+        finally
+          Path.Free;
+        end;
+      end;
+
+    8, 9, 10, 11:
+      begin
+        N := Length(Poly);
+        Path := TPathData.Create;
+        try
+          Path.MoveTo(Poly[0]);
+          I := 4;
+          while (I <= N) do
+          begin
+            Path.CurveTo(Poly[I - 3], Poly[I - 2], Poly[I - 1]);
+            Inc(I, 3);
+          end;
+
+          if (Op = 8) then
+            ACanvas.FillPath(Path, 1)
+          else
+          begin
+            ACanvas.Stroke.Thickness := ((Op - 9) * 2) + 1;
+            ACanvas.DrawPath(Path, 1);
+          end;
+        finally
+          Path.Free;
+        end;
+      end;
+  end;
 end;
+
+{$IFDEF USE_SKIA}
+procedure TFormMain.RenderSkia(const ACanvas: ISkCanvas);
+begin
+  ACanvas.Clear(TAlphaColors.Black);
+
+  var Poly := FPolyF;
+  var W: Single := PaintBox.Width;
+  var H: Single := PaintBox.Height;
+  var Shader: ISkShader := nil;
+
+  case ComboBoxStyle.ItemIndex of
+    1: begin
+         Shader := TSkShader.MakeGradientLinear(PointF(0, 0), PointF(W, H),
+           [$FFFF0000, $FFAF00AF, $FF0000FF], [0.0, 0.5, 1.0]);
+       end;
+
+    2: begin
+         var R: Single := Min(W, H);
+         Shader := TSkShader.MakeGradientRadial(PointF(W * 0.5, H * 0.5), R * 0.5,
+           [$FF0000FF, $FFAF00AF, $FFFF0000], [0.0, 0.5, 1.0]);
+       end;
+
+    3: begin
+         Shader := TSkShader.MakeGradientSweep(PointF(W * 0.5, H * 0.5),
+           [$FFFF0000, $FFAF00AF, $FF0000FF, $FFFF0000], [0.00, 0.33, 0.66, 1.00]);
+       end;
+  else
+    FSkiaFill.Color := TAlphaColors.White;
+    FSkiaStroke.Color := TAlphaColors.White;
+  end;
+
+  FSkiaFill.Shader := Shader;
+  FSkiaStroke.Shader := Shader;
+
+  var I, N: Integer;
+  var Path: ISkPathBuilder;
+
+  var Op := ComboBoxOp.ItemIndex;
+  case Op of
+    0: ACanvas.DrawPoints(TSkDrawPointsMode.Polygon, Poly, FSkiaFill);
+
+    1, 2, 3:
+      begin
+        FSkiaStroke.StrokeWidth := ((Op - 1) * 2) + 1;
+        ACanvas.DrawPoints(TSkDrawPointsMode.Polygon, Poly, FSkiaStroke);
+      end;
+
+    4, 5, 6, 7:
+      begin
+        N := Length(Poly);
+        Path := TSkPathBuilder.Create;
+        Path.FillType := TSkPathFillType.EvenOdd;
+        Path.MoveTo(Poly[0]);
+        I := 3;
+        while (I <= N) do
+        begin
+          Path.QuadTo(Poly[I - 2], Poly[I - 1]);
+          Inc(I, 2);
+        end;
+
+        if (Op = 4) then
+          ACanvas.DrawPath(Path.Detach, FSkiaFill)
+        else
+        begin
+          FSkiaStroke.StrokeWidth := ((Op - 5) * 2) + 1;
+          ACanvas.DrawPath(Path.Detach, FSkiaStroke);
+        end;
+      end;
+
+    8, 9, 10, 11:
+      begin
+        N := Length(Poly);
+        Path := TSkPathBuilder.Create;
+        Path.FillType := TSkPathFillType.EvenOdd;
+        Path.MoveTo(Poly[0]);
+        I := 4;
+        while (I <= N) do
+        begin
+          Path.CubicTo(Poly[I - 3], Poly[I - 2], Poly[I - 1]);
+          Inc(I, 3);
+        end;
+
+        if (Op = 8) then
+          ACanvas.DrawPath(Path.Detach, FSkiaFill)
+        else
+        begin
+          FSkiaStroke.StrokeWidth := ((Op - 9) * 2) + 1;
+          ACanvas.DrawPath(Path.Detach, FSkiaStroke);
+        end;
+      end;
+  end;
+end;
+{$ENDIF}
 
 procedure TFormMain.SetPolyCount(const ACount: Integer);
 begin
@@ -308,6 +440,9 @@ begin
   var Prev := Length(FPoly);
   SetLength(FPoly, ACount);
   SetLength(FStep, ACount);
+  SetLength(FPolygon, ACount);
+  SetLength(FPolyF, ACount);
+  SetLength(FStepF, ACount);
 
   while (Prev < ACount) do
   begin
@@ -316,80 +451,13 @@ begin
       (FRandom.NextDouble * 0.5 + 0.5) * RandomSign,
       (FRandom.NextDouble * 0.5 + 0.5) * RandomSign);
 
+    FPolygon[Prev] := PointF(FPoly[Prev].X, FPoly[Prev].Y);
+    FPolyF[Prev] := PointF(FPoly[Prev].X, FPoly[Prev].Y);
+    FStepF[Prev] := PointF(FStep[Prev].X, FStep[Prev].Y);
+
     Inc(Prev);
   end;
 end;
-
-{$IFDEF USE_SKIA}
-procedure TFormMain.RenderSkia(const ACanvas: ISkCanvas);
-begin
-//  ACanvas.Clear(BackgroundForCompOp(FBlend2DCompOp));
-//  FSkiaFill.Blender := FSkiaBlender;
-//
-//  var RectSize: Single := FRectSize;
-//  var HalfSize: Single := 0.5 * RectSize;
-//  var I: Integer;
-//  var P: TPointF;
-//  var PathBuilder: ISkPathBuilder;
-//
-//  case FShapeType of
-//    TShapeType.RectA,
-//    TShapeType.RectU:
-//      for I := 0 to Length(FCoords) - 1 do
-//      begin
-//        P := FCoords[I];
-//        FSkiaFill.Color := FColors[I];
-//        ACanvas.DrawRect(RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize), FSkiaFill);
-//      end;
-//
-//    TShapeType.RectPath:
-//      begin
-//        PathBuilder := TSkPathBuilder.Create;
-//        for I := 0 to Length(FCoords) - 1 do
-//        begin
-//          P := FCoords[I];
-//
-//          PathBuilder.Reset;
-//          PathBuilder.AddRect(RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize));
-//
-//          FSkiaFill.Color := FColors[I];
-//          ACanvas.DrawPath(PathBuilder.Detach, FSkiaFill);
-//        end;
-//      end;
-//
-//    TShapeType.Polygon:
-//      begin
-//        PathBuilder := TSkPathBuilder.Create;
-//        for I := 0 to Length(FCoords) - 1 do
-//        begin
-//          P := FCoords[I];
-//          var X: Single := P.X - HalfSize;
-//          var Y: Single := P.Y - HalfSize;
-//
-//          PathBuilder.Reset;
-//          PathBuilder.MoveTo(X + HalfSize, Y);
-//          PathBuilder.LineTo(X + RectSize, Y + RectSize * (1 / 3));
-//          PathBuilder.LineTo(X + RectSize * (2 / 3), Y + RectSize);
-//          PathBuilder.LineTo(X + RectSize * (1 / 3), Y + RectSize);
-//          PathBuilder.LineTo(X, Y + RectSize * (1 / 3));
-//
-//          FSkiaFill.Color := FColors[I];
-//          ACanvas.DrawPath(PathBuilder.Detach, FSkiaFill);
-//        end;
-//      end;
-//
-//    TShapeType.RoundRect:
-//      for I := 0 to Length(FCoords) - 1 do
-//      begin
-//        P := FCoords[I];
-//        FSkiaFill.Color := FColors[I];
-//        ACanvas.DrawRoundRect(RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize),
-//
-//          10, 10, FSkiaFill);
-//      end;
-//  end;
-end;
-{$ENDIF}
 
 procedure TFormMain.TrackBarRectCountChange(Sender: TObject);
 begin

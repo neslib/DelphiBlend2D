@@ -242,8 +242,8 @@ begin
         begin
           ACanvas.Fill.Kind := TBrushKind.Gradient;
           ACanvas.Fill.Gradient.Style := TGradientStyle.Radial;
-          ACanvas.Fill.Gradient.Color := C.Color;
-          ACanvas.Fill.Gradient.Color1 := $FFFF7F00;
+          ACanvas.Fill.Gradient.Color := $FFFF7F00;
+          ACanvas.Fill.Gradient.Color1 := C.Color;
         end;
     end;
 
