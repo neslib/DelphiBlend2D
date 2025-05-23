@@ -11,6 +11,9 @@ nav:
     - Styling.md
     - Text.md
     - Rendering.md
+    - Runtime.md
+    - Filesystem.md
+    - Miscellaneous.md
     - MultithreadedRendering.md
   - Reference:
     - Blend2D:

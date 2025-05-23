@@ -19,9 +19,6 @@ The documentation is split into the following groups:
 * [Styling](Styling.md) - Colors, gradients, and patterns
 * [Text](Text.md) - Fonts & Text support
 * [Rendering](Rendering.md) - 2D rendering context API, structures, and constants
-* Runtime - Interaction with Blend2D runtime
-* Filesystem - Filesystem utilities
-* Miscellaneous - Miscellaneous and uncategorized API
-* Impl API - API required for extending Blend2D functionality
-* Macros - Preprocessor macros and compile-time constants
-* Object Model - Object Model & Memory Layout
+* [Runtime](Runtime.md) - Interaction with Blend2D runtime
+* [Filesystem](Filesystem.md) - Filesystem utilities
+* [Miscellaneous](Miscellaneous.md) - Miscellaneous and uncategorized API

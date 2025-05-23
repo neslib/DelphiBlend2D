@@ -104,7 +104,7 @@ Blend2D quickstart and interactive applications are available in the Samples sub
 
 ## Documentation
 
-DelphiBlend2D is [documented on github.io](https://neslib.github.io/DelphiBlend2D/). use the [Documentation Index](https://neslib.github.io/DelphiBlend2D/) page as a starting point, or the [API Reference](https://neslib.github.io/DelphiBlend2D/Reference/DelphiBlend2D/) pages for complete API documentation by. This documentation is extracted from the source code, so you can use the (XML) documentation in the source code as well. Delphi's CodeInsight will also show this documentation when you hover the mouse over an SDL declaration.
+DelphiBlend2D is documented on github.io. Use the [Documentation Index](https://neslib.github.io/DelphiBlend2D/) page as a starting point, or the [API Reference](https://neslib.github.io/DelphiBlend2D/Reference/Blend2D/) pages for complete API documentation by. This documentation is extracted from the source code, so you can use the (XML) documentation in the source code as well. Delphi's CodeInsight will also show this documentation when you hover the mouse over an SDL declaration.
 
 Since the framework matches the original C++ API where possible, you can also use the original [Blend2D documentation](https://blend2d.com/doc/index.html).
 
