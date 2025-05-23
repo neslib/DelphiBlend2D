@@ -6,7 +6,7 @@
 
 DelphiBlend2D opens up Blend2D for Delphi developers. It can be used stand-alone to render to an off-screen image, or with the VCL or FireMonkey frameworks to render to the screen. The API is easy to use and follows the original C++ API as much as possible.
 
-| ![intro1](Docs\main-intro-1.png) | ![intro2](Docs\main-intro-2.png) | ![intro3](Docs\main-intro-3.png) |
+| ![intro1](Docs/main-intro-1.png) | ![intro2](Docs/main-intro-2.png) | ![intro3](Doc/main-intro-3.png) |
 | -------------------------------- | -------------------------------- | -------------------------------- |
 
 > Note that Blend2D (and thus DelphiBlend2D) is still in beta. The API and framework is subject to change.
@@ -73,34 +73,34 @@ It creates the following output:
 
 Blend2D offers similar paint styles as defined by SVG and HTML `<canvas>` including solid colors, gradients, and patterns. The rendering context uses a separate slots for styling fill and stroke operations to make it possible to have assigned both fill and stroke styles at the same time. It also supports passing colors and styles directly to the rendering API. Blend2D at the moment supports linear, radial, and conic gradients. Extend modes specify whether colors should be padded, repeated, or reflected; and quality modes can be used to turn on gradient dithering to prevent banding.
 
-| ![gradient1](Docs\main-gradient-1.png) | ![gradient2](Docs\main-gradient-2.png) | ![gradient3](Docs\main-gradient-3.png) |
+| ![gradient1](Docs/main-gradient-1.png) | ![gradient2](Docs/main-gradient-2.png) | ![gradient3](Docs/main-gradient-3.png) |
 | -------------------------------- | -------------------------------- | -------------------------------- |
 
 ### Patterns & Extend Modes
 
 Patterns also support extend modes, which can be configured independently of X and Y, thus supporting 9 combinations total. The images below show a variation of repeat and reflect modes of image used as a pattern.
 
-| ![pattern1](Docs\main-pattern-1.png) | ![pattern2](Docs\main-pattern-2.png) | ![pattern3](Docs\main-pattern-3.png) |
+| ![pattern1](Docs/main-pattern-1.png) | ![pattern2](Docs/main-pattern-2.png) | ![pattern3](Docs/main-pattern-3.png) |
 | -------------------------------- | -------------------------------- | -------------------------------- |
 
 ## Composition & Blending
 
 Blend2D supports all Porter & Duff compositing operators and a wide range of blend modes defined by SVG and HTML `<canvas>`. Composition and blending modes can be applied to any rendering operation including fills, strokes, and image blits. In addition to composition operators, Blend2D provides also an opacity option to control the strength of the composition.
 
-| ![composition1](Docs\main-composition-1.png) | ![composition2](Docs\main-composition-2.png) | ![composition3](Docs\main-composition-3.png) |
+| ![composition1](Docs/main-composition-1.png) | ![composition2](Docs/main-composition-2.png) | ![composition3](Docs/main-composition-3.png) |
 | -------------------------------- | -------------------------------- | -------------------------------- |
 
 ## Sample Applications
 
 Blend2D quickstart and interactive applications are available in the Samples subdirectory. These samples provide either interactive demonstrations of some Blend2D features like stroking or animated demonstrations that can use the Blend2D, FireMonkey or Skia rendering engine for both performance and quality comparison.
 
-| ![Rectangles](Docs\example-rects.jpg) | ![Bounces](Docs\example-bounces.jpg) |
+| ![Rectangles](Docs/example-rects.jpg) | ![Bounces](Docs/example-bounces.jpg) |
 | -------------------------------- | -------------------------------- |
-| ![Circles](Docs\example-circles.jpg) | ![Particles](Docs\example-particles.jpg) |
-| ![Text](Docs\example-text.jpg) | ![Tiger](Docs\example-tiger.jpg) |
-| ![Gradients](Docs\example-gradients.jpg) | ![Elliptic Arcs](Docs\example-elliptic-arc.jpg) |
-| ![Stroke](Docs\example-stroke.jpg) | ![Paths](Docs\example-paths.jpg) |
-| ![Bubbles](Docs\example-bubbles.jpg) | ![Patterns](Docs\example-patterns.jpg) |
+| ![Circles](Docs/example-circles.jpg) | ![Particles](Docs/example-particles.jpg) |
+| ![Text](Docs/example-text.jpg) | ![Tiger](Docs/example-tiger.jpg) |
+| ![Gradients](Docs/example-gradients.jpg) | ![Elliptic Arcs](Docs/example-elliptic-arc.jpg) |
+| ![Stroke](Docs/example-stroke.jpg) | ![Paths](Docs/example-paths.jpg) |
+| ![Bubbles](Docs/example-bubbles.jpg) | ![Patterns](Docs/example-patterns.jpg) |
 
 ## Documentation
 
