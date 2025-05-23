@@ -6,7 +6,7 @@
 
 DelphiBlend2D opens up Blend2D for Delphi developers. It can be used stand-alone to render to an off-screen image, or with the VCL or FireMonkey frameworks to render to the screen. The API is easy to use and follows the original C++ API as much as possible.
 
-| ![intro1](Docs/main-intro-1.png) | ![intro2](Docs/main-intro-2.png) | ![intro3](Doc/main-intro-3.png) |
+| ![intro1](Docs/main-intro-1.png) | ![intro2](Docs/main-intro-2.png) | ![intro3](Docs/main-intro-3.png) |
 | -------------------------------- | -------------------------------- | -------------------------------- |
 
 > Note that Blend2D (and thus DelphiBlend2D) is still in beta. The API and framework is subject to change.
