@@ -7,6 +7,10 @@ nav:
     - Globals.md
     - Containers.md
     - Geometries.md
+    - Imaging.md
+    - Styling.md
+    - Text.md
+    - Rendering.md
     - MultithreadedRendering.md
   - Reference:
     - Blend2D:
