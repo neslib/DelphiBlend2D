@@ -1,24 +1,43 @@
 inherited FormMain: TFormMain
   Caption = 'Particles'
+  ClientHeight = 520
+  ClientWidth = 580
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
+    Size.Width = 580.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Width = 64.000000000000000000
+    end
     inherited LayoutRenderer: TLayout
-      inherited ComboBoxRenderer: TComboBox
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Size.Width = 106.000000000000000000
-      end
+      Position.X = 72.000000000000000000
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Position.X = 524.000000000000000000
+      TabOrder = 3
+    end
+    inherited LabelFPS: TLabel
+      Position.X = 444.000000000000000000
+      TabOrder = 5
+    end
+    object CheckBoxColors: TCheckBox
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 186.000000000000000000
+      Size.Width = 72.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'Colors'
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Height = 348.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 418.000000000000000000
   end
   object ToolBar: TToolBar
-    Position.Y = 44.000000000000000000
-    Size.Width = 360.000000000000000000
-    Size.Height = 44.000000000000000000
+    Position.Y = 34.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
     object TrackBarCount: TTrackBar
@@ -28,67 +47,82 @@ inherited FormMain: TFormMain
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 43.000000000000000000
-      Position.Y = 12.000000000000000000
-      Size.Width = 241.000000000000000000
+      Position.X = 72.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 464.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
-      Value = 500.000000000000000000
-    end
-    object CheckBoxColors: TCheckBox
-      Align = Right
-      Position.X = 288.000000000000000000
-      Size.Width = 72.000000000000000000
-      Size.Height = 44.000000000000000000
-      Size.PlatformDefault = False
       TabOrder = 2
-      Text = 'Colors'
+      Value = 500.000000000000000000
+      OnChange = TrackBarCountChange
     end
-    object LabelCount: TLabel
+    object LabelCountHeader: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 35.000000000000000000
-      Size.Height = 44.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Count:'
+      TabOrder = 1
+    end
+    object LabelCount: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 540.000000000000000000
+      Size.Width = 36.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '500'
       TabOrder = 0
     end
   end
   object ToolBar1: TToolBar
-    Position.Y = 88.000000000000000000
-    Size.Width = 360.000000000000000000
-    Size.Height = 44.000000000000000000
+    Position.Y = 68.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
     object TrackBarRotation: TTrackBar
       Align = VertCenter
       CanParentFocus = True
-      Max = 0.019999999552965160
+      Max = 1000.000000000000000000
       Orientation = Horizontal
       Margins.Left = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Position.X = 56.000000000000000000
-      Position.Y = 12.000000000000000000
-      Size.Width = 300.000000000000000000
+      Position.X = 72.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 464.000000000000000000
       Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
-      Value = 0.002000000094994903
+      TabOrder = 2
+      Value = 100.000000000000000000
+      OnChange = TrackBarRotationChange
     end
-    object LabelRotation: TLabel
+    object LabelRotationHeader: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 48.000000000000000000
-      Size.Height = 44.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Rotation:'
+      TabOrder = 1
+    end
+    object LabelRotation: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 540.000000000000000000
+      Size.Width = 36.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '100'
       TabOrder = 0
     end
   end

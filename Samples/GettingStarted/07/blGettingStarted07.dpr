@@ -6,29 +6,24 @@ program blGettingStarted07;
 
 uses
   System.SysUtils,
+  System.UITypes,
   Blend2D in '..\..\..\Blend2D.pas';
 
 procedure Run;
-var
-  Image: IBLImage;
-  Context: IBLContext;
-  Face: IBLFontFace;
-  Font: IBLFont;
 begin
   ReportMemoryLeaksOnShutdown := True;
-  Image := TBLImage.Create(480, 480);
+  var Image := TBLImage.Create(480, 480, TBLFormat.Prgb32);
+  var Context := TBLContext.Create(Image);
 
-  Context := TBLContext.Create(Image);
-  Context.CompOp := TBLCompOp.SrcCopy;
-  Context.FillAll;
+  Context.ClearAll;
 
-  Face := TBLFontFace.Create;
-  Face.InitializeFromFile('Resources/NotoSans-Regular.ttf');
+  var Face: TBLFontFace;
+  Face.MakeFromFile('Resources/ABeeZee-Regular.ttf');
 
-  Font := TBLFont.Create;
-  Font.InitializeFromFace(Face, 50);
+  var Font: TBLFont;
+  Font.MakeFromFace(Face, 50);
 
-  Context.FillColor := $FFFFFFFF;
+  Context.SetFillStyle($FF000000);
   Context.FillText(BLPoint(60, 80), Font, 'Hello Blend2D!');
 
   Context.Rotate(0.785398);
@@ -36,7 +31,7 @@ begin
 
   Context.Finish;
 
-  Image.WriteToFile('blGettingStarted07.bmp');
+  Image.WriteToFile('blGettingStarted07.png');
 end;
 
 begin

@@ -10,9 +10,7 @@ object FormMain: TFormMain
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object PanelSettings: TPanel
     Left = 0
@@ -22,6 +20,7 @@ object FormMain: TFormMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 425
     object CheckBoxLowRes: TCheckBox
       AlignWithMargins = True
       Left = 40
@@ -36,6 +35,7 @@ object FormMain: TFormMain
       Caption = 'Low Resolution (on high-DPI displays)'
       TabOrder = 0
       OnClick = CheckBoxLowResClick
+      ExplicitWidth = 385
     end
   end
   object GridPanel: TGridPanel
@@ -96,6 +96,8 @@ object FormMain: TFormMain
         Value = 40.000000000000000000
       end>
     TabOrder = 1
+    ExplicitWidth = 425
+    ExplicitHeight = 380
     object TrackBarX: TTrackBar
       Left = 40
       Top = 15
@@ -107,6 +109,7 @@ object FormMain: TFormMain
       TabOrder = 0
       TickStyle = tsNone
       OnChange = TrackBarChange
+      ExplicitWidth = 345
     end
     object TrackBarY: TTrackBar
       Left = 15
@@ -120,6 +123,7 @@ object FormMain: TFormMain
       TabOrder = 1
       TickStyle = tsNone
       OnChange = TrackBarChange
+      ExplicitHeight = 300
     end
     object TrackBarZoom: TTrackBar
       Left = 395
@@ -136,6 +140,8 @@ object FormMain: TFormMain
       TickMarks = tmTopLeft
       TickStyle = tsNone
       OnChange = TrackBarChange
+      ExplicitLeft = 385
+      ExplicitHeight = 300
     end
     object TrackBarRotate: TTrackBar
       Left = 40
@@ -150,6 +156,8 @@ object FormMain: TFormMain
       TickMarks = tmTopLeft
       TickStyle = tsNone
       OnChange = TrackBarChange
+      ExplicitTop = 340
+      ExplicitWidth = 345
     end
     object Blend2DPaintBox: TBlend2DPaintBox
       Left = 40

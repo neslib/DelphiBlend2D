@@ -10,20 +10,26 @@ uses
   Blend2D;
 
 type
-  { Event handler type for TBlend2DPaintBox.OnPaint }
-  TBlend2DPaintEvent = procedure(const ASender: TObject; const AContext: IBLContext) of object;
+  /// <summary>
+  ///  Event handler type for TBlend2DPaintBox.OnPaint.
+  /// </summary>
+  TBlend2DPaintEvent = procedure(const ASender: TObject; const AContext: TBLContext) of object;
 
 type
-  { A paint box that uses Blend2D for drawing.
-    NOTE: To be able to install a package with this control, you *must* copy
-    "blend2d_win32.dll" to your package output directory (usually
-    c:\Users\Public\Documents\Embarcadero\Studio\<version>\Bpl\) }
+  /// <summary>
+  ///  A paint box that uses Blend2D for drawing.
+  /// </summary>
+  /// <remarks>
+  ///  To be able to install a package with this control, you *must* copy
+  ///  "blend2d_win32.dll" to your package output directory (usually
+  ///  c:\Users\Public\Documents\Embarcadero\Studio\<version>\Bpl\)
+  /// </remarks>
   TBlend2DPaintBox = class(TGraphicControl)
   {$REGION 'Internal Declarations'}
   private
     FBitmap: TBitmap;
-    FImage: IBLImage;
-    FContext: IBLContext;
+    FImage: TBLImage;
+    FContext: TBLContext;
     FDstSize: TSize;
     FPixelScale: Single;
     FLowResolution: Boolean;
@@ -48,17 +54,19 @@ type
     property Enabled;
     property Font;
 
-    { Whether to use a low-resolution buffer on high-DPI (eg. Retina) displays.
-
-      When set to True, the drawing canvas will be in logical units instead
-      of physical units. This will increase performance but result in lower
-      quality (less sharp) output.
-
-      When set to False (the default), the drawing canvas will match the units
-      of the display, resulting a sharp high-quality output at the cost of a
-      decrease in performance.
-
-      On non-high-DPI displays, this property has no effect. }
+    /// <summary>
+    ///  Whether to use a low-resolution buffer on high-DPI (eg. Retina) displays.
+    ///
+    ///  When set to True, the drawing canvas will be in logical units instead
+    ///  of physical units. This will increase performance but result in lower
+    ///  quality (less sharp) output.
+    ///
+    ///  When set to False (the default), the drawing canvas will match the units
+    ///  of the display, resulting a sharp high-quality output at the cost of a
+    ///  decrease in performance.
+    ///
+    ///  On non-high-DPI displays, this property has no effect.
+    /// </summary>
     property LowResolution: Boolean read FLowResolution write SetLowResolution default False;
 
     property ParentColor;
@@ -119,8 +127,6 @@ begin
 
   FBitmap := TBitmap.Create;
   FBitmap.PixelFormat := TPixelFormat.pf32bit;
-  FImage := TBLImage.Create;
-  FContext := TBLContext.Create;
   FPixelScale := 1;
 end;
 
@@ -131,8 +137,6 @@ begin
 end;
 
 procedure TBlend2DPaintBox.Paint;
-var
-  SrcSize, DstSize: TSize;
 begin
   if (csDesigning in ComponentState) then
   begin
@@ -146,6 +150,7 @@ begin
     Exit;
 
   { DstSize is in physical coordinates }
+  var SrcSize, DstSize: TSize;
   DstSize.Width := Trunc(Width);
   DstSize.Height := Trunc(Height);
   if (DstSize <> FDstSize) or (FForceResize) then
@@ -163,7 +168,7 @@ begin
     FBitmap.SetSize(SrcSize.Width, SrcSize.Height);
 
     if (SrcSize.Height > 1) then
-      FImage.InitializeFromData(SrcSize.Width, SrcSize.Height, TBLFormat.PRGB32,
+      FImage.MakeFromData(SrcSize.Width, SrcSize.Height, TBLFormat.PRGB32,
         FBitmap.ScanLine[0], NativeInt(FBitmap.ScanLine[1]) - NativeInt(FBitmap.ScanLine[0]));
   end;
 

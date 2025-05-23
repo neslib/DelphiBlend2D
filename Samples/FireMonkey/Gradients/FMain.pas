@@ -20,49 +20,64 @@ uses
   FMX.Objects,
   FMX.ListBox,
   FMX.Layouts,
+  FMX.Colors,
   Blend2D,
   FBase;
 
 type
   TFormMain = class(TFormBase)
-    ToolBarRadius: TToolBar;
-    TrackBarRadius: TTrackBar;
+    ToolBarParam1: TToolBar;
+    TrackBarParam1: TTrackBar;
     ToolBarGradient: TToolBar;
-    LabelGradient: TLabel;
-    LayoutGradient: TLayout;
-    ComboBoxGradient: TComboBox;
+    LabelParam1Header: TLabel;
     LabelExtend: TLabel;
+    LabelGradient: TLabel;
     LayoutExtend: TLayout;
     ComboBoxExtend: TComboBox;
-    LabelRadius: TLabel;
+    LayoutGradient: TLayout;
+    ComboBoxGradient: TComboBox;
     ButtonRandom: TButton;
-    ButtonColors: TButton;
+    LabelParam1: TLabel;
+    ToolBarParam2: TToolBar;
+    TrackBarParam2: TTrackBar;
+    LabelParam2Header: TLabel;
+    LabelParam2: TLabel;
+    CheckBoxControl: TCheckBox;
+    CheckBoxDither: TCheckBox;
+    ToolBarColors: TToolBar;
+    LabelColors: TLabel;
+    ComboColorBox1: TComboColorBox;
+    LayoutColor1: TLayout;
+    LayoutColor2: TLayout;
+    ComboColorBox2: TComboColorBox;
+    LayoutColor3: TLayout;
+    ComboColorBox3: TComboColorBox;
     procedure FormCreate(Sender: TObject);
     procedure ComboBoxGradientChange(Sender: TObject);
     procedure ComboBoxExtendChange(Sender: TObject);
-    procedure TrackBarRadiusChange(Sender: TObject);
+    procedure TrackBarParam1Change(Sender: TObject);
     procedure PaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Single);
     procedure PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Single);
     procedure PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Single);
-    procedure ButtonColorsClick(Sender: TObject);
     procedure ButtonRandomClick(Sender: TObject);
+    procedure ComboColorBoxChange(Sender: TObject);
+    procedure CheckBoxChange(Sender: TObject);
   private
-    FGradient: IBLGradient;
     FPts: array [0..1] of TBLPoint;
-    FGradientType: TBLGradientType;
+    FGradientKind: TBLGradientKind;
     FGradientExtendMode: TBLExtendMode;
     FNumPoints: Integer;
     FClosestVertex: Integer;
     FGrabbedVertex: Integer;
-    FRandom: TBLRandom;
   private
     function GetClosestVertex(const AP: TBLPoint; const AMaxDistance: Double): Integer;
-    function RandomColor: TAlphaColor;
+    procedure UpdateLabels;
+    function SliderAngle(const AScale: Double): Double;
   protected
-    procedure RenderBlend2D(const AContext: IBLContext); override;
+    procedure RenderBlend2D(const AContext: TBLContext); override;
   public
   end;
 
@@ -78,15 +93,6 @@ uses
 
 { TFormMain }
 
-procedure TFormMain.ButtonColorsClick(Sender: TObject);
-begin
-  FGradient.ResetStops;
-  FGradient.AddStop(0.0, RandomColor or $FF000000);
-  FGradient.AddStop(0.5, RandomColor or $FF000000);
-  FGradient.AddStop(1.0, RandomColor or $FF000000);
-  PaintBox.Repaint;
-end;
-
 procedure TFormMain.ButtonRandomClick(Sender: TObject);
 begin
   inherited;
@@ -94,6 +100,12 @@ begin
   FPts[0].Y := Random(Trunc(PaintBox.Height)) + 0.5;
   FPts[1].X := Random(Trunc(PaintBox.Width)) + 0.5;
   FPts[1].Y := Random(Trunc(PaintBox.Height)) + 0.5;
+  PaintBox.Repaint;
+end;
+
+procedure TFormMain.CheckBoxChange(Sender: TObject);
+begin
+  inherited;
   PaintBox.Repaint;
 end;
 
@@ -107,49 +119,49 @@ end;
 procedure TFormMain.ComboBoxGradientChange(Sender: TObject);
 begin
   inherited;
-  FGradientType := TBLGradientType(ComboBoxGradient.ItemIndex);
-  if (FGradientType = TBLGradientType.Conical) then
+  FGradientKind := TBLGradientKind(ComboBoxGradient.ItemIndex);
+  if (FGradientKind = TBLGradientKind.Conic) then
     FNumPoints := 1
   else
     FNumPoints := 2;
 
+  UpdateLabels;
+  PaintBox.Repaint;
+end;
+
+procedure TFormMain.ComboColorBoxChange(Sender: TObject);
+begin
+  inherited;
   PaintBox.Repaint;
 end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
-  { Disable animation and FPS testing }
-  Application.OnIdle := nil;
+  DisableAnimation;
 
-  FRandom.Reset($1234);
-  FPts[0].Reset(100, 80);
-  FPts[1].Reset(350, 150);
+  FPts[0].Reset(350, 300);
+  FPts[1].Reset(200, 150);
   FNumPoints := 2;
   FClosestVertex := -1;
   FGrabbedVertex := -1;
 
-  FGradientType := TBLGradientType.Linear;
+  FGradientKind := TBLGradientKind.Linear;
   FGradientExtendMode := TBLExtendMode.Pad;
 
-  FGradient := TBLGradient.Create;
-  FGradient.AddStop(0.0, TAlphaColors.Black);
-  FGradient.AddStop(1.0, TAlphaColors.White);
+  UpdateLabels;
 end;
 
 function TFormMain.GetClosestVertex(const AP: TBLPoint;
   const AMaxDistance: Double): Integer;
-var
-  ClosestDistance, D, DX, DY: Double;
-  I: Integer;
 begin
   Result := -1;
-  ClosestDistance := Double.MaxValue;
-  for I := 0 to FNumPoints - 1 do
+  var ClosestDistance: Double := Double.MaxValue;
+  for var I := 0 to FNumPoints - 1 do
   begin
-    DX := AP.X - FPts[I].X;
-    DY := AP.Y - FPts[I].Y;
-    D := Sqrt((DX * DX) + (DY * DY));
+    var DX: Double := FPts[I].X - AP.X;
+    var DY: Double := FPts[I].Y - AP.Y;
+    var D: Double := Sqrt((DX * DX) + (DY * DY));
     if (D < ClosestDistance) and (D < AMaxDistance) then
     begin
       Result := I;
@@ -180,7 +192,7 @@ begin
   inherited;
   P.Reset(X, Y);
   if (FGrabbedVertex < 0) then
-    FClosestVertex := GetClosestVertex(P, 5)
+    FClosestVertex := GetClosestVertex(P, {$IFDEF MOBILE}20{$ELSE}5{$ENDIF})
   else
     FPts[FGrabbedVertex] := P;
   PaintBox.Repaint;
@@ -200,47 +212,87 @@ begin
   end;
 end;
 
-function TFormMain.RandomColor: TAlphaColor;
+procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  Result := FRandom.NextUInt32;
-end;
+  if (CheckBoxDither.IsChecked) then
+    AContext.GradientQuality := TBLGradientQuality.Dither
+  else
+    AContext.GradientQuality := TBLGradientQuality.Nearest;
 
-procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
-var
-  I: Integer;
-begin
-  FGradient.GradientType := FGradientType;
-  FGradient.ExtendMode := FGradientExtendMode;
+  var Gradient: TBLGradient;
+  Gradient.Kind := FGradientKind;
+  Gradient.ExtendMode := FGradientExtendMode;
+  Gradient.ResetStops;
 
-  case FGradientType of
-    TBLGradientType.Linear:
-      FGradient.SetValues(BLLinearGradientValues(FPts[0].X, FPts[0].Y, FPts[1].X, FPts[1].Y));
+  Gradient.AddStop(0.0, ComboColorBox1.Color);
+  Gradient.AddStop(0.5, ComboColorBox2.Color);
+  Gradient.AddStop(1.0, ComboColorBox3.Color);
 
-    TBLGradientType.Radial:
-      FGradient.SetValues(BLRadialGradientValues(FPts[0].X, FPts[0].Y, FPts[1].X, FPts[1].Y, TrackBarRadius.Value));
+  case FGradientKind of
+    TBLGradientKind.Linear:
+      begin
+        Gradient.SetValues(BLLinearGradientValues(
+          FPts[0].X, FPts[0].Y, FPts[1].X, FPts[1].Y));
+      end;
 
-    TBLGradientType.Conical:
-      FGradient.SetValues(BLConicalGradientValues(FPts[0].X, FPts[0].Y, TrackBarRadius.Value));
+    TBLGradientKind.Radial:
+      begin
+        Gradient.SetValues(BLRadialGradientValues(
+          FPts[0].X, FPts[0].Y, FPts[1].X, FPts[1].Y, TrackBarParam1.Value, TrackBarParam2.Value));
+      end;
+
+    TBLGradientKind.Conic:
+      Gradient.SetValues(BLConicGradientValues(
+        FPts[0].X, FPts[0].Y, SliderAngle(Pi * 2), TrackBarParam2.Value));
   end;
 
-  AContext.FillGradient := FGradient;
-  AContext.FillAll;
+  AContext.FillAll(Gradient);
 
-  for I := 0 to FNumPoints - 1 do
+  if (CheckBoxControl.IsChecked) then
   begin
-    if (I = FClosestVertex) then
-      AContext.FillColor := $FF00FFFF
-    else
-      AContext.FillColor := $FF007FFF;
+    for var I := 0 to FNumPoints - 1 do
+    begin
+      var Color: TAlphaColor := $FF007FFF;
+      if (I = FClosestVertex) then
+        Color := $FF00FFFF;
 
-    AContext.FillCircle(FPts[I].X, FPts[I].Y, 2);
+      AContext.StrokeCircle(FPts[I].X, FPts[I].Y, 3, Color);
+    end;
   end;
 end;
 
-procedure TFormMain.TrackBarRadiusChange(Sender: TObject);
+function TFormMain.SliderAngle(const AScale: Double): Double;
+begin
+  Result := TrackBarParam1.Value / 720.0 * AScale;
+end;
+
+procedure TFormMain.TrackBarParam1Change(Sender: TObject);
 begin
   inherited;
   PaintBox.Repaint;
+end;
+
+procedure TFormMain.UpdateLabels;
+begin
+  case FGradientKind of
+    TBLGradientKind.Linear:
+      begin
+        LabelParam1Header.Text := '(Unused)';
+        LabelParam2Header.Text := '(Unused)';
+      end;
+
+    TBLGradientKind.Radial:
+      begin
+        LabelParam1Header.Text := 'Center Rad:';
+        LabelParam2Header.Text := 'Focal Rad:';
+      end;
+
+    TBLGradientKind.Conic:
+      begin
+        LabelParam1Header.Text := 'Angle:';
+        LabelParam2Header.Text := 'Repeat:';
+      end;
+  end;
 end;
 
 end.

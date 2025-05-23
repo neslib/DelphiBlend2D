@@ -9,31 +9,26 @@ uses
   Blend2D in '..\..\..\Blend2D.pas';
 
 procedure Run;
-var
-  Image, Texture: IBLImage;
-  Context: IBLContext;
-  Pattern: IBLPattern;
 begin
   ReportMemoryLeaksOnShutdown := True;
-  Image := TBLImage.Create(480, 480);
+  var Image := TBLImage.Create(480, 480, TBLFormat.Prgb32);
+  var Context := TBLContext.Create(Image);
 
-  Context := TBLContext.Create(Image);
-  Context.CompOp := TBLCompOp.SrcCopy;
-  Context.FillAll;
+  Context.ClearAll;
 
   { Read an image from file. }
-  Texture := TBLImage.Create;
-  Texture.ReadFromFile('Resources/texture.jpeg');
+  var Texture: TBLImage;
+  Texture.ReadFromFile('Resources/Leaves.jpeg');
 
-  { Create a pattern and use it to fill a rounded-rect. }
-  Pattern := TBLPattern.Create(Texture);
+  { Create a pattern and use it to fill a rounded-rect.
+    By default a repeat extend mode is used, but it can be configured to use
+    more extend modes. }
+  var Pattern := TBLPattern.Create(Texture);
 
-  Context.CompOp := TBLCompOp.SrcOver;
-  Context.SetFillStyle(Pattern);
-  Context.FillRoundRect(40, 40, 400, 400, 45.5);
+  Context.FillRoundRect(40, 40, 400, 400, 45.5, Pattern);
   Context.Finish;
 
-  Image.WriteToFile('blGettingStarted03.bmp');
+  Image.WriteToFile('blGettingStarted03.png');
 end;
 
 begin

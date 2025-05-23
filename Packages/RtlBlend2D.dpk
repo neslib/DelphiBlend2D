@@ -33,7 +33,6 @@ requires
   rtl;
 
 contains
-  Blend2D.Api in '..\Blend2D.Api.pas',
   Blend2D in '..\Blend2D.pas';
 
 end.

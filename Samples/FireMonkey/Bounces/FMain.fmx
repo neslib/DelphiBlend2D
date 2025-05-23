@@ -1,31 +1,72 @@
 inherited FormMain: TFormMain
   Caption = 'Bounces'
+  ClientHeight = 520
+  ClientWidth = 580
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
-    Size.Height = 48.000000000000000000
+    Size.Width = 580.000000000000000000
     inherited LabelRenderer: TLabel
-      Size.Height = 48.000000000000000000
+      Size.Width = 64.000000000000000000
     end
     inherited LayoutRenderer: TLayout
-      Size.Height = 48.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 133.000000000000000000
       inherited ComboBoxRenderer: TComboBox
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 106.000000000000000000
-        Size.Height = 32.000000000000000000
+        Size.Width = 133.000000000000000000
       end
     end
     inherited CheckBoxLimitFPS: TCheckBox
-      Size.Height = 48.000000000000000000
+      Position.X = 524.000000000000000000
     end
     inherited LabelFPS: TLabel
-      Size.Height = 48.000000000000000000
+      Position.X = 444.000000000000000000
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Height = 432.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 452.000000000000000000
+  end
+  object ToolBar1: TToolBar
+    Position.Y = 34.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+    object LabelStyle: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Style:'
+      TabOrder = 0
+    end
+    object LayoutCompOp: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 133.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxStyle: TComboBox
+        Align = VertCenter
+        DropDownCount = 20
+        Items.Strings = (
+          'Solid Color'
+          'Linear Gradient'
+          'Radial Gradient'
+          'Conic Gradient')
+        ItemIndex = 1
+        Position.Y = 2.000000000000000000
+        Size.Width = 133.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnChange = ComboBoxStyleChange
+      end
+    end
   end
 end

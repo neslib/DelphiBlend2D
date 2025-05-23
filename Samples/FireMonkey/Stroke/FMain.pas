@@ -46,8 +46,7 @@ type
     ButtonX: TButton;
     ButtonY: TButton;
     ButtonZ: TButton;
-    LayoutWidth: TLayout;
-    LayoutMiterLimit: TLayout;
+    ToolBar4: TToolBar;
     LabelMiterLimit: TLabel;
     TrackBarMiterLimit: TTrackBar;
     procedure FormCreate(Sender: TObject);
@@ -74,16 +73,16 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char;
       Shift: TShiftState);
   private
-    FPath: IBLPath;
-    FPrng: TBLRandom;
+    FPath: TBLPath;
+    FRandom: TBLRandom;
     FStrokeOptions: TBLStrokeOptions;
     FClosestVertex: Integer;
     FGrabbedVertex: Integer;
     FShowControl: Boolean;
-    procedure RenderPathPoints(const AContext: IBLContext; const APath: IBLPath;
+    procedure RenderPathPoints(const AContext: TBLContext; const APath: TBLPath;
       const AHighlight: Integer; const ANormalColor, AHighlightColor: TBLRgba32);
   protected
-    procedure RenderBlend2D(const AContext: IBLContext); override;
+    procedure RenderBlend2D(const AContext: TBLContext); override;
   public
   end;
 
@@ -162,12 +161,12 @@ var
 
   function RandomX: Double;
   begin
-    Result := (FPrng.NextDouble * (MaxX - MinX)) + MinX;
+    Result := (FRandom.NextDouble * (MaxX - MinX)) + MinX;
   end;
 
   function RandomY: Double;
   begin
-    Result := (FPrng.NextDouble * (MaxY - MinY)) + MinY;
+    Result := (FRandom.NextDouble * (MaxY - MinY)) + MinY;
   end;
 
 begin
@@ -180,7 +179,7 @@ begin
   FPath.Clear;
   FPath.MoveTo(RandomX, RandomY);
 
-  Cmd := FPrng.NextDouble;
+  Cmd := FRandom.NextDouble;
   if (Cmd < 0.33) then
   begin
     FPath.LineTo(RandomX, RandomY);
@@ -195,7 +194,7 @@ begin
   else
     FPath.CubicTo(RandomX, RandomY, RandomX, RandomY, RandomX, RandomY);
 
-  if (FPrng.NextDouble < 0.5) then
+  if (FRandom.NextDouble < 0.5) then
     FPath.Close;
 
   PaintBox.Repaint;
@@ -247,11 +246,11 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
+  DisableAnimation;
   FClosestVertex := -1;
   FGrabbedVertex := -1;
   FShowControl := True;
-  FPath := TBLPath.Create;
-  FPrng.Reset(TThread.GetTickCount);
+  FRandom.Reset(TThread.GetTickCount);
   FStrokeOptions.Reset;
   FStrokeOptions.Width := TrackBarWidth.Value;
   FStrokeOptions.MiterLimit := TrackBarMiterLimit.Value;
@@ -285,15 +284,13 @@ end;
 
 procedure TFormMain.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Single);
-var
-  P: TBLPoint;
 begin
   inherited;
-  P.Reset(X, Y);
+  var P := BLPoint(X, Y);
   if (FGrabbedVertex < 0) then
-    FClosestVertex := FPath.GetClosestVertex(P, 5)
+    FClosestVertex := FPath.GetClosestVertex(P, {$IFDEF MOBILE}20{$ELSE}5{$ENDIF})
   else
-    FPath.SetVertexAt(FGrabbedVertex, TBLPathCmd.Move, P, True);
+    FPath.SetVertexAt(FGrabbedVertex, TBLPathCmd.Preserve, P);
   PaintBox.Repaint;
 end;
 
@@ -311,52 +308,41 @@ begin
   end;
 end;
 
-procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
-var
-  S: IBLPath;
+procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  AContext.FillColor := TAlphaColors.Black;
-  AContext.FillAll;
+  AContext.FillAll(TAlphaColors.Black);
 
-  S := TBLPath.Create;
+  var S: TBLPath;
   S.AddStrokedPath(FPath, FStrokeOptions, TBLApproximationOptions.Default);
-
-  AContext.FillColor := $8F003FAA;
-  AContext.FillPath(S);
+  AContext.FillPath(S, $8F003FAA);
 
   if (FShowControl) then
   begin
-    AContext.StrokeColor := $FF0066AA;
-    AContext.StrokePath(S);
+    AContext.StrokePath(S, $FF0066AA);
     RenderPathPoints(AContext, S, Integer.MaxValue, $7F007FFF, $FFFFFFFF);
   end;
 
-  AContext.StrokeColor := TAlphaColors.White;
-  AContext.StrokePath(FPath);
+  AContext.StrokePath(FPath, TAlphaColors.White);
 
   RenderPathPoints(AContext, FPath, FClosestVertex, $FFFFFFFF, $FF00FFFF);
 end;
 
-procedure TFormMain.RenderPathPoints(const AContext: IBLContext;
-  const APath: IBLPath; const AHighlight: Integer; const ANormalColor,
+procedure TFormMain.RenderPathPoints(const AContext: TBLContext;
+  const APath: TBLPath; const AHighlight: Integer; const ANormalColor,
   AHighlightColor: TBLRgba32);
-var
-  I, Count: Integer;
-  Vtx: PBLPoint;
 begin
-  Count := APath.Count;
-  Vtx := APath.VertexData;
+  var Count := APath.Count;
+  var Vtx := APath.VertexData;
 
-  for I := 0 to Count - 1 do
+  for var I := 0 to Count - 1 do
   begin
     if (not Vtx.X.IsInfinity) then
     begin
+      var Color := ANormalColor;
       if (I = AHighlight) then
-        AContext.FillColor := AHighlightColor
-      else
-        AContext.FillColor := ANormalColor;
+        Color := AHighlightColor;
 
-      AContext.FillCircle(Vtx.X, Vtx.Y, 2.5);
+      AContext.FillCircle(Vtx.X, Vtx.Y, 2.5, Color);
     end;
     Inc(Vtx);
   end;

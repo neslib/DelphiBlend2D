@@ -21,13 +21,13 @@ uses
   FMX.ListBox,
   FMX.Layouts,
   {$IFDEF USE_SKIA}
-  Neslib.Skia,
+  System.Skia,
   {$ENDIF}
   Blend2D,
   FBase;
 
 type
-  TShapeType = (Rect, RectPath, RoundRect, Polygon);
+  TShapeType = (RectA, RectU, RectPath, RoundRect, Polygon);
 
 type
   TFormMain = class(TFormBase)
@@ -36,12 +36,14 @@ type
     LayoutCompOp: TLayout;
     ComboBoxCompOp: TComboBox;
     TrackBarRectCount: TTrackBar;
-    LabelCount: TLabel;
+    LabelCountHeader: TLabel;
     ToolBar2: TToolBar;
     LabelShape: TLabel;
     Layout1: TLayout;
     ComboBoxShape: TComboBox;
     TrackBarSize: TTrackBar;
+    LabelSizeHeader: TLabel;
+    LabelCount: TLabel;
     LabelSize: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ComboBoxCompOpChange(Sender: TObject);
@@ -57,7 +59,7 @@ type
     FRectSize: Double;
     FRandom: TBLRandom;
     {$IFDEF USE_SKIA}
-    FSkiaBlendMode: TSKBlendMode;
+    FSkiaBlender: ISkBlender;
     {$ENDIF}
     procedure SetRectCount(const AValue: Integer);
     function RandomSign: Double;
@@ -65,9 +67,9 @@ type
   protected
     procedure BeforeRender; override;
     procedure RenderFireMonkey(const ACanvas: TCanvas); override;
-    procedure RenderBlend2D(const AContext: IBLContext); override;
+    procedure RenderBlend2D(const AContext: TBLContext); override;
     {$IFDEF USE_SKIA}
-    procedure RenderSkia(const ACanvas: ISKCanvas); override;
+    procedure RenderSkia(const ACanvas: ISkCanvas); override;
     {$ENDIF}
   public
   end;
@@ -85,18 +87,14 @@ uses
 { TFormMain }
 
 procedure TFormMain.BeforeRender;
-var
-  W, H: Single;
-  Vertex, Step: PPointF;
-  I: Integer;
 begin
   inherited;
-  W := PaintBox.Width;
-  H := PaintBox.Height;
-  for I := 0 to Length(FCoords) - 1 do
+  var W: Single := PaintBox.Width;
+  var H: Single := PaintBox.Height;
+  for var I := 0 to Length(FCoords) - 1 do
   begin
-    Vertex := @FCoords[I];
-    Step := @FSteps[I];
+    var Vertex := PPointF(@FCoords[I]);
+    var Step := PPointF(@FSteps[I]);
 
     Vertex^ := Vertex^ + Step^;
 
@@ -116,26 +114,30 @@ end;
 
 procedure TFormMain.ComboBoxCompOpChange(Sender: TObject);
 const
-  BLEND2D_COMP_OPS: array [0..8] of TBLCompOp = (TBLCompOp.SrcOver, TBLCompOp.SrcCopy,
-    TBLCompOp.DstAtop, TBLCompOp.ExclusiveOr, TBLCompOp.Plus, TBLCompOp.Screen,
-    TBLCompOp.Lighten, TBLCompOp.HardLight, TBLCompOp.Difference);
+  BLEND2D_COMP_OPS: array [0..16] of TBLCompOp = (TBLCompOp.SrcOver,
+    TBLCompOp.SrcCopy, TBLCompOp.SrcAtop, TBLCompOp.DstAtop,
+    TBLCompOp.ExclusiveOr, TBLCompOp.Plus, TBLCompOp.Multiply, TBLCompOp.Screen,
+    TBLCompOp.Overlay, TBLCompOp.Darken, TBLCompOp.Lighten,
+    TBLCompOp.ColorDodge, TBLCompOp.ColorBurn, TBLCompOp.HardLight,
+    TBLCompOp.SoftLight, TBLCompOp.Difference, TBLCompOp.Exclusion);
 
   {$IFDEF USE_SKIA}
-  SKIA_BLEND_MODES: array [0..8] of TSKBlendMode = (TSKBlendMode.SrcOver,
-    TSKBlendMode.Src, TSKBlendMode.DstAtop, TSKBlendMode.ExclusiveOr,
-    TSKBlendMode.Plus, TSKBlendMode.Screen, TSKBlendMode.Lighten,
-    TSKBlendMode.HardLight, TSKBlendMode.Difference);
+  SKIA_BLEND_MODES: array [0..16] of TSkBlendMode = (TSkBlendMode.SrcOver,
+    TSkBlendMode.Src, TSkBlendMode.SrcATop, TSkBlendMode.DestATop,
+    TSkBlendMode.Xor, TSkBlendMode.Plus, TSkBlendMode.Multiply,
+    TSkBlendMode.Screen, TSkBlendMode.Overlay, TSkBlendMode.Darken,
+    TSkBlendMode.Lighten, TSkBlendMode.ColorDodge, TSkBlendMode.ColorBurn,
+    TSkBlendMode.HardLight, TSkBlendMode.SoftLight, TSkBlendMode.Difference,
+    TSkBlendMode.Exclusion);
   {$ENDIF}
-var
-  I: Integer;
 begin
   inherited;
-  I := ComboBoxCompOp.ItemIndex;
+  var I := ComboBoxCompOp.ItemIndex;
   if (I >= 0) and (I < Length(BLEND2D_COMP_OPS)) then
   begin
     FBlend2DCompOp := BLEND2D_COMP_OPS[I];
     {$IFDEF USE_SKIA}
-    FSkiaBlendMode := SKIA_BLEND_MODES[I];
+    FSkiaBlender := TSkBlender.MakeMode(SKIA_BLEND_MODES[I]);
     {$ENDIF}
   end;
 end;
@@ -149,10 +151,10 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   inherited;
-  FRandom.Reset($1234);
+  FRandom.Reset($123456789ABCDEF);
   FBlend2DCompOp := TBLCompOp.SrcOver;
   {$IFDEF USE_SKIA}
-  FSkiaBlendMode := TSKBlendMode.SrcOver;
+  FSkiaBlender := TSkBlender.MakeMode(TSkBlendMode.SrcOver);
   {$ENDIF}
   SetRectCount(Trunc(TrackBarRectCount.Value));
   FRectSize := 64;
@@ -171,33 +173,40 @@ begin
     Result := -1.0;
 end;
 
-procedure TFormMain.RenderBlend2D(const AContext: IBLContext);
-var
-  I: Integer;
-  P: TPointF;
-  X, Y, RectSize, HalfSize: Double;
-  Path: IBLPath;
+procedure TFormMain.RenderBlend2D(const AContext: TBLContext);
 begin
-  AContext.FillColor := TAlphaColors.Black;
-  AContext.FillAll;
-
+  AContext.CompOp := TBLCompOp.SrcCopy;
+  AContext.FillAll(BackgroundForCompOp(FBlend2DCompOp));
   AContext.CompOp := FBlend2DCompOp;
 
-  RectSize := FRectSize;
-  HalfSize := 0.5 * RectSize;
+  var RectSize: Double := FRectSize;
+  var HalfSize: Double := 0.5 * RectSize;
 
+  var I: Integer;
+  var P: TPointF;
+  var Path: TBLPath;
   case FShapeType of
-    TShapeType.Rect:
+    TShapeType.RectA:
+      begin
+        var RectSizeI := Trunc(FRectSize);
+        for I := 0 to Length(FCoords) - 1 do
+        begin
+          P := FCoords[I];
+          var X := Trunc(P.X - HalfSize);
+          var Y := Trunc(P.Y - HalfSize);
+          AContext.FillRect(BLRectI(X, Y, RectSizeI, RectSizeI), FColors[I]);
+        end;
+      end;
+
+    TShapeType.RectU:
       for I := 0 to Length(FCoords) - 1 do
       begin
         P := FCoords[I];
-        AContext.FillColor := FColors[I];
-        AContext.FillRect(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize);
+        AContext.FillRect(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize, FColors[I]);
       end;
 
     TShapeType.RectPath:
       begin
-        Path := TBLPath.Create;
         for I := 0 to Length(FCoords) - 1 do
         begin
           P := FCoords[I];
@@ -205,19 +214,17 @@ begin
           Path.Reset;
           Path.AddRect(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize);
 
-          AContext.FillColor := FColors[I];
-          AContext.FillPath(Path);
+          AContext.FillPath(Path, FColors[I]);
         end;
       end;
 
     TShapeType.Polygon:
       begin
-        Path := TBLPath.Create;
         for I := 0 to Length(FCoords) - 1 do
         begin
           P := FCoords[I];
-          X := P.X - HalfSize;
-          Y := P.Y - HalfSize;
+          var X: Double := P.X - HalfSize;
+          var Y: Double := P.Y - HalfSize;
 
           Path.Reset;
           Path.MoveTo(X + HalfSize, Y);
@@ -226,8 +233,7 @@ begin
           Path.LineTo(X + RectSize * (1 / 3), Y + RectSize);
           Path.LineTo(X, Y + RectSize * (1 / 3));
 
-          AContext.FillColor := FColors[I];
-          AContext.FillPath(Path);
+          AContext.FillPath(Path, FColors[I]);
         end;
       end;
 
@@ -235,18 +241,12 @@ begin
       for I := 0 to Length(FCoords) - 1 do
       begin
         P := FCoords[I];
-        AContext.FillColor := FColors[I];
-        AContext.FillRoundRect(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize, 10);
+        AContext.FillRoundRect(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize, 10, FColors[I]);
       end;
   end;
 end;
 
 procedure TFormMain.RenderFireMonkey(const ACanvas: TCanvas);
-var
-  I: Integer;
-  P: TPointF;
-  X, Y, RectSize, HalfSize: Single;
-  Path: TPathData;
 begin
   ACanvas.Clear(TAlphaColors.Black);
 
@@ -256,11 +256,15 @@ begin
     Exit;
   end;
 
-  RectSize := FRectSize;
-  HalfSize := 0.5 * RectSize;
+  var RectSize: Single := FRectSize;
+  var HalfSize: Single := 0.5 * RectSize;
+  var I: Integer;
+  var P: TPointF;
+  var Path: TPathData;
 
   case FShapeType of
-    TShapeType.Rect:
+    TShapeType.RectA,
+    TShapeType.RectU:
       for I := 0 to Length(FCoords) - 1 do
       begin
         P := FCoords[I];
@@ -297,8 +301,8 @@ begin
           for I := 0 to Length(FCoords) - 1 do
           begin
             P := FCoords[I];
-            X := P.X - HalfSize;
-            Y := P.Y - HalfSize;
+            var X: Single := P.X - HalfSize;
+            var Y: Single := P.Y - HalfSize;
 
             Path.Clear;
             Path.MoveTo(PointF(X + HalfSize, Y));
@@ -328,61 +332,60 @@ begin
 end;
 
 {$IFDEF USE_SKIA}
-procedure TFormMain.RenderSkia(const ACanvas: ISKCanvas);
-var
-  I: Integer;
-  P: TPointF;
-  X, Y, RectSize, HalfSize: Single;
-  Path: ISKPath;
+procedure TFormMain.RenderSkia(const ACanvas: ISkCanvas);
 begin
-  ACanvas.Clear(TAlphaColors.Black);
-  FSkiaFill.BlendMode := FSkiaBlendMode;
+  ACanvas.Clear(BackgroundForCompOp(FBlend2DCompOp));
+  FSkiaFill.Blender := FSkiaBlender;
 
-  RectSize := FRectSize;
-  HalfSize := 0.5 * RectSize;
+  var RectSize: Single := FRectSize;
+  var HalfSize: Single := 0.5 * RectSize;
+  var I: Integer;
+  var P: TPointF;
+  var PathBuilder: ISkPathBuilder;
 
   case FShapeType of
-    TShapeType.Rect:
+    TShapeType.RectA,
+    TShapeType.RectU:
       for I := 0 to Length(FCoords) - 1 do
       begin
         P := FCoords[I];
         FSkiaFill.Color := FColors[I];
-        ACanvas.DrawRect(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize, FSkiaFill);
+        ACanvas.DrawRect(RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize), FSkiaFill);
       end;
 
     TShapeType.RectPath:
       begin
-        Path := TSKPath.Create;
+        PathBuilder := TSkPathBuilder.Create;
         for I := 0 to Length(FCoords) - 1 do
         begin
           P := FCoords[I];
 
-          Path.Reset;
-          Path.AddRect(TSKRect.CreateXYWH(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize));
+          PathBuilder.Reset;
+          PathBuilder.AddRect(RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize));
 
           FSkiaFill.Color := FColors[I];
-          ACanvas.DrawPath(Path, FSkiaFill);
+          ACanvas.DrawPath(PathBuilder.Detach, FSkiaFill);
         end;
       end;
 
     TShapeType.Polygon:
       begin
-        Path := TSKPath.Create;
+        PathBuilder := TSkPathBuilder.Create;
         for I := 0 to Length(FCoords) - 1 do
         begin
           P := FCoords[I];
-          X := P.X - HalfSize;
-          Y := P.Y - HalfSize;
+          var X: Single := P.X - HalfSize;
+          var Y: Single := P.Y - HalfSize;
 
-          Path.Reset;
-          Path.MoveTo(X + HalfSize, Y);
-          Path.LineTo(X + RectSize, Y + RectSize * (1 / 3));
-          Path.LineTo(X + RectSize * (2 / 3), Y + RectSize);
-          Path.LineTo(X + RectSize * (1 / 3), Y + RectSize);
-          Path.LineTo(X, Y + RectSize * (1 / 3));
+          PathBuilder.Reset;
+          PathBuilder.MoveTo(X + HalfSize, Y);
+          PathBuilder.LineTo(X + RectSize, Y + RectSize * (1 / 3));
+          PathBuilder.LineTo(X + RectSize * (2 / 3), Y + RectSize);
+          PathBuilder.LineTo(X + RectSize * (1 / 3), Y + RectSize);
+          PathBuilder.LineTo(X, Y + RectSize * (1 / 3));
 
           FSkiaFill.Color := FColors[I];
-          ACanvas.DrawPath(Path, FSkiaFill);
+          ACanvas.DrawPath(PathBuilder.Detach, FSkiaFill);
         end;
       end;
 
@@ -391,7 +394,8 @@ begin
       begin
         P := FCoords[I];
         FSkiaFill.Color := FColors[I];
-        ACanvas.DrawRoundRect(P.X - HalfSize, P.Y - HalfSize, RectSize, RectSize,
+        ACanvas.DrawRoundRect(RectF(P.X - HalfSize, P.Y - HalfSize, P.X + HalfSize, P.Y + HalfSize),
+
           10, 10, FSkiaFill);
       end;
   end;
@@ -399,13 +403,10 @@ end;
 {$ENDIF}
 
 procedure TFormMain.SetRectCount(const AValue: Integer);
-var
-  W, H: Single;
-  I: Integer;
 begin
-  W := PaintBox.Width;
-  H := PaintBox.Height;
-  I := Length(FCoords);
+  var W: Single := PaintBox.Width;
+  var H: Single := PaintBox.Height;
+  var I := Length(FCoords);
 
   SetLength(FCoords, AValue);
   SetLength(FSteps, AValue);
@@ -414,8 +415,8 @@ begin
   while (I < AValue) do
   begin
     FCoords[I] := PointF(Random * W, Random * H);
-    FSteps[I] := PointF(((Random * 0.5) + 0.05) * RandomSign,
-                        ((Random * 0.5) + 0.05) * RandomSign);
+    FSteps[I] := PointF(((Random * 0.5) + 0.04) * RandomSign,
+                        ((Random * 0.5) + 0.04) * RandomSign);
     FColors[I] := RandomColor;
     Inc(I);
   end;
@@ -424,13 +425,17 @@ end;
 procedure TFormMain.TrackBarRectCountChange(Sender: TObject);
 begin
   inherited;
-  SetRectCount(Trunc(TrackBarRectCount.Value));
+  var Count := Trunc(TrackBarRectCount.Value);
+  LabelCount.Text := Count.ToString;
+  SetRectCount(Count);
 end;
 
 procedure TFormMain.TrackBarSizeChange(Sender: TObject);
 begin
   inherited;
-  FRectSize := TrackBarSize.Value;
+  var Size := Trunc(TrackBarSize.Value);
+  LabelSize.Text := Size.ToString;
+  FRectSize := Size;
 end;
 
 end.

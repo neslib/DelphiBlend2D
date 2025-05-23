@@ -22,9 +22,8 @@ uses
   FMX.Layouts,
   FMX.Objects,
   {$IFDEF USE_SKIA}
-  Neslib.Skia,
+  System.Skia,
   {$ENDIF}
-  Blend2D.Api,
   Blend2D;
 
 type
@@ -37,6 +36,7 @@ type
     PaintBox: TPaintBox;
     LabelFPS: TLabel;
     TimerRepaint: TTimer;
+    StyleBook: TStyleBook;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject; Canvas: TCanvas);
@@ -50,24 +50,26 @@ type
     FDstRect: TRectF;
     FPixelScale: Single;
     FFrameCount: Integer;
+    FLastFPS: Integer;
     FFPS: Integer;
     FTicksPerFrame: Int64;
     FTicks: Int64;
     FNextFrame: Int64;
     FNextSecond: Int64;
   protected
-    FBlend2DImage: IBLImage;
+    FBlend2DImage: TBLImage;
     FBlend2DBitmapData: TBitmapData;
-    FBlend2DContext: IBLContext;
+    FBlend2DContext: TBLContext;
+    FBlend2DLastError: TBLResult;
     {$IFNDEF MSWINDOWS}
-    FBlend2DConverter: IBLPixelConverter;
+    FBlend2DConverter: TBLPixelConverter;
     {$ENDIF}
   protected
     {$IFDEF USE_SKIA}
-    FSkiaSurface: ISKSurface;
-    FSkiaCanvas: ISKCanvas;
-    FSkiaFill: ISKPaint;
-    FSkiaStroke: ISKPaint;
+    FSkiaSurface: ISkSurface;
+    FSkiaCanvas: ISkCanvas;
+    FSkiaFill: ISkPaint;
+    FSkiaStroke: ISkPaint;
     FSkiaBitmapData: TBitmapData;
     {$ENDIF}
   private
@@ -77,19 +79,22 @@ type
     procedure RenderSkiaInternal;
     {$ENDIF}
     procedure CheckRepaint;
-    procedure UpdateStats;
     procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
+  protected
+    class procedure HandleBlend2DErrorStatic(const AResultCode: TBLResult;
+      const AUserData: Pointer); static;
+    class function BackgroundForCompOp(const ACompOp: TBLCompOp): TAlphaColor; static;
   protected
     procedure BeforeRender; virtual;
     procedure AfterRender; virtual;
+    procedure DisableAnimation;
     procedure RenderNotSupported;
     procedure RenderFireMonkey(const ACanvas: TCanvas); virtual; abstract;
-    procedure RenderBlend2D(const AContext: IBLContext); virtual; abstract;
+    procedure RenderBlend2D(const AContext: TBLContext); virtual; abstract;
     {$IFDEF USE_SKIA}
-    procedure RenderSkia(const ACanvas: ISKCanvas); virtual; abstract;
+    procedure RenderSkia(const ACanvas: ISkCanvas); virtual; abstract;
     {$ENDIF}
   public
-    { Public declarations }
   end;
 
 implementation
@@ -121,6 +126,43 @@ begin
   CheckRepaint;
 end;
 
+class function TFormBase.BackgroundForCompOp(
+  const ACompOp: TBLCompOp): TAlphaColor;
+const
+  COLORS: array [TBLCompOp] of TAlphaColor = (
+    $FF000000, // SrcOver
+    $FF000000, // SrcCopy
+    $FFFFFFFF, // SrcIn
+    $00000000, // SrcOut
+    $FFFFFFFF, // SrcAtop
+    $FFFFFFFF, // DstOver
+    $FF000000, // DstCopy
+    $FF000000, // DstIn
+    $FF000000, // DstOut
+    $FF000000, // DstAtop
+    $FF000000, // ExclusiveOr
+    $FF000000, // Clear
+    $FF000000, // Plus
+    $FF000000, // Minus
+    $FF000000, // Modulate
+    $FFFFFFFF, // Multiply
+    $FF000000, // Screen
+    $00000000, // Overlay
+    $FFFFFFFF, // Darken
+    $FF000000, // Lighten
+    $00000000, // ColorDodge
+    $00000000, // ColorBurn
+    $FF000000, // LinearBurn
+    $FF000000, // LinearLight
+    $FF000000, // PinLight
+    $FF000000, // HardLight
+    $00000000, // SoftLight
+    $FF000000, // Difference
+    $FFFFFFFF);// Exclusion
+begin
+  Result := COLORS[ACompOp];
+end;
+
 procedure TFormBase.BeforeRender;
 begin
   { No default implementation }
@@ -146,13 +188,17 @@ begin
   PaintBox.Repaint;
 end;
 
+procedure TFormBase.DisableAnimation;
+begin
+  Application.OnIdle := nil;
+  TimerRepaint.Enabled := False;
+end;
+
 procedure TFormBase.FormCreate(Sender: TObject);
 
   procedure AddItem(const AText: String; const ATag: Integer);
-  var
-    Item: TListBoxItem;
   begin
-    Item := TListBoxItem.Create(Self);
+    var Item := TListBoxItem.Create(Self);
     Item.Text := AText;
     Item.Tag := ATag;
     ComboBoxRenderer.AddObject(Item);
@@ -160,9 +206,17 @@ procedure TFormBase.FormCreate(Sender: TObject);
 
 begin
   ReportMemoryLeaksOnShutdown := True;
+
+  { Install our own Blend2D error handler instead of using exceptions. }
+  BLSetErrorHandler(HandleBlend2DErrorStatic, Self);
+
   ComboBoxRenderer.BeginUpdate;
   try
-    AddItem('FireMonkey', TAG_FIREMONKEY);
+    var CanvasName := Canvas.ClassName;
+    if (CanvasName.StartsWith('TCanvas')) then
+      CanvasName := CanvasName.Substring(7);
+    AddItem('FMX (' + CanvasName + ')', TAG_FIREMONKEY);
+
     AddItem('Blend2D', TAG_BLEND2D_DEF);
     AddItem('Blend2D 1T', TAG_BLEND2D_1T);
     AddItem('Blend2D 2T', TAG_BLEND2D_2T);
@@ -178,25 +232,23 @@ begin
     ComboBoxRenderer.EndUpdate;
   end;
 
-  FPixelScale := Handle.Scale;
+  FPixelScale := 1;
 
   FBitmap := TBitmap.Create;
-  FBlend2DImage := TBLImage.Create;
-  FBlend2DContext := TBLContext.Create;
 
   {$IFNDEF MSWINDOWS}
   { We need to convert ARGB to ABGR on non-Windows platforms. }
-  FBlend2DConverter := TBLPixelConverter.CreatePlatformConverter;
+  FBlend2DConverter.MakePlatformConverter(TBLFormat.Prgb32);
   {$ENDIF}
 
   {$IFDEF USE_SKIA}
-  FSkiaFill := TSKPaint.Create;
-  FSkiaFill.Style := TSKPaintStyle.Fill;
-  FSkiaFill.IsAntialias := True;
+  FSkiaFill := TSkPaint.Create;
+  FSkiaFill.Style := TSkPaintStyle.Fill;
+  FSkiaFill.AntiAlias := True;
 
-  FSkiaStroke := TSKPaint.Create;
-  FSkiaStroke.Style := TSKPaintStyle.Stroke;
-  FSkiaStroke.IsAntialias := True;
+  FSkiaStroke := TSkPaint.Create;
+  FSkiaStroke.Style := TSkPaintStyle.Stroke;
+  FSkiaStroke.Antialias := True;
   {$ENDIF}
 
   Application.OnIdle := ApplicationIdle;
@@ -212,19 +264,28 @@ begin
   FBitmap.Free;
 end;
 
+class procedure TFormBase.HandleBlend2DErrorStatic(const AResultCode: TBLResult;
+  const AUserData: Pointer);
+begin
+  TFormBase(AUserData).FBlend2DLastError := AResultCode;
+end;
+
 procedure TFormBase.PaintBoxPaint(Sender: TObject; Canvas: TCanvas);
-var
-  SrcSize, DstSize: TSize;
 begin
   if (FBitmap = nil) or (ComboBoxRenderer.Selected = nil) then
     Exit;
 
+  var SrcSize, DstSize: TSize;
   DstSize.Width := Trunc(PaintBox.Width);
   DstSize.Height := Trunc(PaintBox.Height);
   if (DstSize <> FDstSize) then
   begin
     FDstSize := DstSize;
+    {$IFNDEF ANDROID}
+    { Disable high-dpi on Android to improve performance.
+      With Blend2D's anti-aliasing, this isn't that important anyway. }
     FPixelScale := Handle.Scale;
+    {$ENDIF}
     SrcSize.Width := Trunc(FDstSize.Width * FPixelScale);
     SrcSize.Height := Trunc(FDstSize.Height * FPixelScale);
     FBitmap.SetSize(SrcSize);
@@ -249,31 +310,42 @@ begin
 
   Canvas.DrawBitmap(FBitmap, FSrcRect, FDstRect, 1, True);
 
+  if (ComboBoxRenderer.Selected.Tag >= 0) and (FBlend2DLastError <> TBLResult.Success) then
+  begin
+    Canvas.Fill.Kind := TBrushKind.Solid;
+    Canvas.Fill.Color := TAlphaColors.Black;
+    Canvas.FillRect(RectF(0, 0, PaintBox.Width, PaintBox.Height), 1);
+
+    Canvas.Font.Size := 16;
+    Canvas.Fill.Color := TAlphaColors.White;
+    Canvas.FillText(RectF(0, 0, PaintBox.Width, PaintBox.Height),
+      'Blend2D error: ' + FBlend2DLastError.ToString, True, 1, [], TTextAlign.Center);
+    FBlend2DLastError := TBLResult.Success;
+  end;
+
   Inc(FFrameCount);
   if (FTicks >= FNextSecond) then
   begin
     Inc(FNextSecond, TStopwatch.Frequency);
     FFPS := FFrameCount;
     FFrameCount := 0;
-    UpdateStats;
   end;
 end;
 
 procedure TFormBase.RenderBlend2DInternal(const AThreadCount: Integer);
-var
-  Data: TBitmapData;
-  CreateInfo: TBLContextCreateInfo;
 begin
+  var Data: TBitmapData;
   if (FBitmap.Map(TMapAccess.Write, Data)) then
   try
     if (Data.Data <> FBlend2DBitmapData.Data) or (Data.Pitch <> FBlend2DBitmapData.Pitch) then
     begin
-      FBlend2DImage.InitializeFromData(Data.Width, Data.Height,
+      FBlend2DImage.MakeFromData(Data.Width, Data.Height,
         TBLFormat.PRGB32, Data.Data, Data.Pitch);
       FBlend2DBitmapData.Data := Data.Data;
       FBlend2DBitmapData.Pitch := Data.Pitch;
     end;
 
+    var CreateInfo: TBLContextCreateInfo;
     CreateInfo.Reset;
     CreateInfo.ThreadCount := AThreadCount;
 
@@ -295,10 +367,8 @@ begin
 end;
 
 procedure TFormBase.RenderFireMonkeyInternal;
-var
-  Canvas: TCanvas;
 begin
-  Canvas := FBitmap.Canvas;
+  var Canvas := FBitmap.Canvas;
   Canvas.BeginScene;
   try
     Canvas.SetMatrix(TMatrix.CreateScaling(FPixelScale, FPixelScale));
@@ -330,14 +400,18 @@ end;
 procedure TFormBase.TimerRepaintTimer(Sender: TObject);
 begin
   CheckRepaint;
+
+  if (FFPS <> FLastFPS) then
+  begin
+    FLastFPS := FFPS;
+    LabelFPS.Text := Format('%d fps', [FFPS]);
+  end;
 end;
 
 {$IFDEF USE_SKIA}
 procedure TFormBase.RenderSkiaInternal;
-var
-  Data: TBitmapData;
-  Info: TSKImageInfo;
 begin
+  var Data: TBitmapData;
   if (FBitmap.Map(TMapAccess.Write, Data)) then
   try
     if (Data.Data <> FSkiaBitmapData.Data) or (Data.Pitch <> FSkiaBitmapData.Pitch) then
@@ -345,29 +419,22 @@ begin
       FSkiaCanvas := nil;
       FSkiaSurface := nil;
 
-      Info := TSKImageInfo.Create(Data.Width, Data.Height,
-        TSKImageInfo.PlatformColorType, TSKAlphaType.Premul);
-      FSkiaSurface := TSKSurface.Create(Info, Data.Data, Data.Pitch);
+      var Info := TSkImageInfo.Create(Data.Width, Data.Height,
+        SkNative32ColorType, TSkAlphaType.Premul);
+      FSkiaSurface := TSkSurface.MakeRasterDirect(Info, Data.Data, Data.Pitch);
       FSkiaCanvas := FSkiaSurface.Canvas;
 
       FSkiaBitmapData.Data := Data.Data;
       FSkiaBitmapData.Pitch := Data.Pitch;
     end;
 
-    FSkiaCanvas.Scale(FPixelScale);
+    FSkiaCanvas.Scale(FPixelScale, FPixelScale);
     RenderSkia(FSkiaCanvas);
     FSkiaCanvas.ResetMatrix;
-    FSkiaCanvas.Flush;
   finally
     FBitmap.Unmap(Data);
   end;
 end;
 {$ENDIF}
-
-procedure TFormBase.UpdateStats;
-begin
-  LabelFPS.Text := Format('%d fps', [FFPS]);
-  Invalidate;
-end;
 
 end.

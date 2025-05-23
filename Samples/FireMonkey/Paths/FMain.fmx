@@ -1,0 +1,161 @@
+inherited FormMain: TFormMain
+  Caption = 'Paths'
+  ClientHeight = 520
+  ClientWidth = 580
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    Size.Width = 580.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Width = 64.000000000000000000
+    end
+    inherited LayoutRenderer: TLayout
+      Position.X = 72.000000000000000000
+      Size.Width = 150.000000000000000000
+      inherited ComboBoxRenderer: TComboBox
+        Size.Width = 150.000000000000000000
+      end
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Position.X = 524.000000000000000000
+    end
+    inherited LabelFPS: TLabel
+      Position.X = 444.000000000000000000
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Width = 580.000000000000000000
+    Size.Height = 418.000000000000000000
+  end
+  object ToolBar1: TToolBar
+    Position.Y = 34.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 10
+    object LabelOp: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Operation:'
+      TabOrder = 2
+    end
+    object LayoutCompOp: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 150.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object ComboBoxOp: TComboBox
+        Align = VertCenter
+        DropDownCount = 20
+        Items.Strings = (
+          'Fill Poly'
+          'Stroke Poly [W=1]'
+          'Stroke Poly [W=3]'
+          'Stroke Poly [W=5]'
+          'Fill Quads'
+          'Stroke Quads [W=1]'
+          'Stroke Quads [W=3]'
+          'Stroke Quads [W=5]'
+          'Fill Cubics'
+          'Stroke Cubics [W=1]'
+          'Stroke Cubics [W=3]'
+          'Stroke Cubics [W=5]')
+        ItemIndex = 0
+        Position.Y = 2.000000000000000000
+        Size.Width = 150.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+    end
+    object TrackBarRectCount: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 2000.000000000000000000
+      Min = 4.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 274.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 262.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      Value = 50.000000000000000000
+      OnChange = TrackBarRectCountChange
+    end
+    object LabelCountHeader: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 226.000000000000000000
+      Size.Width = 44.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Count:'
+      TabOrder = 1
+    end
+    object LabelCount: TLabel
+      Align = Right
+      Margins.Right = 4.000000000000000000
+      Position.X = 540.000000000000000000
+      Size.Width = 36.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      TextSettings.WordWrap = False
+      Text = '50'
+      TabOrder = 0
+    end
+  end
+  object ToolBar2: TToolBar
+    Position.Y = 68.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object LabelStyle: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Style:'
+      TabOrder = 0
+    end
+    object Layout1: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 150.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxStyle: TComboBox
+        Align = VertCenter
+        DropDownCount = 15
+        Items.Strings = (
+          'Solid Color'
+          'Linear Gradient'
+          'Radial Gradient'
+          'Conic Gradient')
+        ItemIndex = 0
+        Position.Y = 2.000000000000000000
+        Size.Width = 150.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+    end
+  end
+end

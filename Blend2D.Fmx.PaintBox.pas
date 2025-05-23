@@ -11,23 +11,27 @@ uses
   Blend2D;
 
 type
-  { Event handler type for TBlend2DPaintBox.OnPaint }
-  TBlend2DPaintEvent = procedure(const ASender: TObject; const AContext: IBLContext) of object;
+  /// <summary>
+  ///  Event handler type for TBlend2DPaintBox.OnPaint.
+  /// </summary>
+  TBlend2DPaintEvent = procedure(const ASender: TObject; const AContext: TBLContext) of object;
 
 type
-  { A paint box that uses Blend2D for drawing.
-    NOTE: To be able to install a package with this control, you *must* copy
-    "blend2d_win32.dll" to your package output directory (usually
-    c:\Users\Public\Documents\Embarcadero\Studio\<version>\Bpl\) }
+  /// <summary>
+  ///  A paint box that uses Blend2D for drawing.
+  ///  To be able to install a package with this control, you *must* copy
+  ///  "blend2d_win32.dll" to your package output directory (usually
+  ///  c:\Users\Public\Documents\Embarcadero\Studio\<version>\Bpl\)
+  /// </summary>
   TBlend2DPaintBox = class(TControl)
   {$REGION 'Internal Declarations'}
   private
     FBitmap: TBitmap;
     FBitmapData: TBitmapData;
-    FImage: IBLImage;
-    FContext: IBLContext;
+    FImage: TBLImage;
+    FContext: TBLContext;
     {$IFNDEF MSWINDOWS}
-    FConverter: IBLPixelConverter;
+    FConverter: TBLPixelConverter;
     {$ENDIF}
     FPixelScale: Single;
     FDstSize: TSize;
@@ -56,17 +60,19 @@ type
     property Height;
     property HitTest default True;
 
-    { Whether to use a low-resolution buffer on high-DPI (eg. Retina) displays.
-
-      When set to True, the drawing canvas will be in logical units instead
-      of physical units. This will increase performance but result in lower
-      quality (less sharp) output.
-
-      When set to False (the default), the drawing canvas will match the units
-      of the display, resulting a sharp high-quality output at the cost of a
-      decrease in performance.
-
-      On non-high-DPI displays, this property has no effect. }
+    /// <summary>
+    ///  Whether to use a low-resolution buffer on high-DPI (eg. Retina) displays.
+    ///
+    ///  When set to True, the drawing canvas will be in logical units instead
+    ///  of physical units. This will increase performance but result in lower
+    ///  quality (less sharp) output.
+    ///
+    ///  When set to False (the default), the drawing canvas will match the units
+    ///  of the display, resulting a sharp high-quality output at the cost of a
+    ///  decrease in performance.
+    ///
+    ///  On non-high-DPI displays, this property has no effect.
+    /// </summary>
     property LowResolution: Boolean read FLowResolution write SetLowResolution default False;
 
     property Padding;
@@ -118,11 +124,9 @@ constructor TBlend2DPaintBox.Create(AOwner: TComponent);
 begin
   inherited;
   FBitmap := TBitmap.Create;
-  FImage := TBLImage.Create;
-  FContext := TBLContext.Create;
 
   {$IFNDEF MSWINDOWS}
-  FConverter := TBLPixelConverter.CreatePlatformConverter;
+  FConverter.MakePlatformConverter(TBLFormat.Prgb32);
   {$ENDIF}
 end;
 
@@ -133,14 +137,10 @@ begin
 end;
 
 procedure TBlend2DPaintBox.Paint;
-var
-  R: TRectF;
-  SrcSize, DstSize: TSize;
-  Data: TBitmapData;
 begin
   if (csDesigning in ComponentState) and (not FLocked) and (not FInPaintTo) then
   begin
-    R := LocalRect;
+    var R := LocalRect;
     InflateRect(R, -0.5, -0.5);
     Canvas.DrawDashRect(R, 0, 0, AllCorners, AbsoluteOpacity, $A0909090);
     Exit;
@@ -149,6 +149,7 @@ begin
   if (FBitmap = nil) then
     Exit;
 
+  var SrcSize, DstSize: TSize;
   DstSize.Width := Trunc(Width);
   DstSize.Height := Trunc(Height);
   if (DstSize <> FDstSize) or (FForceResize) then
@@ -166,13 +167,15 @@ begin
 
     FSrcRect := RectF(0, 0, SrcSize.Width, SrcSize.Height);
     FDstRect := RectF(0, 0, FDstSize.Width, FDstSize.Height);
+    FForceResize := False;
   end;
 
+  var Data: TBitmapData;
   if (FBitmap.Map(TMapAccess.Write, Data)) then
   try
     if (Data.Data <> FBitmapData.Data) or (Data.Pitch <> FBitmapData.Pitch) then
     begin
-      FImage.InitializeFromData(Data.Width, Data.Height, TBLFormat.PRGB32,
+      FImage.MakeFromData(Data.Width, Data.Height, TBLFormat.Prgb32,
         Data.Data, Data.Pitch);
       FBitmapData.Data := Data.Data;
       FBitmapData.Pitch := Data.Pitch;

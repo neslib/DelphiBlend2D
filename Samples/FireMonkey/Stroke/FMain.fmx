@@ -1,7 +1,7 @@
 inherited FormMain: TFormMain
   Caption = 'Stroke'
-  ClientHeight = 620
-  ClientWidth = 600
+  ClientHeight = 520
+  ClientWidth = 580
   OnKeyDown = FormKeyDown
   DesignerMasterStyle = 0
   inherited ToolBarMain: TToolBar
@@ -24,37 +24,36 @@ inherited FormMain: TFormMain
       end
     end
     inherited CheckBoxLimitFPS: TCheckBox
-      Position.X = 328.000000000000000000
+      Position.X = 344.000000000000000000
       Size.Height = 48.000000000000000000
     end
     inherited LabelFPS: TLabel
-      Position.X = 248.000000000000000000
+      Position.X = 264.000000000000000000
       Size.Height = 48.000000000000000000
     end
   end
   inherited PaintBox: TPaintBox
-    Size.Width = 600.000000000000000000
-    Size.Height = 476.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 384.000000000000000000
     OnMouseDown = PaintBoxMouseDown
     OnMouseMove = PaintBoxMouseMove
     OnMouseUp = PaintBoxMouseUp
   end
   inherited TimerRepaint: TTimer
-    Left = 24
-    Top = 16
+    Left = 264
+    Top = 136
   end
   object ToolBar1: TToolBar
-    Size.Width = 600.000000000000000000
-    Size.Height = 48.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 4
+    TabOrder = 5
     object LabelStrokeCaps: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 66.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Stroke Caps:'
@@ -63,9 +62,9 @@ inherited FormMain: TFormMain
     object LayoutStrokeCaps: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 74.000000000000000000
+      Position.X = 88.000000000000000000
       Size.Width = 110.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       object ComboBoxStrokeCaps: TComboBox
@@ -78,13 +77,9 @@ inherited FormMain: TFormMain
           'Triangle'
           'Triangle-Rev')
         ItemIndex = 0
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 106.000000000000000000
-        Size.Height = 32.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 110.000000000000000000
+        Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
         OnChange = ComboBoxStrokeCapsChange
@@ -92,102 +87,107 @@ inherited FormMain: TFormMain
     end
     object ButtonA: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 402.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 382.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 8
       Text = 'A'
+      TextSettings.Trimming = None
       OnClick = ButtonAClick
     end
     object ButtonB: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 435.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 415.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 7
       Text = 'B'
+      TextSettings.Trimming = None
       OnClick = ButtonBClick
     end
     object ButtonC: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 468.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 448.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 6
       Text = 'C'
+      TextSettings.Trimming = None
       OnClick = ButtonCClick
     end
     object ButtonD: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 501.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 481.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 5
       Text = 'D'
+      TextSettings.Trimming = None
       OnClick = ButtonDClick
     end
     object ButtonE: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 534.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 514.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 4
       Text = 'E'
+      TextSettings.Trimming = None
       OnClick = ButtonEClick
     end
     object ButtonF: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 567.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 547.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 3
       Text = 'F'
+      TextSettings.Trimming = None
       OnClick = ButtonFClick
     end
   end
   object ToolBar2: TToolBar
-    Position.Y = 48.000000000000000000
-    Size.Width = 600.000000000000000000
-    Size.Height = 48.000000000000000000
+    Position.Y = 34.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 3
+    TabOrder = 4
     object LabelStrokeJoin: TLabel
       Align = Left
-      AutoSize = True
       Margins.Left = 4.000000000000000000
       Position.X = 4.000000000000000000
-      Size.Width = 61.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.WordWrap = False
       Text = 'Stroke Join:'
@@ -196,9 +196,9 @@ inherited FormMain: TFormMain
     object LayoutStrokeJoin: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
-      Position.X = 69.000000000000000000
+      Position.X = 88.000000000000000000
       Size.Width = 110.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       object ComboBoxStrokeJoin: TComboBox
@@ -210,13 +210,9 @@ inherited FormMain: TFormMain
           'Bevel'
           'Round')
         ItemIndex = 0
-        Margins.Left = 4.000000000000000000
-        Margins.Top = 4.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Position.Y = 8.000000000000000000
-        Size.Width = 106.000000000000000000
-        Size.Height = 32.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 110.000000000000000000
+        Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
         OnChange = ComboBoxStrokeJoinChange
@@ -225,136 +221,131 @@ inherited FormMain: TFormMain
     object ButtonRandom: TButton
       Align = Left
       Margins.Left = 4.000000000000000000
-      Margins.Top = 8.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 183.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Top = 2.000000000000000000
+      Margins.Bottom = 2.000000000000000000
+      Position.X = 202.000000000000000000
+      Position.Y = 2.000000000000000000
       Size.Width = 74.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 30.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 8
       Text = 'Random'
+      TextSettings.Trimming = None
       OnClick = ButtonRandomClick
     end
     object ButtonX: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 501.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 481.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 7
       Text = 'X'
+      TextSettings.Trimming = None
       OnClick = ButtonXClick
     end
     object ButtonY: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 534.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 514.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 6
       Text = 'Y'
+      TextSettings.Trimming = None
       OnClick = ButtonYClick
     end
     object ButtonZ: TButton
       Align = Right
-      Margins.Top = 8.000000000000000000
+      Margins.Top = 4.000000000000000000
       Margins.Right = 4.000000000000000000
-      Margins.Bottom = 8.000000000000000000
-      Position.X = 567.000000000000000000
-      Position.Y = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 547.000000000000000000
+      Position.Y = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 32.000000000000000000
+      Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 5
       Text = 'Z'
+      TextSettings.Trimming = None
       OnClick = ButtonZClick
     end
   end
   object ToolBar3: TToolBar
-    Position.Y = 96.000000000000000000
-    Size.Width = 600.000000000000000000
-    Size.Height = 48.000000000000000000
+    Position.Y = 68.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 2
-    object LayoutWidth: TLayout
-      Align = Top
-      Size.Width = 600.000000000000000000
-      Size.Height = 24.000000000000000000
+    TabOrder = 3
+    object LabelWidth: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Width:'
+      TabOrder = 0
+    end
+    object TrackBarWidth: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 400.000000000000000000
+      Min = 1.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 88.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 488.000000000000000000
+      Size.Height = 19.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
-      object LabelWidth: TLabel
-        Align = Left
-        AutoSize = True
-        Margins.Left = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Size.Width = 35.000000000000000000
-        Size.Height = 24.000000000000000000
-        Size.PlatformDefault = False
-        TextSettings.WordWrap = False
-        Text = 'Width:'
-        TabOrder = 0
-      end
-      object TrackBarWidth: TTrackBar
-        Align = VertCenter
-        CanParentFocus = True
-        Max = 400.000000000000000000
-        Min = 1.000000000000000000
-        Orientation = Horizontal
-        Margins.Left = 4.000000000000000000
-        Margins.Right = 4.000000000000000000
-        Position.X = 43.000000000000000000
-        Position.Y = 2.000000000000000000
-        Size.Width = 553.000000000000000000
-        Size.Height = 19.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 1
-        Value = 40.000000000000000000
-        OnChange = TrackBarWidthChange
-      end
+      Value = 40.000000000000000000
+      OnChange = TrackBarWidthChange
     end
-    object LayoutMiterLimit: TLayout
-      Align = Client
-      Size.Width = 600.000000000000000000
-      Size.Height = 24.000000000000000000
+  end
+  object ToolBar4: TToolBar
+    Position.Y = 102.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object LabelMiterLimit: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Miter Limit:'
       TabOrder = 0
-      object LabelMiterLimit: TLabel
-        Align = Left
-        AutoSize = True
-        Margins.Left = 4.000000000000000000
-        Position.X = 4.000000000000000000
-        Size.Width = 60.000000000000000000
-        Size.Height = 24.000000000000000000
-        Size.PlatformDefault = False
-        TextSettings.WordWrap = False
-        Text = 'Miter Limit:'
-        TabOrder = 0
-      end
-      object TrackBarMiterLimit: TTrackBar
-        Align = VertCenter
-        CanParentFocus = True
-        Max = 10.000000000000000000
-        Orientation = Horizontal
-        Margins.Left = 4.000000000000000000
-        Margins.Right = 4.000000000000000000
-        Position.X = 68.000000000000000000
-        Position.Y = 2.000000000000000000
-        Size.Width = 528.000000000000000000
-        Size.Height = 19.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 1
-        Value = 5.000000000000000000
-        OnChange = TrackBarMiterLimitChange
-      end
+    end
+    object TrackBarMiterLimit: TTrackBar
+      Align = VertCenter
+      CanParentFocus = True
+      Max = 10.000000000000000000
+      Orientation = Horizontal
+      Margins.Left = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Position.X = 88.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 488.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Value = 5.000000000000000000
+      OnChange = TrackBarMiterLimitChange
     end
   end
 end

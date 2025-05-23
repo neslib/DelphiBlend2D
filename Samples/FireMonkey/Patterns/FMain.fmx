@@ -1,0 +1,236 @@
+inherited FormMain: TFormMain
+  Caption = 'Patterns'
+  ClientHeight = 520
+  ClientWidth = 580
+  DesignerMasterStyle = 0
+  inherited ToolBarMain: TToolBar
+    Size.Width = 580.000000000000000000
+    inherited LabelRenderer: TLabel
+      Size.Width = 64.000000000000000000
+      Visible = False
+      TabOrder = 2
+    end
+    inherited LayoutRenderer: TLayout
+      Position.X = 4.000000000000000000
+      Visible = False
+      TabOrder = 3
+    end
+    inherited CheckBoxLimitFPS: TCheckBox
+      Position.X = 524.000000000000000000
+      TabOrder = 7
+    end
+    inherited LabelFPS: TLabel
+      Position.X = 444.000000000000000000
+      TabOrder = 10
+    end
+    object CheckBoxBilinear: TCheckBox
+      Align = Left
+      IsChecked = True
+      Margins.Left = 4.000000000000000000
+      Position.X = 213.000000000000000000
+      Size.Width = 79.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 9
+      Text = 'Bilinear'
+    end
+    object CheckBoxFillPath: TCheckBox
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 296.000000000000000000
+      Size.Width = 79.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 6
+      Text = 'Fill Path'
+    end
+    object LabelExtendMode: TLabel
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 4.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.WordWrap = False
+      Text = 'Extend:'
+      TabOrder = 0
+    end
+    object LayoutCompOp: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Position.X = 72.000000000000000000
+      Size.Width = 137.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object ComboBoxExtendMode: TComboBox
+        Align = VertCenter
+        DropDownCount = 20
+        Items.Strings = (
+          'Pad'
+          'Repeat'
+          'Reflect'
+          'PadXRepeatY'
+          'PadXReflectY'
+          'RepeatXPadY'
+          'RepeatXReflectY'
+          'ReflectXPadY'
+          'ReflectXRepeatY')
+        ItemIndex = 0
+        Position.Y = 2.000000000000000000
+        Size.Width = 137.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+    end
+  end
+  inherited PaintBox: TPaintBox
+    Size.Width = 580.000000000000000000
+    Size.Height = 418.000000000000000000
+  end
+  object ToolBar2: TToolBar
+    Position.Y = 34.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    OnResize = ToolBar2Resize
+    object LayoutFracX: TLayout
+      Align = Left
+      Size.Width = 233.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object LabelFracX: TLabel
+        Align = Left
+        Margins.Left = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Size.Width = 64.000000000000000000
+        Size.Height = 34.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.WordWrap = False
+        Text = 'Fx Offset:'
+        TabOrder = 3
+      end
+      object TrackBarFracX: TTrackBar
+        Align = VertCenter
+        CanParentFocus = True
+        Max = 255.000000000000000000
+        Orientation = Horizontal
+        Margins.Left = 4.000000000000000000
+        Margins.Right = 4.000000000000000000
+        Position.X = 72.000000000000000000
+        Position.Y = 7.000000000000000000
+        Size.Width = 157.000000000000000000
+        Size.Height = 19.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+      end
+    end
+    object LayoutFracY: TLayout
+      Align = Client
+      Size.Width = 347.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object LabelFracY: TLabel
+        Align = Left
+        Margins.Left = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Size.Width = 64.000000000000000000
+        Size.Height = 34.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.WordWrap = False
+        Text = 'Fy Offset:'
+        TabOrder = 3
+      end
+      object TrackBarFracY: TTrackBar
+        Align = VertCenter
+        CanParentFocus = True
+        Max = 255.000000000000000000
+        Orientation = Horizontal
+        Margins.Left = 4.000000000000000000
+        Margins.Right = 4.000000000000000000
+        Position.X = 72.000000000000000000
+        Position.Y = 7.000000000000000000
+        Size.Width = 271.000000000000000000
+        Size.Height = 19.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+      end
+    end
+  end
+  object ToolBar3: TToolBar
+    Position.Y = 68.000000000000000000
+    Size.Width = 580.000000000000000000
+    Size.Height = 34.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    OnResize = ToolBar3Resize
+    object LayoutAngle: TLayout
+      Align = Left
+      Size.Width = 233.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object LabelAngle: TLabel
+        Align = Left
+        Margins.Left = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Size.Width = 64.000000000000000000
+        Size.Height = 34.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.WordWrap = False
+        Text = 'Angle:'
+        TabOrder = 3
+      end
+      object TrackBarAngle: TTrackBar
+        Align = VertCenter
+        CanParentFocus = True
+        Max = 3600.000000000000000000
+        Orientation = Horizontal
+        Margins.Left = 4.000000000000000000
+        Margins.Right = 4.000000000000000000
+        Position.X = 72.000000000000000000
+        Position.Y = 7.000000000000000000
+        Size.Width = 157.000000000000000000
+        Size.Height = 19.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+      end
+    end
+    object LayoutScale: TLayout
+      Align = Client
+      Size.Width = 347.000000000000000000
+      Size.Height = 34.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object LabelScale: TLabel
+        Align = Left
+        Margins.Left = 4.000000000000000000
+        Position.X = 4.000000000000000000
+        Size.Width = 64.000000000000000000
+        Size.Height = 34.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.WordWrap = False
+        Text = 'Scale:'
+        TabOrder = 3
+      end
+      object TrackBarScale: TTrackBar
+        Align = VertCenter
+        CanParentFocus = True
+        Max = 1000.000000000000000000
+        Orientation = Horizontal
+        Margins.Left = 4.000000000000000000
+        Margins.Right = 4.000000000000000000
+        Position.X = 72.000000000000000000
+        Position.Y = 7.000000000000000000
+        Size.Width = 271.000000000000000000
+        Size.Height = 19.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+      end
+    end
+  end
+end
