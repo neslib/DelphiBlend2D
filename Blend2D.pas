@@ -21379,6 +21379,9 @@ implementation
 {$RANGECHECKS OFF}
 
 uses
+  {$IFDEF MSWINDOWS}
+  Neslib.MemoryModule,
+  {$ENDIF}
   System.TypInfo,
   System.DateUtils;
 
@@ -38127,15 +38130,28 @@ end;
 {$ENDREGION 'Miscellaneous'}
 
 {$REGION 'Initialization'}
+
+{$IFDEF MSWINDOWS}
+{$R 'Blend2DWin32.res' WIN32}
+{$R 'Blend2DWin64.res' WIN64}
+{$INCLUDE 'Blend2D.Api.Impl.inc'}
+{$ENDIF}
+
 initialization
   Assert(SizeOf(TBLObjectCore) = 16);
   Assert(SizeOf(TBLImage) = 16);
   Assert(SizeOf(TBLStrokeOptions.TValues) = 8);
+  {$IFDEF MSWINDOWS}
+  InitializeBlend2DModule;
+  {$ENDIF}
   _blRuntimeInit;
   BLSetExceptionErrorHandler;
 
 finalization
   _blRuntimeShutdown;
+  {$IFDEF MSWINDOWS}
+  FinalizeBlend2DModule;
+  {$ENDIF}
 {$ENDREGION 'Initialization'}
 
 end.

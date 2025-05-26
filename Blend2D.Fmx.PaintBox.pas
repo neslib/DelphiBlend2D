@@ -19,9 +19,6 @@ type
 type
   /// <summary>
   ///  A paint box that uses Blend2D for drawing.
-  ///  To be able to install a package with this control, you *must* copy
-  ///  "blend2d_win32.dll" to your package output directory (usually
-  ///  c:\Users\Public\Documents\Embarcadero\Studio\<version>\Bpl\)
   /// </summary>
   TBlend2DPaintBox = class(TControl)
   {$REGION 'Internal Declarations'}

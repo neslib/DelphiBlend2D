@@ -173,6 +173,7 @@
         </DelphiCompile>
         <DCCReference Include="rtl.dcp"/>
         <DCCReference Include="..\Blend2D.pas"/>
+        <DCCReference Include="..\Neslib.MemoryModule.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

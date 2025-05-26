@@ -33,6 +33,7 @@ requires
   rtl;
 
 contains
-  Blend2D in '..\Blend2D.pas';
+  Blend2D in '..\Blend2D.pas',
+  Neslib.MemoryModule in '..\Neslib.MemoryModule.pas';
 
 end.
