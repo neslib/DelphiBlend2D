@@ -11,8 +11,10 @@ interface
 
 uses
   System.SysUtils,
+  System.Types,
   System.UITypes,
-  System.Math;
+  System.Math,
+  System.Math.Vectors;
 
 {$REGION 'Common Types'}
 type
@@ -3129,7 +3131,8 @@ type
     X: Double;
     Y: Double;
   public
-    constructor Create(const AX, AY: Double);
+    constructor Create(const AX, AY: Double); overload;
+    constructor Create(const APoint: TPointF); overload;
 
     class operator Equal(const ALeft, ARight: TBLPoint): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLPoint): Boolean; inline; static;
@@ -3150,6 +3153,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AX, AY: Double); overload; inline;
     procedure Reset(const AOther: TBLPoint); overload; inline;
+    procedure Reset(const APoint: TPointF); overload; inline;
 
     function Equals(const AOther: TBLPoint): Boolean; inline;
   end;
@@ -3164,7 +3168,8 @@ type
     Empty: TBLPoint = (X: 0; Y: 0);
   end;
 
-function BLPoint(const AX, AY: Double): TBLPoint; inline;
+function BLPoint(const AX, AY: Double): TBLPoint; overload; inline;
+function BLPoint(const APoint: TPointF): TBLPoint; overload; inline;
 function BLAbs(const AValue: TBLPoint): TBLPoint; overload; inline;
 function BLMin(const AA, AB: TBLPoint): TBLPoint; overload; inline;
 function BLMin(const AA: TBLPoint; const AB: Double): TBLPoint; overload; inline;
@@ -3183,7 +3188,8 @@ type
     X: Integer;
     Y: Integer;
   public
-    constructor Create(const AX, AY: Integer);
+    constructor Create(const AX, AY: Integer); overload;
+    constructor Create(const APoint: TPoint); overload;
 
     class operator Equal(const ALeft, ARight: TBLPointI): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLPointI): Boolean; inline; static;
@@ -3201,6 +3207,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AX, AY: Integer); overload; inline;
     procedure Reset(const AOther: TBLPointI); overload; inline;
+    procedure Reset(const APoint: TPoint); overload; inline;
 
     function Equals(const AOther: TBLPointI): Boolean; inline;
   end;
@@ -3215,7 +3222,8 @@ type
     Empty: TBLPointI = (X: 0; Y: 0);
   end;
 
-function BLPointI(const AX, AY: Integer): TBLPointI; inline;
+function BLPointI(const AX, AY: Integer): TBLPointI; overload; inline;
+function BLPointI(const APoint: TPoint): TBLPointI; overload; inline;
 
 type
   /// <summary>
@@ -3226,7 +3234,8 @@ type
     W: Double;
     H: Double;
   public
-    constructor Create(const AW, AH: Double);
+    constructor Create(const AW, AH: Double); overload;
+    constructor Create(const ASize: TSizeF); overload;
 
     class operator Equal(const ALeft, ARight: TBLSize): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLSize): Boolean; inline; static;
@@ -3234,6 +3243,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AW, AH: Double); overload; inline;
     procedure Reset(const AOther: TBLSize); overload; inline;
+    procedure Reset(const ASize: TSizeF); overload; inline;
 
     function Equals(const AOther: TBLSize): Boolean; inline;
   end;
@@ -3248,7 +3258,8 @@ type
     Empty: TBLSize = (W: 0; H: 0);
   end;
 
-function BLSize(const AW, AH: Double): TBLSize; inline;
+function BLSize(const AW, AH: Double): TBLSize; overload; inline;
+function BLSize(const ASize: TSizeF): TBLSize; overload; inline;
 function BLAbs(const AValue: TBLSize): TBLSize; overload; inline;
 function BLMin(const AA, AB: TBLSize): TBLSize; overload; inline;
 function BLMax(const AA, AB: TBLSize): TBLSize; overload; inline;
@@ -3262,7 +3273,8 @@ type
     W: Integer;
     H: Integer;
   public
-    constructor Create(const AW, AH: Integer);
+    constructor Create(const AW, AH: Integer); overload;
+    constructor Create(const ASize: TSize); overload;
 
     class operator Equal(const ALeft, ARight: TBLSizeI): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLSizeI): Boolean; inline; static;
@@ -3270,6 +3282,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AW, AH: Integer); overload; inline;
     procedure Reset(const AOther: TBLSizeI); overload; inline;
+    procedure Reset(const ASize: TSize); overload; inline;
 
     function Equals(const AOther: TBLSizeI): Boolean; inline;
   end;
@@ -3284,7 +3297,8 @@ type
     Empty: TBLSizeI = (W: 0; H: 0);
   end;
 
-function BLSizeI(const AW, AH: Integer): TBLSizeI; inline;
+function BLSizeI(const AW, AH: Integer): TBLSizeI; overload; inline;
+function BLSizeI(const ASize: TSize): TBLSizeI; overload; inline;
 
 type
   /// <summary>
@@ -3387,7 +3401,8 @@ type
     W: Double;
     H: Double;
   public
-    constructor Create(const AX, AY, AW, AH: Double);
+    constructor Create(const AX, AY, AW, AH: Double); overload;
+    constructor Create(const ARect: TRectF); overload;
 
     class operator Equal(const ALeft, ARight: TBLRect): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLRect): Boolean; inline; static;
@@ -3395,6 +3410,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AX, AY, AW, AH: Double); overload; inline;
     procedure Reset(const AOther: TBLRect); overload; inline;
+    procedure Reset(const ARect: TRectF); overload; inline;
 
     function Equals(const AOther: TBLRect): Boolean; inline;
   end;
@@ -3409,7 +3425,8 @@ type
     Empty: TBLRect = (X: 0; Y: 0; W: 0; H: 0);
   end;
 
-function BLRect(const AX, AY, AW, AH: Double): TBLRect; inline;
+function BLRect(const AX, AY, AW, AH: Double): TBLRect; overload; inline;
+function BLRect(const ARect: TRectF): TBLRect; overload; inline;
 
 type
   /// <summary>
@@ -3422,7 +3439,8 @@ type
     W: Integer;
     H: Integer;
   public
-    constructor Create(const AX, AY, AW, AH: Integer);
+    constructor Create(const AX, AY, AW, AH: Integer); overload;
+    constructor Create(const ARect: TRect); overload;
 
     class operator Equal(const ALeft, ARight: TBLRectI): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLRectI): Boolean; inline; static;
@@ -3430,6 +3448,7 @@ type
     procedure Reset; overload; inline;
     procedure Reset(const AX, AY, AW, AH: Integer); overload; inline;
     procedure Reset(const AOther: TBLRectI); overload; inline;
+    procedure Reset(const ARect: TRect); overload; inline;
 
     function Equals(const AOther: TBLRectI): Boolean; inline;
   end;
@@ -3444,7 +3463,8 @@ type
     Empty: TBLRectI = (X: 0; Y: 0; W: 0; H: 0);
   end;
 
-function BLRectI(const AX, AY, AW, AH: Integer): TBLRectI; inline;
+function BLRectI(const AX, AY, AW, AH: Integer): TBLRectI; overload; inline;
+function BLRectI(const ARect: TRect): TBLRectI; overload; inline;
 
 type
   /// <summary>
@@ -3816,7 +3836,8 @@ type
   public
     M: array [0..5] of Double;
   public
-    constructor Create(const AM00, AM01, AM10, AM11, AM20, AM21: Double);
+    constructor Create(const AM00, AM01, AM10, AM11, AM20, AM21: Double); overload;
+    constructor Create(const AMatrix: TMatrix); overload;
 
     class operator Equal(const ALeft, ARight: TBLMatrix2D): Boolean; inline; static;
     class operator NotEqual(const ALeft, ARight: TBLMatrix2D): Boolean; inline; static;
@@ -3869,6 +3890,11 @@ type
     ///  Resets matrix to `AOther` (copy its content to this matrix).
     /// </summary>
     procedure Reset(const AOther: TBLMatrix2D); overload; inline;
+
+    /// <summary>
+    ///  Resets matrix to a standard Delphi TMatrix `AMatrix`.
+    /// </summary>
+    procedure Reset(const AMatrix: TMatrix); overload; inline;
 
     /// <summary>
     ///  Resets matrix to `[AM00, AM01, AM10, AM11, AM20, AM21]`.
@@ -21895,9 +21921,14 @@ end;
 
 {$REGION 'Geometries'}
 
-function BLPoint(const AX, AY: Double): TBLPoint; inline;
+function BLPoint(const AX, AY: Double): TBLPoint; overload; inline;
 begin
   Result.Reset(AX, AY);
+end;
+
+function BLPoint(const APoint: TPointF): TBLPoint; overload; inline;
+begin
+  Result.Reset(APoint);
 end;
 
 function BLAbs(const AValue: TBLPoint): TBLPoint; overload; inline;
@@ -21940,14 +21971,24 @@ begin
   Result := BLMin(AC, BLMax(AB, AA));
 end;
 
-function BLPointI(const AX, AY: Integer): TBLPointI; inline;
+function BLPointI(const AX, AY: Integer): TBLPointI; overload; inline;
 begin
   Result.Reset(AX, AY);
 end;
 
-function BLSize(const AW, AH: Double): TBLSize; inline;
+function BLPointI(const APoint: TPoint): TBLPointI; overload; inline;
+begin
+  Result.Reset(APoint);
+end;
+
+function BLSize(const AW, AH: Double): TBLSize; overload; inline;
 begin
   Result.Reset(AW, AH);
+end;
+
+function BLSize(const ASize: TSizeF): TBLSize; overload; inline;
+begin
+  Result.Reset(ASize);
 end;
 
 function BLAbs(const AValue: TBLSize): TBLSize; overload; inline;
@@ -21965,9 +22006,14 @@ begin
   Result.Reset(Max(AA.W, AB.W), Max(AA.H, AB.H));
 end;
 
-function BLSizeI(const AW, AH: Integer): TBLSizeI; inline;
+function BLSizeI(const AW, AH: Integer): TBLSizeI; overload; inline;
 begin
   Result.Reset(AW, AH);
+end;
+
+function BLSizeI(const ASize: TSize): TBLSizeI; overload; inline;
+begin
+  Result.Reset(ASize);
 end;
 
 function BLBox(const AX0, AY0, AX1, AY1: Double): TBLBox; inline;
@@ -21980,14 +22026,24 @@ begin
   Result.Reset(AX0, AY0, AX1, AY1);
 end;
 
-function BLRect(const AX, AY, AW, AH: Double): TBLRect; inline;
+function BLRect(const AX, AY, AW, AH: Double): TBLRect; overload; inline;
 begin
   Result.Reset(AX, AY, AW, AH);
 end;
 
-function BLRectI(const AX, AY, AW, AH: Integer): TBLRectI; inline;
+function BLRect(const ARect: TRectF): TBLRect; overload; inline;
+begin
+  Result.Reset(ARect);
+end;
+
+function BLRectI(const AX, AY, AW, AH: Integer): TBLRectI; overload; inline;
 begin
   Result.Reset(AX, AY, AW, AH);
+end;
+
+function BLRectI(const ARect: TRect): TBLRectI; overload; inline;
+begin
+  Result.Reset(ARect);
 end;
 
 function BLRoundRect(const ARect: TBLRect; const AR: Double): TBLRoundRect; overload; inline;
@@ -22070,6 +22126,12 @@ begin
   Y := AY;
 end;
 
+constructor TBLPoint.Create(const APoint: TPointF);
+begin
+  X := APoint.X;
+  Y := APoint.Y;
+end;
+
 class operator TBLPoint.Divide(const ALeft: TBLPoint;
   const ARight: Double): TBLPoint;
 begin
@@ -22124,6 +22186,12 @@ begin
   Result := not ALeft.Equals(ARight);
 end;
 
+procedure TBLPoint.Reset(const APoint: TPointF);
+begin
+  X := APoint.X;
+  Y := APoint.Y;
+end;
+
 procedure TBLPoint.Reset(const AOther: TBLPoint);
 begin
   Self := AOther;
@@ -22175,6 +22243,12 @@ end;
 class operator TBLPointI.Add(const ALeft, ARight: TBLPointI): TBLPointI;
 begin
   Result.Reset(ALeft.X + ARight.X, ALeft.X + ARight.Y);
+end;
+
+constructor TBLPointI.Create(const APoint: TPoint);
+begin
+  X := APoint.X;
+  Y := APoint.Y;
 end;
 
 constructor TBLPointI.Create(const AX, AY: Integer);
@@ -22243,6 +22317,12 @@ begin
   Y := AY;
 end;
 
+procedure TBLPointI.Reset(const APoint: TPoint);
+begin
+  X := APoint.X;
+  Y := APoint.Y;
+end;
+
 procedure TBLPointI.Reset;
 begin
   X := 0;
@@ -22260,6 +22340,12 @@ constructor TBLSize.Create(const AW, AH: Double);
 begin
   W := AW;
   H := AH;
+end;
+
+constructor TBLSize.Create(const ASize: TSizeF);
+begin
+  W := ASize.Width;
+  H := ASize.Height;
 end;
 
 class operator TBLSize.Equal(const ALeft, ARight: TBLSize): Boolean;
@@ -22288,6 +22374,12 @@ begin
   H := AH;
 end;
 
+procedure TBLSize.Reset(const ASize: TSizeF);
+begin
+  W := ASize.Width;
+  H := ASize.Height;
+end;
+
 procedure TBLSize.Reset;
 begin
   W := 0;
@@ -22300,6 +22392,12 @@ constructor TBLSizeI.Create(const AW, AH: Integer);
 begin
   W := AW;
   H := AH;
+end;
+
+constructor TBLSizeI.Create(const ASize: TSize);
+begin
+  W := ASize.Width;
+  H := ASize.Height;
 end;
 
 class operator TBLSizeI.Equal(const ALeft, ARight: TBLSizeI): Boolean;
@@ -22326,6 +22424,12 @@ procedure TBLSizeI.Reset(const AW, AH: Integer);
 begin
   W := AW;
   H := AH;
+end;
+
+procedure TBLSizeI.Reset(const ASize: TSize);
+begin
+  W := ASize.Width;
+  H := ASize.Height;
 end;
 
 procedure TBLSizeI.Reset;
@@ -22548,6 +22652,14 @@ begin
   H := AH;
 end;
 
+constructor TBLRect.Create(const ARect: TRectF);
+begin
+  X := ARect.Left;
+  Y := ARect.Top;
+  W := ARect.Width;
+  H := ARect.Height;
+end;
+
 class operator TBLRect.Equal(const ALeft, ARight: TBLRect): Boolean;
 begin
   Result := ALeft.Equals(ARight);
@@ -22577,6 +22689,14 @@ begin
   H := AH;
 end;
 
+procedure TBLRect.Reset(const ARect: TRectF);
+begin
+  X := ARect.Left;
+  Y := ARect.Top;
+  W := ARect.Width;
+  H := ARect.Height;
+end;
+
 procedure TBLRect.Reset;
 begin
   X := 0;
@@ -22593,6 +22713,14 @@ begin
   Y := AY;
   W := AW;
   H := AH;
+end;
+
+constructor TBLRectI.Create(const ARect: TRect);
+begin
+  X := ARect.Left;
+  Y := ARect.Top;
+  W := ARect.Width;
+  H := ARect.Height;
 end;
 
 class operator TBLRectI.Equal(const ALeft, ARight: TBLRectI): Boolean;
@@ -22622,6 +22750,14 @@ begin
   Y := AY;
   W := AW;
   H := AH;
+end;
+
+procedure TBLRectI.Reset(const ARect: TRect);
+begin
+  X := ARect.Left;
+  Y := ARect.Top;
+  W := ARect.Width;
+  H := ARect.Height;
 end;
 
 procedure TBLRectI.Reset;
@@ -23004,6 +23140,11 @@ begin
   Reset(AM00, AM01, AM10, AM11, AM20, AM21);
 end;
 
+constructor TBLMatrix2D.Create(const AMatrix: TMatrix);
+begin
+  Reset(AMatrix);
+end;
+
 function TBLMatrix2D.Determinant: Double;
 begin
   Result := (M00 * M11) - (M01 * M10);
@@ -23261,6 +23402,21 @@ end;
 procedure TBLMatrix2D.Reset(const AOther: TBLMatrix2D);
 begin
   Self := AOther;
+end;
+
+procedure TBLMatrix2D.Reset(const AMatrix: TMatrix);
+{ TMatrix:                TBLMatrix2D:
+    m11=SX m12=+S m13=0     M00=SX M01=+S
+    m21=-S m22=SY m23=0     M10=-S M11=SY
+    m31=TX m32=TY m33=1     M20=TX M21=TY }
+begin
+  { TODO : SIMD optimize? }
+  M00 := AMatrix.m11;
+  M01 := AMatrix.m12;
+  M10 := AMatrix.m21;
+  M11 := AMatrix.m22;
+  M20 := AMatrix.m31;
+  M21 := AMatrix.m32;
 end;
 
 procedure TBLMatrix2D.ResetToRotation(const AAngle: Double);
@@ -34295,9 +34451,9 @@ class operator TBLContext.NotEqual(const ALeft: TBLContext;
   const ARight: Pointer): Boolean;
 begin
   if (ALeft.IsValid) then
-    Result := (ARight <> nil)
+    Result := (ARight = nil)
   else
-    Result := (ARight = nil);
+    Result := (ARight <> nil);
 end;
 
 class operator TBLContext.NotEqual(const ALeft, ARight: TBLContext): Boolean;

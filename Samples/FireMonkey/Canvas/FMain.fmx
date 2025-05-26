@@ -1,0 +1,52 @@
+object FormMain: TFormMain
+  Left = 0
+  Top = 0
+  Caption = 'Blend2D Canvas Test'
+  ClientHeight = 480
+  ClientWidth = 640
+  Fill.Color = claSlateblue
+  Fill.Kind = Solid
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object Rectangle1: TRectangle
+    Fill.Kind = Gradient
+    Fill.Gradient.Points = <
+      item
+        Color = claRed
+        Offset = 0.000000000000000000
+      end
+      item
+        Color = claYellow
+        Offset = 0.322981357574462900
+      end
+      item
+        Color = x00FFFF00
+        Offset = 0.658385097980499300
+      end
+      item
+        Color = claLime
+        Offset = 1.000000000000000000
+      end>
+    Fill.Gradient.StartPosition.X = 0.919549822807312000
+    Fill.Gradient.StartPosition.Y = 1.000000000000000000
+    Fill.Gradient.StopPosition.X = 0.080450169742107390
+    Fill.Gradient.StopPosition.Y = 0.000000004811006704
+    Position.X = 8.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 97.000000000000000000
+    Size.Height = 145.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Kind = None
+  end
+  object Blend2DPaintBox1: TBlend2DPaintBox
+    Position.X = 113.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 97.000000000000000000
+    Size.Height = 145.000000000000000000
+    Size.PlatformDefault = False
+    OnPaint = Blend2DPaintBox1Paint
+  end
+end

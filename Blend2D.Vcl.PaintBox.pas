@@ -174,6 +174,7 @@ begin
       if (not FLowResolution) and (FPixelScale <> 1) then
         FContext.Scale(FPixelScale);
 
+      FContext.ClearAll;
       FOnPaint(Self, FContext);
     finally
       FContext.Finish;
