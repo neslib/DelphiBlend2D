@@ -25,14 +25,16 @@ type
   TBLBitmapHandle = class
   {$REGION 'Internal Declarations'}
   private
+    FImage: TBLImage;
     FPixels: Pointer;
     FWidth: Integer;
     FHeight: Integer;
     FPixelFormat: TPixelFormat;
   private
     function Map(var ABitmapData: TBitmapData): Boolean;
-    procedure Draw(const AContext: TBLContext; const ASrcRect, ADestRect: TRectF;
-      const AOpacity: Single);
+    procedure NeedPixels;
+    procedure NeedImage;
+    procedure Draw(const AContext: TBLContext; const ASrcRect, ADestRect: TRectF);
   public
     constructor Create(const AWidth, AHeight: Integer; const APixelFormat: TPixelFormat);
     destructor Destroy; override;
@@ -40,8 +42,17 @@ type
   end;
 
 type
-  TBLCanvas = class(TCanvas, IModulateCanvas)
+  TBLCanvas = class(TCanvas)
   {$REGION 'Internal Declarations'}
+  private type
+    TSaveState = class(TCanvasSaveState)
+    protected
+      procedure AssignTo(ADest: TPersistent); override;
+    public
+      procedure Assign(ASource: TPersistent); override;
+    end;
+//  private class var
+//    FFontManager: TBLFontManager;
   private
     FContext: TBLContext;
     FImage: TBLImage;
@@ -49,20 +60,24 @@ type
     {$IFDEF MSWINDOWS}
     FBitmap: HBITMAP;
     {$ENDIF}
-  protected
+  private
     procedure Resized;
     procedure BeginContext(const AContextHandle: THandle);
     procedure EndContext;
     procedure GetImageFromWindow(const AContextHandle: THandle);
-    procedure SetStyle(const ABrush: TBrush; const AWidth, AHeight: Double;
+    procedure SetStyle(const ABrush: TBrush; const ARect: TRectF;
       const AForFill: Boolean);
-    procedure SetGradientStyle(const AGradient: TGradient; const AWidth,
-      AHeight: Double; const AForFill: Boolean);
+    procedure SetGradientStyle(const AGradient: TGradient; const ARect: TRectF;
+      const AForFill: Boolean);
+    procedure SetPatternStyle(const ABrushBitmap: TBrushBitmap;
+      const ARect: TRectF; const AForFill: Boolean);
+    procedure DrawNonBLBitmap(const ABitmap: TBitmap; const ASrcRect,
+      ADestRect: TRectF);
+    procedure MakePatternFromNonBLBitmap(const ABitmap: TBitmap;
+      const APattern: TBLPattern; const AExtendMode: TBLExtendMode);
     procedure ReleaseBitmap;
-  protected
-    { IModulateCanvas }
-    function GetModulateColor: TAlphaColor;
-    procedure SetModulateColor(const AColor: TAlphaColor);
+  private
+    class procedure ConvertPath(const ASrc: TPathData; const ADst: TBLPath); static;
   protected
     { TCanvas }
     constructor CreateFromPrinter(const APrinter: TAbstractPrinter); override;
@@ -176,30 +191,40 @@ begin
 end;
 
 procedure TBLBitmapHandle.Draw(const AContext: TBLContext; const ASrcRect,
-  ADestRect: TRectF; const AOpacity: Single);
+  ADestRect: TRectF);
 begin
-  if (AOpacity <> 1) then
-    Assert(False, 'TODO');
+  NeedImage;
 
-  var Image: TBLImage;
-  Image.MakeFromData(FWidth, FHeight, PIXEL_FORMAT_TO_BL_FORMAT[FPixelFormat],
-    FPixels, FWidth * PixelFormatBytes[FPixelFormat], TBLDataAccessFlags.Read);
-
-  var SrcRect, DstRect: TBLRect;
-  SrcRect.Reset(ASrcRect);
+  var SrcRect: TBLRectI;
+  var DstRect: TBLRect;
+  SrcRect.Reset(ASrcRect.Round);
   DstRect.Reset(ADestRect);
 
-  AContext.BlitImage(DstRect, Image, SrcRect);
+  AContext.BlitImage(DstRect, FImage, SrcRect);
 end;
 
 function TBLBitmapHandle.Map(var ABitmapData: TBitmapData): Boolean;
 begin
-  if (FPixels = nil) then
-    GetMem(FPixels, FWidth * FHeight * PixelFormatBytes[FPixelFormat]);
-
+  NeedPixels;
   ABitmapData.Data := FPixels;
   ABitmapData.Pitch := FWidth * PixelFormatBytes[FPixelFormat];
   Result := True;
+end;
+
+procedure TBLBitmapHandle.NeedImage;
+begin
+  if (FImage = nil) then
+  begin
+    NeedPixels;
+    FImage.MakeFromData(FWidth, FHeight, PIXEL_FORMAT_TO_BL_FORMAT[FPixelFormat],
+      FPixels, FWidth * PixelFormatBytes[FPixelFormat], TBLDataAccessFlags.Read);
+  end;
+end;
+
+procedure TBLBitmapHandle.NeedPixels;
+begin
+  if (FPixels = nil) then
+    GetMem(FPixels, FWidth * FHeight * PixelFormatBytes[FPixelFormat]);
 end;
 
 { TBLCanvas }
@@ -212,19 +237,60 @@ begin
     begin
       GetImageFromWindow(AContextHandle);
       if (FImage <> nil) then
+      begin
         FContext := TBLContext.Create(FImage);
+        FContext.FillRule := TBLFillRule.EvenOdd;
+      end;
     end;
   end
   else if (Bitmap <> nil) then
   begin
-    Assert(False, 'TODO');
+    Assert(Bitmap.Canvas.InheritsFrom(TBLCanvas));
+    var BitmapHandle := TBLBitmapHandle(Bitmap.Handle);
+    BitmapHandle.NeedImage;
+    if (BitmapHandle.FImage <> nil) then
+    begin
+      FContext := TBLContext.Create(BitmapHandle.FImage);
+      FContext.FillRule := TBLFillRule.EvenOdd;
+    end;
+  end;
+end;
+
+class procedure TBLCanvas.ConvertPath(const ASrc: TPathData;
+  const ADst: TBLPath);
+begin
+  var PointCount := ASrc.Count;
+  var I := 0;
+  while (I < PointCount) do
+  begin
+    var Point := ASrc[I];
+    case Point.Kind of
+      TPathPointKind.MoveTo:
+        ADst.MoveTo(Point.Point.X, Point.Point.Y);
+
+      TPathPointKind.LineTo:
+        ADst.LineTo(Point.Point.X, Point.Point.Y);
+
+      TPathPointKind.CurveTo:
+        begin
+          Inc(I);
+          var CP2 := ASrc[I].Point;
+          Inc(I);
+          var Stop := ASrc[I].Point;
+          ADst.CubicTo(Point.Point.X, Point.Point.Y, CP2.X, CP2.Y, Stop.X, Stop.Y);
+        end;
+
+      TPathPointKind.Close:
+        ADst.Close;
+    end;
+    Inc(I);
   end;
 end;
 
 constructor TBLCanvas.CreateFromPrinter(const APrinter: TAbstractPrinter);
 begin
   inherited;
-  Assert(False, 'TODO');
+  { Not used }
 end;
 
 {$IFDEF MSWINDOWS}
@@ -240,8 +306,7 @@ end;
 
 function TBLCanvas.CreateSaveState: TCanvasSaveState;
 begin
-  Assert(False, 'TODO');
-  Result := nil;
+  Result := TSaveState.Create;
 end;
 
 destructor TBLCanvas.Destroy;
@@ -276,13 +341,12 @@ begin
       begin
         var Rects := AClipRects^;
         var Count := Length(Rects);
-        if (Count = 1) then
+        if (Count > 0) then
         begin
+          { NOTE: Multiple cliprects not supported by Blend2D }
           var R := Rects[0];
           FContext.ClipToRect(R.Left, R.Top, R.Width, R.Height);
-        end
-        else if (Count > 1) then
-          Assert(False, 'TODO');
+        end;
       end;
     end;
   end;
@@ -290,57 +354,89 @@ end;
 
 procedure TBLCanvas.DoClear(const AColor: TAlphaColor);
 begin
+  var OrigCompOp := FContext.CompOp;
+  FContext.CompOp := TBLCompOp.SrcCopy;
   FContext.FillAll(AColor);
+  FContext.CompOp := OrigCompOp;
 end;
 
 procedure TBLCanvas.DoClearRect(const ARect: TRectF; const AColor: TAlphaColor);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  var OrigCompOp := FContext.CompOp;
+  FContext.CompOp := TBLCompOp.SrcCopy;
+  FContext.FillRect(ARect.Left, ARect.Top, ARect.Width, ARect.Height, AColor);
+  FContext.CompOp := OrigCompOp;
 end;
 
 procedure TBLCanvas.DoDrawBitmap(const ABitmap: TBitmap; const ASrcRect,
   ADestRect: TRectF; const AOpacity: Single; const AHighSpeed: Boolean);
 begin
+  FContext.GlobalAlpha := AOpacity;
+
   var SrcRect := ASrcRect * TRectF.Create(0, 0, ABitmap.Width, ABitmap.Height);
   if (ABitmap.HandleAllocated) and (not ASrcRect.IsEmpty) and (not ADestRect.IsEmpty) then
   begin
     if (ABitmap.CanvasClass.InheritsFrom(TBLCanvas)) then
     begin
       Assert(TObject(ABitmap.Handle) is TBLBitmapHandle);
-      TBLBitmapHandle(ABitmap.Handle).Draw(FContext, SrcRect, ADestRect, AOpacity);
+      TBLBitmapHandle(ABitmap.Handle).Draw(FContext, SrcRect, ADestRect);
     end
     else
-      Assert(False, 'TODO');
+      DrawNonBLBitmap(ABitmap, ASrcRect, ADestRect);
   end;
 end;
 
 procedure TBLCanvas.DoDrawEllipse(const ARect: TRectF; const AOpacity: Single;
   const ABrush: TStrokeBrush);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  var W: Double := ARect.Width;
+  var H: Double := ARect.Height;
+  if (W <= 0) or (H <= 0) then
+    Exit;
+
+  SetStyle(ABrush, ARect, False);
+  FContext.GlobalAlpha := AOpacity;
+
+  var RX: Single := ARect.Width * 0.5;
+  var RY: Single := ARect.Height * 0.5;
+  FContext.StrokeEllipse(ARect.Left + RX, ARect.Top + RY, RX, RY);
 end;
 
 procedure TBLCanvas.DoDrawLine(const APoint1, APoint2: TPointF;
   const AOpacity: Single; const ABrush: TStrokeBrush);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  FContext.GlobalAlpha := AOpacity;
+  var Rect := TRectF.Create(APoint1, APoint2, True);
+  SetStyle(ABrush, Rect, False);
+  FContext.StrokeLine(APoint1.X, APoint1.Y, APoint2.X, APoint2.Y);
 end;
 
 procedure TBLCanvas.DoDrawPath(const APath: TPathData; const AOpacity: Single;
   const ABrush: TStrokeBrush);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  var Bounds := APath.GetBounds;
+  if (Bounds.Width <= 0) or (Bounds.Height <= 0) or (APath.Count = 0) then
+    Exit;
+
+  SetStyle(ABrush, Bounds, False);
+  FContext.GlobalAlpha := AOpacity;
+
+  var Path: TBLPath;
+  ConvertPath(APath, Path);
+  FContext.StrokePath(Path);
 end;
 
 procedure TBLCanvas.DoDrawRect(const ARect: TRectF; const AOpacity: Single;
   const ABrush: TStrokeBrush);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  var W: Double := ARect.Width;
+  var H: Double := ARect.Height;
+  if (W <= 0) or (H <= 0) then
+    Exit;
+
+  SetStyle(ABrush, ARect, False);
+  FContext.GlobalAlpha := AOpacity;
+  FContext.StrokeRect(ARect.Left, ARect.Top, W, H);
 end;
 
 procedure TBLCanvas.DoEndScene;
@@ -353,15 +449,32 @@ end;
 procedure TBLCanvas.DoFillEllipse(const ARect: TRectF; const AOpacity: Single;
   const ABrush: TBrush);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  var W: Double := ARect.Width;
+  var H: Double := ARect.Height;
+  if (W <= 0) or (H <= 0) then
+    Exit;
+
+  SetStyle(ABrush, ARect, True);
+  FContext.GlobalAlpha := AOpacity;
+
+  var RX: Single := ARect.Width * 0.5;
+  var RY: Single := ARect.Height * 0.5;
+  FContext.FillEllipse(ARect.Left + RX, ARect.Top + RY, RX, RY);
 end;
 
 procedure TBLCanvas.DoFillPath(const APath: TPathData; const AOpacity: Single;
   const ABrush: TBrush);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  var Bounds := APath.GetBounds;
+  if (Bounds.Width <= 0) or (Bounds.Height <= 0) or (APath.Count = 0) then
+    Exit;
+
+  SetStyle(ABrush, Bounds, True);
+  FContext.GlobalAlpha := AOpacity;
+
+  var Path: TBLPath;
+  ConvertPath(APath, Path);
+  FContext.FillPath(Path);
 end;
 
 procedure TBLCanvas.DoFillRect(const ARect: TRectF; const AOpacity: Single;
@@ -372,7 +485,8 @@ begin
   if (W <= 0) or (H <= 0) then
     Exit;
 
-  SetStyle(ABrush, W, H, True);
+  SetStyle(ABrush, ARect, True);
+  FContext.GlobalAlpha := AOpacity;
   FContext.FillRect(ARect.Left, ARect.Top, W, H);
 end;
 
@@ -419,6 +533,28 @@ begin
   { Not needed }
 end;
 
+procedure TBLCanvas.DrawNonBLBitmap(const ABitmap: TBitmap; const ASrcRect,
+  ADestRect: TRectF);
+begin
+  var Data: TBitmapData;
+  if (ABitmap.Map(TMapAccess.Read, Data)) then
+  try
+    var Image: TBLImage;
+    Image.MakeFromData(Data.Width, Data.Height,
+      PIXEL_FORMAT_TO_BL_FORMAT[Data.PixelFormat], Data.Data, Data.Pitch,
+      TBLDataAccessFlags.Read);
+
+    var SrcRect: TBLRectI;
+    var DstRect: TBLRect;
+    SrcRect.Reset(ASrcRect.Round);
+    DstRect.Reset(ADestRect);
+
+    FContext.BlitImage(DstRect, Image, SrcRect);
+  finally
+    ABitmap.Unmap(Data);
+  end;
+end;
+
 procedure TBLCanvas.EndContext;
 begin
   if (Parent <> nil) then
@@ -454,13 +590,14 @@ begin
     end;
   end
   else if (Bitmap <> nil) then
-    Assert(False, 'TODO');
+  begin
+    FContext.Finish;
+  end;
 end;
 
 procedure TBLCanvas.ExcludeClipRect(const ARect: TRectF);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  { TODO : Blend2D currently does not support complex clip regions }
 end;
 
 function TBLCanvas.GetCanvasScale: Single;
@@ -508,29 +645,66 @@ begin
   {$ENDIF}
 end;
 
-function TBLCanvas.GetModulateColor: TAlphaColor;
-begin
-  Assert(False, 'TODO');
-  Result := 0;
-end;
-
 procedure TBLCanvas.IntersectClipRect(const ARect: TRectF);
 begin
-  inherited;
-  Assert(False, 'TODO');
+  { TODO : Blend2D currently does not support complex clip regions }
 end;
 
 function TBLCanvas.LoadFontFromStream(const AStream: TStream): Boolean;
 begin
-  Assert(False, 'TODO');
-  Result := False;
+{  try
+    if (not FFontManager.IsValid) then
+      FFontManager.Make;
+
+    var Size := AStream.Size - AStream.Position;
+    var Bytes: TBytes;
+    SetLength(Bytes, Size);
+    AStream.ReadBuffer(Bytes, Size);
+
+    var Data: TBLFontData;
+    Data.MakeFromData(Bytes);
+
+    var Face: TBLFontFace;
+    Face.MakeFromData(Data, 0);
+
+    FFontManager.AddFace(Face);
+    Result := True;
+  except
+    Result := False;
+  end;}
+  Result := True;
+end;
+
+procedure TBLCanvas.MakePatternFromNonBLBitmap(const ABitmap: TBitmap;
+  const APattern: TBLPattern; const AExtendMode: TBLExtendMode);
+begin
+  var Data: TBitmapData;
+  if (ABitmap.Map(TMapAccess.Read, Data)) then
+  try
+    var Image: TBLImage;
+    Image.MakeFromData(Data.Width, Data.Height,
+      PIXEL_FORMAT_TO_BL_FORMAT[Data.PixelFormat], Data.Data, Data.Pitch,
+      TBLDataAccessFlags.Read);
+
+    APattern.Make(Image, AExtendMode);
+  finally
+    ABitmap.Unmap(Data);
+  end;
 end;
 
 function TBLCanvas.PtInPath(const APoint: TPointF;
   const APath: TPathData): Boolean;
 begin
-  Assert(False, 'TODO');
-  Result := False;
+  var Bounds := APath.GetBounds;
+  if (Bounds.Width <= 0) or (Bounds.Height <= 0) or (APath.Count = 0) then
+    Exit(False);
+
+  if (not Bounds.Contains(APoint)) then
+    Exit(False);
+
+  var Path: TBLPath;
+  ConvertPath(APath, Path);
+  Result := (Path.HitTest(BLPoint(APoint), TBLFillRule.EvenOdd) = TBLHitTest.FullyIn);
 end;
 
 procedure TBLCanvas.ReleaseBitmap;
@@ -563,27 +737,44 @@ begin
     ReleaseBitmap;
 end;
 
-procedure TBLCanvas.SetGradientStyle(const AGradient: TGradient; const AWidth,
-  AHeight: Double; const AForFill: Boolean);
+procedure TBLCanvas.SetGradientStyle(const AGradient: TGradient;
+  const ARect: TRectF; const AForFill: Boolean);
 begin
+  var Points := AGradient.Points;
+  if (Points.Count < 2) then
+    Exit;
+
+  var W: Single := ARect.Width;
+  var H: Single := ARect.Height;
+
   var G: TBLGradient;
 
-  case AGradient.Style of
-    TGradientStyle.Linear:
-      G.Make(BLLinearGradientValues(
-        AWidth * AGradient.StartPosition.X,
-        AHeight * AGradient.StartPosition.Y,
-        AWidth * AGradient.StopPosition.X,
-        AHeight * AGradient.StopPosition.Y));
-  else
-    Assert(False, 'TODO');
-  end;
-
-  var Points := AGradient.Points;
-  for var I := 0 to Points.Count - 1 do
+  if (AGradient.Style = TGradientStyle.Radial) then
   begin
-    var Point := Points[I];
-    G.AddStop(Point.Offset, Point.Color);
+    var P := AGradient.RadialTransform.RotationCenter.Point;
+    G.Make(BLRadialGradientValues(P.X, P.Y, P.X, P.Y, 0.5));
+
+    for var I := 0 to Points.Count - 1 do
+    begin
+      var Point := Points[I];
+      G.AddStop(1 - Point.Offset, Point.Color);
+    end;
+
+    G.Scale(W, H);
+  end
+  else
+  begin
+    G.Make(BLLinearGradientValues(
+      ARect.Left + (AGradient.StartPosition.X * W),
+      ARect.Top + (AGradient.StartPosition.Y * H),
+      ARect.Left + (AGradient.StopPosition.X * W),
+      ARect.Top + (AGradient.StopPosition.Y * H)));
+
+    for var I := 0 to Points.Count - 1 do
+    begin
+      var Point := Points[I];
+      G.AddStop(Point.Offset, Point.Color);
+    end;
   end;
 
   if (AForFill) then
@@ -592,9 +783,40 @@ begin
     FContext.SetStrokeStyle(G);
 end;
 
-procedure TBLCanvas.SetModulateColor(const AColor: TAlphaColor);
+procedure TBLCanvas.SetPatternStyle(const ABrushBitmap: TBrushBitmap;
+  const ARect: TRectF; const AForFill: Boolean);
+const
+  EXTEND_MODES: array [TWrapMode] of TBLExtendMode = (
+    TBLExtendMode.Repeating, TBLExtendMode.Pad, TBLExtendMode.Repeating);
 begin
-  Assert(False, 'TODO');
+  var Pattern: TBLPattern;
+  var Bitmap := ABrushBitmap.Bitmap;
+  if (Bitmap.CanvasClass.InheritsFrom(TBLCanvas)) then
+  begin
+    Assert(TObject(Bitmap.Handle) is TBLBitmapHandle);
+    var BitmapHandle := TBLBitmapHandle(Bitmap.Handle);
+    BitmapHandle.NeedImage;
+    Pattern.Make(BitmapHandle.FImage, EXTEND_MODES[ABrushBitmap.WrapMode]);
+  end
+  else
+    MakePatternFromNonBLBitmap(Bitmap, Pattern, EXTEND_MODES[ABrushBitmap.WrapMode]);
+
+  if (ABrushBitmap.WrapMode = TWrapMode.TileStretch) then
+  begin
+    if (Stroke.Kind = TBrushKind.None) then
+      Pattern.Scale(ARect.Width / Bitmap.Width, ARect.Height / Bitmap.Height)
+    else
+    begin
+      Pattern.Translate(ARect.Left, ARect.Top);
+      Pattern.Scale((ARect.Width + (0.5 * Stroke.Thickness)) / Bitmap.Width,
+                    (ARect.Height + (0.5 * Stroke.Thickness)) / Bitmap.Height);
+    end;
+  end;
+
+  if (AForFill) then
+    FContext.SetFillStyle(Pattern)
+  else
+    FContext.SetStrokeStyle(Pattern);
 end;
 
 procedure TBLCanvas.SetSize(const AWidth, AHeight: Integer);
@@ -606,21 +828,91 @@ begin
   end;
 end;
 
-procedure TBLCanvas.SetStyle(const ABrush: TBrush; const AWidth,
-  AHeight: Double;const AForFill: Boolean);
+procedure TBLCanvas.SetStyle(const ABrush: TBrush; const ARect: TRectF;
+  const AForFill: Boolean);
+const
+  JOINS: array [TStrokeJoin] of TBLStrokeJoin = (
+    TBLStrokeJoin.MiterClip, TBLStrokeJoin.Round, TBLStrokeJoin.Bevel);
+  CAPS: array [TStrokeCap] of TBLStrokeCap = (TBLStrokeCap.Square,
+    TBLStrokeCap.Round);
 begin
-  case ABrush.Kind of
+  var Brush := ABrush;
+  while (Brush <> nil) and (Brush.Kind = TBrushKind.Resource) do
+    Brush := Brush.Resource.Brush;
+  if (Brush = nil) then
+    Exit;
+
+  case Brush.Kind of
     TBrushKind.Solid:
       if (AForFill) then
-        FContext.SetFillStyle(ABrush.Color)
+        FContext.SetFillStyle(Brush.Color)
       else
-        FContext.SetStrokeStyle(ABrush.Color);
+        FContext.SetStrokeStyle(Brush.Color);
 
     TBrushKind.Gradient:
-      SetGradientStyle(ABrush.Gradient, AWidth, AHeight, AForFill);
+      SetGradientStyle(Brush.Gradient, ARect, AForFill);
+
+    TBrushKind.Bitmap:
+      SetPatternStyle(Brush.Bitmap, ARect, AForFill);
   else
-    Assert(False, 'TODO');
+    Exit;
   end;
+
+  if (not AForFill) then
+  begin
+    Assert(ABrush is TStrokeBrush);
+    var Stroke := TStrokeBrush(ABrush);
+    if (Stroke.Kind = TBrushKind.Resource) then
+    begin
+      Brush := Stroke;
+      while (Brush <> nil) and (Brush.Kind = TBrushKind.Resource) do
+        Brush := Brush.Resource.Brush;
+
+      if (Brush is TStrokeBrush) then
+        Stroke := TStrokeBrush(Brush)
+      else
+        Exit;
+    end;
+
+    if (Stroke = nil) then
+      Exit;
+
+    FContext.StrokeWidth := Stroke.Thickness;
+    FContext.StrokeJoin := JOINS[Stroke.Join];
+    FContext.SetStrokeCaps(CAPS[Stroke.Cap]);
+
+    { Blend2D does not support dashed lines yet
+      (https://github.com/blend2d/blend2d/issues/48)
+    var Dash: TBLArray<Double>;
+    if (Stroke.Dash <> TStrokeDash.Solid) then
+    begin
+      FContext.StrokeDashOffset := Stroke.DashOffset;
+
+      var Dashes := Stroke.DashArray;
+      Dash.Reserve(Length(Dashes));
+      for var I := 0 to Length(Dashes) - 1 do
+        Dash.Append(Dashes[I]);
+      Dash.Append(0.1);
+      Dash.Append(0.5);
+    end;
+    FContext.StrokeDashArray := Dash;}
+  end;
+end;
+
+{ TBLCanvas.TSaveState }
+
+procedure TBLCanvas.TSaveState.Assign(ASource: TPersistent);
+begin
+  inherited;
+  if (ASource is TBLCanvas) then
+    TBLCanvas(ASource).FContext.Save;
+end;
+
+procedure TBLCanvas.TSaveState.AssignTo(ADest: TPersistent);
+begin
+  if (ADest is TBLCanvas) then
+    TBLCanvas(ADest).FContext.Restore;
+  inherited;
 end;
 
 { TBLTextLayout }

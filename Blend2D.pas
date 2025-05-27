@@ -7748,11 +7748,37 @@ type
   /// </summary>
   TBLRadialGradientValues = record
   public
+    /// <summary>
+    ///  X-position of center of the gradient.
+    /// </summary>
     X0: Double;
+
+    /// <summary>
+    ///  Y-position of center of the gradient.
+    /// </summary>
     Y0: Double;
+
+    /// <summary>
+    ///  X-position of focal point of the gradient.
+    ///  Set equal to X0 to have focal point in center.
+    /// </summary>
     X1: Double;
+
+    /// <summary>
+    ///  Y-position of focal point of the gradient.
+    ///  Set equal to Y0 to have focal point in center.
+    /// </summary>
     Y1: Double;
+
+    /// <summary>
+    ///  (Outer) radius of the gradient.
+    /// </summary>
     R0: Double;
+
+    /// <summary>
+    ///  Inner radius of the gradient. You usually set this to 0, but can be
+    ///  larger (but < R0) to make a larger center of the same color.
+    /// </summary>
     R1: Double;
   public
     class function Create: TBLRadialGradientValues; overload; inline; static;
@@ -12339,7 +12365,7 @@ type
   private type
     TState = record
     public
-      TargetImage: TBLObjectCore;
+      TargetImage: Pointer;
       Targetize: TBLSize;
       Hints: TBLContextHints;
       CompOp: Byte;
@@ -20581,7 +20607,7 @@ type
     /// </summary>
     /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure BlitImage(const ARect: TBLRect; const ASrc: TBLImage;
-      const ASrcArea: TBLRect); overload; inline;
+      const ASrcArea: TBLRectI); overload; inline;
 
     /// <summary>
     ///  The target size in abstract units (pixels in case of `TBLImage`).
@@ -31416,7 +31442,7 @@ begin
 end;
 
 procedure TBLContext.BlitImage(const ARect: TBLRect; const ASrc: TBLImage;
-  const ASrcArea: TBLRect);
+  const ASrcArea: TBLRectI);
 begin
   _BLCheck(_blContextBlitScaledImageD(@Self, @ARect, @ASrc, @ASrcArea));
 end;
@@ -37011,43 +37037,43 @@ end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba64);
 begin
-  _BLCheck(_blContextFillRectDRgba64(@Self, @ARect, AStyle.Value));
+  _BLCheck(_blContextStrokeRectDRgba64(@Self, @ARect, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba32);
 begin
-  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle.Value));
+  _BLCheck(_blContextStrokeRectDRgba32(@Self, @ARect, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @Style));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @Style));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect);
 begin
-  _BLCheck(_blContextFillRectD(@Self, @ARect));
+  _BLCheck(_blContextStrokeRectD(@Self, @ARect));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLVar);
 begin
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLGradient);
 begin
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLPattern);
 begin
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TAlphaColor);
 begin
-  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle));
+  _BLCheck(_blContextStrokeRectDRgba32(@Self, @ARect, AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
