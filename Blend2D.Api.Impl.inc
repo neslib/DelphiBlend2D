@@ -805,5 +805,5 @@ end;
 
 procedure FinalizeBlend2DModule;
 begin
-  GMod.Free;
+  GMod.FreeMemoryOnly;
 end;

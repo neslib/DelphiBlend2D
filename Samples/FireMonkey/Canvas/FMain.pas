@@ -7,7 +7,7 @@ uses
   System.Math,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   Blend2D.Fmx.PaintBox, Blend2D, FMX.Controls.Presentation, FMX.Edit,
-  FMX.EditBox, FMX.SpinBox;
+  FMX.EditBox, FMX.SpinBox, FMX.StdCtrls;
 
 type
   TFormMain = class(TForm)
@@ -35,6 +35,8 @@ type
     Path1: TPath;
     TimerUpate: TTimer;
     PaintBox1: TPaintBox;
+    Label1: TLabel;
+    Rectangle16: TRectangle;
     procedure FormCreate(Sender: TObject);
     procedure Blend2DPaintBox1Paint(const ASender: TObject;
       const AContext: TBLContext);
@@ -52,6 +54,9 @@ var
   FormMain: TFormMain;
 
 implementation
+
+uses
+  System.IOUtils;
 
 {$R *.fmx}
 

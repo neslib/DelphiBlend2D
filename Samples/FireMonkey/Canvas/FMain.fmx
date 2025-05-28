@@ -866,4 +866,22 @@ object FormMain: TFormMain
     Left = 16
     Top = 16
   end
+  object Rectangle16: TRectangle
+    Position.X = 368.000000000000000000
+    Position.Y = 321.000000000000000000
+    Size.Width = 161.000000000000000000
+    Size.Height = 16.000000000000000000
+    Size.PlatformDefault = False
+    object Label1: TLabel
+      Align = Client
+      StyledSettings = [Style, FontColor]
+      Size.Width = 161.000000000000000000
+      Size.Height = 16.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.VertAlign = Leading
+      Text = 'The Quick Brown Fox Jumps Over The Lazy Dog'
+      TabOrder = 0
+    end
+  end
 end

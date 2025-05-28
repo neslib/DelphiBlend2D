@@ -16,6 +16,7 @@ Win64/
 Docs/Docs/Reference/
 LaunchScreen.TemplateiOS/
 C/blend2d.pas
+FastMM_FullDebugMode.dll
 #ignore Delphi build files
 *.obj
 *.exe

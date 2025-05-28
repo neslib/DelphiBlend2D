@@ -11280,19 +11280,20 @@ type
     procedure AddFace(const AFace: TBLFontFace); inline;
 
     /// <summary>
-    ///  Queries a font face by family `AName` and returns the result.
+    ///  Queries a font face by family `AName` and returns the result, or nil
+    ///  if not found.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     function QueryFace(const AName: String): TBLFontFace; overload; inline;
 
     /// <summary>
-    ///  Queries a font face by family `AName` and returns the result.
+    ///  Queries a font face by family `AName` and returns the result, or nil
+    ///  if not found.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     function QueryFace(const AName: TBLStringView): TBLFontFace; overload; inline;
 
     /// <summary>
-    ///  Queries a font face by family `AName` and returns the result.
+    ///  Queries a font face by family `AName` and returns the result, or nil
+    ///  if not found.
     ///
     ///  An `AProperties` parameter contains query properties that the query
     ///  engine will consider when doing the match. The best candidate will be
@@ -11301,12 +11302,12 @@ type
     ///    - Style has the highest priority.
     ///    - Weight has the lowest priority.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     function QueryFace(const AName: String;
       const AProperties: TBLFontQueryProperties): TBLFontFace; overload; inline;
 
     /// <summary>
-    ///  Queries a font face by family `AName` and returns the result.
+    ///  Queries a font face by family `AName` and returns the result, or nil
+    ///  if not found.
     ///
     ///  An `AProperties` parameter contains query properties that the query
     ///  engine will consider when doing the match. The best candidate will be
@@ -11315,33 +11316,30 @@ type
     ///    - Style has the highest priority.
     ///    - Weight has the lowest priority.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     function QueryFace(const AName: TBLStringView;
       const AProperties: TBLFontQueryProperties): TBLFontFace; overload; inline;
 
     /// <summary>
-    ///  Queries all font faces by family `AName`.
+    ///  Queries all font faces by family `AName`. Returns nil if not found.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     function QueryFacesByFamilyName(const AName: String): TArray<TBLFontFace>; overload; inline;
 
     /// <summary>
     ///  Queries all font faces by family `AName` and stores the result to `AOut`.
+    ///  Doesn't update AOut if not found.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure QueryFacesByFamilyName(const AName: String;
       const AOut: TBLArray<TBLFontFace>); overload; inline;
 
     /// <summary>
-    ///  Queries all font faces by family `AName`.
+    ///  Queries all font faces by family `AName`. Returns nil if not found.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     function QueryFacesByFamilyName(const AName: TBLStringView): TArray<TBLFontFace>; overload; inline;
 
     /// <summary>
     ///  Queries all font faces by family `AName` and stores the result to `AOut`.
+    ///  Doesn't update AOut if not found.
     /// </summary>
-    /// <exception name="EBlend2DError">Raised on failure.</exception>
     procedure QueryFacesByFamilyName(const AName: TBLStringView;
       const AOut: TBLArray<TBLFontFace>); overload; inline;
 
@@ -23613,7 +23611,7 @@ end;
 class operator TBLStrokeOptions.Assign(var ADest: TBLStrokeOptions;
   const [ref] ASrc: TBLStrokeOptions);
 begin
-  _BLCheck(_blStrokeOptionsInitWeak(@ADest, @ASrc));
+  _BLCheck(_blStrokeOptionsAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLStrokeOptions.Equal(const ALeft,
@@ -24394,7 +24392,7 @@ end;
 
 class operator TBLPath.Assign(var ADest: TBLPath; const [ref] ASrc: TBLPath);
 begin
-  _BLCheck(_blPathInitWeak(@ADest, @ASrc));
+  _BLCheck(_blPathAssignWeak(@ADest, @ASrc));
 end;
 
 procedure TBLPath.AssignDeep(const AOther: TBLPath);
@@ -24802,7 +24800,7 @@ end;
 class operator TBLArray<T>.Assign(var ADest: TBLArray<T>;
   const [ref] ASrc: TBLArray<T>);
 begin
-  _BLCheck(_blArrayInitWeak(@ADest, @ASrc));
+  _BLCheck(_blArrayAssignWeak(@ADest, @ASrc));
 end;
 
 procedure TBLArray<T>.Append(const AItems: array of T);
@@ -25243,7 +25241,7 @@ end;
 
 class operator TBLString.Assign(var ADest: TBLString; const [ref] ASrc: TBLString);
 begin
-  _BLCheck(_blStringInitWeak(@ADest, @ASrc));
+  _BLCheck(_blStringAssignWeak(@ADest, @ASrc));
 end;
 
 constructor TBLString.Create(const AView: TBLStringView);
@@ -25840,7 +25838,7 @@ end;
 class operator TBLBitArray.Assign(var ADest: TBLBitArray;
   const [ref] ASrc: TBLBitArray);
 begin
-  _BLCheck(_blBitArrayInitWeak(@ADest, @ASrc));
+  _BLCheck(_blBitArrayAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLBitArray.Equal(const ALeft: TBLBitArray;
@@ -26607,7 +26605,7 @@ end;
 class operator TBLPattern.Assign(var ADest: TBLPattern;
   const [ref] ASrc: TBLPattern);
 begin
-  _BLCheck(_blPatternInitWeak(@ADest, @ASrc));
+  _BLCheck(_blPatternAssignWeak(@ADest, @ASrc));
 end;
 
 constructor TBLPattern.Create(const AImage: TBLImage;
@@ -27186,7 +27184,7 @@ end;
 class operator TBLGradient.Assign(var ADest: TBLGradient;
   const [ref] ASrc: TBLGradient);
 begin
-  _BLCheck(_blGradientInitWeak(@ADest, @ASrc));
+  _BLCheck(_blGradientAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLGradient.Equal(const ALeft: TBLGradient;
@@ -28319,7 +28317,7 @@ end;
 class operator TBLFontData.Assign(var ADest: TBLFontData;
   const [ref] ASrc: TBLFontData);
 begin
-  _BLCheck(_blFontDataInitWeak(@ADest, @ASrc));
+  _BLCheck(_blFontDataAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLFontData.Equal(const ALeft: TBLFontData;
@@ -28611,7 +28609,7 @@ end;
 class operator TBLFontFace.Assign(var ADest: TBLFontFace;
   const [ref] ASrc: TBLFontFace);
 begin
-  _BLCheck(_blFontFaceInitWeak(@ADest, @ASrc));
+  _BLCheck(_blFontFaceAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLFontFace.Equal(const ALeft: TBLFontFace;
@@ -28996,7 +28994,7 @@ end;
 class operator TBLFontFeatureSettings.Assign(var ADest: TBLFontFeatureSettings;
   const [ref] ASrc: TBLFontFeatureSettings);
 begin
-  _BLCheck(_blFontFeatureSettingsInitWeak(@ADest, @ASrc));
+  _BLCheck(_blFontFeatureSettingsAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLFontFeatureSettings.Equal(const ALeft: TBLFontFeatureSettings;
@@ -29137,7 +29135,7 @@ class operator TBLFontVariationSettings.Assign(
   var ADest: TBLFontVariationSettings;
   const [ref] ASrc: TBLFontVariationSettings);
 begin
-  _BLCheck(_blFontVariationSettingsInitWeak(@ADest, @ASrc));
+  _BLCheck(_blFontVariationSettingsAssignWeak(@ADest, @ASrc));
 end;
 
 procedure TBLFontVariationSettings.Clear;
@@ -29267,7 +29265,7 @@ end;
 
 class operator TBLFont.Assign(var ADest: TBLFont; const [ref] ASrc: TBLFont);
 begin
-  _BLCheck(_blFontInitWeak(@ADest, @ASrc));
+  _BLCheck(_blFontAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLFont.Equal(const ALeft: TBLFont;
@@ -29541,7 +29539,7 @@ end;
 class operator TBLFontManager.Assign(var ADest: TBLFontManager;
   const [ref] ASrc: TBLFontManager);
 begin
-  _BLCheck(_blFontManagerInitWeak(@ADest, @ASrc));
+  _BLCheck(_blFontManagerAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLFontManager.Equal(const ALeft,
@@ -29608,29 +29606,25 @@ end;
 function TBLFontManager.QueryFace(const AName: String): TBLFontFace;
 begin
   var Name := UTF8String(AName);
-  _BLCheck(_blFontManagerQueryFace(@Self, PUTF8Char(Name), Length(Name),
-    nil, @Result));
+  _blFontManagerQueryFace(@Self, PUTF8Char(Name), Length(Name), nil, @Result);
 end;
 
 function TBLFontManager.QueryFace(const AName: TBLStringView): TBLFontFace;
 begin
-  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FCount,
-    nil, @Result));
+  _blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FCount, nil, @Result);
 end;
 
 function TBLFontManager.QueryFace(const AName: String;
   const AProperties: TBLFontQueryProperties): TBLFontFace;
 begin
   var Name := UTF8String(AName);
-  _BLCheck(_blFontManagerQueryFace(@Self, PUTF8Char(Name), Length(Name),
-    @AProperties, @Result));
+  _blFontManagerQueryFace(@Self, PUTF8Char(Name), Length(Name), @AProperties, @Result);
 end;
 
 function TBLFontManager.QueryFace(const AName: TBLStringView;
   const AProperties: TBLFontQueryProperties): TBLFontFace;
 begin
-  _BLCheck(_blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FCount,
-    @AProperties, @Result));
+  _blFontManagerQueryFace(@Self, Pointer(AName.FData), AName.FCount, @AProperties, @Result);
 end;
 
 function TBLFontManager.QueryFacesByFamilyName(
@@ -29638,8 +29632,7 @@ function TBLFontManager.QueryFacesByFamilyName(
 begin
   var Faces: TBLArray<TBLFontFace>;
   var Name := UTF8String(AName);
-  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, PUTF8Char(Name),
-    Length(AName), @Faces));
+  _blFontManagerQueryFacesByFamilyName(@Self, PUTF8Char(Name), Length(AName), @Faces);
   Result := Faces.ToArray;
 end;
 
@@ -29647,24 +29640,21 @@ procedure TBLFontManager.QueryFacesByFamilyName(const AName: String;
   const AOut: TBLArray<TBLFontFace>);
 begin
   var Name := UTF8String(AName);
-  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, PUTF8Char(Name),
-    Length(AName), @AOut));
+  _blFontManagerQueryFacesByFamilyName(@Self, PUTF8Char(Name), Length(AName), @AOut);
 end;
 
 function TBLFontManager.QueryFacesByFamilyName(
   const AName: TBLStringView): TArray<TBLFontFace>;
 begin
   var Faces: TBLArray<TBLFontFace>;
-  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData),
-    AName.FCount, @Faces));
+  _blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData), AName.FCount, @Faces);
   Result := Faces.ToArray;
 end;
 
 procedure TBLFontManager.QueryFacesByFamilyName(const AName: TBLStringView;
   const AOut: TBLArray<TBLFontFace>);
 begin
-  _BLCheck(_blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData),
-    AName.FCount, @AOut));
+  _blFontManagerQueryFacesByFamilyName(@Self, Pointer(AName.FData), AName.FCount, @AOut);
 end;
 
 class operator TBLFontManager.NotEqual(const ALeft: TBLFontManager;
@@ -29802,7 +29792,7 @@ end;
 class operator TBLPixelConverter.Assign(var ADest: TBLPixelConverter;
   const [ref] ASrc: TBLPixelConverter);
 begin
-  _BLCheck(_blPixelConverterInitWeak(@ADest, @ASrc));
+  _BLCheck(_blPixelConverterAssign(@ADest, @ASrc));
 end;
 
 procedure TBLPixelConverter.ConvertRect(const ADstData: Pointer;
@@ -29904,7 +29894,7 @@ end;
 class operator TBLImageDecoder.Assign(var ADest: TBLImageDecoder;
   const [ref] ASrc: TBLImageDecoder);
 begin
-  _BLCheck(_blImageDecoderInitWeak(@ADest, @ASrc));
+  _BLCheck(_blImageDecoderAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLImageDecoder.Equal(const ALeft: TBLImageDecoder;
@@ -30048,7 +30038,7 @@ end;
 class operator TBLImageEncoder.Assign(var ADest: TBLImageEncoder;
   const [ref] ASrc: TBLImageEncoder);
 begin
-  _BLCheck(_blImageEncoderInitWeak(@ADest, @ASrc));
+  _BLCheck(_blImageEncoderAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLImageEncoder.Equal(const ALeft: TBLImageEncoder;
@@ -30163,7 +30153,7 @@ end;
 class operator TBLImageCodec.Assign(var ADest: TBLImageCodec;
   const [ref] ASrc: TBLImageCodec);
 begin
-  _BLCheck(_blImageCodecInitWeak(@ADest, @ASrc));
+  _BLCheck(_blImageCodecAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLImageCodec.Equal(const ALeft: TBLImageCodec;
@@ -30404,7 +30394,7 @@ end;
 
 class operator TBLImage.Assign(var ADest: TBLImage; const [ref] ASrc: TBLImage);
 begin
-  _BLCheck(_blImageInitWeak(@ADest, @ASrc));
+  _BLCheck(_blImageAssignWeak(@ADest, @ASrc));
 end;
 
 procedure TBLImage.AssignDeep(const AOther: TBLImage);
@@ -30630,7 +30620,7 @@ end;
 
 class operator TBLVar.Assign(var ADest: TBLVar; const [ref] ASrc: TBLVar);
 begin
-  _BLCheck(_blVarInitWeak(@ADest, @ASrc));
+  _BLCheck(_blVarAssignWeak(@ADest, @ASrc));
 end;
 
 class operator TBLVar.Equal(const ALeft, ARight: TBLVar): Boolean;
@@ -31416,7 +31406,7 @@ end;
 
 class operator TBLContext.Assign(var ADest: TBLContext; const [ref] ASrc: TBLContext);
 begin
-  _BLCheck(_blContextInitWeak(@ADest, @ASrc));
+  _BLCheck(_blContextAssignWeak(@ADest, @ASrc));
 end;
 
 procedure TBLContext.BlitImage(const AOrigin: TBLPoint; const ASrc: TBLImage;
@@ -38330,7 +38320,8 @@ initialization
   BLSetExceptionErrorHandler;
 
 finalization
-  _blRuntimeShutdown;
+  { Don't call _blRuntimeShutdown since other units may still hold on to Blend2D
+    objects that need to be destroyed. }
   {$IFDEF MSWINDOWS}
   FinalizeBlend2DModule;
   {$ENDIF}

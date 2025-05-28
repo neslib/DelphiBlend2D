@@ -55,6 +55,7 @@ type
     {$ENDIF}
     FIsRelocated: Boolean;
     FInitialized: Boolean;
+    FFreeMemoryOnly: Boolean;
   private
     class procedure CheckSize(const ASize, AExpected: IntPtr); static;
     class function ImageFirstSection(const AHeader: PImageNtHeaders): PImageSectionHeader; inline; static;
@@ -81,6 +82,7 @@ type
     constructor Create(const AData: TBytes); overload;
     constructor Create(const AResourceName: String); overload;
     destructor Destroy; override;
+    procedure FreeMemoryOnly;
 
     function GetProcAddress(const AName: PAnsiChar): Pointer;
   end;
@@ -268,21 +270,24 @@ end;
 
 destructor TMemoryModule.Destroy;
 begin
-  if (FInitialized) then
+  if (not FFreeMemoryOnly) then
   begin
-    var DllEntry: TDllEntryProc;
-    @DllEntry := Pointer(PByte(FCodeBase) + FHeaders.OptionalHeader.AddressOfEntryPoint);
-    DllEntry(THandle(FCodeBase), DLL_PROCESS_DETACH, nil);
-  end;
+    if (FInitialized) then
+    begin
+      var DllEntry: TDllEntryProc;
+      @DllEntry := Pointer(PByte(FCodeBase) + FHeaders.OptionalHeader.AddressOfEntryPoint);
+      DllEntry(THandle(FCodeBase), DLL_PROCESS_DETACH, nil);
+    end;
 
-  for var Module in FModules do
-  begin
-    if (Module <> 0) then
-      Winapi.Windows.FreeLibrary(Module);
-  end;
+    for var Module in FModules do
+    begin
+      if (Module <> 0) then
+        Winapi.Windows.FreeLibrary(Module);
+    end;
 
-  if (FCodeBase <> nil) then
-    VirtualFree(FCodeBase, 0, MEM_RELEASE);
+    if (FCodeBase <> nil) then
+      VirtualFree(FCodeBase, 0, MEM_RELEASE);
+  end;
 
   {$IFDEF WIN64}
   FreePointerList(FBlockedMemory);
@@ -389,6 +394,15 @@ begin
 
   SectionData.Last := True;
   FinalizeSection(SectionData);
+end;
+
+procedure TMemoryModule.FreeMemoryOnly;
+begin
+  if (Self <> nil) then
+  begin
+    FFreeMemoryOnly := True;
+    Destroy;
+  end;
 end;
 
 {$IFDEF WIN64}
