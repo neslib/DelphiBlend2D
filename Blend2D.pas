@@ -8506,8 +8506,11 @@ type
     function GetPlacementDataAsGlyphPlacements: PBLGlyphPlacement; inline;
     function GetPlacementDataAsPoints: PBLPoint; inline;
     function GetFlags: TBLGlyphRunFlags; inline;
+    procedure SetFlags(const AValue: TBLGlyphRunFlags); inline;
     function GetPlacementType: TBLGlyphPlacementType; inline;
+    procedure SetPlacementType(const AValue: TBLGlyphPlacementType); inline;
     function GetCount: NativeInt; inline;
+    procedure SetCount(const AValue: NativeInt); inline;
     function GetIsEmpty: Boolean; inline;
   {$ENDREGION 'Internal Declarations'}
   public
@@ -8525,14 +8528,14 @@ type
     /// <summary>
     ///  Glyph id data (abstract, incremented by `GlyphAdvance`).
     /// </summary>
-    property GlyphData: Pointer read FGlyphData;
+    property GlyphData: Pointer read FGlyphData write FGlyphData;
 
     property GlyphDataAsGlyphIds: PBLGlyphId read GetGlyphDataAsGlyphIds;
 
     /// <summary>
     ///  Glyph placement data (abstract, incremented by `PlacementAdvance`).
     /// </summary>
-    property PlacementData: Pointer read FPlacementData;
+    property PlacementData: Pointer read FPlacementData write FPlacementData;
 
     property PlacementDataAsGlyphPlacements: PBLGlyphPlacement read GetPlacementDataAsGlyphPlacements;
     property PlacementDataAsPoints: PBLPoint read GetPlacementDataAsPoints;
@@ -8540,27 +8543,27 @@ type
     /// <summary>
     ///  Size of the glyph-run in glyph units.
     /// </summary>
-    property Count: NativeInt read GetCount;
+    property Count: NativeInt read GetCount write SetCount;
 
     /// <summary>
     ///  Type of placement.
     /// </summary>
-    property PlacementType: TBLGlyphPlacementType read GetPlacementType;
+    property PlacementType: TBLGlyphPlacementType read GetPlacementType write SetPlacementType;
 
     /// <summary>
     ///  Advance of `GlyphData` array.
     /// </summary>
-    property GlyphAdvance: ShortInt read FGlyphAdvance;
+    property GlyphAdvance: ShortInt read FGlyphAdvance write FGlyphAdvance;
 
     /// <summary>
     ///  Advance of `PlacementData` array.
     /// </summary>
-    property PlacementAdvance: ShortInt read FPlacementAdvance;
+    property PlacementAdvance: ShortInt read FPlacementAdvance write FPlacementAdvance;
 
     /// <summary>
     ///  Glyph-run flags.
     /// </summary>
-    property Flags: TBLGlyphRunFlags read GetFlags;
+    property Flags: TBLGlyphRunFlags read GetFlags write SetFlags;
 
     property IsEmpty: Boolean read GetIsEmpty;
   end;
@@ -11012,7 +11015,7 @@ type
       const AGlyphAdvance, ACount: NativeInt): TArray<TBLBoxI>; overload; inline;
 
     procedure GetGlyphAdvances(const AGlyphData: PUInt32;
-      const AGlyphAdvance, ACount: NativeInt; out APlacements: PBLGlyphPlacement); overload; inline;
+      const AGlyphAdvance, ACount: NativeInt; const APlacements: PBLGlyphPlacement); overload; inline;
     function GetGlyphAdvances(const AGlyphData: PUInt32;
       const AGlyphAdvance, ACount: NativeInt): TArray<TBLGlyphPlacement>; overload; inline;
 
@@ -27951,6 +27954,16 @@ begin
   FPlacementAdvance := 0;
 end;
 
+procedure TBLGlyphRun.SetCount(const AValue: NativeInt);
+begin
+  FCount := AValue;
+end;
+
+procedure TBLGlyphRun.SetFlags(const AValue: TBLGlyphRunFlags);
+begin
+  FFlags := Cardinal(AValue);
+end;
+
 procedure TBLGlyphRun.SetGlyphData(const AData: Pointer;
   const AAdvance: ShortInt);
 begin
@@ -27975,6 +27988,11 @@ procedure TBLGlyphRun.SetPlacementData(const AData: Pointer;
 begin
   FPlacementData := AData;
   FPlacementAdvance := AAdvance;
+end;
+
+procedure TBLGlyphRun.SetPlacementType(const AValue: TBLGlyphPlacementType);
+begin
+  FPlacementType := Ord(AValue);
 end;
 
 procedure TBLGlyphRun.SetGlyphData(const AGlyphData: PBLGlyphId);
@@ -29326,7 +29344,7 @@ begin
 end;
 
 procedure TBLFont.GetGlyphAdvances(const AGlyphData: PUInt32;
-  const AGlyphAdvance, ACount: NativeInt; out APlacements: PBLGlyphPlacement);
+  const AGlyphAdvance, ACount: NativeInt; const APlacements: PBLGlyphPlacement);
 begin
   _BLCheck(_blFontGetGlyphAdvances(@Self, AGlyphData, AGlyphAdvance, APlacements, ACount));
 end;

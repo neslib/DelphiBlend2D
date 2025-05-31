@@ -1,4 +1,4 @@
-unit Blend2D.TypefaceManager;
+unit Blend2D.FontProvider;
 
 interface
 
@@ -7,37 +7,37 @@ uses
   Blend2D;
 
 type
-  TBLTypefaceManager = class abstract
+  TBLFontProvider = class abstract
   {$REGION 'Internal Declarations'}
   private class var
-    FInstance: TBLTypefaceManager;
+    FInstance: TBLFontProvider;
   {$ENDREGION 'Internal Declarations'}
   public
     function GetTypefaceData(const AFamilyName: String;
       const AProps: TBLFontQueryProperties;
       out AFaceIndex: Integer): TBytes; virtual; abstract;
 
-    class property Instance: TBLTypefaceManager read FInstance;
+    class property Instance: TBLFontProvider read FInstance;
   end;
 
 implementation
 
 uses
   {$IF Defined(MSWINDOWS)}
-  Blend2D.TypefaceManager.Windows;
+  Blend2D.FontProvider.Windows;
   {$ELSE}
     {$MESSAGE Error 'Unsupported platform'}
   {$ENDIF}
 
 initialization
   {$IF Defined(MSWINDOWS)}
-  TBLTypefaceManager.FInstance := TBLTypefaceManagerWindows.Create;
+  TBLFontProvider.FInstance := TBLFontProviderWindows.Create;
   {$ELSE}
     {$MESSAGE Error 'Unsupported platform'}
   {$ENDIF}
 
 finalization
-  TBLTypefaceManager.FInstance.Free;
-  TBLTypefaceManager.FInstance := nil;
+  TBLFontProvider.FInstance.Free;
+  TBLFontProvider.FInstance := nil;
 
 end.

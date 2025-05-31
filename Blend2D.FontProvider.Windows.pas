@@ -1,4 +1,4 @@
-unit Blend2D.TypefaceManager.Windows;
+unit Blend2D.FontProvider.Windows;
 
 interface
 
@@ -6,10 +6,10 @@ uses
   Winapi.D2D1,
   System.SysUtils,
   Blend2D,
-  Blend2D.TypefaceManager;
+  Blend2D.FontProvider;
 
 type
-  TBLTypefaceManagerWindows = class(TBLTypefaceManager)
+  TBLFontProviderWindows = class(TBLFontProvider)
   {$REGION 'Internal Declarations'}
   private
     FD2DFactory: ID2D1Factory;
@@ -30,9 +30,9 @@ uses
   Winapi.Windows,
   System.Win.ComObj;
 
-{ TBLTypefaceManagerWindows }
+{ TBLFontProviderWindows }
 
-constructor TBLTypefaceManagerWindows.Create;
+constructor TBLFontProviderWindows.Create;
 begin
   inherited;
   OleCheck(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, ID2D1Factory,
@@ -44,7 +44,7 @@ begin
   OleCheck(FDWriteFactory.GetSystemFontCollection(FFontCollection));
 end;
 
-function TBLTypefaceManagerWindows.GetTypefaceData(const AFamilyName: String;
+function TBLFontProviderWindows.GetTypefaceData(const AFamilyName: String;
   const AProps: TBLFontQueryProperties; out AFaceIndex: Integer): TBytes;
 const
   BUFFER_SIZE = 64 * 1024;

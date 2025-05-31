@@ -310,6 +310,7 @@
             <Form>FormMain</Form>
         </DCCReference>
         <DCCReference Include="..\..\..\Blend2D.Fmx.pas"/>
+        <DCCReference Include="..\..\..\Blend2D.Fmx.TextLayout.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
