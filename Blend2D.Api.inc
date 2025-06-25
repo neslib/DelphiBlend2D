@@ -832,7 +832,7 @@ const
 // array.h'
 
 function _blArrayInit(self: Pointer; arrayType: Integer): Integer; cdecl;
-  external _LIB_BLEND2D name _PU + 'blArrayInit';
+  external _LIB_BLEND2D name 'blArrayInit';
 
 function _blArrayInitMove(self: Pointer; other: Pointer): Integer; cdecl;
   external _LIB_BLEND2D name 'blArrayInitMove';

@@ -528,7 +528,7 @@ begin
   while (Relocation.VirtualAddress > 0) do
   begin
     var Dest := CodeBase + Relocation.VirtualAddress;
-    var RelInfo := PSmallint(OffsetPointer(Relocation, SizeOf(TImageBaseRelocation)));
+    var RelInfo := PWord(OffsetPointer(Relocation, SizeOf(TImageBaseRelocation)));
     for var I := 0 to Integer(Relocation.SizeOfBlock - SizeOf(TImageBaseRelocation)) div 2 - 1 do
     begin
       var Typ: Integer := RelInfo^ shr 12;
@@ -537,14 +537,14 @@ begin
       case Typ of
         IMAGE_REL_BASED_HIGHLOW:
           begin
-            var PatchAddrHL := PDWORD(Dest + Offset);
+            var PatchAddrHL := PNativeInt(Dest + Offset);
             Inc(PatchAddrHL^, ADelta);
           end;
 
         {$IFDEF WIN64}
         IMAGE_REL_BASED_DIR64:
           begin
-            var PatchAddr64 := PULONGLONG(Dest + Offset);
+            var PatchAddr64 := PInt64(Dest + Offset);
             Inc(PatchAddr64^, ADelta);
           end;
         {$ENDIF}
@@ -649,7 +649,7 @@ begin
 
   CopySections(PByte(AData), Size, OldHeader);
 
-  var LocationDelta: IntPtr := FHeaders.OptionalHeader.ImageBase - OldHeader.OptionalHeader.ImageBase;
+  var LocationDelta: IntPtr := IntPtr(FHeaders.OptionalHeader.ImageBase) - IntPtr(OldHeader.OptionalHeader.ImageBase);
   if (LocationDelta <> 0) then
     FIsRelocated := PerformBaseRelocation(LocationDelta)
   else
