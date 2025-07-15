@@ -36855,43 +36855,43 @@ end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba64);
 begin
-  _BLCheck(_blContextFillRectDRgba64(@Self, @ARect, AStyle.Value));
+  _BLCheck(_blContextStrokeRectDRgba64(@Self, @ARect, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba32);
 begin
-  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle.Value));
+  _BLCheck(_blContextStrokeRectDRgba32(@Self, @ARect, AStyle.Value));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLRgba);
 begin
   var Style: TBLVar := AStyle;
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @Style));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @Style));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect);
 begin
-  _BLCheck(_blContextFillRectD(@Self, @ARect));
+  _BLCheck(_blContextStrokeRectD(@Self, @ARect));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLVar);
 begin
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLGradient);
 begin
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TBLPattern);
 begin
-  _BLCheck(_blContextFillRectDExt(@Self, @ARect, @AStyle));
+  _BLCheck(_blContextStrokeRectDExt(@Self, @ARect, @AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const ARect: TBLRect; const AStyle: TAlphaColor);
 begin
-  _BLCheck(_blContextFillRectDRgba32(@Self, @ARect, AStyle));
+  _BLCheck(_blContextStrokeRectDRgba32(@Self, @ARect, AStyle));
 end;
 
 procedure TBLContext.StrokeRect(const AX, AY, AW, AH: Double;
